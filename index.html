@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alva · protótipos</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{--bg:#eef0ea;--surface:#fff;--ink:#010f12;--muted:#4f5a58;--soft:#7c8581;--line:rgba(1,15,18,.09);--brand:#07486e;--sans:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;--serif:"Instrument Serif",Georgia,serif}
+@media (prefers-color-scheme:dark){:root{--bg:#010f12;--surface:#13292d;--ink:#fff;--muted:#b5b8ad;--soft:#8a948f;--line:rgba(255,255,255,.08);--brand:#a9c8da}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(900px 500px at 100% 0%,rgba(169,200,218,.4),transparent 70%),radial-gradient(700px 440px at 10% 0%,rgba(199,235,234,.35),transparent 72%)}
+main{width:100%;max-width:920px;margin:0 auto;padding:64px 20px 40px;flex:1}
+.logo{display:inline-flex;align-items:flex-end;gap:8px;font:800 26px/1 var(--sans);letter-spacing:-.05em}
+h1{margin:48px 0 0;font:400 44px/48px var(--serif);letter-spacing:-.01em}
+h1 em{color:var(--brand)}
+.lede{margin:14px 0 0;font:400 16px/24px var(--sans);color:var(--muted);max-width:520px}
+.grid{margin-top:40px;display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}h1{font-size:54px;line-height:58px}}
+a.card{display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:24px;background:var(--surface);color:inherit;text-decoration:none;box-shadow:0 1px 2px rgba(1,15,18,.04),0 10px 30px rgba(1,15,18,.06);transition:transform .2s,box-shadow .2s}
+a.card:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(1,15,18,.04),0 16px 40px rgba(1,15,18,.1),inset 0 0 0 1.5px var(--brand)}
+.tag{align-self:flex-start;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.card b{font:700 24px/28px var(--sans);letter-spacing:-.02em}
+.card p{margin:0;font:400 14.5px/22px var(--sans);color:var(--muted)}
+.go{margin-top:auto;padding-top:8px;font:600 14px/1 var(--sans);color:var(--brand)}
+footer{padding:20px;text-align:center;font:400 12.5px/18px var(--sans);color:var(--soft)}
+</style>
+</head>
+<body>
+<main>
+ <span class="logo"><svg viewBox="0 0 48 32" height="22" width="33" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c7ebea"/><stop offset=".5" stop-color="#6da8a7"/><stop offset="1" stop-color="#07486e"/></linearGradient><clipPath id="c"><rect width="48" height="25"/></clipPath></defs><g stroke="#07486e" stroke-width="2.6" stroke-linecap="round"><line x1="11.16" y1="20.83" x2="5.93" y2="19.13"/><line x1="16.07" y1="14.08" x2="12.83" y2="9.63"/><line x1="24" y1="11.5" x2="24" y2="6"/><line x1="31.93" y1="14.08" x2="35.17" y2="9.63"/><line x1="36.84" y1="20.83" x2="42.07" y2="19.13"/></g><g clip-path="url(#c)"><circle cx="24" cy="25" r="10" fill="url(#g)"/></g><line x1="5" y1="28.5" x2="43" y2="28.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>alva</span>
+ <h1>Protótipos para <em>revisão</em>.</h1>
+ <p class="lede">Versões navegáveis do app da comunidade e do painel de gestão. Os dados são fictícios e nada é salvo.</p>
+ <div class="grid">
+  <a class="card" href="/mobile/"><span class="tag">App da comunidade</span><b>Alva Mobile</b><p>Login, início, agenda, grupos, cursos, check-in de eventos e perfis de acesso. Use o menu ao lado para trocar de tela, tema e cenário.</p><span class="go">Abrir protótipo →</span></a>
+  <a class="card" href="/web/"><span class="tag">Painel de gestão</span><b>Alva Web</b><p>Acesso multi-igreja, dashboard, pessoas, cuidado, comunidade, kids e administração. Funciona no desktop e no celular.</p><span class="go">Abrir protótipo →</span></a>
+ </div>
+</main>
+<footer>Alva · protótipos de design · não é o produto final</footer>
+</body>
+</html>

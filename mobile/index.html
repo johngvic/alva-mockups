@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Alva Mobile · protótipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="stage" lang="pt-BR">
+  <aside class="rail" aria-label="Controles do protótipo">
+    <div class="stack g2">
+      <h1 class="raillogo">alva</h1>
+      <p>Protótipo navegável com o novo design system. Toque, erre e acerte: os formulários validam e respondem.</p>
+    </div>
+    <div class="rail-sec">
+      <span class="rail-lbl">Tema</span>
+      <div class="rail-seg" id="themeSeg">
+        <button type="button" data-t="noite" aria-pressed="true">Noite</button>
+        <button type="button" data-t="dia" aria-pressed="false">Dia</button>
+      </div>
+    </div>
+    <div class="rail-sec">
+      <span class="rail-lbl">Fundo e superfícies</span>
+      <div class="rail-chips" id="modeSeg">
+        <button type="button" data-m="m-float" aria-pressed="true">Flutuante</button>
+        <button type="button" data-m="m-aurora" aria-pressed="false">Aurora</button>
+        <button type="button" data-m="" aria-pressed="false">Original</button>
+      </div>
+    </div>
+    <div class="rail-sec">
+      <span class="rail-lbl">Perfil de acesso</span>
+      <div class="rail-chips" id="roleSeg">
+        <button type="button" data-v="visitante" aria-pressed="false">Visitante</button>
+        <button type="button" data-v="membro" aria-pressed="true">Membro</button>
+        <button type="button" data-v="lider" aria-pressed="false">Líder</button>
+        <button type="button" data-v="admin" aria-pressed="false">Administrador</button>
+        <button type="button" data-v="staff" aria-pressed="false">Staff</button>
+      </div>
+    </div>
+    <div class="rail-sec">
+      <span class="rail-lbl">Ir para a tela</span>
+      <nav class="rail-nav" id="railNav"></nav>
+    </div>
+    <div class="rail-sec">
+      <span class="rail-lbl">Resultado da busca de cadastro</span>
+      <div class="rail-chips" id="scnSeg">
+        <button type="button" data-v="found" aria-pressed="true">Encontrado</button>
+        <button type="button" data-v="multi" aria-pressed="false">Vários cadastros</button>
+        <button type="button" data-v="noemail" aria-pressed="false">Sem e-mail (telefone)</button>
+        <button type="button" data-v="notfound" aria-pressed="false">Não encontrado</button>
+      </div>
+    </div>
+    <div class="rail-sec">
+      <span class="rail-lbl">Entrar como</span>
+      <div class="rail-nav" id="demoUsers">
+        <button type="button" data-v="renan.ferreira@email.com">Renan Ferreira · membro</button>
+        <button type="button" data-v="giovanna.martins@email.com">Giovanna Martins · líder</button>
+        <button type="button" data-v="equipe.eventos@email.com">Equipe de eventos · staff</button>
+      </div>
+    </div>
+    <div class="rail-sec">
+      <span class="rail-lbl">Para testar erros</span>
+      <p class="rail-tip">Senha <code>errada</code> recusa o login. Código <code>000000</code> gasta uma tentativa; com 5 erros o código trava. E-mail <code>teste@example.org</code> já tem conta no cadastro novo.</p>
+    </div>
+  </aside>
+  <div class="device">
+    <div class="phone m-float" id="phone">
+      <div class="statusbar" aria-hidden="true">
+        <span>9:41</span>
+        <span class="sb-r">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.1-1.2A10.2 10.2 0 0 0 8 .6 10.2 10.2 0 0 0 .9 3.4L2 4.6a8.6 8.6 0 0 1 6-2.4zm0 3.2c1.4 0 2.7.5 3.7 1.4l1.1-1.2A7 7 0 0 0 8 3.8a7 7 0 0 0-4.8 1.8l1.1 1.2c1-.9 2.3-1.4 3.7-1.4zm0 3.2c.6 0 1.1.2 1.5.6L8 10.9 6.5 9.2c.4-.4.9-.6 1.5-.6z"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><path d="M24 4v4c.8-.3 1.3-1.1 1.3-2S24.8 4.3 24 4z" fill="currentColor" opacity=".4"/></svg>
+        </span>
+      </div>
+      <div id="view"></div>
+      <div id="tabbarSlot"></div>
+      <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+      <div id="overlay"></div>
+    </div>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

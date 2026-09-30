@@ -1,0 +1,18 @@
+{
+  "name": "alva-mockups",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Protótipos navegáveis do Alva (mobile e web) para revisão do time.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
