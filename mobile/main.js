@@ -22,7 +22,7 @@ const I={
  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
  bell:'<path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/>',
  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
- plus:'<path d="M12 5v14M5 12h14"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
  check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
  x:'<path d="M6 6l12 12M18 6 6 18"/>',
  alert:'<path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/>',
@@ -168,7 +168,8 @@ const S={
  user:{first:'Rafael',name:'Rafael Pereira'},church:null,
  email:'',otpCtx:'login',scn:'found',lookupMode:'email',prefill:null,su:{email:'',sel:0,att:5,expAt:0},
  ag:{y:2026,m:9,sel:29,tab:'Eventos'},
- escalas:[{id:'s1',min:'Louvor',area:'Ministério de Louvor',fn:'Vocal',y:2026,m:10,d:4,h:'18h30',st:'confirmado'},{id:'s2',min:'Recepção',area:'Recepção e Acolhimento',fn:'Recepcionista',y:2026,m:10,d:11,h:'17h30',st:'pendente'},{id:'s3',min:'Infantil',area:'Ministério Infantil',fn:'Monitor',y:2026,m:10,d:18,h:'9h',st:'pendente'}],
+ escalas:[{id:'s1',min:'Louvor',area:'Ministério de Louvor',fn:'Vocal',y:2026,m:10,d:4,h:'18h30',st:'confirmado'},{id:'s2',min:'Recepção',area:'Recepção e Acolhimento',fn:'Recepcionista',y:2026,m:10,d:11,h:'17h30',st:'pendente'},{id:'s3',min:'Infantil',area:'Ministério Infantil',fn:'Monitor',y:2026,m:10,d:18,h:'9h',st:'pendente'},{id:'s4',min:'Louvor',area:'Ministério de Louvor',fn:'Vocal',y:2026,m:10,d:25,h:'18h30',st:'pendente',over:true,why:'Faltou vocal para o culto da noite'}],
+ lim:{church:3,pref:null},
  discs:[{id:'d1',who:'Gabriel Souza',tone:'ceu',theme:'Identidade em Cristo',y:2026,m:10,d:1,h:'18h30',place:'Sala 3, Igreja',remote:false,st:'pendente'},{id:'d2',who:'Isabela Rocha',tone:'rosado',theme:'Serviço e doação',y:2026,m:10,d:2,h:'9h',place:'Remoto',remote:true,st:'aceito'},{id:'d3',who:'Fernanda Lima',tone:'lima',theme:'Multiplicação',y:2026,m:10,d:6,h:'19h',place:'Café Central',remote:false,st:'pendente'}],
  blocks:[],
  gr:{tab:'Casas',q:''},cu:{tab:'andamento',open:'fund',view:null,playing:false},
@@ -209,10 +210,10 @@ function field(o){
 }
 function setErr(id,msg){const f=$('#f-'+id);if(!f)return;f.classList.add('invalid');const h=$('.hint',f);h.innerHTML=ic('alert',14,2)+'<span>'+esc(msg)+'</span>';f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake');}
 function clearErr(id){const f=$('#f-'+id);if(!f||!f.classList.contains('invalid'))return;f.classList.remove('invalid');const h=$('.hint',f);h.textContent=h.dataset.hint||'';}
-const WORK={Entrar:'Entrando',Enviar:'Enviando',Salvar:'Salvando',Criar:'Criando',Confirmar:'Confirmando',Quero:'Enviando',Contribuir:'Processando',Pagar:'Processando',Continuar:'Buscando',Buscar:'Buscando',Aceitar:'Confirmando',Recusar:'Enviando',Bloquear:'Bloqueando',Inscrever:'Reservando','Inscrever-se':'Reservando',Concluir:'Salvando',Solicitar:'Enviando','Já':'Verificando',Cancelar:'Cancelando',Entrar_:'Entrando'};
+const WORK={Falar:'Conectando',Entrar:'Entrando',Enviar:'Enviando',Salvar:'Salvando',Criar:'Criando',Confirmar:'Confirmando',Quero:'Enviando',Contribuir:'Processando',Pagar:'Processando',Continuar:'Buscando',Buscar:'Buscando',Aceitar:'Confirmando',Recusar:'Enviando',Bloquear:'Bloqueando',Inscrever:'Reservando','Inscrever-se':'Reservando',Concluir:'Salvando',Solicitar:'Enviando','Já':'Verificando',Cancelar:'Cancelando',Entrar_:'Entrando'};
 async function busy(btn,ms,fn,done){if(!btn)return;const html=btn.innerHTML,txt=btn.textContent.trim();const w=btn.getBoundingClientRect().width;const first=txt.split(/\s+/)[0];const work=WORK[first]||'Um instante';
  if(!btn.classList.contains('block'))btn.style.width=w+'px';btn.disabled=true;btn.classList.add('is-busy');btn.style.setProperty('--dur',ms+'ms');
- btn.innerHTML=`<span class="bprog"></span><span class="bl">${work}<span class="bdots"><i>.</i><i>.</i><i>.</i></span></span>`;
+ btn.innerHTML=`<span class="bprog"></span><span class="bl"><i class="bspin"></i>${work}</span>`;
  requestAnimationFrame(()=>requestAnimationFrame(()=>btn.classList.add('run')));
  await wait(ms);
  if(done&&btn.isConnected){btn.classList.add('is-done');btn.innerHTML=`<span class="bl bdone"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ckp" d="M5 12.5l4.5 4.5L19 7"/></svg>${esc(done)}</span>`;await wait(760);}
@@ -404,14 +405,22 @@ function calendarHTML(anim){
   <div class="cal-foot">${cats.length?cats.map(([c,t])=>`<span class="lg"><i style="background:${MK[t]}"></i>${c}</span>`).join(''):'<span class="lg">Sem eventos neste mês</span>'}<span class="lg"><i class="lg-mine"></i>Sua escala</span></div></div>`;
 }
 const evRow=e=>`<button class="item" data-a="event" data-v="${e.id}">${dateblk(e,true)}<span class="grow stack" style="gap:2px"><span class="it-title">${esc(e.t)}</span><span class="it-sub">${e.h} · ${esc(e.p)}</span></span>${S.rsvp[e.id]?status('success','Vou'):tag(e.tone,e.cat,true)}</button>`;
+function limUse(y,m){const l=S.escalas.filter(x=>x.y===y&&x.m===m&&x.st!=='recusado'),reg=l.filter(x=>!x.over).length,ex=l.filter(x=>x.over).length,pend=l.filter(x=>x.st==='pendente').length;return {reg,ex,pend,tot:l.length,lim:S.lim.church,pref:S.lim.pref};}
+function limCard(){const y=2026,m=10,u=limUse(y,m),full=u.reg>=u.lim,mon=MONTHS[m-1];const cap=u.pref&&u.pref<u.lim?u.pref:u.lim;
+ const sub=u.ex?`Você chegou no limite. ${u.ex===1?'1 convite chegou':u.ex+' convites chegaram'} como exceção: tudo bem recusar.`:full?'Você chegou no limite. Novos convites só chegam como exceção, com aviso.':u.lim-u.reg===1?'Falta 1 para o seu limite do mês.':`Cabem mais ${u.lim-u.reg} neste mês.`;
+ return `<section class="lim-card ${u.ex?'ov':full?'full':''}" aria-label="Seu mês servindo"><div class="row between g3"><span class="eb2" style="color:inherit;opacity:.8">Seu mês servindo</span><span class="lim-mo">${mon}</span></div>
+  <div class="row g3" style="align-items:flex-end"><span class="lim-big">${u.reg}<small>/${u.lim}</small></span><div class="lim-dots" aria-hidden="true">${Array.from({length:Math.max(u.lim,u.tot)},(_,i)=>`<i class="${i<u.reg?'on':i<u.lim?'':'ex'}${i>=cap&&i<u.lim?' pf':''}"></i>`).join('')}</div></div>
+  <p class="lim-sub">${sub}</p>
+  <div class="lim-foot"><span>${ic('users',14,2)}Limite da igreja: ${u.lim} por mês</span><button type="button" class="lim-pref" data-a="limPref">${ic('heart',14,2)}${u.pref?'Prefiro até '+u.pref:'Definir preferência'}</button></div></section>`;}
 function agendaTab(){
  const t=S.ag.tab;
  if(t==='Eventos'){const {y,m,sel}=S.ag;const k=y*10000+m*100+sel;const day=EVENTS.filter(e=>evKey(e)===k);const nxt=EVENTS.filter(e=>evKey(e)>Math.max(k,todayKey-1)&&evKey(e)!==k).sort((a,b)=>evKey(a)-evKey(b)).slice(0,5);
   return `<div class="stack g3"><p class="eyebrow" style="color:var(--ink-muted)">${sel} de ${MONTHS[m-1]}${k===todayKey?' · hoje':''}</p>${day.length?`<div class="list">${day.map(evRow).join('')}</div>`:`<div class="card row g3" style="padding:16px;border-radius:var(--r-md)"><span class="iconbox" style="background:var(--surface-raised);color:var(--ink-muted)">${ic('calendar',20)}</span><span class="callout">Nada marcado para este dia.</span></div>`}</div>
    <div class="stack g3"><p class="eyebrow" style="color:var(--ink-muted)">Próximos</p>${nxt.length?`<div class="list">${nxt.map(evRow).join('')}</div>`:'<p class="callout">Nenhum evento depois desta data.</p>'}</div>`;}
- if(t==='Escalas'){return `<div class="stack g3"><p class="eb2">Minhas escalas de serviço</p>${S.escalas.map(x=>{const k=K(x.y,x.m,x.d),bl=blockedAt(k);return `<article class="card stack g3" style="padding:18px;border-radius:var(--r-lg)">
+ if(t==='Escalas'){return `${limCard()}<div class="stack g3"><p class="eb2">Minhas escalas de serviço</p>${S.escalas.map(x=>{const k=K(x.y,x.m,x.d),bl=blockedAt(k);return `<article class="card stack g3 ${x.over&&x.st!=='recusado'?'lim-ov':''}" style="padding:18px;border-radius:var(--r-lg)">
    <div class="row between g3" style="align-items:flex-start"><div class="stack" style="gap:2px"><span class="t3">${x.min}</span><span class="it-sub">${x.area}</span></div>${x.st==='confirmado'?status('success','Confirmado'):x.st==='recusado'?status('danger','Recusado'):status('warning','Aguardando')}</div>
    <div class="callout" style="color:var(--ink)">Função: <b>${x.fn}</b> · ${fmtK(k)} · ${x.h}</div>
+   ${x.over&&x.st!=='recusado'?`<div class="lim-note">${ic('alert',16,2.2)}<div><b>Acima do seu limite do mês</b><span>${x.st==='confirmado'?'Você topou servir além do limite. Obrigado!':`O líder pediu mesmo assim${x.why?': “'+esc(x.why)+'”':''}. Tudo bem recusar.`}</span></div></div>`:''}
    ${bl&&x.st!=='recusado'?`<div class="row g2 foot" style="color:var(--danger-text)">${ic('alert',14,2)}Conflita com seu bloqueio de ${fmtK(bl.a)}${bl.a!==bl.b?' a '+fmtK(bl.b):''}</div>`:''}
    ${x.st==='pendente'?`<div class="row g2"><button class="btn primary md grow" data-a="escalaOk" data-v="${x.id}">Confirmar</button><button class="btn outline md grow" data-a="escalaNo" data-v="${x.id}">Recusar</button></div>`:x.st==='confirmado'?`<button class="tlink" style="align-self:flex-start;padding:0" data-a="escalaNo" data-v="${x.id}">Não vou conseguir ir</button>`:''}
   </article>`;}).join('')}</div>`;}
@@ -580,6 +589,7 @@ function groupSheet(id){
    <div class="prow"><span class="grow stack" style="gap:6px"><span class="eb2">${leaders.length>1?'Líderes':'Líder'}</span><span class="row g2">${leaders.map((l,k)=>`<span class="avatar" style="${tone(['menta','damasco'][k%2])};width:30px;height:30px;font-size:11px">${initials(l)}</span>`).join('')}<span class="pt" style="font-size:16px">${esc(c.leader)}</span></span></span></div>
   </div>
   ${j?`<button class="btn outline block" data-a="joinGroup" data-v="${id}">Cancelar pedido</button>`:c.open?`<button class="btn primary block split" data-a="joinGroup" data-v="${id}"><span>Quero participar</span><span class="meta">${c.day.slice(0,3)} · ${c.h}</span></button>`:`<button class="btn inverse block" data-a="joinGroup" data-v="${id}">Entrar na lista de espera</button>`}
+  <button class="btn secondary block talkbtn" data-a="talkLeader" data-v="g|${id}">${ic('message',18)}Falar com o líder</button>
  </div>`);
 }
 function serveBox(m,on,note){return on?`<div class="servecard"><span class="svdot"></span><span class="grow stack" style="gap:2px"><b>Interesse enviado</b><span>${m.lead} vai falar com você em até 3 dias.</span></span></div><button class="btn outline block md" data-a="serve" data-v="${m.id}">Cancelar interesse</button>`:`${note?`<p class="svnote">${note}</p>`:''}<button class="btn primary block split" data-a="serve" data-v="${m.id}"><span>Quero servir</span><span class="meta">Resposta em até 3 dias</span></button>`;}
@@ -588,7 +598,7 @@ function miniSheet(id){const m=MINIS.find(x=>x.id===id);const on=S.serving[id];
   <p class="body" style="color:var(--ink);margin:0">${m.d}</p>
   <div class="gfacts"><div style="grid-column:span 2"><span class="eb2">Quando</span><b style="font-size:17px;line-height:22px;letter-spacing:-.02em">${m.when}</b></div><div><span class="eb2">Equipe</span><b>${m.n}</b><small>voluntários</small></div></div>
   <div class="chlist"><div class="prow"><span class="grow stack" style="gap:2px"><span class="eb2">Liderança</span><span class="pt" style="font-size:16px">${m.lead}</span></span></div><div class="prow" style="align-items:flex-start"><span class="grow stack" style="gap:6px"><span class="eb2">Para servir aqui</span>${m.need.map(n=>`<span class="row g2" style="align-items:flex-start;font:400 15px/20px var(--font-text)"><span class="mico" style="width:auto;color:var(--brand-text);margin-top:2px">${ic('check',14,2.5)}</span>${n}</span>`).join('')}</span></div></div>
-  <div class="servebox" id="serveBox">${serveBox(m,on)}</div></div>`);}
+  <div class="servebox" id="serveBox">${serveBox(m,on)}</div><button class="btn secondary block talkbtn" data-a="talkLeader" data-v="m|${m.id}">${ic('message',18)}Falar com o líder</button></div>`);}
 function giveSheet(){
  const st={type:'Dízimo',amt:50,method:'Pix'};
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Contribuir</h3><p class="callout">Sua generosidade sustenta a obra da ${esc(S.church?S.church.name:'igreja')}.</p></div>
@@ -663,14 +673,14 @@ function blockSheet(){
 function refuseSheet(kind,id){
  const x=kind==='escala'?S.escalas.find(e=>e.id===id):S.discs.find(e=>e.id===id);const who=kind==='escala'?'a liderança de '+x.min:x.who.split(' ')[0];
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${kind==='escala'?'Recusar escala':'Recusar encontro'}</h3><p class="callout">${kind==='escala'?x.min+' · '+x.fn+' · '+fmtK(K(x.y,x.m,x.d)):x.theme+' · '+fmtK(K(x.y,x.m,x.d))+' · '+x.h}</p></div>
-  <div class="stack g2"><span class="eb2">Por quê?</span><div class="row g2" style="flex-wrap:wrap" id="rfWhy">${(kind==='escala'?['Viagem','Trabalho','Compromisso familiar','Outro']:['Horário não dá','Prefiro remoto','Outro']).map(w=>`<button type="button" class="chip" aria-pressed="false" data-v="${w}">${w}</button>`).join('')}</div></div>
+  <div class="stack g2"><span class="eb2">Por quê?</span><div class="row g2" style="flex-wrap:wrap" id="rfWhy">${(kind==='escala'?(x.over?['Já sirvo bastante este mês','Viagem','Trabalho','Outro']:['Viagem','Trabalho','Compromisso familiar','Outro']):['Horário não dá','Prefiro remoto','Outro']).map(w=>`<button type="button" class="chip" aria-pressed="false" data-v="${w}">${w}</button>`).join('')}</div></div>
   ${field({id:'rfMsg',label:'Mensagem para '+who+' (opcional)',area:true,ph:kind==='escala'?'Posso trocar com alguém do time?':'Que tal na semana seguinte?',max:200})}
   <div class="otpmsg" id="rfErr" role="alert" style="min-height:0"></div>
   <div class="stack g3"><button type="button" class="btn primary block" id="rfGo">Recusar</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
   let why=null;$('#rfWhy',sh).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('#rfWhy button',sh).forEach(z=>z.setAttribute('aria-pressed',z===b));why=b.dataset.v;$('#rfErr',sh).textContent='';});
   $('#rfGo',sh).addEventListener('click',async e=>{if(!why){$('#rfErr',sh).textContent='Escolha um motivo para '+who+' entender.';return;}
    await busy(e.currentTarget,700,null,'Recusado');x.st='recusado';await closeSheet();$('#agBody').innerHTML=agendaTab();
-   toast('info',kind==='escala'?'Escala recusada':'Encontro recusado',kind==='escala'?'A liderança de '+x.min+' vai procurar outra pessoa.':x.who.split(' ')[0]+' vai sugerir outro horário.');});
+   toast('info',kind==='escala'?'Escala recusada':'Encontro recusado',kind==='escala'?(()=>{const u=limUse(x.y,x.m);return 'A liderança de '+x.min+' vai procurar outra pessoa.'+(x.over?' Seu mês segue em '+u.reg+' de '+u.lim+'.':' Uma vaga do seu mês ficou livre ('+u.reg+' de '+u.lim+').');})():x.who.split(' ')[0]+' vai sugerir outro horário.');});
  });
 }
 
@@ -731,7 +741,16 @@ const A={
  month:v=>{let m=S.ag.m+(+v),y=S.ag.y;if(m<1){m=12;y--;}if(m>12){m=1;y++;}if(y*100+m<202609){toast('error','Sem histórico','A agenda mostra de setembro de 2026 em diante.');return;}S.ag.m=m;S.ag.y=y;S.ag.sel=(y===TODAY.y&&m===TODAY.m)?TODAY.d:1;monthSwap(+v>0?'next':'prev');},
  goToday:()=>{const dir=(S.ag.y*100+S.ag.m)>(TODAY.y*100+TODAY.m)?'prev':'next';const same=S.ag.y===TODAY.y&&S.ag.m===TODAY.m;S.ag.y=TODAY.y;S.ag.m=TODAY.m;S.ag.sel=TODAY.d;S.ag.tab='Eventos';monthSwap(same?null:dir);},
  agTab:v=>{S.ag.tab=v;$$('.utabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));$('#agBody').innerHTML=agendaTab();},
- escalaOk:async(v,el)=>{const x=S.escalas.find(e=>e.id===v);const k=K(x.y,x.m,x.d);if(blockedAt(k)){toast('error','Essa data está bloqueada','Remova o bloqueio em Disponibilidade para confirmar.');return;}await busy(el,600,null,'Confirmado');x.st='confirmado';$('#agBody').innerHTML=agendaTab();toast('success','Escala confirmada',x.min+' · '+fmtK(k)+' · '+x.h+'.');},
+ limPref:()=>{let v=S.lim.pref||Math.min(2,S.lim.church);const u=limUse(2026,10);const paint=sh=>{$('#lpV',sh).textContent=v;$('#lpM',sh).disabled=v<=1;$('#lpP',sh).classList.toggle('dim',v>=S.lim.church);$('#lpP',sh).setAttribute('aria-disabled',v>=S.lim.church);$('#lpW',sh).hidden=!(v<u.tot);$('#lpH',sh).textContent=v>=S.lim.church?'Esse é o limite da igreja. Para servir mais, fale com seu líder.':v===1?'Uma vez por mês.':'Até '+v+' vezes por mês.';};
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Quantas vezes você quer servir por mês?</h3><p class="callout">Os líderes veem sua preferência ao montar a escala. O limite da igreja é ${S.lim.church} por mês, somando todos os ministérios.</p></div>
+   <div class="lim-step"><button type="button" class="lim-sb" id="lpM" aria-label="Menos">${ic('minus',20,2.4)}</button><div class="stack" style="align-items:center;gap:4px"><b id="lpV">${v}</b><span class="it-sub">por mês</span></div><button type="button" class="lim-sb" id="lpP" aria-label="Mais">${ic('plus',20,2.4)}</button></div>
+   <p class="callout" id="lpH" style="text-align:center;margin-top:-8px"></p>
+   <div class="lim-note soft" id="lpW" hidden>${ic('info',16,2.2)}<div><b>Você já tem ${u.tot} escalas em outubro</b><span>Elas continuam. A preferência vale para os próximos convites.</span></div></div>
+   <div class="stack g3"><button type="button" class="btn primary block" id="lpGo">Salvar preferência</button>${S.lim.pref?'<button type="button" class="tlink" id="lpClr">Remover preferência</button>':'<button type="button" class="tlink" data-a="closeSheet">Agora não</button>'}</div></div>`,sh=>{
+   paint(sh);$('#lpM',sh).addEventListener('click',()=>{if(v>1){v--;paint(sh);}});$('#lpP',sh).addEventListener('click',()=>{if(v<S.lim.church){v++;paint(sh);}else toast('info','Esse é o limite da igreja','Para servir mais vezes, fale com o líder do seu ministério.');});
+   $('#lpGo',sh).addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Salvo');S.lim.pref=v;await closeSheet();$('#agBody').innerHTML=agendaTab();toast('success','Preferência salva','Até '+v+(v===1?' vez':' vezes')+' por mês. Os líderes veem isso ao te escalar.');});
+   const c=$('#lpClr',sh);if(c)c.addEventListener('click',async()=>{S.lim.pref=null;await closeSheet();$('#agBody').innerHTML=agendaTab();toast('info','Preferência removida','Vale só o limite da igreja: '+S.lim.church+' por mês.');});});},
+ escalaOk:async(v,el)=>{const x=S.escalas.find(e=>e.id===v);const k=K(x.y,x.m,x.d);if(blockedAt(k)){toast('error','Essa data está bloqueada','Remova o bloqueio em Disponibilidade para confirmar.');return;}await busy(el,600,null,'Confirmado');x.st='confirmado';$('#agBody').innerHTML=agendaTab();const u=limUse(x.y,x.m);toast('success','Escala confirmada',x.over?'Obrigado por topar! Essa foi uma exceção ao seu limite de '+MONTHS[x.m-1]+'.':u.reg>=u.lim&&u.pend===0?x.min+' · '+fmtK(k)+'. Você fechou seu mês: '+u.reg+' de '+u.lim+'.':x.min+' · '+fmtK(k)+' · '+x.h+'.');},
  escalaNo:v=>refuseSheet('escala',v),
  discOk:async(v,el)=>{const x=S.discs.find(e=>e.id===v);await busy(el,600,null,'Aceito');x.st='aceito';$('#agBody').innerHTML=agendaTab();toast('success','Encontro aceito',x.who.split(' ')[0]+' recebeu sua confirmação.');},
  discNo:v=>refuseSheet('disc',v),
@@ -747,6 +766,7 @@ const A={
  joinGroup:async(v,el)=>{const c=CASAS.find(x=>x.id===v);await busy(el,800,null,S.joined[v]?'Cancelado':(CASAS.find(x=>x.id===v).open?'Pedido enviado':'Na lista'));S.joined[v]=!S.joined[v];await closeSheet();
   if(!S.joined[v])toast('info','Pedido cancelado','');else if(c.open)toast('success','Pedido enviado',c.leader+' vai falar com você pelo WhatsApp.');else toast('info','Você está na lista de espera','Avisamos quando abrir uma vaga na '+c.t+'.');
   if(S.screen==='grupos')$('#casas').innerHTML=casasList();},
+ talkLeader:async(v,el)=>{const [k,id]=v.split('|');const who=k==='g'?((CASAS.find(x=>x.id===id)||{}).leader||'o líder'):((MINIS.find(x=>x.id===id)||{}).lead||'o líder');await busy(el,900,null,'Mensagem enviada');toast('success','Pedido enviado',who.split(/ e |,/)[0]+' vai receber seu contato. Em breve definimos o próximo passo.');},
  serve:async(v,el)=>{const m=MINIS.find(x=>x.id===v);const was=!!S.serving[v];await busy(el,800,null,was?'Cancelado':'Enviado');S.serving[v]=!was;const box=$('#serveBox');
   if(box){box.style.height=box.offsetHeight+'px';box.classList.add('svout');await wait(180);box.innerHTML=serveBox(m,!was,was?'Interesse cancelado. Você pode voltar quando quiser.':'');box.classList.remove('svout');box.style.height=box.scrollHeight+'px';box.classList.add('svin');setTimeout(()=>{box.style.height='';box.classList.remove('svin');},420);}
   if(S.screen==='grupos'){const sc=$('#scr');const t=sc.scrollTop;const ov=$('#overlay').innerHTML;render('none');$('#scr').scrollTop=t;}},
@@ -846,8 +866,9 @@ APP.push(...SUBS);
 const brl=n=>'R$ '+Number(n).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 Object.assign(S,{
  me:{nome:'Rafael Pereira',email:'rafael@alvaigreja.com.br',tel:'(11) 99123-4455',nasc:'',end:'',upd:'12/03/2026'},meEdit:false,
- notifs:[{id:'n1',t:'Você tem uma nova escala: Infantil · Monitor',s:'Dom, 18 out · 9h. Confirme até sexta.',when:'Hoje · 08h12',grp:'Hoje',tone:'lima',i:'calendar',go:'escalas',unread:true},
+ notifs:[{id:'n0',t:'Convite acima do seu limite: Louvor · Vocal',s:'Dom, 25 out. Você já tem 3 escalas em outubro. Tudo bem recusar.',when:'Hoje · 09h05',grp:'Hoje',tone:'vinho',i:'alert',go:'escalas',unread:true},{id:'n1',t:'Você tem uma nova escala: Infantil · Monitor',s:'Dom, 18 out · 9h. Confirme até sexta.',when:'Hoje · 08h12',grp:'Hoje',tone:'lima',i:'calendar',go:'escalas',unread:true},
   {id:'n2',t:'Inscrições abertas: Conferência Anual 2026',s:'18 a 20 de outubro · gratuito',when:'Hoje · 07h30',grp:'Hoje',tone:'brasa',i:'ticket',go:'inscricoes',unread:true},
+  {id:'n3b',t:'Você chegou ao limite de escalas de outubro',s:'3 de 3. Novos convites só chegam como exceção, com aviso.',when:'Hoje · 08h12',grp:'Hoje',tone:'damasco',i:'calendar',go:'escalas',unread:false},
   {id:'n3',t:'Sua escala de domingo foi confirmada',s:'Louvor · Vocal · Dom, 4 out',when:'Sex, 25 set · 09h20',grp:'Esta semana',tone:'laranja',i:'check',go:'escalas',unread:false},
   {id:'n4',t:'Seu pedido de oração foi respondido',s:'Pr. Marcos Lima orou por você',when:'Qua, 23 set · 08h16',grp:'Esta semana',tone:'vinho',i:'hands',go:'oracao',unread:false},
   {id:'n5',t:'Feliz aniversário! A Alva ora por você hoje.',s:'Que seu novo ano seja cheio da graça de Deus.',when:'12 set',grp:'Anteriores',tone:'damasco',i:'sparkle',go:null,unread:true}],
