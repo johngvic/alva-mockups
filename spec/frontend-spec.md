@@ -32,74 +32,136 @@ O Alva tem dois fronts TypeScript, cada um no seu repositório e servidos pelo m
 
 ## Stack e arquitetura dos repositórios
 
-O Alva é dividido em três repositórios privados. O que web e mobile compartilham (tipos, regras, camada de dados, tokens) não é copiado entre eles: vira pacote versionado e publicado no GitHub Packages.
+O Alva tem quatro repositórios privados. Tudo que web e mobile compartilham (tema, contratos, regras de interface, camada de dados) mora num repositório próprio, o **alva-kit**, e chega aos apps como pacotes versionados no GitHub Packages. Os apps ficam só com telas, rotas, componentes visuais e adaptadores de plataforma.
 
-| Repositório | Conteúdo | Publica |
+| Repositório | Papel | Publica | Consome |
+| --- | --- | --- | --- |
+| `alva-api` | Backend (outra linguagem). Dono da verdade dos dados e das regras. Mantém `openapi.yaml`, `asyncapi.yaml` e as fixtures de regras | A especificação dos contratos, a cada release | — |
+| `alva-kit` | Workspace pnpm com os pacotes compartilhados | `@alva/theme`, `@alva/contracts`, `@alva/core`, `@alva/config` | A especificação do `alva-api` |
+| `alva-web` | Portal admin em Next.js | — | Os quatro pacotes |
+| `alva-app` | App mobile em Expo + React Native | — | Os quatro pacotes |
+
+Recomenda-se uma organização "alva" no GitHub com os quatro repositórios, para que o escopo `@alva/*` seja válido no GitHub Packages.
+
+**Dependências entre pacotes:** `@alva/theme` e `@alva/contracts` não dependem de nada do Alva nem de React. `@alva/core` depende de `@alva/contracts`. Os apps dependem dos quatro. O backend não depende de nenhum: ele só fornece a especificação.
+
+**Estrutura do alva-kit:**
+
+```
+alva-kit/
+  packages/
+    theme/         → @alva/theme       visual: tokens, CSS, preset Tailwind, helpers nativos, marca
+    contracts/     → @alva/contracts   gerado da especificação do alva-api (nunca editado à mão)
+      spec/          openapi.yaml + asyncapi.yaml + fixtures/ (cópias sincronizadas)
+    core/          → @alva/core        regras de interface, cache, real-time, estado, hooks
+    config/        → @alva/config      eslint, tsconfig, prettier compartilhados
+  apps/
+    playground/      Storybook do tema e dos hooks com dados simulados
+  .changeset/
+  .github/workflows/  ci.yml, release.yml, sync-contracts.yml
+```
+
+### @alva/theme
+
+Tudo que é visual e igual nas duas plataformas. É só dado (sem React), então também serve para e-mails, PDFs (certificado de apresentação) e gráficos.
+
+| Export | Conteúdo | Quem usa |
 | --- | --- | --- |
-| `alva-api` | Backend que serve o app e o web (stack própria, não TypeScript). Dono dos contratos: `openapi.yaml` (REST) e `asyncapi.yaml` (eventos real-time) | `@alva/contracts`, gerado no CI a cada mudança de contrato |
-| `alva-web` | Portal admin em Next.js. Internamente um workspace pnpm pequeno: `apps/web` + `packages/theme` + `packages/core` | `@alva/theme` e `@alva/core` (via Changesets) |
-| `alva-app` | App mobile em Expo + React Native | Nada; só consome os pacotes |
+| `@alva/theme` | Tokens tipados: `palette`, `themes` (light/dark), `tones`, `type`, `space`, `radius`, `layout`, `breakpoints`, `gradients`, `motion`, `zIndex`, `blur`; funções `toCssVars()` e `toCss()` | Os dois apps, gráficos, Reanimated |
+| `@alva/theme/theme.css` | Variáveis CSS dos dois temas (seletores `[data-theme="dark"]` e `.dark`), bloco `@theme` do Tailwind v4 e aliases do shadcn | Web (`globals.css`) e mobile (`global.css` do NativeWind) |
+| `@alva/theme/preset` | Preset de configuração do Tailwind em JS | NativeWind (enquanto usar Tailwind v3) |
+| `@alva/theme/native` | Conversões para React Native: `textStyle('h1')` vira um `TextStyle`, `shadow('card')` vira props de sombra/elevação, `easing.standard` vira `Easing.bezier(...)` do Reanimated, `colors(theme)` devolve as cores resolvidas | Mobile |
+| `@alva/theme/brand` | Geometria do logo (sol, raios, horizonte), ícones próprios (ex.: chupeta) como paths SVG, roteiro de tempos da splash | `Logo`, `SunMark`, `Splash` nos dois apps |
 
-**Pacotes compartilhados:**
+### @alva/contracts
 
-| Pacote | Origem | O que tem |
-| --- | --- | --- |
-| `@alva/contracts` | `alva-api` (CI) | Tipos TypeScript, schemas Zod e cliente HTTP gerados do OpenAPI (Hey API ou Orval); schemas Zod dos eventos gerados do AsyncAPI. Nunca editado à mão |
-| `@alva/theme` | `alva-web/packages/theme` | Cores, tipografia, espaço, raio, sombra e motion. Gera variáveis CSS, preset Tailwind (web e NativeWind) e constantes para Reanimated |
-| `@alva/core` | `alva-web/packages/core` | Submódulos `/domain` (regras puras), `/query` (query keys, queryOptions, mutations), `/realtime` (conexão e roteador de eventos), `/stores` (Zustand) e `/hooks` (hooks de domínio). Depende de React, mas não de DOM nem de React Native |
+A tradução em TypeScript do que o alva-api declara. 100% gerado; ninguém edita à mão. Sem React e sem TanStack, só tipos, validação e chamadas HTTP.
 
-Os componentes visuais **não** são compartilhados: cada front tem o seu `components/ui` (shadcn no web, NativeWind no app), com a mesma API e os mesmos tokens.
+| Export | Conteúdo |
+| --- | --- |
+| Tipos de entidade | `Schedule`, `ScheduleAssignment`, `Event`, `Member`, `Church`, `CareCase`, `CareMeeting`, `BabyDedication`, `DedicationDate`, `CheckIn`, `Notification`, `ServiceLimit`… com os campos derivados da API (`checkInWindow`, `limitUsage`, `availableSlots`) |
+| Schemas Zod | Um por entidade, por corpo de requisição e por resposta. Usados para validar respostas em desenvolvimento e como base dos formulários |
+| Cliente HTTP | Uma função por endpoint (`schedules.list`, `schedules.confirm`, `care.cases.create`…), criado com `createApiClient({ baseUrl, getToken, onUnauthorized, appVersion })`. Usa `fetch`, funciona no web e no React Native |
+| Eventos real-time | `RealtimeEvent`, união discriminada por `type` (`schedule.assignment.updated`, `checkin.created`…), com o schema Zod de cada payload |
+| Erros | `ProblemDetails` com a união de todos os `code` possíveis, para mapear mensagens no i18n |
+| Constantes | Enums de status, lista tipada de permissões (`Permission = 'schedules:edit' \| 'care:read' \| …`), versão da API |
+| Fixtures | Casos de teste das regras que existem nos dois lados, em JSON tipado (`fixtures.checkInWindow`, `fixtures.limitUsage`) |
+
+**Como ele é gerado:**
+
+1. O time da API altera `openapi.yaml` ou `asyncapi.yaml` no alva-api. O CI de lá valida e roda `oasdiff` para detectar quebra de contrato.
+2. No merge, o alva-api publica a especificação como artefato da release e dispara um `repository_dispatch` para o alva-kit com a versão.
+3. O workflow `sync-contracts` do alva-kit baixa a especificação, gera o pacote (Hey API para REST, script próprio para AsyncAPI → Zod), **compila o `@alva/core` contra os novos tipos** e abre um PR com um changeset.
+4. Se o contrato não quebra nada, o PR é mesclado automaticamente e a versão é publicada. Se quebra, o PR mostra exatamente o que o core precisa ajustar, antes de chegar aos apps.
+5. O Renovate abre PRs no alva-web e no alva-app com as novas versões de `@alva/*`, agrupadas.
+
+A vantagem de gerar no alva-kit (e não no alva-api) é que contratos e core mudam juntos e são testados juntos, num só lugar.
+
+### @alva/core
+
+A lógica de cliente que seria duplicada entre web e mobile. Depende de `@alva/contracts`; tem `react`, `@tanstack/react-query` e `zustand` como peer dependencies. Não importa nada de DOM nem de React Native: diferenças de plataforma entram por adaptadores.
+
+| Submódulo | Oferece |
+| --- | --- |
+| `/platform` | Interfaces `StorageAdapter`, `NetworkAdapter`, `FocusAdapter`, `LocationAdapter`, `RealtimeTransport`; `createAlvaCore(adapters)` e o `<AlvaProvider>` que monta QueryClient, sessão e real-time |
+| `/domain` | Funções puras de interface: formatação pt-BR (datas, horários, moeda), ordenação e agrupamento de listas, schemas de formulário (Zod sobre os contratos), avisos antecipados ("vai passar do limite"), `can(permissions, p)` |
+| `/query` | Fábrica de chaves `qk.*` escopada por igreja, `queryOptions` por recurso, fábricas de mutation com patch otimista e rollback, `createQueryClient()` com os padrões da spec, lista de chaves que podem ser persistidas |
+| `/realtime` | `createRealtimeClient()` com transporte plugável (troca de provedor sem mexer nas telas), validação do envelope, deduplicação, ordem por versão, lote de 50 ms, tabela de handlers `type → patch/invalidate`, máquina de estados da conexão e resync por cursor |
+| `/stores` | Store de sessão (usuário, igreja ativa, papel, permissões, preferência de tema), store de conexão e barramento de UI (toasts, haptics) |
+| `/hooks` | Hooks de domínio (`useSchedules`, `useCheckIn`, `useCareCase`, `useBabyDedications`, `useChurchSwitch`…) e de interface (`useAsyncAction`, `useConfirm`, `useDebouncedSearch`, `useListState`) |
+| `/i18n` | Textos pt-BR compartilhados: mensagens de erro por `code`, status, rótulos de domínio |
+| `/testing` | Handlers MSW gerados dos contratos, fábricas de dados falsos, servidor real-time simulado, `renderWithAlva()` para testes dos dois apps |
+
+**Regra de dependência:** telas → `@alva/core/hooks` → `/query`, `/realtime`, `/stores` → `/domain` + `@alva/contracts`. Telas nunca chamam `@alva/contracts` direto (regra de lint em `@alva/config`).
+
+**Quem decide as regras de negócio:** o alva-api é a única autoridade. Para as duas linguagens não divergirem:
+
+1. **Regras críticas chegam calculadas pela API.** Janela de check-in, limite de escalas, vagas de apresentação e permissões vêm prontas nas respostas (`checkInWindow`, `limitUsage`, `availableSlots`, `permissions`). O front só exibe.
+2. **`@alva/core/domain` fica com regras de interface:** validação de formulário, aviso antecipado, formatação, ordenação e agrupamento. Se o front errar, o servidor recusa e o rollback corrige a tela.
+3. **Regra que precisa existir nos dois lados ganha fixtures compartilhadas**, mantidas no alva-api e distribuídas em `@alva/contracts`. Os testes do backend e do core rodam os mesmos casos; mudou de um lado só, o teste quebra.
+
+### @alva/config
+
+Configurações compartilhadas para os apps se comportarem igual: `@alva/config/eslint` (com `react-hooks`, `@tanstack/query` e as regras de importação), `@alva/config/tsconfig` (base `strict`) e `@alva/config/prettier`.
+
+### O que fica em cada app
+
+| alva-web | alva-app |
+| --- | --- |
+| Rotas do App Router, layouts, Server Components da casca | Rotas do Expo Router, tabs, deep links |
+| `components/ui` (shadcn tematizado) | `components/ui` (NativeWind, mesma API) |
+| `features/*`: telas por módulo | `features/*`: telas por módulo |
+| Adaptadores: IndexedDB, `navigator.onLine`, foco da janela, geolocalização do navegador | Adaptadores: MMKV, NetInfo, AppState, expo-location, push |
+| `nuqs` para estado na URL, middleware de permissão | Params do Expo Router, guardas no layout |
+
+### Stack
 
 | Camada | Escolha | Por quê |
 | --- | --- | --- |
-| Linguagem (fronts) | TypeScript `strict` | Contratos gerados do OpenAPI garantem o mesmo tipo nos dois fronts |
+| Linguagem (fronts e kit) | TypeScript `strict` | Contratos gerados garantem o mesmo tipo em todo lugar |
 | Web | Next.js 15 (App Router) + React 19 | SSR no primeiro carregamento, rotas aninhadas para lista/detalhe |
 | Mobile | Expo SDK atual + Expo Router + React Native (New Architecture) | Rotas por arquivo, OTA updates, EAS Build |
-| Estilo web | Tailwind CSS v4 + shadcn/ui (Radix) | Componentes no repositório, tematizados por tokens |
+| Estilo web | Tailwind CSS v4 + shadcn/ui (Radix) | Componentes no repositório, tematizados por `@alva/theme` |
 | Estilo mobile | NativeWind v4 + react-native-reusables como base | Mesmas classes e tokens do web |
 | Dados do servidor | TanStack Query v5 | Cache, deduplicação, retry, otimista, persistência |
 | Estado do cliente | Zustand | Sem provider, seletores finos, igual nas duas plataformas |
 | Formulários | React Hook Form + Zod (schemas de `@alva/contracts`) | Mesma validação que a API declara |
-| Real-time | WebSocket gerenciado (ver seção Real-time) | Um canal por sessão, eventos tipados pelo AsyncAPI |
-| Animação | Motion (web) + Reanimated 3 (mobile) | Curvas e durações dos mesmos tokens |
+| Real-time | WebSocket gerenciado via `@alva/core/realtime` | Um canal por sessão, eventos tipados pelo AsyncAPI |
+| Animação | Motion (web) + Reanimated 3 (mobile) | Curvas e durações de `@alva/theme` |
 | Listas longas | TanStack Virtual (web) + FlashList (mobile) | Escalas, membros e lançamentos passam de milhares de linhas |
 | Armazenamento local | MMKV (mobile), IndexedDB via idb-keyval (web) | Cache persistido e fila offline |
 | Observabilidade | Sentry + PostHog | Erros com contexto e funis de uso |
 
-**Estrutura de cada front:**
+### Versionamento e dia a dia
 
-```
-alva-web/
-  apps/web/
-    app/              rotas (App Router)
-    components/ui/    shadcn tematizado
-    features/         telas por módulo (schedules, care, kids…)
-  packages/
-    theme/            → @alva/theme
-    core/             → @alva/core (domain, query, realtime, stores, hooks)
-
-alva-app/
-  app/                rotas (Expo Router)
-  components/ui/      primitivos NativeWind com a mesma API do web
-  features/           telas por módulo
-  lib/                adaptadores de plataforma (MMKV, NetInfo, AppState, push)
-```
-
-**Fluxo de um contrato novo:** o backend altera `openapi.yaml` ou `asyncapi.yaml` → CI do `alva-api` valida, gera e publica `@alva/contracts` com nova versão → Renovate abre PR no `alva-web` e no `alva-app` → o typecheck aponta tudo que quebrou antes do merge. Mudanças que quebram contrato exigem versão major e janela de compatibilidade na API, porque versões antigas do app continuam em uso nas lojas.
-
-**Regra de dependência:** telas → `@alva/core/hooks` → `/query`, `/realtime`, `/stores` → `/domain` + `@alva/contracts`. `/domain` não importa React; regras como "pode escalar acima do limite?" ou "o check-in está aberto?" são funções puras testadas uma vez e usadas nos dois fronts. Diferenças de plataforma (armazenamento, rede, foco) entram por injeção: `createAlvaCore({ storage, network, focus })` no boot de cada app.
-
-**Quem decide as regras de negócio:** o `@alva/core` é usado só pelos fronts; o alva-api é a única autoridade. Para as duas linguagens não divergirem:
-
-1. **Regras críticas chegam calculadas pela API.** Janela de check-in, limite de escalas, vagas de apresentação e permissões vêm prontas nas respostas (`checkInWindow`, `limitUsage`, `availableSlots`, `permissions`). O front só exibe.
-2. **`@alva/core/domain` fica com regras de interface:** validação de formulário, aviso antecipado ("isso vai passar do limite"), formatação, ordenação e agrupamento. Se o front errar, o servidor recusa e o rollback corrige a tela.
-3. **Regra que precisa existir nos dois lados ganha casos de teste compartilhados:** um JSON com entradas e resultados esperados em `alva-api/contracts/fixtures/`, publicado junto com `@alva/contracts` e rodado pelos testes do backend e do core. Mudou de um lado só, o teste quebra.
-
-**Desenvolvimento local:** para mexer em `@alva/core` e ver o efeito no app sem publicar, usar `pnpm link` ou `yalc`; no CI do app, sempre a versão publicada. Se o ritmo de mudanças no core ficar alto, mover `packages/` para um quarto repositório (`alva-kit`) é uma troca sem impacto nas telas.
+- **Versões independentes por pacote**, com Changesets. Quebra de contrato ou de API pública do core = versão major.
+- **Mudar o tema:** editar `packages/theme`, abrir PR com changeset, conferir no playground (Storybook) e mesclar; a versão é publicada e o Renovate atualiza os apps.
+- **Desenvolver core e app juntos:** `pnpm link` ou `yalc` apontando o app para o kit local. No CI dos apps, sempre a versão publicada.
+- **Compatibilidade:** versões antigas do app continuam nas lojas, então o alva-api mantém contratos antigos por no mínimo 90 dias depois de uma major.
 
 ## Design system
 
-A referência completa está em `design-system/design-system.md` e os valores em `design-system/tokens.ts`, que vira o pacote `@alva/theme`. Ele é um único objeto TypeScript que gera três saídas: variáveis CSS para o web, o preset do Tailwind (usado também pelo NativeWind) e constantes para Reanimated. Nenhum componente usa cor em hex direto.
+O design system vive em `alva-kit/packages/theme` e é publicado como `@alva/theme` (referência completa em `design-system/design-system.md` na pasta da prototipação). Um único objeto TypeScript gera as variáveis CSS, o preset do Tailwind (web e NativeWind) e as constantes para React Native e Reanimated. Nenhum componente usa cor em hex direto.
 
 **Temas:** `light` (rótulo "Dia" na interface, padrão do web) e `dark` ("Noite", padrão do mobile), ativados por `data-theme="dark"`. A preferência fica salva como `theme: 'light' | 'dark' | 'system'`.
 
@@ -238,10 +300,10 @@ Os hooks são a API pública entre telas e dados. Ficam em `@alva/core/hooks` (c
 | Hook | Retorna / faz | Notas |
 | --- | --- | --- |
 | `useSession()` | usuário, igreja ativa, papel, `can(perm)` | Seletor fino sobre o store de sessão |
-| `useSchedules(filters)` / `useSchedule(id)` | lista e detalhe | `select` deriva `mine`, `pending`, `atLimit` |
+| `useSchedules(filters)` / `useSchedule(id)` | lista e detalhe | `select` deriva mine, pending, atLimit |
 | `useConfirmSchedule()` / `useDeclineSchedule()` | mutations otimistas | Atualiza lista, detalhe e contador de limite juntos |
-| `useServiceLimits(memberId)` | uso vs. limite por mês e exceções | Lê `limitUsage` da API; usado no card de limite e no aviso ao escalar |
-| `useCheckInWindow(eventId)` | `{ state: 'upcoming' \| 'open' \| 'closed', opensAt, closesAt }` | Estado vem pronto da API (`checkInWindow`); o cliente só atualiza a contagem regressiva, por minuto, com o relógio do servidor + offset |
+| `useServiceLimits(memberId)` | uso vs. limite por mês e exceções | Lê limitUsage da API; usado no card de limite e no aviso ao escalar |
+| `useCheckInWindow(eventId)` | `{ state: 'upcoming' \| 'open' \| 'closed', opensAt, closesAt }` | Estado vem pronto da API (checkInWindow); o cliente só atualiza a contagem regressiva, por minuto, com o relógio do servidor + offset |
 | `useCheckIn(eventId)` | `checkIn()` com geolocalização | Valida raio no cliente para feedback, servidor decide |
 | `useServiceRoster(eventId)` | equipe com presença ao vivo | Assina o sub-canal do culto; líder marca quem esqueceu |
 | `useCareCases(filters)` / `useCareCase(id)` / `useScheduleCareMeeting()` | acompanhamento pastoral | Nunca persistido em disco |
@@ -339,7 +401,7 @@ O que já foi prototipado, onde vive em cada plataforma e o que precisa de real-
 
 **Rotas mobile (Expo Router):**
 
-- `(auth)` stack → `(tabs)` com as rotas `home`, `calendar` (sub-abas `events` · `schedules` · `discipleship` · `care`), `notifications`, `more`. Rótulos: Início, Agenda (Eventos · Escalas · Discipulado · Acompanhamento), Notificações, Mais.
+- `(auth)` stack → `(tabs)` com as rotas `home`, `calendar` (sub-abas `events` · `schedules` · `discipleship` · `care`), `notifications` e `more`. Rótulos: Início, Agenda (Eventos · Escalas · Discipulado · Acompanhamento), Notificações, Mais.
 - Abas visíveis calculadas por `tabsFor(role)`; visitante vê a versão restrita.
 - Deep links `alva://schedule/{id}`, `alva://checkin/{eventId}` usados por push.
 
@@ -372,13 +434,13 @@ O que já foi prototipado, onde vive em cada plataforma e o que precisa de real-
 | Componentes | Testing Library (web) / RNTL (mobile) + Storybook | Design system e estados (vazio, carregando, erro) | Todo componente de `components/ui` |
 | E2E web | Playwright | Login, escalar, check-in do líder, aprovar apresentação | Fluxos críticos no CI |
 | E2E mobile | Maestro | Login, confirmar escala, check-in por geolocalização simulada | Fluxos críticos antes de cada release |
-| Visual | Chromatic sobre o Storybook | Regressão visual do DS, temas `light` e `dark` | Aprovação em PR |
+| Visual | Chromatic sobre o Storybook | Regressão visual do DS, temas light e dark | Aprovação em PR |
 | Acessibilidade | axe (web), labels obrigatórios (lint) | Contraste, foco, leitores de tela | Sem violações sérias |
 | Performance | Lighthouse CI, React Profiler, Flashlight (mobile) | LCP, renders por evento, FPS em listas | LCP < 2,5 s; 60 fps em listas |
 
 **Teste de carga do real-time:** antes do primeiro domingo em produção, simular 500 eventos/min no sub-canal de um culto e medir renders, memória e latência nas duas plataformas.
 
-**CI (GitHub Actions + um pipeline por repositório):** lint → typecheck → testes → build → Playwright → preview na Vercel. Mobile com EAS Build e EAS Update (canais `preview` e `production`), OTA só para mudanças de JS. No alva-api, o CI valida OpenAPI e AsyncAPI, detecta mudanças que quebram contrato (oasdiff) e publica @alva/contracts; no alva-web, Changesets publica @alva/theme e @alva/core.
+**CI (GitHub Actions + um pipeline por repositório):** lint → typecheck → testes → build → Playwright → preview na Vercel. Mobile com EAS Build e EAS Update (canais `preview` e `production`), OTA só para mudanças de JS. No alva-api, o CI valida OpenAPI e AsyncAPI, detecta mudanças que quebram contrato (oasdiff) e publica @alva/contracts; no alva-kit, o workflow sync-contracts gera @alva/contracts a partir da especificação e o Changesets publica @alva/theme, @alva/contracts, @alva/core e @alva/config.
 
 **Convenções:** ESLint com `react-hooks`, `@tanstack/query` e regra proibindo import de `@alva/contracts` em telas; Prettier; commits convencionais; PR pequeno com Storybook do componente novo.
 
@@ -388,7 +450,7 @@ A robustez do front depende de garantias que só o backend pode dar. Estes ponto
 
 | Requisito | Detalhe | Por que o front precisa |
 | --- | --- | --- |
-| Contratos versionados | `openapi.yaml` e `asyncapi.yaml` no repo; CI valida, roda `oasdiff` e publica `@alva/contracts`. Quebra de contrato = versão major + janela de compatibilidade de no mínimo 90 dias | Versões antigas do app continuam instaladas nos celulares |
+| Contratos versionados | `openapi.yaml` e `asyncapi.yaml` no repo; CI valida, roda `oasdiff` e avisa o alva-kit, que gera e publica `@alva/contracts`. Quebra de contrato = versão major + janela de compatibilidade de no mínimo 90 dias | Versões antigas do app continuam instaladas nos celulares |
 | Versão por registro | Toda entidade tem `version` (inteiro crescente) e `updatedAt`, nas respostas e nos eventos | Descartar eventos fora de ordem e resolver corrida entre mutation e socket |
 | Envelope de evento | `{ id, type, churchId, entity, entityId, version, at, payload }`, com `id` único; payload completo quando a entidade é pequena | Deduplicação e decisão entre patch e invalidate |
 | Histórico e cursor | Eventos guardados por 24 h; ao reconectar, o cliente envia o último cursor e recebe o que perdeu. Fora da janela, responde `resync_required` | Reconexão sem perder atualizações |
@@ -407,7 +469,7 @@ A robustez do front depende de garantias que só o backend pode dar. Estes ponto
 
 | Fase | Duração estimada | Entregas |
 | --- | --- | --- |
-| 0. Fundação | 2–3 semanas | CI dos três repositórios, publicação de @alva/contracts, @alva/theme e @alva/core, tokens e componentes base (web + native), auth e sessão, QueryClient, cliente real-time com roteador e testes, Sentry, CI |
+| 0. Fundação | 2–3 semanas | Repositório alva-kit com @alva/theme, @alva/contracts, @alva/core e @alva/config publicados, sync de contratos com o alva-api, CI dos quatro repositórios, tokens e componentes base (web + native), auth e sessão, QueryClient, cliente real-time com roteador e testes, Sentry, CI |
 | 1. Núcleo do culto | 4–5 semanas | Agenda, Escalas (montagem, convites, limites), Check-in com geolocalização e painel do líder, notificações e push |
 | 2. Cuidado | 3–4 semanas | Acompanhamento pastoral, Discipulado, Kids |
 | 3. Vida da igreja | 3 semanas | Apresentação de bebês com certificado, Conteúdo / aulas, Meu perfil completo |
@@ -420,7 +482,6 @@ A robustez do front depende de garantias que só o backend pode dar. Estes ponto
 | --- | --- | --- |
 | Provedor de real-time | Supabase Realtime · Ably · Socket.IO próprio · Pusher | Depende do backend: Supabase se o banco for Postgres no Supabase; Ably se quiser histórico e garantia de entrega sem operar servidor |
 | Contrato de API | Gerador do cliente: Hey API · Orval · openapi-zod-client | REST + OpenAPI já decidido (API não é TypeScript). Hey API: gera tipos, Zod e queryOptions do TanStack Query |
-| Onde vivem @alva/core e @alva/theme | Workspace dentro do alva-web · quarto repositório alva-kit · copiar entre fronts | Começar no alva-web (sem repo extra); migrar para alva-kit se o app passar a esperar releases do web. Nunca copiar |
 | Cursor de resync | Servidor guarda histórico de eventos · sempre invalidar ao reconectar | Histórico curto (24 h) no servidor, invalidação como fallback |
 | Offline no mobile | Só leitura · fila de mutations | Fila apenas para ações seguras (lista na seção Resiliência) |
 | Componentes compartilhados | Duas bibliotecas (shadcn + NativeWind) · Tamagui / gluestack universal | Duas bibliotecas sobre os mesmos tokens: aproveita shadcn na web e mantém o nativo leve |

@@ -1,6 +1,6 @@
 # Alva — Design System
 
-Referência do visual atual do Alva, extraída dos protótipos **Alva Web v71** e **Alva Mobile v62**. Os valores daqui estão em `tokens.ts`, que vira o pacote `@alva/theme`.
+Referência do visual atual do Alva, extraída dos protótipos **Alva Web v71** e **Alva Mobile v62**. Os valores daqui estão em `tokens.ts`, que vira o pacote `@alva/theme`, publicado pelo repositório `alva-kit` (`packages/theme`).
 
 **Convenção de nomes:** todo identificador (tokens, variáveis CSS, classes, chaves do TypeScript, nomes de componentes) é em **inglês**. Explicações e textos da interface ficam em pt-BR. Na interface, os temas continuam se chamando "Dia" e "Noite"; no código são `light` e `dark`.
 

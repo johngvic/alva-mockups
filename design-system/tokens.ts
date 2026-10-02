@@ -1,6 +1,6 @@
 /**
  * Alva Design System — tokens
- * Fonte única para @alva/theme. Extraído dos protótipos Alva Web (v71) e Alva Mobile (v62).
+ * Fonte única para @alva/theme (alva-kit/packages/theme). Extraído dos protótipos Alva Web (v71) e Alva Mobile (v62).
  *
  * Gera:
  *  - variáveis CSS (web)            → toCssVars()
