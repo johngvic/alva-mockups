@@ -32,97 +32,281 @@ O Alva tem dois fronts TypeScript, cada um no seu repositório e servidos pelo m
 
 ## Stack e arquitetura dos repositórios
 
-O Alva tem quatro repositórios privados. Tudo que web e mobile compartilham (tema, contratos, regras de interface, camada de dados) mora num repositório próprio, o **alva-kit**, e chega aos apps como pacotes versionados no GitHub Packages. Os apps ficam só com telas, rotas, componentes visuais e adaptadores de plataforma.
+**Decisão:** o Alva tem **quatro repositórios**. Um deles, o `alva-kit`, é **um único repositório com quatro bibliotecas dentro**. Cada biblioteca é publicada como um pacote separado no GitHub Packages, e os apps instalam esses pacotes como qualquer dependência.
 
-| Repositório | Papel | Publica | Consome |
+```
+alva-api            backend (outra linguagem): dados, regras, especificação dos contratos
+alva-kit            um repositório, quatro bibliotecas
+  packages/theme      → @alva/theme       como o Alva parece
+  packages/contracts  → @alva/contracts   como o Alva conversa com a API
+  packages/core       → @alva/core        como o Alva se comporta no cliente
+  packages/config     → @alva/config      como o código do Alva é escrito
+alva-web            portal admin (Next.js): telas, rotas e componentes do web
+alva-app            app mobile (Expo): telas, rotas e componentes do mobile
+```
+
+| Repositório | Responsabilidade | Publica | Consome |
 | --- | --- | --- | --- |
-| `alva-api` | Backend (outra linguagem). Dono da verdade dos dados e das regras. Mantém `openapi.yaml`, `asyncapi.yaml` e as fixtures de regras | A especificação dos contratos, a cada release | — |
-| `alva-kit` | Workspace pnpm com os pacotes compartilhados | `@alva/theme`, `@alva/contracts`, `@alva/core`, `@alva/config` | A especificação do `alva-api` |
-| `alva-web` | Portal admin em Next.js | — | Os quatro pacotes |
-| `alva-app` | App mobile em Expo + React Native | — | Os quatro pacotes |
+| `alva-api` | Dono dos dados e das regras de negócio. Mantém `openapi.yaml`, `asyncapi.yaml` e as fixtures de regras | A especificação dos contratos, a cada release | — |
+| `alva-kit` | Tudo que web e mobile compartilham | `@alva/theme`, `@alva/contracts`, `@alva/core`, `@alva/config` | A especificação do `alva-api` |
+| `alva-web` | Telas, rotas, componentes e adaptadores do web | — | Os quatro pacotes |
+| `alva-app` | Telas, rotas, componentes e adaptadores do mobile | — | Os quatro pacotes |
 
-Recomenda-se uma organização "alva" no GitHub com os quatro repositórios, para que o escopo `@alva/*` seja válido no GitHub Packages.
+**Por que assim:** web e app usam o mesmo tema, os mesmos contratos e a mesma lógica de dados. Se isso morasse dentro de um dos apps, o outro dependeria dele; se fosse copiado, os dois divergiriam. No `alva-kit`, existe uma versão só, testada uma vez, e cada app decide quando atualizar. As quatro bibliotecas ficam no mesmo repositório porque mudam juntas com frequência (um contrato novo quase sempre pede um ajuste no core), e assim a mudança entra num PR só, com um CI e um processo de publicação.
 
-**Dependências entre pacotes:** `@alva/theme` e `@alva/contracts` não dependem de nada do Alva nem de React. `@alva/core` depende de `@alva/contracts`. Os apps dependem dos quatro. O backend não depende de nenhum: ele só fornece a especificação.
+**Organização no GitHub:** os quatro repositórios ficam numa organização "alva", para que o escopo `@alva/*` seja válido no GitHub Packages.
+
+**Dependências:** `@alva/theme` e `@alva/contracts` não dependem de nada do Alva nem de React. `@alva/core` depende de `@alva/contracts`. Os apps dependem dos quatro. O backend não depende de nenhum; ele só fornece a especificação.
 
 **Estrutura do alva-kit:**
 
 ```
 alva-kit/
   packages/
-    theme/         → @alva/theme       visual: tokens, CSS, preset Tailwind, helpers nativos, marca
-    contracts/     → @alva/contracts   gerado da especificação do alva-api (nunca editado à mão)
-      spec/          openapi.yaml + asyncapi.yaml + fixtures/ (cópias sincronizadas)
-    core/          → @alva/core        regras de interface, cache, real-time, estado, hooks
-    config/        → @alva/config      eslint, tsconfig, prettier compartilhados
+    theme/
+    contracts/
+      spec/          openapi.yaml + asyncapi.yaml + fixtures/ (cópias sincronizadas do alva-api)
+      src/generated/ código gerado (nunca editado à mão)
+    core/
+    config/
   apps/
     playground/      Storybook do tema e dos hooks com dados simulados
   .changeset/
-  .github/workflows/  ci.yml, release.yml, sync-contracts.yml
+  .github/workflows/ ci.yml · release.yml · sync-contracts.yml
 ```
 
-### @alva/theme
+### @alva/theme — como o Alva parece
 
-Tudo que é visual e igual nas duas plataformas. É só dado (sem React), então também serve para e-mails, PDFs (certificado de apresentação) e gráficos.
-
-| Export | Conteúdo | Quem usa |
-| --- | --- | --- |
-| `@alva/theme` | Tokens tipados: `palette`, `themes` (light/dark), `tones`, `type`, `space`, `radius`, `layout`, `breakpoints`, `gradients`, `motion`, `zIndex`, `blur`; funções `toCssVars()` e `toCss()` | Os dois apps, gráficos, Reanimated |
-| `@alva/theme/theme.css` | Variáveis CSS dos dois temas (seletores `[data-theme="dark"]` e `.dark`), bloco `@theme` do Tailwind v4 e aliases do shadcn | Web (`globals.css`) e mobile (`global.css` do NativeWind) |
-| `@alva/theme/preset` | Preset de configuração do Tailwind em JS | NativeWind (enquanto usar Tailwind v3) |
-| `@alva/theme/native` | Conversões para React Native: `textStyle('h1')` vira um `TextStyle`, `shadow('card')` vira props de sombra/elevação, `easing.standard` vira `Easing.bezier(...)` do Reanimated, `colors(theme)` devolve as cores resolvidas | Mobile |
-| `@alva/theme/brand` | Geometria do logo (sol, raios, horizonte), ícones próprios (ex.: chupeta) como paths SVG, roteiro de tempos da splash | `Logo`, `SunMark`, `Splash` nos dois apps |
-
-### @alva/contracts
-
-A tradução em TypeScript do que o alva-api declara. 100% gerado; ninguém edita à mão. Sem React e sem TanStack, só tipos, validação e chamadas HTTP.
+**A ideia:** o design system é dado, não código de tela. Cores, tipografia, espaçamentos, raios, sombras, gradientes, curvas de animação e a geometria do logo são descritos uma vez num objeto TypeScript, e o pacote traduz isso para o formato que cada plataforma entende: variáveis CSS e Tailwind no web, NativeWind e estilos nativos no app. Como não depende de React, serve também para gerar o PDF do certificado, e-mails e gráficos.
 
 | Export | Conteúdo |
 | --- | --- |
-| Tipos de entidade | `Schedule`, `ScheduleAssignment`, `Event`, `Member`, `Church`, `CareCase`, `CareMeeting`, `BabyDedication`, `DedicationDate`, `CheckIn`, `Notification`, `ServiceLimit`… com os campos derivados da API (`checkInWindow`, `limitUsage`, `availableSlots`) |
-| Schemas Zod | Um por entidade, por corpo de requisição e por resposta. Usados para validar respostas em desenvolvimento e como base dos formulários |
-| Cliente HTTP | Uma função por endpoint (`schedules.list`, `schedules.confirm`, `care.cases.create`…), criado com `createApiClient({ baseUrl, getToken, onUnauthorized, appVersion })`. Usa `fetch`, funciona no web e no React Native |
-| Eventos real-time | `RealtimeEvent`, união discriminada por `type` (`schedule.assignment.updated`, `checkin.created`…), com o schema Zod de cada payload |
-| Erros | `ProblemDetails` com a união de todos os `code` possíveis, para mapear mensagens no i18n |
-| Constantes | Enums de status, lista tipada de permissões (`Permission = 'schedules:edit' \| 'care:read' \| …`), versão da API |
-| Fixtures | Casos de teste das regras que existem nos dois lados, em JSON tipado (`fixtures.checkInWindow`, `fixtures.limitUsage`) |
+| `@alva/theme` | Tokens tipados: `palette`, `themes` (light/dark), `tones`, `type`, `space`, `radius`, `layout`, `breakpoints`, `gradients`, `motion`, `zIndex`; funções `toCssVars()` e `toCss()` |
+| `@alva/theme/theme.css` | Variáveis dos dois temas, bloco `@theme` do Tailwind v4 e aliases do shadcn |
+| `@alva/theme/preset` | Preset do Tailwind em JS para o NativeWind |
+| `@alva/theme/native` | `textStyle()`, `shadow()`, `easing` (Reanimated) e `colors(theme)` para React Native |
+| `@alva/theme/brand` | Geometria do sol, ícones próprios (chupeta) e roteiro de tempos da splash |
+
+**Exemplos reais:**
+
+No web, o tema entra por uma linha de CSS, e os componentes do shadcn já saem com a cara do Alva:
+
+```css
+/* alva-web/app/globals.css */
+@import "tailwindcss";
+@import "@alva/theme/theme.css";
+```
+
+```tsx
+// alva-web/components/ui/status-pill.tsx
+const tone = { confirmed: 'bg-success-bg text-success', pending: 'bg-warning-bg text-warning', declined: 'bg-danger-bg text-danger' };
+export const StatusPill = ({ status, children }) => (
+  <span className={`rounded-full px-2.5 py-1.5 text-xs font-semibold ${tone[status]}`}>{children}</span>
+);
+```
+
+No app, as mesmas classes funcionam via NativeWind, e a animação do botão assíncrono usa as mesmas curvas e durações do web:
+
+```tsx
+// alva-app/components/ui/async-button.tsx
+import { motion } from '@alva/theme';
+import { easing } from '@alva/theme/native';
+
+scale.value = withSequence(
+  withTiming(0.97, { duration: motion.duration.instant }),
+  withTiming(1, { duration: motion.duration.pop, easing: easing.spring }),
+);
+```
+
+No certificado de apresentação (gerado em PDF pelo web), a moldura usa `gradients.certificate` e a fonte serifada de `type.h1Accent`, sem duplicar valores.
+
+**Caso do dia a dia:** a igreja pede um azul de marca um pouco mais escuro. Alguém altera `themes.light.brand` no `alva-kit`, confere no playground, publica `@alva/theme 1.3.0`, e o Renovate abre PRs no web e no app. Nenhuma tela é editada.
+
+### @alva/contracts — como o Alva conversa com a API
+
+**A ideia:** o contrato entre front e back é escrito uma vez pelo time da API (`openapi.yaml` para REST, `asyncapi.yaml` para eventos) e o TypeScript é gerado a partir dele. Ninguém digita tipos de resposta à mão, ninguém inventa nome de campo, e qualquer mudança na API aparece como erro de compilação no front antes de virar bug em produção. O pacote não tem React nem TanStack: só tipos, validação e chamadas HTTP.
+
+| Export | Conteúdo |
+| --- | --- |
+| Tipos de entidade | `Schedule`, `ScheduleAssignment`, `Event`, `Member`, `Church`, `CareCase`, `CareMeeting`, `BabyDedication`, `DedicationDate`, `CheckIn`, `Notification`, `ServiceLimit`…, incluindo os campos calculados pela API (`checkInWindow`, `limitUsage`, `availableSlots`) |
+| Schemas Zod | Um por entidade, por corpo de requisição e por resposta |
+| Cliente HTTP | Uma função por endpoint, criado com `createApiClient({ baseUrl, getToken, onUnauthorized, appVersion })`. Usa `fetch`, funciona no web e no React Native |
+| Eventos real-time | `RealtimeEvent`, união discriminada por `type`, com o schema de cada payload |
+| Erros | `ProblemDetails` com todos os `code` possíveis |
+| Constantes | Enums de status, lista tipada de permissões, versão da API |
+| Fixtures | Casos de teste das regras que existem nos dois lados |
+
+**Exemplos reais:**
+
+Chamada tipada de ponta a ponta. Se a API renomear um campo, este código para de compilar:
+
+```ts
+import { createApiClient, type Schedule } from '@alva/contracts';
+
+const api = createApiClient({ baseUrl: env.API_URL, getToken: session.getToken });
+const schedules: Schedule[] = await api.schedules.list({ churchId, month: '2026-10' });
+schedules[0].checkInWindow.state; // 'upcoming' | 'open' | 'closed'
+```
+
+Eventos real-time com tipo estreitado por `type`, sem `any`:
+
+```ts
+function handle(event: RealtimeEvent) {
+  switch (event.type) {
+    case 'checkin.created':      // event.payload: CheckIn
+    case 'schedule.assignment.updated': // event.payload: ScheduleAssignment
+  }
+}
+```
+
+Erros com código estável, traduzidos no front:
+
+```ts
+// resposta da API: { type: '...', code: 'checkin.outside_radius', status: 422 }
+messages['checkin.outside_radius'] = 'Você está fora do raio do local do culto.';
+```
+
+Fixture compartilhada, rodada pelos testes do backend e do core:
+
+```json
+{ "rule": "checkInWindow", "case": "30 min antes do culto das 19h",
+  "input": { "startsAt": "2026-10-04T19:00", "now": "2026-10-04T18:30", "windowHours": 2 },
+  "expected": { "state": "open" } }
+```
 
 **Como ele é gerado:**
 
-1. O time da API altera `openapi.yaml` ou `asyncapi.yaml` no alva-api. O CI de lá valida e roda `oasdiff` para detectar quebra de contrato.
-2. No merge, o alva-api publica a especificação como artefato da release e dispara um `repository_dispatch` para o alva-kit com a versão.
-3. O workflow `sync-contracts` do alva-kit baixa a especificação, gera o pacote (Hey API para REST, script próprio para AsyncAPI → Zod), **compila o `@alva/core` contra os novos tipos** e abre um PR com um changeset.
-4. Se o contrato não quebra nada, o PR é mesclado automaticamente e a versão é publicada. Se quebra, o PR mostra exatamente o que o core precisa ajustar, antes de chegar aos apps.
-5. O Renovate abre PRs no alva-web e no alva-app com as novas versões de `@alva/*`, agrupadas.
+1. O time da API altera `openapi.yaml` ou `asyncapi.yaml`. O CI do alva-api valida e roda `oasdiff` para detectar quebra de contrato.
+2. No merge, o alva-api publica a especificação como artefato da release e dispara um `repository_dispatch` para o alva-kit.
+3. O workflow `sync-contracts` baixa a especificação, gera o código (Hey API para REST, script próprio para AsyncAPI → Zod), **compila o `@alva/core` contra os tipos novos** e abre um PR com changeset.
+4. Sem quebra, o PR é mesclado sozinho e a versão é publicada. Com quebra, o PR mostra exatamente o que o core precisa ajustar.
+5. O Renovate abre PRs agrupados com as novas versões de `@alva/*` no web e no app.
 
-A vantagem de gerar no alva-kit (e não no alva-api) é que contratos e core mudam juntos e são testados juntos, num só lugar.
+**Caso do dia a dia:** a API passa a mandar `limitUsage` em cada membro da escala. O `@alva/contracts` ganha o campo automaticamente; o hook `useServiceLimits` no core passa a ler esse campo em vez de calcular; web e app exibem o mesmo número que o servidor usa para decidir.
 
-### @alva/core
+### @alva/core — como o Alva se comporta no cliente
 
-A lógica de cliente que seria duplicada entre web e mobile. Depende de `@alva/contracts`; tem `react`, `@tanstack/react-query` e `zustand` como peer dependencies. Não importa nada de DOM nem de React Native: diferenças de plataforma entram por adaptadores.
+**A ideia:** tudo que um app faz com dados, e que não é desenhar a tela, é igual no web e no mobile: buscar e guardar em cache, atualizar de forma otimista, receber eventos real-time, saber quem está logado e em qual igreja, formatar datas, validar formulários. O core concentra isso em hooks. As telas de cada app só chamam hooks e desenham; as diferenças de plataforma (onde salvar dados, como detectar rede, como pegar a localização) entram por adaptadores na inicialização. Depende de `@alva/contracts` e tem `react`, `@tanstack/react-query` e `zustand` como peer dependencies; não importa nada de DOM nem de React Native.
 
 | Submódulo | Oferece |
 | --- | --- |
-| `/platform` | Interfaces `StorageAdapter`, `NetworkAdapter`, `FocusAdapter`, `LocationAdapter`, `RealtimeTransport`; `createAlvaCore(adapters)` e o `<AlvaProvider>` que monta QueryClient, sessão e real-time |
-| `/domain` | Funções puras de interface: formatação pt-BR (datas, horários, moeda), ordenação e agrupamento de listas, schemas de formulário (Zod sobre os contratos), avisos antecipados ("vai passar do limite"), `can(permissions, p)` |
-| `/query` | Fábrica de chaves `qk.*` escopada por igreja, `queryOptions` por recurso, fábricas de mutation com patch otimista e rollback, `createQueryClient()` com os padrões da spec, lista de chaves que podem ser persistidas |
-| `/realtime` | `createRealtimeClient()` com transporte plugável (troca de provedor sem mexer nas telas), validação do envelope, deduplicação, ordem por versão, lote de 50 ms, tabela de handlers `type → patch/invalidate`, máquina de estados da conexão e resync por cursor |
-| `/stores` | Store de sessão (usuário, igreja ativa, papel, permissões, preferência de tema), store de conexão e barramento de UI (toasts, haptics) |
-| `/hooks` | Hooks de domínio (`useSchedules`, `useCheckIn`, `useCareCase`, `useBabyDedications`, `useChurchSwitch`…) e de interface (`useAsyncAction`, `useConfirm`, `useDebouncedSearch`, `useListState`) |
-| `/i18n` | Textos pt-BR compartilhados: mensagens de erro por `code`, status, rótulos de domínio |
-| `/testing` | Handlers MSW gerados dos contratos, fábricas de dados falsos, servidor real-time simulado, `renderWithAlva()` para testes dos dois apps |
+| `/platform` | Interfaces de adaptador (`StorageAdapter`, `NetworkAdapter`, `FocusAdapter`, `LocationAdapter`, `RealtimeTransport`), `createAlvaCore()` e `<AlvaProvider>` |
+| `/domain` | Funções puras de interface: formatação pt-BR, ordenação, agrupamento, schemas de formulário, avisos antecipados, `can(permissions, p)` |
+| `/query` | Fábrica de chaves `qk.*` por igreja, `queryOptions`, fábricas de mutation com otimista e rollback, `createQueryClient()` |
+| `/realtime` | Cliente real-time com transporte plugável, validação, deduplicação, ordem por versão, lote de 50 ms, handlers `type → patch/invalidate`, resync |
+| `/stores` | Sessão (usuário, igreja ativa, papel, permissões, tema), estado da conexão, barramento de UI |
+| `/hooks` | Hooks de domínio (`useSchedules`, `useCheckIn`, `useCareCase`, `useBabyDedications`, `useChurchSwitch`…) e de interface (`useAsyncAction`, `useConfirm`, `useDebouncedSearch`) |
+| `/i18n` | Textos pt-BR compartilhados: erros por `code`, status, rótulos de domínio |
+| `/testing` | Handlers MSW gerados dos contratos, fábricas de dados falsos, servidor real-time simulado, `renderWithAlva()` |
 
-**Regra de dependência:** telas → `@alva/core/hooks` → `/query`, `/realtime`, `/stores` → `/domain` + `@alva/contracts`. Telas nunca chamam `@alva/contracts` direto (regra de lint em `@alva/config`).
+**Exemplos reais:**
+
+Cada app monta o core uma vez, com os seus adaptadores. É o único lugar onde web e app diferem:
+
+```tsx
+// alva-web/app/providers.tsx
+const core = createAlvaCore({
+  api: { baseUrl: env.API_URL },
+  storage: indexedDbStorage(), network: browserNetwork(), focus: windowFocus(),
+  location: browserLocation(), realtime: websocketTransport(env.WS_URL),
+});
+
+// alva-app/app/_layout.tsx
+const core = createAlvaCore({
+  api: { baseUrl: env.API_URL },
+  storage: mmkvStorage(), network: netInfoNetwork(), focus: appStateFocus(),
+  location: expoLocation(), realtime: websocketTransport(env.WS_URL),
+});
+
+<AlvaProvider core={core}>{children}</AlvaProvider>
+```
+
+A mesma lógica de "confirmar escala" nos dois apps; só o JSX muda:
+
+```tsx
+const { data: schedule } = useSchedule(id);
+const confirm = useConfirmSchedule();
+const action = useAsyncAction(() => confirm.mutateAsync(id));
+
+// web:    <AsyncButton state={action.state} onClick={action.run}>Confirmar</AsyncButton>
+// mobile: <AsyncButton state={action.state} onPress={action.run}>Confirmar</AsyncButton>
+```
+
+Por trás desse hook, sem nenhuma linha nas telas: a lista e o detalhe mudam na hora (otimista), o contador de limite atualiza, se a API recusar tudo volta ao estado anterior com um toast, e sem rede a confirmação entra na fila e é enviada quando a conexão voltar.
+
+Check-in ao vivo: um voluntário faz check-in pelo celular → a API emite `checkin.created` → o handler em `@alva/core/realtime` atualiza o cache da equipe do culto → a tela do líder no web (e no app de outro líder) mostra a presença. Nenhuma tela assina socket.
+
+Testes iguais nos dois apps:
+
+```tsx
+import { renderWithAlva, factories } from '@alva/core/testing';
+
+renderWithAlva(<ScheduleScreen id="s1" />, {
+  data: { schedules: [factories.schedule({ id: 's1', status: 'invited' })] },
+});
+```
+
+**Caso do dia a dia:** trocar o provedor de real-time (por exemplo, de Socket.IO para Ably) é escrever um novo `RealtimeTransport` no core e trocar uma linha na inicialização de cada app. Telas e hooks não mudam.
+
+**Regra de dependência:** telas → `@alva/core/hooks` → `/query`, `/realtime`, `/stores` → `/domain` + `@alva/contracts`. Telas nunca chamam `@alva/contracts` direto.
 
 **Quem decide as regras de negócio:** o alva-api é a única autoridade. Para as duas linguagens não divergirem:
 
 1. **Regras críticas chegam calculadas pela API.** Janela de check-in, limite de escalas, vagas de apresentação e permissões vêm prontas nas respostas (`checkInWindow`, `limitUsage`, `availableSlots`, `permissions`). O front só exibe.
 2. **`@alva/core/domain` fica com regras de interface:** validação de formulário, aviso antecipado, formatação, ordenação e agrupamento. Se o front errar, o servidor recusa e o rollback corrige a tela.
-3. **Regra que precisa existir nos dois lados ganha fixtures compartilhadas**, mantidas no alva-api e distribuídas em `@alva/contracts`. Os testes do backend e do core rodam os mesmos casos; mudou de um lado só, o teste quebra.
+3. **Regra que precisa existir nos dois lados ganha fixtures compartilhadas**, mantidas no alva-api e distribuídas em `@alva/contracts`.
 
-### @alva/config
+### @alva/config — como o código do Alva é escrito
 
-Configurações compartilhadas para os apps se comportarem igual: `@alva/config/eslint` (com `react-hooks`, `@tanstack/query` e as regras de importação), `@alva/config/tsconfig` (base `strict`) e `@alva/config/prettier`.
+**A ideia:** as regras da spec ("tela não chama a API direto", "nada de hex em componente", "TypeScript strict") só se sustentam se forem verificadas por máquina. O `@alva/config` guarda a configuração de ESLint, TypeScript e Prettier usada pelos dois apps e pelo próprio kit. Uma regra nova é escrita uma vez e passa a valer em todo lugar na próxima atualização.
+
+| Export | Conteúdo |
+| --- | --- |
+| `@alva/config/eslint` | Presets `base`, `react`, `next` e `expo`, com `react-hooks`, `@tanstack/query` e as regras de arquitetura do Alva |
+| `@alva/config/tsconfig` | `base.json` (strict), `next.json`, `expo.json`, `library.json` |
+| `@alva/config/prettier` | Formatação única |
+
+**Exemplos reais:**
+
+```js
+// alva-web/eslint.config.js
+import alva from '@alva/config/eslint';
+export default [...alva.react, ...alva.next];
+
+// alva-app/eslint.config.js
+import alva from '@alva/config/eslint';
+export default [...alva.react, ...alva.expo];
+```
+
+```json
+// alva-app/tsconfig.json
+{ "extends": "@alva/config/tsconfig/expo.json" }
+```
+
+Regras de arquitetura que o preset traz:
+
+| Regra | O que impede |
+| --- | --- |
+| Sem import de `@alva/contracts` ou `@alva/core/query` em `features/**` | Tela chamando a API ou montando query key à mão |
+| Sem cor hex ou `rgb()` em `className` e `style` | Cor fora do tema |
+| Sem `useEffect` que só copia `data` de uma query para estado local | Dado do servidor duplicado |
+| `@tanstack/query/exhaustive-deps` | Query key que não muda quando o filtro muda |
+| Sem import entre `features` diferentes | Telas acopladas entre módulos |
+
+**Caso do dia a dia:** o time decide proibir `console.log` em produção. A regra entra no `@alva/config`, sai na próxima versão, e os dois apps passam a respeitá-la sem ninguém copiar configuração.
+
+### Exemplo de ponta a ponta: uma feature nova
+
+A igreja quer que o membro possa **trocar de escala com outro voluntário**. O caminho pelos quatro repositórios:
+
+| Passo | Repositório | O que acontece |
+| --- | --- | --- |
+| 1 | `alva-api` | Cria `POST /churches/{id}/schedules/{id}/swap-requests` e o evento `schedule.swap.requested` na especificação; implementa a regra no servidor |
+| 2 | `alva-kit` | O sync gera `api.schedules.requestSwap()` e o tipo do evento em `@alva/contracts`. No core: hook `useRequestSwap()`, handler real-time que avisa o colega e atualiza as listas, texto pt-BR do erro `swap.not_allowed`. Publica |
+| 3 | `alva-app` | Botão "Pedir troca" na escala e tela de aceitar/recusar, usando os hooks novos |
+| 4 | `alva-web` | Coluna "troca pendente" na escala do líder, usando os mesmos hooks |
+
+A regra de negócio foi escrita uma vez (no backend), a lógica de cliente uma vez (no core), e cada app só desenhou a sua interface.
 
 ### O que fica em cada app
 
