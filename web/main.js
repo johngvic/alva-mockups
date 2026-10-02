@@ -45,6 +45,7 @@ const I={
  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
  eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
  eyeOff:'<path d="M10.6 5.6A9.7 9.7 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.2 6.9C3.8 8.6 2.5 12 2.5 12S6 18.5 12 18.5c1.9 0 3.5-.6 4.9-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18"/>',
+ pacifier:'<circle cx="12" cy="5" r="2.6"/><path d="M12 7.6V10"/><path d="M12 10c-2-1.7-6.2-1.9-7.4.3-.9 1.7.5 3.8 2.9 4.1 1.8.3 3.4-.3 4.5-1.3 1.1 1 2.7 1.6 4.5 1.3 2.4-.3 3.8-2.4 2.9-4.1-1.2-2.2-5.4-2-7.4-.3z"/><path d="M10.9 14c-.3.9-.9 2-.9 3.3a2 2 0 0 0 4 0c0-1.3-.6-2.4-.9-3.3"/>',
  baby:'<path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>',
  door:'<path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.56v16.16a1 1 0 0 1-1.24.97L5 20V5.56a2 2 0 0 1 1.52-1.94l4-1A2 2 0 0 1 13 4.56z"/>',
  sliders:'<path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/>',
@@ -91,10 +92,10 @@ const S={navOpen:{},theme:'dia',church:0,active:'hoje',day:2,range:'12s'};
 try{const t=localStorage.getItem('alva-web-theme');if(t)S.theme=t;}catch(e){}
 const NETWORK='Rede Alva';
 const CHURCHES=[{n:'Alva Sede',c:'Centro',i:'AS',city:'São Paulo, SP',m:1240,role:'Administrador',tone:'ceu',last:'agora'},{n:'Alva Norte',c:'Santana',i:'AN',city:'São Paulo, SP',m:380,role:'Pastor',tone:'menta',last:'há 2 dias'},{n:'Alva Jardins',c:'Jardim Europa',i:'AJ',city:'São Paulo, SP',m:290,role:'Líder',tone:'damasco',last:'há 1 semana'},{n:'Alva Campinas',c:'Cambuí',i:'AC',city:'Campinas, SP',m:210,role:'Líder',tone:'rosado',last:'há 3 semanas'}];
-const chTile=(x,s=26)=>`<span class="chd" style="--s:${s}px;--t:var(--tone-${x.tone});--ti:var(--tone-${x.tone}-ink)">${x.i}</span>`;
+const chTile=()=>'';
 const NAV=[
- [null,[['hoje','dawn','Dashboard'],['pessoas','users','Pessoas',[['membros','Membros'],['integracao','Integração de membros']]],['cuidado','heart','Cuidado',[['discipulado','Discipulado'],['acompanhamento','Acompanhamento'],['oracao','Pedidos de oração']]],['comunidade','home','Comunidade',[['casas','Casas de Apascentamento'],['redes','Redes de célula'],['ministerios','Ministérios']]],['kids','baby','Kids',[['kvis','Visão geral'],['ksalas','Salas'],['ktimes','Times'],['kturmas','Turmas']]]]],
- ['Operação',[['agenda','calendar','Agenda e serviço',[['cultos','Cultos'],['eventos','Eventos'],['calendario','Calendário'],['escalas','Escalas'],['ag-insc','Inscrições']]],['espacos','building','Espaços',[['reservas','Reservas'],['salas','Salas']]],['almox','box','Almoxarifado',[['aitens','Itens'],['acat','Categorias'],['aemp','Empréstimos'],['adev','Devoluções'],['adist','Distribuições'],['atrf','Transferências'],['aaj','Ajustes'],['amov','Movimentações'],['arel','Relatórios']]]]],
+ ['Geral',[['hoje','dawn','Dashboard'],['pessoas','users','Pessoas',[['membros','Membros'],['integracao','Integração de membros']]],['cuidado','heart','Cuidado',[['discipulado','Discipulado'],['acompanhamento','Acompanhamento'],['oracao','Pedidos de oração']]],['comunidade','home','Comunidade',[['casas','Casas de Apascentamento'],['redes','Redes de célula'],['ministerios','Ministérios']]],['kids','baby','Kids',[['kvis','Visão geral'],['ksalas','Salas'],['ktimes','Times'],['kturmas','Turmas']]]]],
+ ['Operação',[['agenda','calendar','Agenda e serviço',[['cultos','Cultos'],['eventos','Eventos'],['calendario','Calendário'],['escalas','Escalas'],['bebes','Apresentações'],['ag-insc','Inscrições']]],['espacos','building','Espaços',[['reservas','Reservas'],['salas','Salas']]],['almox','box','Almoxarifado',[['aitens','Itens'],['acat','Categorias'],['aemp','Empréstimos'],['adev','Devoluções'],['adist','Distribuições'],['atrf','Transferências'],['aaj','Ajustes'],['amov','Movimentações'],['arel','Relatórios']]]]],
  ['Comunicação',[['conteudo','layers','Conteúdo',[['pregacoes','Pregações'],['musicas','Músicas'],['jornadas','Jornadas'],['cursos','Cursos'],['material','Material de apoio']]],['comunicacao','megaphone','Comunicação',[['noticias','Notícias'],['push','Push e e-mail'],['banners','Banners'],['transmissoes','Transmissões']]]]],
  ['Gestão',[['financeiro','wallet','Financeiro',[['fvis','Visão geral'],['flanc','Lançamentos'],['fpag','Contas a pagar'],['frec','Contas a receber'],['fapr','Aprovações'],['frel','Relatórios'],['fimp','Importar e exportar'],['fdoa','Doações']]],['admin','shield','Administração',[['usuarios','Usuários e permissões'],['multi','Multi-igreja'],['auditoria','Auditoria e LGPD']]]]],
 ];
@@ -131,21 +132,20 @@ function sidebar(){
  const c=CHURCHES[S.church];
  const an=!S.animated;S.animated=true;return `<div class="brand">${logo(20,an)}<button class="ibtn only-m" data-a="closeSide" aria-label="Fechar menu" style="width:32px;height:32px">${ic('x',16)}</button></div>
  <div style="position:relative">
-  <button class="church" data-a="churchMenu" aria-haspopup="menu">${chTile(c,32)}<span class="cn"><b>${c.n}</b><span>${c.c} · ${c.role}</span></span><span class="chv">${ic('updown',14)}</span></button>
+  <button class="church" data-a="churchMenu" aria-haspopup="menu"><span class="cn"><small class="ch-net">${NETWORK}</small><b>${c.n}</b><span>${c.c} · ${c.role}</span></span><span class="chv">${ic('updown',14)}</span></button>
   <div class="pop chpop" id="churchPop" role="menu"><div class="chp-h"><span>${ic('church',14)}${NETWORK}</span><small>${CHURCHES.length} igrejas</small></div>
    ${CHURCHES.length>4?`<label class="sbox chp-q">${ic('search',14)}<input placeholder="Buscar igreja" oninput="this.closest('.chpop').querySelectorAll('.chp-i').forEach(b=>b.hidden=!norm(b.dataset.n).includes(norm(this.value)))"></label>`:''}
-   <div class="chp-l">${CHURCHES.map((x,i)=>`<button class="chp-i ${i===S.church?'on':''}" role="menuitemradio" aria-checked="${i===S.church}" data-a="setChurch" data-v="${i}" data-n="${esc(x.n+' '+x.c)}">${chTile(x,36)}<span class="dkt"><b>${esc(x.n)}</b><span>${esc(x.c)} · ${x.m.toLocaleString('pt-BR')} membros</span></span><span class="chp-r">${i===S.church?`<span class="chp-ck">${ic('check',13,2.6)}</span>`:`<small>${x.role}</small>`}</span></button>`).join('')}</div>
+   <div class="chp-l">${CHURCHES.map((x,i)=>`<button class="chp-i ${i===S.church?'on':''}" role="menuitemradio" aria-checked="${i===S.church}" data-a="setChurch" data-v="${i}" data-n="${esc(x.n+' '+x.c)}">${chTile(x,36)}<span class="dkt"><b>${esc(x.n)}</b><span>${esc(x.c)} · ${x.m.toLocaleString('pt-BR')} membros</span></span><span class="chp-r"><small>${x.role}</small>${i===S.church?`<span class="chp-ck">${ic('check',12,2.8)}</span>`:''}</span></button>`).join('')}</div>
    <div class="chp-f"><button class="pi" data-a="nav" data-v="multi">${ic('sliders',15)}Gerenciar igrejas da rede</button></div></div>
  </div>
  <button class="search" data-a="cmd">${ic('search',17)}<span>Buscar</span><kbd>⌘K</kbd></button>
  <nav class="nav" aria-label="Áreas">${NAV.map(g=>`${g[0]?`<div class="grp">${g[0]}</div>`:''}${g[1].map(navItem).join('')}`).join('')}</nav>
  <div class="me">
-  <button class="mebtn" data-a="meMenu" aria-haspopup="menu"><span class="av">RP</span><span class="cn"><b>Rafael Pereira</b><span>Administrador</span></span>${ic('updown',16)}</button>
+  <button class="mebtn ${S.active==='perfil'?'on':''}" data-a="meMenu" aria-haspopup="menu"><span class="av">RP</span><span class="cn"><b>Rafael Pereira</b><span>Administrador</span></span>${ic('updown',16)}</button>
   <div class="pop" id="mePop" role="menu" style="left:0;right:0;bottom:calc(100% + 6px)">
    <div class="pl">Aparência</div>
    <div class="seg" role="group" aria-label="Tema"><button data-a="theme" data-v="dia" aria-pressed="${S.theme==='dia'}">Dia</button><button data-a="theme" data-v="noite" aria-pressed="${S.theme==='noite'}">Noite</button></div>
-   <hr><button class="pi" data-a="soon" data-v="Meu perfil">${ic('user',17)}Meu perfil</button><button class="pi" data-a="soon" data-v="Preferências">${ic('sliders',17)}Preferências</button><hr><button class="pi" data-a="openMobile">${ic('phone',17)}Ver app da comunidade</button><button class="pi" data-a="soon" data-v="Vem">${ic('arrowR',17)}Abrir o Vem<span class="ck" style="color:var(--ink-soft)">↗</span></button>
-   <hr><button class="pi" data-a="logout">${ic('logout',17)}Sair</button>
+   <hr><button class="pi" data-a="myProfile">${ic('user',17)}Meu perfil</button><button class="pi" data-a="myProfile" data-v="pref">${ic('sliders',17)}Preferências</button><hr><button class="pi pi-out" data-a="logout">${ic('logout',17)}Sair</button>
   </div>
  </div>`;
 }
@@ -254,12 +254,15 @@ function placeholder(id){const n=area(id);
 function topbar(){const c=CHURCHES[S.church];return `<button class="ibtn" data-a="side" aria-label="Abrir menu">${ic('menu',18)}</button>${logo(16,false)}<button class="ibtn" data-a="cmd" aria-label="Buscar">${ic('search',17)}</button><button class="ibtn" data-a="side" aria-label="${c.n}" style="background:var(--brand);color:var(--on-brand);box-shadow:none;font:700 11px/1 var(--font-text)">${c.i}</button>`;}
 function render(){
  document.documentElement.dataset.theme=S.theme;
+ if(S._navAct!==S.active){S._navAct=S.active;S.navOpen={};}
  if(S.auth){document.body.classList.add('authmode');$('#auth').innerHTML=authView();authAfter();return;}
  document.body.classList.remove('authmode');$('#auth').innerHTML='';
  $('#side').innerHTML=sidebar();$('#topbar').innerHTML=topbar();
- $('#main .wrap').innerHTML=S.active==='hoje'?home():S.active==='membros'?(S.member?profile():members()):S.active==='integracao'?(S.integ?integDetail():integList()):S.active==='discipulado'?(S.disc?discDetail():discList()):S.active==='acompanhamento'?casesList():S.active==='oracao'?prayerList():S.active==='casas'?(S.casa?casaDetail():casasList()):S.active==='redes'?redesList():S.active==='ministerios'?(S.mini?miniDetail():minisList()):S.active==='kvis'?kVis():S.active==='ksalas'?kSalas():S.active==='ktimes'?kTimes():S.active==='kturmas'?kTurmas():S.active==='usuarios'?(S.user?userDetail():usersList()):S.active==='multi'?multiList():S.active==='auditoria'?auditPage():S.active==='cultos'||S.active==='eventos'?(S.evt?evDetail():evList(S.active)):S.active==='calendario'?(S.evt?evDetail():calPage()):S.active==='ag-insc'?inscPage():S.active==='escalas'?(S.esc?escDetail():escList()):S.active==='reservas'?rvPage():S.active==='salas'?slPage():S.active==='noticias'?ntPage():S.active==='push'?puPage():S.active==='banners'?bnPage():S.active==='transmissoes'?txPage():S.active==='pregacoes'?pgPage():S.active==='musicas'?sgPage():S.active==='jornadas'?joPage():S.active==='cursos'?csPage():S.active==='fvis'?fVis():S.active==='aitens'?axItems():S.active==='acat'?axCats():S.active==='aemp'?axLoans():S.active==='adev'?axRets():S.active==='adist'?axDists():S.active==='atrf'?axTrans():S.active==='aaj'?axAdj():S.active==='amov'?axMoves():S.active==='arel'?axRep():S.active==='flanc'?fLanc():S.active==='fpag'?fPag():S.active==='frec'?fRec():S.active==='fapr'?fApr():S.active==='frel'?fRel():S.active==='fimp'?fImp():S.active==='fdoa'?fDoa():S.active==='material'?mtPage():placeholder(S.active);
+ $('#main .wrap').innerHTML=S.active==='hoje'?home():S.active==='perfil'?perfilPage():S.active==='membros'?(S.member?profile():members()):S.active==='integracao'?(S.integ?integDetail():integList()):S.active==='discipulado'?(S.disc?discDetail():discList()):S.active==='acompanhamento'?(S.case?caseDetail():casesList()):S.active==='oracao'?prayerList():S.active==='casas'?(S.casa?casaDetail():casasList()):S.active==='redes'?redesList():S.active==='ministerios'?(S.mini?miniDetail():minisList()):S.active==='kvis'?kVis():S.active==='ksalas'?kSalas():S.active==='ktimes'?kTimes():S.active==='kturmas'?kTurmas():S.active==='usuarios'?(S.user?userDetail():usersList()):S.active==='multi'?multiList():S.active==='auditoria'?auditPage():S.active==='cultos'||S.active==='eventos'?(S.evt?evDetail():evList(S.active)):S.active==='calendario'?(S.evt?evDetail():calPage()):S.active==='ag-insc'?inscPage():S.active==='bebes'?bbPage():S.active==='escalas'?(S.esc?escDetail():escList()):S.active==='reservas'?rvPage():S.active==='salas'?slPage():S.active==='noticias'?ntPage():S.active==='push'?puPage():S.active==='banners'?bnPage():S.active==='transmissoes'?txPage():S.active==='pregacoes'?pgPage():S.active==='musicas'?sgPage():S.active==='jornadas'?joPage():S.active==='cursos'?csPage():S.active==='fvis'?fVis():S.active==='aitens'?axItems():S.active==='acat'?axCats():S.active==='aemp'?axLoans():S.active==='adev'?axRets():S.active==='adist'?axDists():S.active==='atrf'?axTrans():S.active==='aaj'?axAdj():S.active==='amov'?axMoves():S.active==='arel'?axRep():S.active==='flanc'?fLanc():S.active==='fpag'?fPag():S.active==='frec'?fRec():S.active==='fapr'?fApr():S.active==='frel'?fRel():S.active==='fimp'?fImp():S.active==='fdoa'?fDoa():S.active==='material'?mtPage():placeholder(S.active);
  if(['cultos','eventos','calendario','ag-insc'].includes(S.active))agAfter();
  if(S.active==='escalas')escAfter();
+ if(S.active==='perfil')perfilAfter();
+ if(S.active==='bebes')bbAfter();
  if(S.active==='reservas'||S.active==='salas')spAfter();
  if(S.active==='flanc')fAfter();
  if(S.active==='aitens')axAfter();
@@ -1029,10 +1032,10 @@ const CTYPE={Visita:'home',Hospital:'hospital',Aconselhamento:'message',Luto:'fl
 const CST={urgente:['Urgente','var(--st-rec)','var(--st-rec-bg)'],acompanhando:['Acompanhando','var(--st-sol)','var(--st-sol-bg)'],resolvido:['Resolvido','var(--st-int)','var(--st-int-bg)']};
 const PASTORS=[['Pr. Rafael Pereira','ceu'],['Diác. Ana Costa','rosado'],['Pr. Marcos Lima','salvia'],['Pra. Daniela Rocha','damasco']];
 let _cid=0;
-const CS=(n,st,type,desc,resp,o={})=>({id:'c'+(++_cid),n,tone:o.tone||TONES[_cid%6],st,type,desc,resp,restr:!!o.restr,meets:o.meets||[],opened:o.opened||addDays(-10),resolved:o.resolved||''});
+const CS=(n,st,type,desc,resp,o={})=>({id:'c'+(++_cid),sched:o.sched||[],n,tone:o.tone||TONES[_cid%6],st,type,desc,resp,restr:!!o.restr,meets:o.meets||[],opened:o.opened||addDays(-10),resolved:o.resolved||''});
 const CASES=[
  CS('Maria Santos','urgente','Hospital','Internada no Hospital São Paulo — cirurgia programada para sexta.','Pr. Rafael Pereira',{tone:'rosado',opened:addDays(-4),meets:[{d:addDays(-1),t:'Visita no hospital. Família presente, pediu oração pela cirurgia.'},{d:addDays(-4),t:'Ligação após a internação.'}]}),
- CS('João Oliveira','acompanhando','Aconselhamento','Passando por divórcio. Terceira sessão de aconselhamento agendada.','Diác. Ana Costa',{restr:true,tone:'ceu',opened:addDays(-40),meets:[{d:addDays(-6),t:'2ª sessão de aconselhamento.'},{d:addDays(-20),t:'1ª sessão.'},{d:addDays(-40),t:'Primeira conversa após o culto.'}]}),
+ CS('João Oliveira','acompanhando','Aconselhamento','Passando por divórcio. Terceira sessão de aconselhamento agendada.','Diác. Ana Costa',{restr:true,tone:'ceu',opened:addDays(-40),sched:[{d:addDays(5),t:'19:30',mode:'Presencial',where:'Gabinete pastoral'}],meets:[{d:addDays(-6),t:'2ª sessão de aconselhamento.'},{d:addDays(-20),t:'1ª sessão.'},{d:addDays(-40),t:'Primeira conversa após o culto.'}]}),
  CS('Clara Ferreira','acompanhando','Luto','Perdeu o pai em agosto. Necessita de visita e suporte.','Pr. Marcos Lima',{tone:'lima',opened:addDays(-35)}),
  CS('Pedro Almeida','urgente','Oração','Crise de ansiedade severa. Afastado do trabalho.','Pr. Rafael Pereira',{restr:true,tone:'damasco',opened:addDays(-3),meets:[{d:addDays(-2),t:'Conversa por telefone. Encaminhado para acompanhamento profissional.'}]}),
  CS('Lucia Gomes','resolvido','Visita','Visitação realizada. Membro bem-acolhida e encorajada.','Pra. Daniela Rocha',{tone:'menta',resolved:addDays(-8),meets:[{d:addDays(-8),t:'Visita em casa com a equipe de recepção.'}]}),
@@ -1049,7 +1052,7 @@ function casesList(){
  const cnt=k=>CASES.filter(c=>c.st===k).length,act=cnt('urgente')+cnt('acompanhando');
  return `<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Acompanhamento</h1><p class="lede">Casos de cuidado pastoral, visitas e aconselhamento</p></div>
   <div class="pact"><div style="position:relative"><button class="btn sec" data-a="cexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="cexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="todos os casos">Todos os casos</button><button class="pi" data-a="export" data-v="os casos urgentes">Casos urgentes</button></div></div>
-  <button class="btn pri" data-a="cAdd">${ic('plus',15,2.2)}Novo caso</button></div></header>
+  <button class="btn pri" data-a="cAdd">${ic('plus',15,2.2)}Adicionar caso</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Casos ativos</span><span class="kv">${act}</span><span class="kd"><b style="color:var(--st-rec)">${cnt('urgente')} urgentes</b> precisam de atenção</span></div>
   <div class="k4"><span class="kl">Acompanhando</span><span class="kv">${cnt('acompanhando')}</span><span class="kd">em andamento</span></div>
@@ -1069,24 +1072,33 @@ function cRows(){
   <span class="av" style="background:var(--tone-${c.tone});color:var(--tone-${c.tone}-ink)">${initials(c.n)}</span>
   <div class="cb"><div class="c1"><b>${esc(c.n)}</b>${cPill(c)}<span class="ctype">${ic(CTYPE[c.type],14)}${c.type}</span>${c.restr?`<span class="crestr" title="Só o responsável e o Presbitério veem">${ic('lock',12,2.2)}Restrito</span>`:''}</div>
    <p class="cdesc">${esc(c.desc)}</p>
-   <div class="c3"><span class="cresp"><span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}</span><span class="sep">·</span><span>${c.meets.length?`${c.meets.length} encontro${c.meets.length>1?'s':''} · último ${ago(last.d)}`:'<b style="color:var(--st-sol)">Nenhum encontro ainda</b>'}</span></div></div>
+   <div class="c3"><span class="cresp"><span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}</span><span class="sep">·</span><span>${c.meets.length?`${c.meets.length} encontro${c.meets.length>1?'s':''} · último ${ago(last.d)}`:'<b style="color:var(--st-sol)">Nenhum encontro ainda</b>'}</span>${(c.sched||[]).length?`<span class="c-nxp">${ic('calendar',12,2)}Próximo: ${wd(c.sched[0].d).slice(0,3)}, ${fmtD(c.sched[0].d)} · ${c.sched[0].t}</span>`:''}</div></div>
   <span class="tc">${ic('chevR',16)}</span></div>`;}).join('')}</div>
  <div class="tfoot"><span>${l.length} ${l.length>1?'casos':'caso'}</span></div>`;
 }
-function cDrawer(c){
- openDlg(`<div class="dh"><div class="drh"><span class="av lg" style="background:var(--tone-${c.tone});color:var(--tone-${c.tone}-ink)">${initials(c.n)}</span><div><h3>${esc(c.n)}</h3><p><span class="ctype">${ic(CTYPE[c.type],14)}${c.type}</span> · aberto ${ago(c.opened)}${c.restr?` · <span class="crestr">${ic('lock',12,2.2)}Restrito</span>`:''}</p></div></div><button class="ibtn sm" data-a="closeDlg" aria-label="Fechar">${ic('x',16)}</button></div>
-  <div class="fld"><span class="fl">Situação</span><div class="yn cst" role="radiogroup" id="cstG">${Object.keys(CST).map(k=>`<label><input type="radio" name="cst" value="${k}" ${c.st===k?'checked':''}><span><i style="background:${CST[k][1]}"></i>${CST[k][0]}</span></label>`).join('')}</div></div>
-  <div class="dsec"><span class="fl">Descrição</span><p>${esc(c.desc)}</p></div>
-  <dl class="kv grid2"><div><dt>Responsável</dt><dd class="cresp"><span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}</dd></div><div><dt>Quem vê</dt><dd>${c.restr?'Responsável e Presbitério':'Todos os pastores'}</dd></div></dl>
-  <div class="dsec"><div class="sh" style="margin-bottom:10px"><span class="fl">Encontros</span><span class="who">${c.meets.length}</span></div>
-   <form id="cmF" class="cmf"><textarea class="ta" name="t" rows="2" placeholder="Registrar encontro: o que aconteceu?"></textarea><div class="cmr"><input type="date" name="d" value="${TODAY.toISOString().slice(0,10)}" max="${TODAY.toISOString().slice(0,10)}"><button class="btn pri sm" type="submit">Registrar</button></div></form>
-   ${c.meets.length?`<ol class="mini-tl" style="margin-top:16px">${c.meets.map(m=>`<li><b>${esc(m.t)}</b><span>${fmtD(m.d)} · ${ago(m.d)}</span></li>`).join('')}</ol>`:'<p class="who" style="margin:12px 0 0">Nenhum encontro registrado.</p>'}</div>
-  <div class="dfoot" style="justify-content:space-between"><button class="btn ghostd" data-a="cDel" data-v="${c.id}">Excluir caso</button><button class="btn sec" data-a="closeDlg">Fechar</button></div>`,'drawer');
- $('.dlgw').classList.add('drw');
- $('#cstG').addEventListener('change',e=>{const old=c.st;c.st=e.target.value;if(c.st==='resolvido')c.resolved=TODAY.toISOString().slice(0,10);refreshCases();toast(`Caso de ${c.n.split(' ')[0]}: ${CST[c.st][0].toLowerCase()}`,()=>{c.st=old;refreshCases();cDrawer(c);});});
- $('#cmF').addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(e.target),t=fd.get('t').trim();if(!t){e.target.querySelector('textarea').focus();e.target.querySelector('textarea').animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'none'}],{duration:220});return;}
-  const b=e.target.querySelector('button');b.classList.add('busy');setTimeout(()=>{c.meets.unshift({d:fd.get('d'),t});refreshCases();cDrawer(c);toast('Encontro registrado');},600);});
+function caseDetail(){
+ const c=cById(S.case);if(!c){S.case=null;return casesList();}
+ const sch=c.sched||[];
+ return `<nav class="crumb rise"><span class="soft">Cuidado</span>${ic('chevR',13,2)}<button class="lnk back" data-a="cBack">Acompanhamento</button>${ic('chevR',13,2)}<span>${esc(c.n)}</span></nav>
+ <header class="card prof rise" style="--d:1">
+  <div class="pid"><span class="av xl" style="background:var(--tone-${c.tone});color:var(--tone-${c.tone}-ink)">${initials(c.n)}</span><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(c.n)}</h1>${cPill(c)}</div>
+   <p><span class="ctype">${ic(CTYPE[c.type],14)}${c.type}</span> · aberto ${ago(c.opened)}${c.restr?` · <span class="crestr">${ic('lock',12,2.2)}Restrito</span>`:''}</p></div></div>
+  <div class="pact"><button class="btn sec" data-a="cReg" data-v="${c.id}">Registrar encontro</button><button class="btn pri" data-a="cSched" data-v="${c.id}">${ic('calendar',15)}Agendar</button>
+   <div style="position:relative"><button class="ibtn" data-a="cMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="cPop" style="right:0;top:calc(100% + 6px)"><button class="pi danger" data-a="cDel" data-v="${c.id}">${ic('x',17)}Excluir caso</button></div></div></div>
+ </header>
+ <div class="pgrid cdet rise" style="--d:2">
+  <section class="card pc"><div class="sh"><h2>Encontros</h2><span class="who">${c.meets.length} registrado${c.meets.length===1?'':'s'}${sch.length?` · ${sch.length} agendado${sch.length===1?'':'s'}`:''}</span></div>
+   ${sch.length?`<p class="fl" style="margin:0 0 8px">Próximos</p><div class="c-next">${sch.map((m,i)=>`<div class="c-nx"><span class="c-nd"><b>${+m.d.slice(8)}</b><small>${wd(m.d).slice(0,3)}</small></span><span class="dkt"><b>${m.mode==='Remoto'?'Encontro remoto':'Encontro presencial'}</b><span>${fmtD(m.d)} · ${m.t}${m.mode==='Remoto'?(m.link?' · link enviado':' · link a definir'):m.where?' · '+esc(m.where):''}</span></span><button class="btn sec sm" data-a="cDone" data-v="${c.id}|${i}">Concluir</button><button class="ibtn sm" data-a="cUnsched" data-v="${c.id}|${i}" aria-label="Cancelar encontro" title="Cancelar encontro">${ic('x',13)}</button></div>`).join('')}</div>`:''}
+   ${c.meets.length?`${sch.length?'<p class="fl" style="margin:18px 0 10px">Histórico</p>':''}<ol class="mini-tl">${c.meets.map(m=>`<li><b>${esc(m.t)}</b><span>${fmtD(m.d)} · ${ago(m.d)}</span></li>`).join('')}</ol>`
+   :`<div class="eempty" style="padding:24px 0 8px"><span class="eei">${ic('calendar',22)}</span><p>Nenhum encontro ainda.</p><span class="who">Agende o primeiro ou registre um que já aconteceu.</span></div>`}</section>
+  <aside class="stack-col">
+   <section class="card pc"><div class="sh"><h2>Situação</h2></div><div class="yn cst" role="radiogroup" id="cstG">${Object.keys(CST).map(k=>`<label><input type="radio" name="cst" value="${k}" ${c.st===k?'checked':''}><span><i style="background:${CST[k][1]}"></i>${CST[k][0]}</span></label>`).join('')}</div></section>
+   <section class="card pc"><div class="sh"><h2>Sobre o caso</h2></div><p class="cdtx">${esc(c.desc)}</p>
+    <dl class="cdkv"><div><dt>Responsável</dt><dd class="cresp"><span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}</dd></div><div><dt>Quem vê</dt><dd>${c.restr?`${ic('lock',13,2.2)} Responsável e Presbitério`:'Todos os pastores'}</dd></div><div><dt>Aberto em</dt><dd>${fmtD(c.opened)}</dd></div></dl></section>
+  </aside></div>`;
 }
+function caseAfter(){const c=cById(S.case);const g=$('#cstG');if(!c||!g)return;g.addEventListener('change',e=>{const old=c.st;c.st=e.target.value;if(c.st==='resolvido')c.resolved=TODAY.toISOString().slice(0,10);cRe();toast(`Caso de ${c.n.split(' ')[0]}: ${CST[c.st][0].toLowerCase()}`,()=>{c.st=old;cRe();});});}
+const cRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
 function refreshCases(){if(S.active==='acompanhamento'){const y=window.scrollY;render();window.scrollTo(0,y);}}
 
 /* ================= Cuidado › Pedidos de oração ================= */
@@ -1125,30 +1137,46 @@ function pCard(p){
  </article>`;
 }
 function cuidadoAfter(){
+ if(S.case){caseAfter();return;}
  const q=$('#cq');if(q)q.addEventListener('input',e=>{S.cq=e.target.value;$('#crows').innerHTML=cRows();});
 }
 const CA={
  cexpMenu:()=>{const p=$('#cexpPop');closePops(p);p.classList.toggle('open');},
  pexpMenu:()=>{const p=$('#pexpPop');closePops(p);p.classList.toggle('open');},
  cFilter:v=>{S.cf=v;$$('.chipf[data-a=cFilter]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#crows').innerHTML=cRows();},
- cOpen:v=>cDrawer(cById(v)),
- cDel:v=>{const c=cById(v);closeDlg();setTimeout(()=>confirmDel({title:`Excluir o caso de ${c.n.split(' ')[0]}?`,body:`A descrição e os ${c.meets.length} encontros registrados serão apagados. Esta ação não pode ser desfeita.`,label:'Excluir caso',onConfirm:()=>{CASES.splice(CASES.indexOf(c),1);render();toast('Caso excluído');}}),250);},
- cAdd:()=>{const cand=MEMBERS.filter(m=>m.tit);openDlg(`${dlgHead('Novo caso','Registre uma situação que precisa de cuidado pastoral.')}
-  <form class="fgrid one" id="caF" novalidate>
-   <div class="fld"><span class="fl">Membro</span><label class="sbox" style="margin-bottom:8px">${ic('search',16)}<input id="caq" placeholder="Buscar membro" autocomplete="off"></label><div class="pick" id="capick" style="max-height:176px">${candList(cand,'')}</div><span class="err"></span></div>
-   <div class="fld"><span class="fl">Tipo</span><div class="minpick">${Object.keys(CTYPE).map((t,i)=>`<label><input type="radio" name="type" value="${t}" ${!i?'checked':''}><span>${ic(CTYPE[t],14)}&nbsp;${t}</span></label>`).join('')}</div></div>
-   <label class="fld"><span class="fl">Descrição</span><textarea class="ta" name="desc" rows="3" placeholder="O que está acontecendo e do que a pessoa precisa"></textarea><span class="err"></span></label>
-   <label class="fld"><span class="fl">Responsável</span><span class="selw"><select name="resp">${PASTORS.map(p=>`<option>${p[0]}</option>`).join('')}</select>${ic('updown',14)}</span></label>
-   <div class="fld"><span class="fl">Quem pode ver este caso?</span><div class="vis">
-    <label><input type="radio" name="restr" value="0" checked><span><b>Todos os pastores</b><small>Qualquer pastor do sistema pode ver.</small></span></label>
-    <label><input type="radio" name="restr" value="1"><span><b>${ic('lock',13,2.2)} Restrito</b><small>Só o responsável e o Presbitério. Para casos sensíveis.</small></span></label></div></div>
-   <label class="tog"><input type="checkbox" name="urg"><span class="sw"></span><span><b>Marcar como urgente</b><small>Aparece no topo e no painel Hoje</small></span></label>
-   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Criar caso</button></div></form>`);
-  $('#caq').addEventListener('input',e=>{$('#capick').innerHTML=candList(cand,e.target.value);});
-  const f=$('#caF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
-  f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);let ok=true;const bad=(el,m)=>{el.classList.add('bad');el.querySelector('.err').textContent=m;ok=false;};
-   if(!fd.get('pm'))bad($('#capick').closest('.fld'),'Escolha o membro');if(!fd.get('desc').trim())bad(f.querySelector('[name=desc]').closest('.fld'),'Descreva a situação');if(!ok)return;
-   const m=byId(fd.get('pm')),b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{const c=CS(m.n,fd.get('urg')?'urgente':'acompanhando',fd.get('type'),fd.get('desc').trim(),fd.get('resp'),{restr:fd.get('restr')==='1',tone:m.tone,opened:TODAY.toISOString().slice(0,10)});CASES.unshift(c);closeDlg();S.cf='ativos';render();toast(`Caso de ${m.n.split(' ')[0]} criado · ${fd.get('resp')} foi avisado`);},800);});},
+ cOpen:v=>{S.case=v;render();window.scrollTo({top:0});},
+ cBack:()=>{S.case=null;render();},
+ cMenu:()=>{const p=$('#cPop');closePops(p);p.classList.toggle('open');},
+ cReg:v=>{const c=cById(v);openDlg(`${dlgHead('Registrar encontro',`Caso de ${esc(c.n)}. Para um encontro que já aconteceu e não foi agendado.`)}<form id="crgF" class="fgrid" novalidate style="grid-template-columns:180px 1fr"><label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${TODAY.toISOString().slice(0,10)}" max="${TODAY.toISOString().slice(0,10)}"><span class="err"></span></label><div></div><label class="fld wide" style="grid-column:1/-1"><span class="fl">O que aconteceu?</span><textarea class="ta" name="t" rows="4" placeholder="Resumo do encontro. Só quem vê o caso tem acesso."></textarea><span class="err"></span></label><div class="dfoot" style="grid-column:1/-1"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Registrar</button></div></form>`,'sm');
+  const f=$('#crgF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));f.addEventListener('submit',e=>{e.preventDefault();const t=f.t.value.trim(),d=f.d.value;const bad=(n,m)=>{const i=f[n];i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;};if(!d)return bad('d','Informe a data');if(d>TODAY.toISOString().slice(0,10))return bad('d','Para datas futuras, use Agendar');if(t.length<5)return bad('t','Conte o que foi tratado');const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{c.meets.unshift({d,t});c.meets.sort((a,b)=>a.d<b.d?1:-1);closeDlg();cRe();toast('Encontro registrado');},500);});},
+ cDel:v=>{closePops();const c=cById(v);setTimeout(()=>confirmDel({title:`Excluir o caso de ${c.n.split(' ')[0]}?`,body:`A descrição e os ${c.meets.length} encontros registrados serão apagados. Esta ação não pode ser desfeita.`,label:'Excluir caso',onConfirm:()=>{CASES.splice(CASES.indexOf(c),1);S.case=null;render();toast('Caso excluído');}}),50);},
+ cAdd:()=>{const cand=MEMBERS.filter(m=>m.tit),st={step:1,pm:null,type:'Visita',desc:'',resp:PASTORS[0][0],restr:'0',urg:false};
+  openDlg(`${dlgHead('Adicionar caso','Uma situação que precisa de cuidado pastoral.')}<div class="ca-steps" id="caSt"></div><div id="caB"></div><div class="dfoot" id="caFt"></div>`,'lg ca-dlg');
+  const paint=()=>{const m=st.pm&&byId(st.pm);
+   $('#caSt').innerHTML=[['1','Pessoa e tipo'],['2','Detalhes']].map((z,i)=>`<span class="${st.step>i+1?'done':st.step===i+1?'on':''}"><i>${st.step>i+1?ic('check',11,3):z[0]}</i>${z[1]}</span>`).join('<b></b>');
+   if(st.step===1){$('#caB').innerHTML=`<div class="ca-g"><div class="fld" id="caPm"><span class="fl">Quem precisa de cuidado?</span><label class="sbox" style="margin-bottom:8px">${ic('search',16)}<input id="caq" placeholder="Buscar membro" autocomplete="off"></label><div class="pick" id="capick" style="max-height:232px">${candList(cand,'')}</div><span class="err"></span></div>
+     <div class="fld"><span class="fl">Tipo</span><div class="ca-types">${Object.keys(CTYPE).map(t=>`<label><input type="radio" name="catype" value="${t}" ${st.type===t?'checked':''}><span>${ic(CTYPE[t],16)}<b>${t}</b></span></label>`).join('')}</div></div></div>`;
+    if(st.pm){const r=$(`#capick input[value="${st.pm}"]`);if(r)r.checked=true;}
+    $('#caq').addEventListener('input',e=>{$('#capick').innerHTML=candList(cand,e.target.value);const r=st.pm&&$(`#capick input[value="${st.pm}"]`);if(r)r.checked=true;});
+    $('#capick').addEventListener('change',e=>{st.pm=e.target.value;$('#caPm').classList.remove('bad');});
+    $$('input[name=catype]').forEach(r=>r.addEventListener('change',()=>st.type=r.value));
+    $('#caFt').innerHTML=`<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="button" class="btn pri" id="caNx">Continuar</button>`;
+    $('#caNx').onclick=()=>{if(!st.pm){$('#caPm').classList.add('bad');$('#caPm .err').textContent='Escolha quem precisa de cuidado';return;}st.step=2;paint();setTimeout(()=>$('#caD')?.focus(),40);};}
+   else{$('#caB').innerHTML=`<div class="ca-who">${mav(m)}<span class="dkt"><b>${esc(m.n)}</b><span>${ic(CTYPE[st.type],13)} ${st.type}</span></span><button class="lnk" id="caEd">Trocar</button></div>
+    <div class="ca-g"><label class="fld" style="grid-column:1/-1"><span class="fl">O que está acontecendo?</span><textarea class="ta" id="caD" rows="3" maxlength="400" placeholder="Situação e do que a pessoa precisa">${esc(st.desc)}</textarea><span class="err"></span></label>
+     <label class="fld"><span class="fl">Responsável</span><span class="selw"><select id="caR">${PASTORS.map(p=>`<option ${st.resp===p[0]?'selected':''}>${p[0]}</option>`).join('')}</select>${ic('updown',14)}</span></label>
+     <div class="fld"><span class="fl">Quem pode ver</span><div class="segc ca-vis" role="group"><button type="button" data-r="0" aria-pressed="${st.restr==='0'}">Todos os pastores</button><button type="button" data-r="1" aria-pressed="${st.restr==='1'}">${ic('lock',12,2.2)} Restrito</button></div><span class="hint" id="caVh">${st.restr==='1'?'Só o responsável e o Presbitério.':'Qualquer pastor do sistema.'}</span></div>
+     <label class="tog" style="grid-column:1/-1"><input type="checkbox" id="caU" ${st.urg?'checked':''}><span class="sw"></span><span><b>Marcar como urgente</b><small>Aparece no topo da lista e no Dashboard</small></span></label></div>`;
+    $('#caEd').onclick=()=>{st.desc=$('#caD').value;st.step=1;paint();};
+    $('#caD').addEventListener('input',e=>{st.desc=e.target.value;e.target.closest('.fld').classList.remove('bad');});
+    $('#caR').addEventListener('change',e=>st.resp=e.target.value);
+    $('.ca-vis').addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(!b)return;st.restr=b.dataset.r;$$('.ca-vis button').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#caVh').textContent=st.restr==='1'?'Só o responsável e o Presbitério.':'Qualquer pastor do sistema.';});
+    $('#caU').addEventListener('change',e=>st.urg=e.target.checked);
+    $('#caFt').innerHTML=`<button type="button" class="btn sec" id="caBk">Voltar</button><button type="button" class="btn pri" id="caGo">Criar caso</button>`;
+    $('#caBk').onclick=()=>{st.desc=$('#caD').value;st.step=1;paint();};
+    $('#caGo').onclick=e=>{const d=st.desc.trim();if(d.length<10){const f=$('#caD').closest('.fld');f.classList.add('bad');f.querySelector('.err').textContent=d?'Conte um pouco mais':'Descreva a situação';return;}
+     const b=e.currentTarget;b.classList.add('busy');setTimeout(()=>{const c=CS(m.n,st.urg?'urgente':'acompanhando',st.type,d,st.resp,{restr:st.restr==='1',tone:m.tone,opened:TODAY.toISOString().slice(0,10)});CASES.unshift(c);closeDlg();S.cf='ativos';S.case=c.id;render();window.scrollTo({top:0});toast(`Caso de ${m.n.split(' ')[0]} criado · ${st.resp} foi avisado`);},700);};}
+  };paint();},
  pFilter:v=>{S.pf=v;render();},
  pMenu:v=>{const p=$('#pPop-'+v);closePops(p);p.classList.toggle('open');},
  pPray:(v,b)=>{const p=PRAYERS.find(x=>x.id===v);p.mine=!p.mine;p.count+=p.mine?1:-1;const el=$('#'+v);el.outerHTML=pCard(p);$('#'+v).animate([{transform:'scale(.99)'},{transform:'none'}],{duration:260});
@@ -1159,6 +1187,28 @@ const CA={
 };
 function updPrayKpi(){const y=window.scrollY;const act=PRAYERS.filter(p=>p.st==='ativo');const k=$$('.kpis4 .k4');if(!k.length)return;
  k[1].querySelector('.kv').textContent=act.reduce((a,p)=>a+p.count,0);const mine=act.filter(p=>p.mine).length;k[2].querySelector('.kv').innerHTML=`${mine}<small class="kof"> de ${act.length}</small>`;k[2].querySelector('.kmeter i').style.width=Math.round(mine/act.length*100)+'%';window.scrollTo(0,y);}
+
+Object.assign(CA,{
+ cSched:v=>{const c=cById(v);openDlg(`${dlgHead('Agendar encontro',`Caso de ${esc(c.n)}. O que foi tratado você registra ao concluir.`)}
+  <form class="fgrid" id="cschF" novalidate style="grid-template-columns:1fr 1fr">
+   <label class="fld"><span class="fl">Data</span><input type="date" name="d" min="${TODAY.toISOString().slice(0,10)}" value="${addDays(7)}"><span class="err"></span></label>
+   <label class="fld"><span class="fl">Horário</span><input type="time" name="t" value="19:30"><span class="err"></span></label>
+   <div class="fld wide"><span class="fl">Modalidade</span><div class="yn" role="radiogroup" id="cmodeG"><label><input type="radio" name="mode" value="Presencial" checked><span>${ic('pin',15)}&nbsp;Presencial</span></label><label><input type="radio" name="mode" value="Remoto"><span>${ic('monitor',15)}&nbsp;Remoto</span></label></div></div>
+   <label class="fld wide" id="cwhereF"><span class="fl">Local <small>opcional</small></span><input name="where" placeholder="Ex.: Gabinete pastoral, visita em casa"></label>
+   <label class="fld wide" id="clinkF" hidden><span class="fl">Link da reunião <small>opcional</small></span><input name="link" type="url" placeholder="Meet, Teams, Zoom… pode preencher depois"><span class="err"></span></label>
+   <label class="tog wide"><input type="checkbox" name="notify" checked><span class="sw"></span><span><b>Avisar ${esc(c.n.split(' ')[0])} no app</b><small>A pessoa confirma ou recusa em Agenda › Acompanhamento</small></span></label>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Agendar</button></div></form>`);
+  $('#cmodeG').addEventListener('change',e=>{const r=e.target.value==='Remoto';$('#clinkF').hidden=!r;$('#cwhereF').hidden=r;});
+  const f=$('#cschF');f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f),bad=(n,m)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent=m;};
+   if(!fd.get('d'))return bad('d','Escolha a data');if(fd.get('d')<TODAY.toISOString().slice(0,10))return bad('d','A data já passou');if(!fd.get('t'))return bad('t','Informe o horário');
+   const lk=fd.get('link');if(lk&&!/^https?:\/\//.test(lk))return bad('link','Link inválido');
+   if((c.sched||[]).some(m=>m.d===fd.get('d')&&m.t===fd.get('t')))return bad('d','Já existe encontro neste horário');
+   const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{c.sched=c.sched||[];c.sched.push({d:fd.get('d'),t:fd.get('t'),mode:fd.get('mode'),where:fd.get('where'),link:lk});c.sched.sort((a,b)=>a.d<b.d?-1:1);closeDlg();cRe();toast(`Encontro agendado para ${wd(fd.get('d'))}, ${fmtD(fd.get('d'))} às ${fd.get('t')}${fd.get('notify')?` · ${c.n.split(' ')[0]} foi avisado(a)`:''}`);},700);});},
+ cDone:v=>{const [id,i]=v.split('|'),c=cById(id),m=c.sched[+i];openDlg(`${dlgHead('Concluir encontro',`${esc(c.n)} · ${fmtD(m.d)} às ${m.t}`)}<form id="cdnF" class="fgrid one" novalidate><label class="fld"><span class="fl">O que foi tratado?</span><textarea class="ta" name="t" rows="4" placeholder="Resumo do encontro. Só quem vê o caso tem acesso."></textarea><span class="err"></span></label>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Concluir</button></div></form>`,'sm');
+  const f=$('#cdnF');f.addEventListener('submit',e=>{e.preventDefault();const t=f.t.value.trim();if(t.length<5){f.t.closest('.fld').classList.add('bad');f.t.nextElementSibling.textContent='Escreva um resumo do encontro';return;}const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{c.sched.splice(+i,1);c.meets.unshift({d:m.d,t});closeDlg();cRe();toast('Encontro concluído e registrado');},500);});},
+ cUnsched:v=>{const [id,i]=v.split('|'),c=cById(id),m=c.sched[+i];confirmDel({title:'Cancelar este encontro?',body:`${esc(c.n)} recebe o aviso de que o encontro de ${fmtD(m.d)} às ${m.t} foi cancelado.`,label:'Cancelar encontro',onConfirm:()=>{c.sched.splice(+i,1);closeDlg();cRe();toast('Encontro cancelado',()=>{c.sched.splice(+i,0,m);closeDlg();cRe();});}});},
+});
 
 /* ================= Comunidade › Casas de Apascentamento ================= */
 const HMIN=['Jovens e Adolescentes','Casais','Mulheres','Homens','Kids'];
@@ -1560,7 +1610,7 @@ function kVis(){
  <section class="card korg rise" style="--d:1"><div class="kon"><span class="eb" style="margin:0">Como se organiza</span><p class="who" style="margin:4px 0 0">Salas, times e turmas são geridos aqui. Cadastro de crianças, famílias e check-in continuam no Zelo Kids.</p></div>
   <div class="kflow">
    <button class="kfn" data-a="nav" data-v="kturmas"><span class="kfi">${ic('users',16)}</span><span><b>Turma</b><small>a faixa etária</small></span></button><span class="kfa">${ic('arrowR',14,2)}<small>alocada em</small></span>
-   <button class="kfn main" data-a="nav" data-v="ksalas"><span class="kfi">${ic('door',16)}</span><span><b>Sala</b><small>o espaço, com capacidade</small></span></button><span class="kfa rev">${ic('arrowR',14,2)}<small>servida por</small></span>
+   <button class="kfn kmain" data-a="nav" data-v="ksalas"><span class="kfi">${ic('door',16)}</span><span><b>Sala</b><small>o espaço, com capacidade</small></span></button><span class="kfa rev">${ic('arrowR',14,2)}<small>servida por</small></span>
    <button class="kfn" data-a="nav" data-v="ktimes"><span class="kfi">${ic('hand',16)}</span><span><b>Time</b><small>voluntários e professores</small></span></button>
   </div></section>
  <section class="card kpis4 rise" style="--d:2">
@@ -1889,7 +1939,7 @@ const AUDEMO=['rafael@alvasede.com.br','demo1234'];
 Object.assign(S,{auth:'login',authErr:0,authEmail:'',authUser:null,signStep:1,sign:{}});
 const RROLE={g1:'Administrador',g2:'Administrador',g3:'Administrador'};
 const brand=()=>`<aside class="au-brand">
- <div class="au-top">${logo(26,!S.auAnim)}</div>
+ <div class="au-top">${logo(26,!S.auAnim)}${S.auth==='login'?`<button class="au-mcta" data-a="auGo" data-v="signup">Nova igreja?<b>Cadastrar</b></button>`:''}</div>
  <div class="au-mid"><p class="au-line">O cuidado da sua igreja,<br>em <em>um só lugar</em>.</p><p class="au-sub">Pessoas, comunidade, cuidado e operação para quem lidera, em todas as igrejas da sua rede.</p></div>
  <div class="au-hz ${S.auAnim?'still':''}" aria-hidden="true"><span class="au-sun"></span><span class="au-line2"></span></div>
  <p class="au-foot">Alva Web · painel de gestão</p></aside>`;
@@ -1901,7 +1951,7 @@ function authView(){
   <div class="au-h"><h1>Entrar no painel</h1><p>Use o e-mail cadastrado pela sua igreja.</p></div>
   <form id="auF" class="au-form" novalidate>
    <label class="fld"><span class="fl">E-mail</span><input name="e" type="email" autocomplete="username" placeholder="nome@suaigreja.com.br" value="${esc(S.authEmail)}" ${locked?'disabled':''}><span class="err"></span></label>
-   <label class="fld"><span class="fl au-fl">Senha<button type="button" class="lnk" data-a="auGo" data-v="forgot">Esqueci minha senha</button></span><span class="au-pw"><input name="p" type="password" autocomplete="current-password" placeholder="Sua senha" ${locked?'disabled':''}>${eye}</span><span class="err"></span></label>
+   <label class="fld"><span class="fl">Senha</span><span class="au-pw"><input name="p" type="password" autocomplete="current-password" placeholder="Sua senha" ${locked?'disabled':''}>${eye}</span><span class="err"></span><button type="button" class="lnk au-forgot" data-a="auGo" data-v="forgot">Esqueci minha senha</button></label>
    ${S.authErr&&!locked?`<p class="au-warn">${ic('alert',14,2)}E-mail ou senha incorretos. ${5-S.authErr} ${5-S.authErr===1?'tentativa restante':'tentativas restantes'}.</p>`:''}
    ${locked?`<div class="au-lock">${ic('lock',16,2)}<div><b>Acesso bloqueado por 15 minutos</b><span>Por segurança, depois de 5 tentativas. Você pode redefinir a senha agora.</span></div></div>`:''}
    <label class="tog au-keep"><input type="checkbox" name="keep" checked><span class="sw"></span><span><b>Manter conectado</b><small>Neste dispositivo, por 30 dias</small></span></label>
@@ -1933,7 +1983,7 @@ function authView(){
   body=`<div class="au-who">${uAv(u)}<span class="dkt"><b>${esc(u.n)}</b><span>${esc(S.authEmail||u.e)}</span></span></div>
   <div class="au-h"><h1>Selecione a igreja</h1><p>${CHURCHES.length>1?`Você tem acesso a ${CHURCHES.length} igrejas. O seu papel pode ser diferente em cada uma.`:'Confirme a igreja para entrar no painel.'}</p></div>
   <p class="au-net">${ic('church',13)}${NETWORK}<span class="soft">· ${CHURCHES.length} igrejas</span></p>
-  <div class="au-ch">${CHURCHES.map((x,i)=>`<button class="au-ig" data-a="auPick" data-v="${i}" style="--d:${i}">${chTile(x,44)}<span class="dkt"><b>${esc(x.n)} <span class="soft">— ${esc(x.c)}</span></b><span>${esc(x.city)} · ${x.m.toLocaleString('pt-BR')} membros</span><small class="au-last">${ic('clock',11)} último acesso ${x.last}</small></span>${rPill(x.role)}</button>`).join('')}</div>
+  <div class="au-ch2">${CHURCHES.map((x,i)=>`<button class="au-ig2" data-a="auPick" data-v="${i}" style="--d:${i}"><span class="au-ign"><b>${esc(x.n)}</b><span>${esc(x.c)} · ${x.m.toLocaleString('pt-BR')} membros</span></span><span class="au-igr"><b>${esc(x.role)}</b><small>${x.last==='agora'?'acessada agora':x.last}</small></span><span class="au-iga">${ic('arrowR',16,2)}</span></button>`).join('')}</div>
   <label class="tog au-keep"><input type="checkbox" id="remCh"><span class="sw"></span><span><b>Lembrar minha escolha</b><small>Troque de igreja a qualquer momento pelo menu</small></span></label>
   <button class="btn sec au-cta" data-a="auGo" data-v="login">${ic('chevL',15,2)}Trocar de conta</button>`;}
  else if(v==='signup'){const st=S.signStep,d=S.sign;body=`${back(st===1?'login':'signup1',st===1?'Voltar para entrar':'Voltar')}
@@ -1998,7 +2048,7 @@ const AU={
 
 /* ================= Agenda e serviço: Cultos, Eventos, Calendário, Inscrições ================= */
 const ETYPES=['Culto','Retiro','Batismo','Conferência','Evento especial'];
-const ETONE={Culto:'ceu',Retiro:'lima',Batismo:'menta',Conferência:'damasco','Evento especial':'rosado'};
+const ETONE={Ensaio:'salvia',Culto:'ceu',Retiro:'lima',Batismo:'menta',Conferência:'damasco','Evento especial':'rosado'};
 let _eid=0;
 const R=(n,d,pay,val,vch)=>({id:'rg'+Math.random().toString(36).slice(2,8),n,d,pay,val,vch:vch||''});
 const EV=(o)=>Object.assign({id:'ev'+(++_eid),kind:'evento',st:'confirmado',time:'19h',place:'Templo principal',min:'',paid:false,price:0,cap:0,regs:[],vouchers:[],checkin:'off',periods:[],items:[],link:'',rep:'none',prev:''},o);
@@ -2015,6 +2065,7 @@ const EVTS=[
  EV({t:'Convergir 2027',type:'Conferência',st:'previsao',prev:'Fev/2027',d:''}),
  EV({t:'Congresso de Mulheres 2027',type:'Conferência',st:'previsao',prev:'Mar/2027',d:''}),
  EV({t:'12 Horas de Oração',type:'Evento especial',d:'2026-10-24',time:'05h às 17h',min:'Intercessão',regs:[R('Renata Campos','2026-09-25','—',0),R('Elisa Moura','2026-09-26','—',0)]}),
+ EV({t:'Ensaio do Louvor',type:'Ensaio',d:'2026-09-30',time:'20h',min:'Louvor',place:'Templo principal'})
 ];
 const MYESC=[{t:'Louvor · Culto de Celebração',min:'Louvor',d:'2026-10-04',role:'Vocal'},{t:'Louvor · Culto de Celebração',min:'Louvor',d:'2026-10-18',role:'Vocal'},{t:'Recepção · Conferência Missões',min:'Recepção',d:'2026-10-09',role:'Porta principal'}].sort((a,b)=>a.d<b.d?-1:1);
 const BLOCKS=[{id:'b1',from:'2026-10-24',to:'2026-10-26',why:'Viagem em família'}];
@@ -2320,9 +2371,19 @@ const GA={
 const EST={criacao:['Em criação','var(--ink-muted)','var(--surface-2)'],aguardando:['Aguardando aceite','var(--st-sol)','var(--st-sol-bg)'],aprovada:['Aprovada','var(--st-int)','var(--st-int-bg)']};
 const MST={rascunho:['Não enviado','var(--ink-muted)','var(--surface)'],aguardando:['Aguardando','var(--st-sol)','var(--st-sol-bg)'],confirmado:['Confirmado','var(--st-int)','var(--st-int-bg)'],recusado:['Recusou','var(--st-rec)','var(--st-rec-bg)']};
 let _bid=0;
-const BK=(label,members=[],content=[],team='')=>({id:'bk'+(++_bid),label,team,members:members.map(m=>({n:m[0],role:m[1],st:m[2]||'confirmado',over:m[3]||undefined})),content:content.map(c=>({t:c[0],d:c[1]||''}))});
+const BK=(label,members=[],content=[],team='')=>({id:'bk'+(++_bid),label,team,members:members.map(m=>({n:m[0],role:m[1],st:m[2]||'confirmado',over:m[3]||undefined})),content:content.map(c=>({t:c[0],d:c[1]||'',k:c[2]||(/^Tom /.test(c[1]||'')?'musica':'material')}))});
 const DT=(ev,blocks)=>({id:'dt'+(++_bid),ev,blocks});
+/* ---------- presença no dia (check-in com geolocalização) ---------- */
+const CKDAY='2026-09-30',CKNOW=20*60+25,CKRAIO=150;
+const ckMin=t=>{const m=String(t).match(/(\d{1,2})h(\d{2})?/);return m?+m[1]*60+(+m[2]||0):19*60;};
+const ckHM=m=>`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}`.replace('h00','h');
+function ckWin(e){const st=ckMin(e.time);return {open:st-120,start:st,close:st+120};}
+function ckState(e){if(!e||e.d!==CKDAY)return null;const w=ckWin(e);return CKNOW<w.open?'antes':CKNOW>w.close?'fim':'aberto';}
+const CKPR={pend:['Sem check-in','var(--ink-muted)','var(--surface)'],ck:['Check-in feito','var(--st-sol)','var(--st-sol-bg)'],ok:['Presente','var(--st-int)','var(--st-int-bg)'],falta:['Faltou','var(--st-rec)','var(--st-rec-bg)']};
+const ckOf=m=>m.pr==='ok'?'ok':m.pr==='falta'?'falta':m.ck?'ck':'pend';
 const ESCALAS=[
+ {id:'es0',n:'Escala Louvor — Ensaios de setembro',min:'Louvor',desc:'Ensaio geral antes dos cultos de outubro.',st:'aprovada',dates:[
+  DT('ev11',[BK('Ensaio',[['Daniela Rocha','Vocal'],['Elisa Moura','Vocal'],['Diego Faria','Bateria'],['Igor Santana','Baixo'],['Clara Nunes','Teclado'],['Gustavo Mendes','Guitarra','recusado']],[['Grande é o Senhor','Tom G']],'Domingo manhã')])]},
  {id:'es1',n:'Escala Louvor — Outubro',min:'Louvor',desc:'Cultos de celebração de outubro.',st:'aprovada',dates:[
   DT('ev2',[BK('Culto inteiro',[['Ana Clara Lima','Vocal'],['Daniela Rocha','Vocal'],['Bruno Reis','Violão'],['Helena Duarte','Teclado']],[['Grande é o Senhor','Tom G'],['Te louvarei','Tom D']],'Domingo manhã')]),
   DT('ev3',[BK('Culto inteiro',[['Ana Clara Lima','Vocal'],['Elisa Moura','Vocal'],['Bruno Reis','Violão']],[['Aclame ao Senhor','Tom A']],'Domingo manhã')])]},
@@ -2332,6 +2393,7 @@ const ESCALAS=[
  {id:'es4',n:'Escala Retiro de Jovens',min:'Jovens e Adolescentes',desc:'Equipe de apoio do retiro.',st:'criacao',dates:[DT('ev5',[BK('Sábado',[['Thiago Barros','Coordenação','rascunho']]),BK('Domingo')])]},
  {id:'es5',n:'Escala Louvor — Novembro',min:'Louvor',desc:'',st:'criacao',dates:[]},
 ];
+(()=>{const m=ESCALAS[0].dates[0].blocks[0].members;Object.assign(m[0],{ck:{at:'19h12',dist:40},pr:'ok',by:'Você'});m[1].ck={at:'20h02',dist:12};m[2].ck={at:'19h58',dist:85};})();
 Object.assign(S,{esc:null,estab:'datas',esview:'blocos',esq:'',esf:'todos',esM:null,esSel:null,esCol:{}});
 const esById=id=>ESCALAS.find(x=>x.id===id);
 const esPill=s=>`<span class="stp" style="--c:${EST[s][1]};--b:${EST[s][2]}"><i></i>${EST[s][0]}</span>`;
@@ -2353,7 +2415,7 @@ function escList(){
   <div class="k4"><span class="kl">Aguardando aceite</span><span class="kv" style="color:var(--st-sol)">${c('aguardando')}</span><span class="kd">${ESCALAS.filter(x=>x.st==='aguardando').reduce((a,x)=>a+esMembers(x).filter(m=>m.st==='aguardando').length,0)} pessoas sem resposta</span></div>
   <div class="k4"><span class="kl">Em criação</span><span class="kv">${c('criacao')}</span><span class="kd">ainda não enviadas</span></div>
  </section>
- ${lmCard()}
+ ${ckStrip()}${lmCard()}
  <section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="esq" placeholder="Buscar escala ou ministério" value="${esc(S.esq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todas',ESCALAS.length],['aprovada','Aprovadas',c('aprovada')],['aguardando','Aguardando aceite',c('aguardando')],['criacao','Em criação',c('criacao')]].map(x=>`<button class="chipf ${S.esf===x[0]?'on':''}" data-a="esF" data-v="${x[0]}">${x[0]!=='todos'?`<i style="background:${EST[x[0]][1]}"></i>`:''}${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
   ${l.length?`<div class="trow es thead"><span>Escala</span><span>Datas</span><span>Confirmações</span><span>Status</span><span></span></div>${l.map(x=>{const ms=esMembers(x),ok=ms.filter(m=>m.st==='confirmado').length,ds=esSorted(x);return `<div class="trow es" tabindex="0" data-a="esOpen" data-v="${x.id}">
@@ -2374,9 +2436,9 @@ function escDetail(){
   <div class="pact">${act}<div style="position:relative"><button class="ibtn" data-a="esMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="esPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="esDup">${ic('layers',17)}Duplicar para o próximo mês</button><hr><button class="pi danger" data-a="esDel">${ic('x',17)}Excluir escala</button></div></div></div>
   ${x.st==='criacao'?`<div class="esflow"><span class="on"><i>1</i>Montar</span><b></b><span><i>2</i>Escalados confirmam</span><b></b><span><i>3</i>Aprovada</span></div>`:x.st==='aguardando'?`<div class="esflow"><span class="done"><i>${ic('check',11,3)}</i>Montar</span><b class="on"></b><span class="on"><i>2</i>Escalados confirmam</span><b></b><span><i>3</i>Aprovada</span></div>`:''}
   <div class="ikpi hk"><div><b>${x.dates.length}</b><span>Datas</span></div><div><b>${bl}</b><span>Blocos</span></div><div><b>${ms.length}</b><span>Pessoas escaladas</span></div><div><b>${ok}<small class="kof">/${ms.length}</small></b><span>Confirmaram</span></div></div>
-  <div class="ptabs" role="tablist">${[['det','Detalhes'],['datas','Datas',x.dates.length]].map(t=>`<button role="tab" class="${S.estab===t[0]?'on':''}" data-a="esTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
+  <div class="ptabs" role="tablist">${[['det','Detalhes'],['datas','Datas',x.dates.length],['ck','Check-in']].map(t=>`<button role="tab" class="${S.estab===t[0]?'on':''}" data-a="esTab" data-v="${t[0]}">${t[0]==='ck'&&ckToday(x)?'<i class="cklive"></i>':''}${t[1]}${t[2]?`<small>${t[2]}</small>`:t[0]==='ck'&&ckPendN(x)?`<small class="ckn">${ckPendN(x)}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
- <div class="rise" style="--d:2">${S.estab==='det'?esDet(x):esDatas(x)}</div>`;
+ <div class="rise" style="--d:2">${S.estab==='det'?esDet(x):S.estab==='ck'?esCk(x):esDatas(x)}</div>`;
 }
 function esDet(x){
  const ms=esMembers(x),tot=ms.length||1,cnt=k=>ms.filter(m=>m.st===k).length,mn=MINIS.find(m=>m.n===x.min)||{tone:'ceu',icon:'users'},tm=teamsFor(x.min),ds=esSorted(x);
@@ -2410,7 +2472,7 @@ function esDatas(x){
 function esDateCard(x,d){
  const e=eById(d.ev),st=dateState(d),col=!!S.esCol[d.id],ms=d.blocks.flatMap(b=>b.members),ok=ms.filter(m=>m.st==='confirmado').length;
  return `<article class="esdt ${col?'col':''}" id="${d.id}"><header class="esdh"><button class="ibtn sm estog" data-a="esCol" data-v="${d.id}" aria-expanded="${!col}" aria-label="${col?'Expandir':'Recolher'} data" title="${col?'Expandir':'Recolher'}">${ic('chevD',15,2.2)}</button>${dTile(e)}<div class="dkt"><b>${esc(e.t)}</b><span>${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}</span></div>${tTag(e.type)}<span class="esst ${st}">${{ok:'Tudo confirmado',wait:'Aguardando respostas',acao:'Precisa de ação',empty:'Sem ninguém',past:'Já aconteceu'}[st]}</span><button class="ibtn sm" data-a="esDelDate" data-v="${d.id}" aria-label="Remover data" title="Remover data">${ic('x',14)}</button></header>
-  ${col?`<button class="esmini" data-a="esCol" data-v="${d.id}"><span>${d.blocks.map(b=>`<em>${esc(b.label)}</em>`).join('')}</span><span class="esmc">${ms.length?`<b>${ok}</b>/${ms.length} confirmados`:'Ninguém escalado'}</span><span class="avs">${ms.slice(0,5).map(m=>`<span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span>`).join('')}</span></button>`:`<div class="esbl">${d.blocks.map(b=>esBlock(x,d,b)).join('')}</div>
+  ${ckBar(d,e)}${col?`<button class="esmini" data-a="esCol" data-v="${d.id}"><span>${d.blocks.map(b=>`<em>${esc(b.label)}</em>`).join('')}</span><span class="esmc">${ms.length?`<b>${ok}</b>/${ms.length} confirmados`:'Ninguém escalado'}</span><span class="avs">${ms.slice(0,5).map(m=>`<span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span>`).join('')}</span></button>`:`<div class="esbl">${d.blocks.map(b=>esBlock(x,d,b)).join('')}</div>
   <button class="btn sec sm esaddb" data-a="esAddBlock" data-v="${d.id}">${ic('plus',13,2.2)}Adicionar bloco</button>`}</article>`;
 }
 function esBlock(x,d,b){
@@ -2421,7 +2483,7 @@ function esBlock(x,d,b){
    ${b.members.length?`<div class="esms">${b.members.map((m,i)=>`<div class="esm"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${m.over&&m.st!=='recusado'?` <em class="lm-x" title="Escalado(a) acima do limite mensal">${ic('alert',10,2.6)}Exceção ao limite</em>`:''}</span></span>${m.st!=='recusado'&&['over','full','pause'].includes(lmUse(m.n,ym).st)?lmPill(m.n,ym):''}${msPill(m,x.st==='aguardando'&&m.st==='aguardando',r+'|'+i)}<button class="ibtn sm" data-a="esDelM" data-v="${r}|${i}" aria-label="Remover ${esc(m.n)}">${ic('x',13)}</button></div>`).join('')}</div>`:`<p class="esempty">${ic('alert',13,2)}Ninguém escalado neste bloco.</p>`}
    <div class="row2" style="margin-top:8px">${b.team?'':`<button class="btn sec sm" data-a="esTeam" data-v="${r}">${ic('users',13)}Selecionar time</button>`}<button class="btn sec sm" data-a="esAddM" data-v="${r}">${ic('plus',13,2.2)}Pessoa</button>${x.st!=='criacao'?`<button class="btn sec sm" data-a="esNotify" data-v="${r}" ${pend?'':'disabled'}>${ic('bell',13)}Notificar</button>`:''}</div></div>
   <div><p class="fl">Conteúdo <small>repertório, material de apoio…</small></p>
-   ${b.content.length?`<div class="escs">${b.content.map((c,i)=>`<div class="escc"><span class="cti" style="width:28px;height:28px;border-radius:8px">${ic(x.min==='Louvor'?'music':'book',13)}</span><span class="dkt"><b>${esc(c.t)}</b>${c.d?`<span>${esc(c.d)}</span>`:''}</span><button class="ibtn sm" data-a="esDelC" data-v="${r}|${i}" aria-label="Remover">${ic('x',13)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0 0 4px">Nada ainda.</p>'}
+   ${b.content.length?`<div class="escs">${b.content.map((c,i)=>`<div class="escc"><span class="cti ec-k ${c.k||'outro'}" style="width:28px;height:28px;border-radius:8px">${ic(ECT[c.k||'outro'][2],13)}</span><span class="dkt"><b>${esc(c.t)}</b><span>${ECT[c.k||'outro'][0]}${c.d?' · '+esc(c.d):''}</span></span><button class="ibtn sm" data-a="esDelC" data-v="${r}|${i}" aria-label="Remover">${ic('x',13)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0 0 4px">Nada ainda.</p>'}
    <div class="row2" style="margin-top:8px"><button class="btn sec sm" data-a="esAddC" data-v="${r}">${ic('plus',13,2.2)}Conteúdo</button><button class="btn sec sm" data-a="esReuse" data-v="${r}">${ic('layers',13)}Reaproveitar de outro bloco</button></div></div></div></div>`;
 }
 function esCal(x,ds){
@@ -2497,8 +2559,19 @@ const EA={
  esDelM:v=>{const {x,b,mi}=refB(v),m=b.members[mi];const go=()=>{b.members.splice(mi,1);esRe();toast(`${m.n.split(' ')[0]} removido(a)`,()=>{b.members.splice(mi,0,m);esRe();});};if(x.st==='criacao')return go();confirmDel({title:`Tirar ${m.n.split(' ')[0]} deste bloco?`,body:`${m.n} ${m.st==='confirmado'?'já tinha confirmado e ':''}será avisado(a) de que não precisa mais servir em “${esc(b.label)}”.`,label:'Tirar da escala',onConfirm:go});},
  esMst:v=>{const {x,b,mi}=refB(v),m=b.members[mi];m.st='confirmado';esRe();toast(`${m.n.split(' ')[0]} marcado(a) como confirmado`,()=>{m.st='aguardando';esRe();});},
  esNotify:(v,bt)=>{const {b}=refB(v),p=b.members.filter(m=>m.st==='aguardando'||m.st==='rascunho');busy(bt,800,'Avisado',()=>{p.forEach(m=>m.st='aguardando');toast(`${p.map(m=>m.n.split(' ')[0]).join(', ')} ${p.length>1?'foram avisados':'foi avisado(a)'}`);setTimeout(esRe,900);});},
- esAddC:v=>{openDlg(`${dlgHead('Adicionar conteúdo')}<form class="fgrid one" id="ecF" novalidate><label class="fld"><span class="fl">Título</span><input name="t" placeholder="Nome da música ou do material" autocomplete="off"><span class="err"></span></label><label class="fld"><span class="fl">Detalhe <small>opcional</small></span><input name="d" placeholder="Tom, capítulo, link…" autocomplete="off"></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Adicionar</button></div></form>`,'sm');
-  const f=$('#ecF');f.addEventListener('submit',e=>{e.preventDefault();const t=f.t.value.trim();if(!t){f.t.closest('.fld').classList.add('bad');f.t.nextElementSibling.textContent='Informe o título';f.t.focus();return;}const {b}=refB(v);b.content.push({t,d:f.d.value.trim()});closeDlg();esRe();toast(`${t} adicionado`);});},
+ esAddC:v=>{const {x,b}=refB(v);window._ecS={v,k:x.min==='Louvor'?'musica':x.min==='Kids'?'material':'musica',sel:{musica:{ids:[],cfg:{}},material:{ids:[],cfg:{}},pregacao:{ids:[],cfg:{}}},out:{t:'',d:''},q:''};
+  openDlg(`${dlgHead('Adicionar conteúdo',`${esc(b.label)} · escolha o tipo e depois o item da biblioteca`)}<div class="ec-ty" role="radiogroup" aria-label="Tipo de conteúdo">${Object.entries(ECT).map(([k,t])=>`<button type="button" role="radio" class="ec-t ${k}" data-k="${k}"><span class="ec-ti">${ic(t[2],16)}</span><b>${t[0]}</b><small>${t[1]}</small><em class="ec-bd" data-bd="${k}"></em></button>`).join('')}</div><div id="ecBody"></div>
+   <div class="dfoot ec-ft"><span class="ec-sum" id="ecSum"></span><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="button" class="btn pri" data-a="esDoC" data-v="${v}" id="ecGo" disabled>Adicionar</button></div>`,'lg');
+  $('.ec-ty').addEventListener('click',e=>{const t=e.target.closest('[data-k]');if(!t)return;const E=window._ecS;if(E.k===t.dataset.k)return;Object.assign(E,{k:t.dataset.k,q:''});ecPaint();});ecPaint();},
+ esDoC:(v,bt)=>{const E=window._ecS,{b}=refB(v),err=(m,k)=>{if(k&&k!==E.k){E.k=k;E.q='';ecPaint();}const e=$('#ecErr');e.innerHTML=`${ic('alert',13,2)}${m}`;e.hidden=false;};const items=[];
+  for(const k of ['musica','material','pregacao']){const P=E.sel[k],lib=ecSrc(k);
+   for(const id of P.ids){const src=lib.find(z=>z.id===id),o=src.o,cf=P.cfg[id];
+    if(k==='musica'){if(b.content.some(c=>c.k==='musica'&&c.ref===id&&c.key===cf.key))return err(`${src.t} em ${cf.key} já está neste bloco`,k);items.push({t:src.t,d:`Tom ${cf.key}${cf.key!==o.key?' (original '+o.key+')':''} · ${o.art}`,k,ref:id,key:cf.key});}
+    else if(k==='material'){const fs=o.files.map(f=>f.n).filter(n=>cf.files.includes(n));if(o.files.length&&!fs.length)return err(`Marque pelo menos um arquivo de “${src.t}”`,k);items.push({t:src.t,d:fs.length===o.files.length?(fs.length?`${fs.length} arquivo${fs.length===1?'':'s'}`:'sem arquivos'):fs.join(', '),k,ref:id,files:fs});}
+    else items.push({t:src.t,d:`${o.who} · ${fmtD(o.d)}`,k,ref:id});}}
+  const ot=E.out.t.trim();if(ot)items.push({t:ot,d:E.out.d.trim(),k:'outro'});
+  if(!items.length)return err(E.k==='outro'?'Dê um título ou selecione itens de outro tipo':'Selecione pelo menos um item');
+  bt.classList.add('busy');setTimeout(()=>{b.content.push(...items);closeDlg();esRe();toast(items.length>1?`${items.length} itens adicionados ao bloco`:`${ECT[items[0].k][0]}: ${items[0].t} adicionad${items[0].k==='musica'||items[0].k==='pregacao'?'a':'o'}`);},350);},
  esDelC:v=>{const {b,mi}=refB(v),c=b.content[mi];b.content.splice(mi,1);esRe();toast(`${c.t} removido`,()=>{b.content.splice(mi,0,c);esRe();});},
  esReuse:v=>{const {x,b}=refB(v),src=x.dates.flatMap(d=>d.blocks.filter(z=>z!==b&&z.content.length).map(z=>({d,z})));
   openDlg(`${dlgHead('Reaproveitar conteúdo','Copia o conteúdo de outro bloco desta escala.')}<div class="pick">${src.length?src.map((s,i)=>`<label class="pk"><span class="cti">${ic('layers',15)}</span><span><b>${esc(s.z.label)} · ${fmtD(eById(s.d.ev).d)}</b><small>${s.z.content.map(c=>esc(c.t)).join(', ')}</small></span><input type="radio" name="rs" value="${i}" ${!i?'checked':''}></label>`).join(''):'<p class="who" style="padding:12px">Nenhum outro bloco tem conteúdo ainda.</p>'}</div><div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="esDoReuse" data-v="${v}" ${src.length?'':'disabled'}>Copiar conteúdo</button></div>`,'sm');
@@ -2563,22 +2636,18 @@ function lmPaint(){
 const lmDirty=()=>{const D=S.lmD;return D.on!==LMR.on||D.limit!==LMR.limit||D.notifyMember!==LMR.notifyMember||D.warnNear!==LMR.warnNear;};
 function lmTabLim(){
  const D=S.lmD,p=lmPeople(LMYM,D),ov=p.filter(z=>z.st==='over').length,fu=p.filter(z=>z.st==='full').length;
- return `<label class="tog lm-tog"><input type="checkbox" id="lmOn" ${D.on?'checked':''}><span class="sw"></span><span><b>Limitar escalas por pessoa no mês</b><small>Quem chega no limite só pode ser escalado como exceção, com aviso para o líder</small></span></label>
- <div class="lm-lim ${D.on?'':'off'}">
-  <div class="lm-step"><button type="button" data-a="lmStep" data-v="-1" ${!D.on||D.limit<=1?'disabled':''} aria-label="Diminuir">${ic('minus',16,2.4)}</button><output aria-live="polite"><b>${D.limit}</b><small>${D.limit===1?'escala':'escalas'} por mês</small></output><button type="button" data-a="lmStep" data-v="1" ${!D.on||D.limit>=10?'disabled':''} aria-label="Aumentar">${ic('plus',16,2.4)}</button></div>
-  <div class="lm-prev">${D.on?`<p class="fl">Com esse limite, em ${lmMon(LMYM)}</p><div class="lm-pv"><span class="${ov?'bad':''}"><b>${ov}</b>acima</span><span class="${fu?'warn':''}"><b>${fu}</b>no limite</span><span><b>${p.length-ov-fu}</b>com vaga</span></div>${ov?`<p class="lm-hint">${ic('alert',12,2.2)}Escalas já feitas continuam valendo. Novos convites para essas pessoas viram exceção.</p>`:''}`:`<p class="lm-hint" style="margin:0">${ic('info',12,2.2)}Sem teto para a igreja. As ${LMX.length} exceções individuais, como pausas, continuam valendo.</p>`}</div>
+ const impact=!D.on?'Sem limite. Só as exceções individuais valem.':ov||fu?`Em ${lmMon(LMYM)}: ${[fu?`${fu} ${fu===1?'pessoa':'pessoas'} no limite`:'',ov?`<b>${ov} acima</b>`:''].filter(Boolean).join(' · ')}`:`Em ${lmMon(LMYM)}, ninguém chega no limite.`;
+ return `<div class="lm2 ${D.on?'':'off'}">
+  <div class="lm2-top"><span class="lm2-lbl">Limite mensal</span><label class="tog lm2-sw"><input type="checkbox" id="lmOn" ${D.on?'checked':''}><span class="sw"></span><span>${D.on?'Ligado':'Desligado'}</span></label></div>
+  <div class="lm2-main"><span>Cada pessoa serve até</span>
+   <span class="lm2-step"><button type="button" data-a="lmStep" data-v="-1" ${!D.on||D.limit<=1?'disabled':''} aria-label="Diminuir">${ic('minus',16,2.4)}</button><output aria-live="polite"><b>${D.limit}</b></output><button type="button" data-a="lmStep" data-v="1" ${!D.on||D.limit>=10?'disabled':''} aria-label="Aumentar">${ic('plus',16,2.4)}</button></span>
+   <span>${D.limit===1?'vez':'vezes'} por mês</span></div>
+  <p class="lm2-sub">Somando todos os ministérios. Acima disso, só como exceção.</p>
+  <button type="button" class="lm2-imp ${ov?'bad':''}" data-a="lmTab" data-v="carga">${impact}${D.on?ic('chevR',13,2.2):''}</button>
  </div>
- <div class="lm-rules">
-  <span>${ic('check',14,2.4)}<b>Confirmadas e pendentes contam</b><small>O convite já reserva a vaga</small></span>
-  <span>${ic('x',14,2.4)}<b>Recusou? A vaga volta</b><small>Recusas e remoções liberam na hora</small></span>
-  <span>${ic('layers',14,2)}<b>Cada bloco conta 1</b><small>Manhã e tarde no mesmo dia = 2</small></span>
-  <span>${ic('users',14,2)}<b>Soma todos os ministérios</b><small>Louvor, Kids, Recepção…</small></span>
- </div>
- <div class="lm-opts">
-  <label class="tog"><input type="checkbox" id="lmNm" ${D.notifyMember?'checked':''}><span class="sw"></span><span><b>Avisar a pessoa no app</b><small>Quando ela chega no limite e quando recebe um convite como exceção</small></span></label>
-  <label class="tog"><input type="checkbox" id="lmWn" ${D.warnNear?'checked':''}><span class="sw"></span><span><b>Alertar o líder na última vaga</b><small>Ao montar a escala, mostra quem vai fechar o mês com esse convite</small></span></label>
- </div>
- <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="lmSave" ${lmDirty()?'':'disabled'}>Salvar regras</button></div>`;
+ <details class="lm2-how" ${S.lmHow?'open':''}><summary>${ic('info',14,2)}Como a conta funciona${ic('chevD',14,2.2)}</summary><ul><li>Convites <b>confirmados e pendentes</b> contam.</li><li>Se a pessoa <b>recusa</b>, a vaga volta.</li><li>Cada <b>bloco</b> conta 1 (manhã e tarde = 2).</li></ul></details>
+ <label class="tog lm2-ntf"><input type="checkbox" id="lmNm" ${D.notifyMember?'checked':''}><span class="sw"></span><span><b>Enviar avisos</b><small>Para a pessoa quando chega no limite, e para o líder na última vaga</small></span></label>
+ <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="lmSave" ${lmDirty()?'':'disabled'}>Salvar</button></div>`;
 }
 function lmConfView(){
  const D=S.lmD,nw=lmPeople(LMYM,D).filter(z=>z.st==='over'&&lmUse(z.n,LMYM).st!=='over').sort(lmSort);
@@ -2590,10 +2659,14 @@ function lmTabExc(){
  const q=norm(S.lmq),l=LMX.map((e,i)=>({e,i})).filter(z=>!q||norm(z.e.n+' '+z.e.why).includes(q));
  return `<div class="lm-exh"><label class="sbox">${ic('search',16)}<input id="lmq" placeholder="Buscar pessoa ou motivo" value="${esc(S.lmq)}" autocomplete="off"></label><button class="btn pri sm" data-a="lmExNew">${ic('plus',14,2.2)}Nova exceção</button></div>
  <p class="who" style="margin:0 0 10px">Um limite próprio para quem precisa servir menos (ou mais) que o padrão. Limite 0 é uma pausa: a pessoa não aparece como disponível.</p>
- ${l.length?`<div class="lm-exl">${l.map(({e,i})=>{const exp=e.until&&e.until<LMYM;return `<div class="lm-ex ${exp?'exp':''}">${lmAv(e.n)}<span class="dkt"><b>${esc(e.n)}</b><span>${esc(e.why)}</span></span>
-   <span class="lm-xl ${e.lim===0?'pz':e.lim>LMR.limit?'up':'dn'}">${e.lim===0?`${ic('pause',11,2.6)}Pausa`:`${ic(e.lim>LMR.limit?'arrowR':'chevR',11,2.6)}${e.lim} por mês`}</span>
-   <span class="lm-un">${exp?'Expirou':e.until?'até '+lmMs(e.until)+'/'+e.until.slice(2,4):'sem prazo'}</span>${lmPill(e.n,LMYM)}
-   <button class="ibtn sm" data-a="lmExEdit" data-v="${i}" aria-label="Editar exceção">${ic('sliders',14)}</button><button class="ibtn sm lm-del" data-a="lmExDel" data-v="${i}" aria-label="Remover exceção">${ic('x',14)}</button></div>`;}).join('')}</div>`
+ ${l.length?`<div class="lm-exl">${l.map(({e,i})=>{const exp=e.until&&e.until<LMYM,u=lmUse(e.n,LMYM),k=e.lim===0?'pz':e.lim>LMR.limit?'up':'dn',cap=e.lim===0?0:e.lim;
+   return `<article class="lmx ${k} ${exp?'exp':''}">
+    <div class="lmx-h">${lmAv(e.n)}<div class="lmx-n"><b>${esc(e.n)}</b><span>${esc(e.why)}</span></div>
+     <div class="lmx-r"><span class="lmx-v">${e.lim===0?`${ic('pause',13,2.6)}<b>Pausa</b>`:`<b>${e.lim}</b><small>por mês</small>`}</span>
+      <div class="lmx-a"><button class="ibtn sm" data-a="lmExEdit" data-v="${i}" aria-label="Editar exceção" title="Editar">${ic('sliders',14)}</button><button class="ibtn sm lm-del" data-a="lmExDel" data-v="${i}" aria-label="Remover exceção" title="Remover">${ic('x',14)}</button></div></div></div>
+    <div class="lmx-f"><span class="lmx-t">${e.lim===0?'Não aparece como disponível':e.lim>LMR.limit?`Acima do padrão (${LMR.limit})`:`Abaixo do padrão (${LMR.limit})`}</span><span class="lmx-d">${ic('clock',12,2)}${exp?'Expirou':e.until?'até '+lmMs(e.until)+'/'+e.until.slice(2,4):'Sem prazo'}</span>
+     <span class="lmx-u ${u.st}">${e.lim===0?(u.c?`<b>${u.c}</b> escala${u.c===1?'':'s'} em ${lmMs(LMYM)}`:`Nenhuma escala em ${lmMs(LMYM)}`):`${lmDots(u.c,cap)}<b>${u.c}</b>/${cap} em ${lmMs(LMYM)}`}</span></div>
+   </article>`;}).join('')}</div>`
  :`<div class="mempty"><p>${q?'Nenhuma exceção encontrada':'Nenhuma exceção'}</p><span>${q?'Tente outro nome.':'Todos seguem o limite da igreja.'}</span></div>`}`;
 }
 const LMUNTIL=['','2026-10','2026-11','2026-12','2027-01','2027-02','2027-03'];
@@ -2620,7 +2693,7 @@ function lmTabCarga(){
 }
 function lmMount(){
  const on=$('#lmOn');if(on)on.addEventListener('change',()=>{S.lmD.on=on.checked;lmPaint();});
- const nm=$('#lmNm');if(nm)nm.addEventListener('change',()=>{S.lmD.notifyMember=nm.checked;lmPaint();});
+ const hw=$('.lm2-how');if(hw)hw.addEventListener('toggle',()=>{S.lmHow=hw.open;});const nm=$('#lmNm');if(nm)nm.addEventListener('change',()=>{S.lmD.notifyMember=nm.checked;S.lmD.warnNear=nm.checked;lmPaint();});
  const wn=$('#lmWn');if(wn)wn.addEventListener('change',()=>{S.lmD.warnNear=wn.checked;lmPaint();});
  const q=$('#lmq');if(q)q.addEventListener('input',()=>{S.lmq=q.value;const p=q.selectionStart;lmPaint();const n=$('#lmq');n.focus();n.setSelectionRange(p,p);});
  const lq=$('#lxq');if(lq)lq.addEventListener('input',()=>{S.lxq=lq.value;$('#lxp').innerHTML=lmXList([...new Set(MEMBERS.map(m=>m.n))]);});
@@ -2633,7 +2706,7 @@ function myLimit(){const c=MYESC.filter(x=>x.d.startsWith(LMYM)).length,lim=lmLi
  return `<div class="lm-me ${st}">${lmDots(c,lim)}<span class="dkt"><b>${c} de ${lim} escalas em ${lmMon(LMYM)}</b><span>${st==='full'||st==='over'?'Você chegou no limite do mês. Novos convites só chegam como exceção.':st==='near'?'Falta 1 para o seu limite do mês.':'Limite da igreja para ninguém ficar sobrecarregado.'}</span></span></div>`;}
 
 const LMA={
- lmOpen:v=>{closePops&&closePops();S.lmtab=v||'lim';S.lmD={...LMR};S.lmEx=null;S.lmConf=false;S.lmq='';S.lmYm=LMYM;openDlg(`${dlgHead('Regras de escala','Um teto mensal por pessoa, somando todos os ministérios, para ninguém ficar sobrecarregado.')}<div id="lmIn"></div>`,'lg lm-dlg');lmPaint();},
+ lmOpen:v=>{closePops&&closePops();S.lmtab=v||'lim';S.lmD={...LMR};S.lmEx=null;S.lmConf=false;S.lmq='';S.lmYm=LMYM;openDlg(`${dlgHead('Regras de escala','Para ninguém ficar sobrecarregado.')}<div id="lmIn"></div>`,'lm-dlg');lmPaint();},
  lmTab:v=>{S.lmtab=v;S.lmEx=null;S.lmConf=false;lmPaint();},
  lmStep:v=>{const D=S.lmD;D.limit=Math.max(1,Math.min(10,D.limit+ +v));lmPaint();const o=$('.lm-step output b');o&&o.animate([{transform:`translateY(${+v>0?6:-6}px)`,opacity:.3},{transform:'none',opacity:1}],{duration:220,easing:'cubic-bezier(.2,.8,.2,1)'});},
  lmBack:()=>{S.lmConf=false;lmPaint();},
@@ -2667,6 +2740,191 @@ function lmWarn(n,ym){const u=lmUse(n,ym),f=esc(n.split(' ')[0]),mon=lmMon(ym);i
  if(u.pref&&u.c>=u.pref&&u.c<u.lim)h+=`<div class="lm-w soft">${ic('heart',14,2)}<div><b>${f} prefere servir até ${u.pref}x por mês</b><span>Definiu no app. Não bloqueia, mas vale conversar antes.</span></div></div>`;
  if(u.c>=u.lim)h+=`<label class="lm-ack"><input type="checkbox" id="emack"><span class="lm-ck">${ic('check',11,3)}</span><span>Entendo e quero escalar ${f} como exceção</span></label>`;
  return h;}
+
+/* conteúdo do bloco: tipo + item da biblioteca */
+const ECT={musica:['Música','Do repertório','music'],material:['Material de apoio','Apostilas e arquivos','file'],pregacao:['Pregação','Mensagem gravada','play'],outro:['Outro','Observação livre','layers']};
+function ecSrc(k){return k==='musica'?SONGS.map(z=>({id:z.id,t:z.n,sub:`${z.art} · Tom ${z.key} · ${z.bpm} bpm`,tag:z.cat,o:z})):k==='material'?MATS.map(z=>({id:z.id,t:z.t,sub:`${z.files.length} arquivo${z.files.length===1?'':'s'}${z.min?' · '+z.min:''}`,tag:'',o:z})):k==='pregacao'?PREGS.slice().sort((a,b)=>a.d<b.d?1:-1).map(z=>({id:z.id,t:z.t,sub:`${z.who} · ${fmtD(z.d)}`,tag:'',o:z})):[];}
+function ecPaint(){const E=window._ecS,el=$('#ecBody');if(!el)return;$$('.ec-t').forEach(t=>t.setAttribute('aria-checked',t.dataset.k===E.k));const go=$('#ecGo'),P=E.sel[E.k]||{ids:[],cfg:{}};ecFoot();
+ if(E.k==='outro'){el.innerHTML=`<div class="ec-out"><p class="ec-note">${ic('info',13,2)}Use só para o que não está na biblioteca, como um recado ou uma dinâmica.</p><label class="fld"><span class="fl">Título</span><input id="ecT" maxlength="80" placeholder="Ex.: Momento de oração pelos pais" autocomplete="off" value="${esc(E.out.t)}"><span class="err"></span></label><label class="fld"><span class="fl">Observação <small>opcional</small></span><input id="ecD" maxlength="120" placeholder="Duração, responsável, link…" autocomplete="off" value="${esc(E.out.d)}"></label></div>`;$('#ecT').addEventListener('input',e=>{E.out.t=e.target.value;e.target.closest('.fld').classList.remove('bad');ecFoot();});$('#ecD').addEventListener('input',e=>{E.out.d=e.target.value;});setTimeout(()=>$('#ecT').focus(),30);return;}
+ const lib={musica:'Repertório',material:'Material de apoio',pregacao:'Pregações'}[E.k],src=ecSrc(E.k),{b}=refB(E.v);
+ el.innerHTML=`<div class="ec-2"><div class="ec-l"><div class="ec-lh"><p class="fl">1 · Selecione em ${lib}</p><span class="ec-n" id="ecN"></span></div><label class="sbox">${ic('search',16)}<input id="ecQ" placeholder="Buscar ${E.k==='musica'?'música ou artista':E.k==='material'?'material':'pregação ou pregador'}" value="${esc(E.q)}" autocomplete="off"></label><div class="ec-grid" id="ecL"></div></div><div class="ec-r" id="ecR"></div></div><p class="eswarn" id="ecErr" hidden></p>`;
+ const inBlk=id=>b.content.some(c=>c.k===E.k&&c.ref===id);
+ const list=()=>{const q=norm(E.q),l=src.filter(z=>!q||norm(z.t+' '+z.sub).includes(q));$('#ecL').innerHTML=l.length?l.map(z=>{const on=P.ids.includes(z.id),ib=inBlk(z.id)&&E.k!=='musica';return `<button type="button" class="ec-it ${on?'on':''}" data-id="${z.id}" aria-pressed="${on}" ${ib?'disabled title="Já está neste bloco"':''}><span class="cti ec-k ${E.k}">${ic(ECT[E.k][2],14)}</span><span class="dkt"><b>${esc(z.t)}</b><span>${ib?'Já está neste bloco':esc(z.sub)}</span></span><span class="ec-cb">${ic(ib||on?'check':'plus',12,2.6)}</span></button>`;}).join(''):`<p class="who" style="padding:10px">Nada encontrado. Cadastre em Conteúdo › ${lib}.</p>`;};
+ const detail=()=>{const r=$('#ecR'),n=P.ids.length;$('#ecN').textContent=n?`${n} selecionad${E.k==='musica'||E.k==='pregacao'?'a':'o'}${n===1?'':'s'}`:'';ecFoot();
+  if(!n){r.innerHTML=`<div class="ec-empty"><span>${ic(ECT[E.k][2],20)}</span><p>Toque nos itens ao lado para selecionar.<br>Dá para escolher mais de um.</p></div>`;return;}
+  r.innerHTML=`<p class="fl">2 · ${E.k==='musica'?'Tom de cada música':E.k==='material'?'Arquivos de cada material':'Selecionadas'}</p><div class="ec-sl">${P.ids.map((id,i)=>{const z=src.find(q=>q.id===id),o=z.o,cf=P.cfg[id];
+   const body=E.k==='musica'?`<div class="ec-kr"><span class="soft">${esc(o.art)}</span><span class="selw sm"><select data-key="${id}" aria-label="Tom de ${esc(o.n)}">${KEYS.map(k=>`<option ${k===cf.key?'selected':''}>${k}</option>`).join('')}</select>${ic('updown',12)}</span>${cf.key!==o.key?`<small class="ec-tr">de ${o.key}</small>`:''}</div>`
+    :E.k==='material'?(o.files.length?`<div class="ec-chips">${o.files.map(f=>`<button type="button" class="ec-fc ${cf.files.includes(f.n)?'on':''}" data-f="${id}|${esc(f.n)}" aria-pressed="${cf.files.includes(f.n)}">${fTile(f.n,20)}<span>${esc(f.n)}</span>${ic('check',11,3)}</button>`).join('')}</div>`:`<p class="ec-note warn" style="margin:4px 0 0">${ic('alert',12,2)}Sem arquivos. Vai como referência.</p>`)
+    :`<span class="soft">${esc(o.who)} · ${fmtD(o.d)} · ${o.dur} min</span>`;
+   return `<div class="ec-s" style="--i:${i}"><div class="ec-sh"><span class="cti ec-k ${E.k}">${ic(ECT[E.k][2],13)}</span><b>${esc(z.t)}</b><button type="button" class="ibtn sm" data-rm="${id}" aria-label="Tirar ${esc(z.t)}">${ic('x',12)}</button></div>${body}</div>`;}).join('')}</div>`;};
+ list();detail();
+ $('#ecQ').addEventListener('input',e=>{E.q=e.target.value;list();});
+ $('#ecL').addEventListener('click',e=>{const t=e.target.closest('.ec-it');if(!t||t.disabled)return;const id=t.dataset.id,i=P.ids.indexOf(id);if(i>-1)P.ids.splice(i,1);else{P.ids.push(id);const o=src.find(z=>z.id===id).o;P.cfg[id]=P.cfg[id]||(E.k==='musica'?{key:o.key}:E.k==='material'?{files:o.files.map(f=>f.n)}:{});}$('#ecErr').hidden=true;list();detail();});
+ $('#ecR').addEventListener('click',e=>{const rm=e.target.closest('[data-rm]');if(rm){P.ids.splice(P.ids.indexOf(rm.dataset.rm),1);list();detail();return;}
+  const fc=e.target.closest('[data-f]');if(fc){const [id,n]=fc.dataset.f.split('|'),fs=P.cfg[id].files,i=fs.indexOf(n);if(i>-1)fs.splice(i,1);else fs.push(n);fc.classList.toggle('on',i<0);fc.setAttribute('aria-pressed',i<0);$('#ecErr').hidden=true;}});
+ $('#ecR').addEventListener('change',e=>{const s=e.target.closest('[data-key]');if(s){P.cfg[s.dataset.key].key=s.value;detail();}});
+}
+
+function ecFoot(){const E=window._ecS,go=$('#ecGo');if(!go)return;const c={musica:E.sel.musica.ids.length,material:E.sel.material.ids.length,pregacao:E.sel.pregacao.ids.length,outro:E.out.t.trim()?1:0},n=c.musica+c.material+c.pregacao+c.outro;
+ $$('[data-bd]').forEach(x=>{const v=c[x.dataset.bd];x.textContent=v||'';x.classList.toggle('on',!!v);});
+ go.disabled=!n;go.textContent=n>1?`Adicionar ${n} itens`:'Adicionar';
+ const sm=$('#ecSum');if(sm){const parts=[[c.musica,'música','músicas'],[c.material,'material','materiais'],[c.pregacao,'pregação','pregações'],[c.outro,'outro','outros']].filter(z=>z[0]).map(z=>`${z[0]} ${z[0]===1?z[1]:z[2]}`);sm.innerHTML=parts.length?`${ic('check',12,2.6)}No bloco vão: ${parts.join(' · ')}`:'';}}
+
+/* presença: UI */
+function ckBar(d,e){const st=ckState(e);if(!st)return '';const w=ckWin(e),ms=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'),c=k=>ms.filter(m=>ckOf(m)===k).length,nck=c('ck');
+ const tx=st==='antes'?`Check-in abre às ${ckHM(w.open)}, 2h antes`:st==='fim'?`Check-in encerrou às ${ckHM(w.close)}`:`Check-in aberto até ${ckHM(w.close)}`;
+ return `<div class="ckbar ${st}"><span class="ckb-i">${ic('pin',16,2)}</span><div class="dkt"><b>Hoje · ${tx}</b><span>Só vale a até ${CKRAIO} m de ${esc(e.place)} · agora ${ckHM(CKNOW)}</span></div>
+  <div class="ckb-n">${[['ok','presentes'],['ck','a confirmar'],['pend','sem check-in'],['falta','faltas']].filter(z=>c(z[0])||z[0]!=='falta').map(z=>`<span class="${z[0]}"><b>${c(z[0])}</b>${z[1]}</span>`).join('')}</div>
+  ${S.estab==='ck'?(nck?`<button class="btn pri sm" data-a="ckAll" data-v="${d.id}">${ic('check',14,2.4)}Confirmar ${nck} check-in${nck===1?'':'s'}</button>`:''):`<button class="btn pri sm" data-a="esTab" data-v="ck">Abrir check-in${ic('arrowR',14,2)}</button>`}</div>`;}
+function ckCell(m,ref,e){const k=ckOf(m),w=ckWin(e),pill=(lab,sub)=>`<span class="ckp ${k}"><b>${lab}</b>${sub?`<small>${sub}</small>`:''}</span>`;
+ if(k==='ck')return `${pill(`Check-in ${m.ck.at}`,`a ${m.ck.dist} m do local`)}<button class="btn pri sm ckgo" data-a="ckOk" data-v="${ref}">${ic('check',13,2.4)}Confirmar</button>`;
+ if(k==='ok')return `${pill('Presente',m.manual?`marcado por ${m.by.toLowerCase()} · ${esc(m.why)}`:`check-in ${m.ck.at} · ${m.dist||m.ck.dist} m`)}<button class="ibtn sm" data-a="ckUndo" data-v="${ref}" aria-label="Desfazer" title="Desfazer">${ic('swap',13)}</button>`;
+ if(k==='falta')return `${pill('Faltou','marcado por você')}<button class="ibtn sm" data-a="ckUndo" data-v="${ref}" aria-label="Desfazer" title="Desfazer">${ic('swap',13)}</button>`;
+ const pre=CKNOW<w.start;return `${pill('Sem check-in','')}<button class="btn sec sm" data-a="ckMan" data-v="${ref}">Marcar presente</button><button class="btn sec sm ckf" data-a="ckFalta" data-v="${ref}" ${pre?`disabled title="Disponível depois do início (${ckHM(w.start)})"`:''}>Falta</button>`;}
+const CKA={
+ ckOk:(v,bt)=>{const {b,mi}=refB(v),m=b.members[mi];busy(bt,500,'Confirmado',()=>{m.pr='ok';m.by='Você';setTimeout(()=>{esRe();toast(`Presença de ${m.n.split(' ')[0]} confirmada`,()=>{delete m.pr;esRe();});},250);});},
+ ckAll:(v,bt)=>{const x=esById(S.esc),d=x.dates.find(z=>z.id===v),l=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'&&ckOf(m)==='ck');busy(bt,700,'Confirmados',()=>{l.forEach(m=>{m.pr='ok';m.by='Você';});setTimeout(()=>{esRe();toast(`${l.length} presença${l.length===1?'':'s'} confirmada${l.length===1?'':'s'}: ${l.map(m=>m.n.split(' ')[0]).join(', ')}`,()=>{l.forEach(m=>delete m.pr);esRe();});},250);});},
+ ckMan:v=>{const {b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0];
+  openDlg(`${dlgHead(`Marcar ${esc(f)} como presente?`,`Use quando a pessoa está no local mas não conseguiu fazer check-in.`)}<div class="ckwhy" id="ckWhy">${['Esqueceu o celular','Sem internet','Localização bloqueada','Chegou depois','Outro'].map(w=>`<button type="button" class="chipf" data-w="${w}">${w}</button>`).join('')}</div><p class="eswarn" id="ckE" hidden>${ic('alert',13,2)}Escolha um motivo. Fica registrado no histórico.</p>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="ckDoMan" data-v="${v}">Marcar presente</button></div>`,'sm');
+  $('#ckWhy').addEventListener('click',e=>{const t=e.target.closest('[data-w]');if(!t)return;$$('#ckWhy .chipf').forEach(z=>z.classList.toggle('on',z===t));$('#ckE').hidden=true;});},
+ ckDoMan:(v,bt)=>{const w=$('#ckWhy .chipf.on');if(!w){$('#ckE').hidden=false;return;}const {b,mi}=refB(v),m=b.members[mi];bt.classList.add('busy');setTimeout(()=>{Object.assign(m,{pr:'ok',manual:true,why:w.dataset.w,by:'Você'});LOG.unshift({u:'Rafael Pereira',a:'Marcou presença',e:'Escala',x:m.n,det:`Manual · ${w.dataset.w}`,d:CKDAY,t:ckHM(CKNOW)});closeDlg();esRe();toast(`${m.n.split(' ')[0]} marcado(a) como presente`,()=>{delete m.pr;delete m.manual;delete m.why;esRe();});},400);},
+ ckFalta:v=>{const {b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0];confirmDel({title:`Registrar falta de ${f}?`,body:`${esc(m.n)} não fez check-in e não foi marcado(a) como presente. A falta fica no histórico de serviço e ${f} recebe um aviso gentil no app. Dá para desfazer.`,label:'Registrar falta',onConfirm:()=>{m.pr='falta';LOG.unshift({u:'Rafael Pereira',a:'Registrou falta',e:'Escala',x:m.n,d:CKDAY,t:ckHM(CKNOW)});esRe();toast(`Falta de ${f} registrada`,()=>{delete m.pr;esRe();});}});},
+ ckUndo:v=>{const {b,mi}=refB(v),m=b.members[mi],old={pr:m.pr,manual:m.manual,why:m.why};delete m.pr;delete m.manual;delete m.why;esRe();toast(`Presença de ${m.n.split(' ')[0]} reaberta`,()=>{Object.assign(m,old);esRe();});},
+};
+
+/* aba Check-in */
+const ckToday=x=>x.dates.find(d=>{const e=eById(d.ev);return e&&e.d===CKDAY;});
+const ckPendN=x=>{const d=ckToday(x);return d?d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'&&ckOf(m)==='ck').length:0;};
+function esCk(x){const d=ckToday(x),ds=esSorted(x),fut=ds.filter(z=>{const e=eById(z.ev);return e&&e.d>CKDAY;}),pas=ds.filter(z=>{const e=eById(z.ev);return e&&e.d<CKDAY;});
+ const how=`<div class="ckhow"><span>${ic('clock',15,2)}<b>Abre 2h antes</b><small>e fecha 2h depois do início</small></span><span>${ic('pin',15,2)}<b>Até ${CKRAIO} m do local</b><small>fora disso, o app bloqueia</small></span><span>${ic('check',15,2.4)}<b>Você confirma</b><small>ou marca quem esqueceu</small></span></div>`;
+ if(!d){const nx=fut[0],e=nx&&eById(nx.ev),w=e&&ckWin(e);
+  return `<section class="card ckempty"><span class="cke-i">${ic('pin',26,1.8)}<i></i></span><h2>${nx?'O check-in ainda não abriu':'Nenhuma data com check-in'}</h2><p class="who">${nx?`Os check-ins aparecem aqui no dia da escala. O próximo é <b>${esc(e.t)}</b>, ${wd(e.d)}, ${dBR(e.d)}, a partir das <b>${ckHM(w.open)}</b>.`:'Adicione datas futuras na aba Datas para acompanhar a presença do time.'}</p>
+   ${nx?`<div class="cknext">${fut.slice(0,4).map(z=>{const ev=eById(z.ev),wn=ckWin(ev),n=z.blocks.reduce((a,b)=>a+b.members.filter(m=>m.st!=='recusado').length,0);return `<div class="ckn-r">${dTile(ev)}<span class="dkt"><b>${esc(ev.t)}</b><span>${n} pessoa${n===1?'':'s'} · abre às ${ckHM(wn.open)}</span></span><span class="ckn-in">em ${inDays(ev.d)} dia${inDays(ev.d)===1?'':'s'}</span></div>`;}).join('')}</div>`:`<button class="btn pri" data-a="esTab" data-v="datas" style="margin-top:6px">Ir para Datas</button>`}
+   ${how}</section>`;}
+ const e=eById(d.ev),ms=d.blocks.flatMap(b=>b.members.map((m,i)=>({m,b,i}))).filter(z=>z.m.st==='confirmado'),c=k=>ms.filter(z=>ckOf(z.m)===k).length,tot=ms.length,okp=Math.round(c('ok')/Math.max(tot,1)*100);
+ const ord={ck:0,pend:1,ok:2,falta:3},nck=c('ck');
+ return `<section class="card ckpanel">${ckBar(d,e)}
+  <div class="ckgrid"><div class="ckring" style="--p:${okp}"><div><b>${c('ok')}<small>/${tot}</small></b><span>presentes</span></div></div>
+   <div class="cklist">${ms.sort((a,b)=>ord[ckOf(a.m)]-ord[ckOf(b.m)]).map(({m,b,i})=>`<div class="esm ckr ${ckOf(m)}"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${d.blocks.length>1?' · '+esc(b.label):''}</span></span>${ckCell(m,`${d.id}|${b.id}|${i}`,e)}</div>`).join('')}</div></div>
+  ${d.blocks.flatMap(b=>b.members).some(m=>m.st!=='confirmado'&&m.st!=='recusado')?`<p class="eswarn" style="margin-top:12px">${ic('alert',13,2)}Quem não confirmou a escala não aparece no check-in.</p>`:''}
+ </section>`;}
+
+function ckStrip(){const it=ESCALAS.map(x=>({x,d:ckToday(x)})).filter(z=>z.d);if(!it.length)return '';
+ return it.map(({x,d})=>{const e=eById(d.ev),st=ckState(e),w=ckWin(e),ms=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'),c=k=>ms.filter(m=>ckOf(m)===k).length;
+  return `<section class="cktoday-strip rise" style="--d:1"><span class="ckb-i">${ic('pin',16,2)}</span><div class="dkt"><b>Hoje · ${esc(e.t)} · ${st==='aberto'?`check-in aberto até ${ckHM(w.close)}`:st==='antes'?`check-in abre às ${ckHM(w.open)}`:'check-in encerrado'}</b><span>${esc(x.n)} · ${e.time} · ${esc(e.place)}</span></div>
+   <div class="ckt-n"><span><b>${c('ok')}</b>presentes</span><span><b>${c('ck')}</b>a confirmar</span><span><b>${c('pend')}</b>sem check-in</span></div><button class="btn sm" data-a="ckGo" data-v="${x.id}">Abrir check-in${ic('arrowR',14,2)}</button></section>`;}).join('');}
+CKA.ckGo=v=>{S.esc=v;S.estab='ck';S.esview='blocos';render();window.scrollTo({top:0});};
+
+/* ================= Agenda e serviço › Apresentação de Bebês ao Senhor ================= */
+const BBR={maxM:24,vagas:6,prazo:7};
+const BBD=[{id:'bd0',ev:'ev1',vagas:6,st:'fechada'},{id:'bd1',ev:'ev2',vagas:5,st:'aberta'},{id:'bd2',ev:'ev3',vagas:6,st:'aberta'}];
+let _bbid=0;const BBP_=(bebe,nasc,pais,d,st,at,extra={})=>Object.assign({id:'bp'+(++_bbid),bebe,nasc,pais,cert:bebe,d,st,at,why:'',certOk:false},extra);
+const BBP=[
+ BBP_('Alice Rocha Reis','2026-03-12',['Daniela Rocha','Bruno Reis'],'bd1','aguardando','2026-09-24'),
+ BBP_('Theo Andrade Costa','2025-11-02',['Felipe Andrade','Marina Costa'],'bd1','confirmado','2026-09-12'),
+ BBP_('Laura Nunes Faria','2026-06-20',['Clara Nunes','Diego Faria'],'bd2','aguardando','2026-09-27'),
+ BBP_('Miguel Santana','2024-01-15',['Igor Santana'],'bd2','aguardando','2026-09-28'),
+ BBP_('Benjamin Lins Campos','2026-01-10',['Otávio Lins','Renata Campos'],'bd0','realizada','2026-09-02',{certOk:true}),
+ BBP_('Maria Clara Prado','2025-12-04',['Juliana Prado'],'bd0','realizada','2026-09-05'),
+ BBP_('Davi Teixeira','2026-02-18',['Lucas Teixeira'],'bd1','recusado','2026-09-20',{why:'Data já estava cheia; família vai escolher 11/out'}),
+];
+Object.assign(S,{bbq:'',bbf:'todos',bbd:null});
+const BBST={aguardando:['Aguardando','var(--st-sol)','var(--st-sol-bg)'],confirmado:['Confirmado','var(--st-int)','var(--st-int-bg)'],realizada:['Realizada','var(--brand-text)','var(--brand-soft)'],recusado:['Recusado','var(--st-rec)','var(--st-rec-bg)']};
+const bbPill=s=>`<span class="stp" style="--c:${BBST[s][1]};--b:${BBST[s][2]}"><i></i>${BBST[s][0]}</span>`;
+const bbD=id=>BBD.find(d=>d.id===id);
+const bbEv=p=>eById(bbD(p.d).ev);
+const bbM=(nasc,iso)=>{const a=new Date(nasc+'T12:00'),b=new Date(iso+'T12:00');let m=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());if(b.getDate()<a.getDate())m--;return Math.max(0,m);};
+const bbAge=m=>m<1?'recém-nascido':m<12?`${m} ${m===1?'mês':'meses'}`:(()=>{const y=Math.floor(m/12),r=m%12;return `${y} ano${y>1?'s':''}${r?` e ${r} ${r===1?'mês':'meses'}`:''}`;})();
+const bbUsed=d=>BBP.filter(p=>p.d===d.id&&(p.st==='confirmado'||p.st==='aguardando'||p.st==='realizada')).length;
+const bbOver=p=>bbM(p.nasc,bbEv(p).d)>BBR.maxM;
+const bbAv=n=>`<span class="bb-av" style="--h:${(n.length*37)%360}">${ic('pacifier',16,1.8)}</span>`;
+const bbMaxTx=()=>BBR.maxM%12?`${BBR.maxM} meses`:`${BBR.maxM/12} ano${BBR.maxM>12?'s':''}`;
+
+function bbPage(){
+ const q=norm(S.bbq),c=k=>BBP.filter(p=>p.st===k).length,cert=BBP.filter(p=>p.st==='realizada'&&!p.certOk).length;
+ const l=BBP.filter(p=>(S.bbf==='todos'||p.st===S.bbf)&&(!S.bbd||p.d===S.bbd)&&(!q||norm(p.bebe+' '+p.pais.join(' ')).includes(q))).sort((a,b)=>(bbEv(a).d<bbEv(b).d?-1:1));
+ const fut=BBD.filter(d=>{const e=eById(d.ev);return e&&!past(e);}).sort((a,b)=>eById(a.ev).d<eById(b.ev).d?-1:1);
+ return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>Apresentações</h1><p class="lede">Bebês apresentados ao Senhor no culto, com a igreja reunida · <em class="bb-ref">Lucas 2:22</em></p></div>
+  <div class="pact"><button class="btn sec" data-a="bbRules">${ic('sliders',15)}Regras</button><button class="btn pri" data-a="bbOpenDate">${ic('plus',15,2.2)}Abrir data</button></div></header>
+ <section class="card kpis4 rise" style="--d:1">
+  <div class="k4"><span class="kl">Aguardando confirmação</span><span class="kv" style="color:var(--st-sol)">${c('aguardando')}</span><span class="kd">pedidos de famílias</span></div>
+  <div class="k4"><span class="kl">Confirmados</span><span class="kv" style="color:var(--st-int)">${c('confirmado')}</span><span class="kd">nas próximas datas</span></div>
+  <div class="k4"><span class="kl">Certificados a emitir</span><span class="kv" style="color:${cert?'var(--brand-text)':'inherit'}">${cert}</span><span class="kd">de apresentações feitas</span></div>
+  <div class="k4"><span class="kl">Apresentados em 2026</span><span class="kv">${c('realizada')+14}</span><span class="kd">bebês ao Senhor</span></div>
+ </section>
+ <section class="rise" style="--d:2"><div class="sh" style="margin:6px 0 12px"><h2 style="font:600 17px/22px var(--font-display);margin:0">Próximas datas</h2><span class="who">Até ${bbMaxTx()} · ${BBR.vagas} vagas por culto</span></div>
+  <div class="bb-dates">${fut.map(d=>{const e=eById(d.ev),u=bbUsed(d),ps=BBP.filter(p=>p.d===d.id&&p.st!=='recusado'),full=u>=d.vagas;return `<button class="card bb-dc ${S.bbd===d.id?'on':''} ${full?'full':''}" data-a="bbDate" data-v="${d.id}">
+    <div class="bb-dh">${dTile(e)}<div class="dkt"><b>${esc(e.t)}</b><span>${wd(e.d)}, ${dBR(e.d)} · ${e.time}</span></div>${full?'<span class="bb-full">Esgotada</span>':''}</div>
+    <div class="bb-seats">${Array.from({length:d.vagas},(_,i)=>{const p=ps[i];return `<i class="${p?p.st:''}" title="${p?esc(p.bebe):'Vaga livre'}">${p?ic('pacifier',12,2):''}</i>`;}).join('')}</div>
+    <div class="bb-df"><span><b>${u}</b> de ${d.vagas} vagas</span><span>${ps.filter(p=>p.st==='aguardando').length?`${ps.filter(p=>p.st==='aguardando').length} aguardando`:'tudo confirmado'}</span></div></button>`;}).join('')}
+   <button class="bb-dc add" data-a="bbOpenDate"><span>${ic('plus',18,2.2)}</span><b>Abrir data</b><small>Escolha um culto e as vagas</small></button></div></section>
+ <section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="bbq" placeholder="Buscar bebê ou responsável" value="${esc(S.bbq)}" autocomplete="off"></label>
+  <div class="chips">${[['todos','Todos',BBP.length],['aguardando','Aguardando',c('aguardando')],['confirmado','Confirmados',c('confirmado')],['realizada','Realizadas',c('realizada')],['recusado','Recusados',c('recusado')]].map(x=>`<button class="chipf ${S.bbf===x[0]?'on':''}" data-a="bbF" data-v="${x[0]}">${x[0]!=='todos'?`<i style="background:${BBST[x[0]][1]}"></i>`:''}${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
+  ${S.bbd?`<div class="bb-filt">${ic('calendar',13,2)}Mostrando ${esc(eById(bbD(S.bbd).ev).t)}, ${dBR(eById(bbD(S.bbd).ev).d)}<button class="lnk" data-a="bbDate" data-v="${S.bbd}">Ver todas as datas</button></div>`:''}
+  ${l.length?`<div class="trow bb thead"><span>Bebê</span><span>Responsáveis</span><span>Culto</span><span>Status</span><span></span></div>${l.map(p=>{const e=bbEv(p),m=bbM(p.nasc,e.d),ov=m>BBR.maxM;return `<div class="trow bb" tabindex="0" data-a="bbOpen" data-v="${p.id}">
+   <span class="tn">${bbAv(p.bebe)}<span class="hn"><b>${esc(p.bebe)}</b><span class="${ov&&p.st!=='realizada'?'bb-ov':''}">${bbAge(m)} na data${ov&&p.st!=='realizada'?` · acima de ${bbMaxTx()}`:''}</span></span></span>
+   <span class="bb-pa">${p.pais.map(n=>esc(n)).join(' e ')}</span>
+   <span class="bb-cu">${dBR(e.d)} · ${e.time}<small>${esc(e.t)}</small></span>
+   <span class="ts">${bbPill(p.st)}${p.st==='realizada'?`<span class="bb-cs ${p.certOk?'ok':''}">${ic(p.certOk?'check':'award',11,2.4)}${p.certOk?'Certificado enviado':'Emitir certificado'}</span>`:''}</span>
+   <span class="bb-ac">${p.st==='aguardando'?`<button class="btn pri sm" data-a="bbOk" data-v="${p.id}">Confirmar</button>`:p.st==='realizada'?`<button class="btn sec sm" data-a="bbCert" data-v="${p.id}">${ic('award',13)}Certificado</button>`:p.st==='confirmado'&&!past(e)?'':p.st==='confirmado'?`<button class="btn sec sm" data-a="bbDone" data-v="${p.id}">Marcar realizada</button>`:''}${ic('chevR',16)}</span></div>`;}).join('')}`
+  :`<div class="mempty"><p>Nenhum pedido.</p><span>${q||S.bbf!=='todos'||S.bbd?'Nada corresponde a esse filtro.':'Quando uma família pedir pelo app, aparece aqui.'}</span></div>`}
+  <div class="tfoot"><span>${l.length} pedido${l.length===1?'':'s'}</span><span class="who">Pedidos chegam pelo app (Mais › Apresentações)</span></div></section>`;
+}
+function bbAfter(){const q=$('#bbq');if(q)q.addEventListener('input',e=>{S.bbq=e.target.value;const p=e.target.selectionStart;render();const n=$('#bbq');n.focus();n.setSelectionRange(p,p);});}
+const bbRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
+
+function bbCertHTML(p){const e=bbEv(p);return `<div class="bb-cert"><div class="bb-cert-in">
+ <div class="bb-c-top">${logo(18,false)}<span>${esc(CHURCHES[S.church].n)}</span></div>
+ <p class="bb-c-eb">Certificado de</p><h2 class="bb-c-t">Apresentação ao Senhor</h2>
+ <p class="bb-c-tx">Certificamos que</p><p class="bb-c-name">${esc(p.cert)}</p>
+ <p class="bb-c-tx">nascido(a) em ${dBR(p.nasc)}, filho(a) de ${p.pais.map(esc).join(' e ')}, foi apresentado(a) ao Senhor diante da igreja reunida no ${esc(e.t)} de ${dBR(e.d)}.</p>
+ <blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote>
+ <div class="bb-c-sig"><span><i></i>Pr. Rafael Pereira<small>Pastor presidente</small></span><span><i></i>${esc(CHURCHES[S.church].n)}<small>${dBR(e.d)}</small></span></div>
+ </div></div>`;}
+
+const BBA={
+ bbF:v=>{S.bbf=v;render();},
+ bbDate:v=>{S.bbd=S.bbd===v?null:v;bbRe();},
+ bbOpen:(v,b,ev)=>{if(ev&&ev.target.closest('[data-a=bbOk],[data-a=bbCert],[data-a=bbDone]'))return;const p=BBP.find(x=>x.id===v),e=bbEv(p),m=bbM(p.nasc,e.d),ov=m>BBR.maxM&&p.st!=='realizada';
+  openDlg(`${dlgHead('Pedido de apresentação',`Recebido em ${dBR(p.at)}`)}
+   <div class="bb-head">${bbAv(p.bebe)}<div class="dkt"><b>${esc(p.bebe)}</b><span>Nasceu em ${dBR(p.nasc)} · ${bbAge(m)} na data</span></div>${bbPill(p.st)}</div>
+   ${ov?`<p class="lm-w bad" style="margin:12px 0 0">${ic('alert',14,2.2)}<span><b>Acima da idade da regra (${bbMaxTx()})</b><br>Converse com a família antes de confirmar. Você pode confirmar mesmo assim.</span></p>`:''}
+   <dl class="bb-dl"><div><dt>Culto</dt><dd>${esc(e.t)} · ${wd(e.d)}, ${dBR(e.d)} · ${e.time}</dd></div><div><dt>Responsáveis</dt><dd>${p.pais.map(n=>`${esc(n)} <span class="bb-mb">${ic('check',10,3)}membro</span>`).join('<br>')}</dd></div>${p.why?`<div><dt>Motivo da recusa</dt><dd>${esc(p.why)}</dd></div>`:''}</dl>
+   <label class="fld"><span class="fl">Nome no certificado</span><input id="bbCn" value="${esc(p.cert)}" ${p.certOk?'disabled':''} autocomplete="off"><span class="hint">${p.certOk?'Certificado já enviado à família.':'Confira com a família: é assim que sai no certificado.'}</span><span class="err"></span></label>
+   <div class="dfoot bb-ft">${p.st==='aguardando'?`<button class="btn sec" data-a="bbNo" data-v="${p.id}">Recusar</button><button class="btn pri" data-a="bbOk" data-v="${p.id}">${ov?'Confirmar mesmo assim':'Confirmar'}</button>`:p.st==='confirmado'?`<button class="btn sec" data-a="bbCancel" data-v="${p.id}">Cancelar apresentação</button>${past(e)||e.d===CKDAY?`<button class="btn pri" data-a="bbDone" data-v="${p.id}">Marcar realizada</button>`:`<button class="btn pri" data-a="bbSaveName" data-v="${p.id}">Salvar</button>`}`:p.st==='realizada'?`<button class="btn sec" data-a="bbSaveName" data-v="${p.id}" ${p.certOk?'disabled':''}>Salvar nome</button><button class="btn pri" data-a="bbCert" data-v="${p.id}">${ic('award',14)}Ver certificado</button>`:`<button class="btn sec" data-a="closeDlg">Fechar</button>`}</div>`,'sm');},
+ bbSaveName:(v,bt)=>{const p=BBP.find(x=>x.id===v),n=$('#bbCn').value.trim();if(!n){const f=$('#bbCn').closest('.fld');f.classList.add('bad');f.querySelector('.err').textContent='Informe o nome';return;}busy(bt,500,'Salvo',()=>{p.cert=n;setTimeout(()=>{closeDlg();bbRe();toast('Nome do certificado salvo');},300);});},
+ bbOk:(v,bt)=>{const p=BBP.find(x=>x.id===v),d=bbD(p.d),cn=$('#bbCn');if(cn&&cn.value.trim())p.cert=cn.value.trim();
+  const conf=BBP.filter(x=>x.d===d.id&&(x.st==='confirmado'||x.st==='realizada')).length;if(conf>=d.vagas){toast(`Não há vagas confirmadas livres em ${dBR(eById(d.ev).d)}. Aumente as vagas ou recuse.`);return;}
+  busy(bt,600,'Confirmado',()=>{p.st='confirmado';LOG.unshift({u:'Rafael Pereira',a:'Confirmou',e:'Apresentação de bebê',x:p.bebe,det:dBR(eById(d.ev).d),d:'2026-09-30',t:new Date().toTimeString().slice(0,5)});setTimeout(()=>{closeDlg();bbRe();toast(`Apresentação de ${p.bebe.split(' ')[0]} confirmada. A família recebe o aviso no app.`,()=>{p.st='aguardando';bbRe();});},300);});},
+ bbNo:v=>{const p=BBP.find(x=>x.id===v),others=BBD.filter(d=>d.id!==p.d&&d.st==='aberta'&&bbUsed(d)<d.vagas);
+  openDlg(`${dlgHead(`Recusar o pedido de ${esc(p.bebe.split(' ')[0])}?`,'A família recebe o motivo no app.')}<div class="ckwhy" id="bbW">${['Data cheia','Acima da idade','Responsáveis não são membros','Outro'].map(w=>`<button type="button" class="chipf" data-w="${w}">${w}</button>`).join('')}</div>
+   <label class="fld" style="margin-top:10px"><span class="fl">Mensagem para a família</span><textarea class="ta" id="bbWm" rows="3" maxlength="200" placeholder="Ex.: que tal no culto do dia 11?"></textarea><span class="err"></span></label>
+   ${others.length?`<p class="hint" style="margin:8px 0 0">${ic('info',12,2)} Datas com vaga: ${others.map(d=>dBR(eById(d.ev).d)).join(', ')}. A família pode pedir de novo pelo app.</p>`:''}
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Voltar</button><button class="btn pri" data-a="bbDoNo" data-v="${v}">Recusar pedido</button></div>`,'sm');
+  $('#bbW').addEventListener('click',e=>{const t=e.target.closest('[data-w]');if(!t)return;$$('#bbW .chipf').forEach(z=>z.classList.toggle('on',z===t));$('#bbWm').closest('.fld').classList.remove('bad');});},
+ bbDoNo:(v,bt)=>{const w=$('#bbW .chipf.on'),m=$('#bbWm').value.trim();if(!w){const f=$('#bbWm').closest('.fld');f.classList.add('bad');f.querySelector('.err').textContent='Escolha um motivo';return;}if(w.dataset.w==='Outro'&&!m){const f=$('#bbWm').closest('.fld');f.classList.add('bad');f.querySelector('.err').textContent='Explique o motivo para a família';return;}
+  const p=BBP.find(x=>x.id===v);bt.classList.add('busy');setTimeout(()=>{p.st='recusado';p.why=w.dataset.w+(m?' · '+m:'');closeDlg();bbRe();toast(`Pedido de ${p.bebe.split(' ')[0]} recusado. A família foi avisada.`,()=>{p.st='aguardando';p.why='';bbRe();});},500);},
+ bbCancel:v=>{const p=BBP.find(x=>x.id===v);confirmDel({title:`Cancelar a apresentação de ${p.bebe.split(' ')[0]}?`,body:`A família é avisada no app e a vaga de ${dBR(bbEv(p).d)} volta a ficar livre.`,label:'Cancelar apresentação',onConfirm:()=>{p.st='recusado';p.why='Cancelada pela secretaria';bbRe();toast('Apresentação cancelada',()=>{p.st='confirmado';p.why='';bbRe();});}});},
+ bbDone:(v,bt)=>{const p=BBP.find(x=>x.id===v);busy(bt,600,'Realizada',()=>{p.st='realizada';setTimeout(()=>{closeDlg();bbRe();toast(`Apresentação de ${p.bebe.split(' ')[0]} registrada. Emita o certificado.`);},300);});},
+ bbCert:v=>{const p=BBP.find(x=>x.id===v);openDlg(`${dlgHead('Certificado de apresentação',`${esc(p.bebe)} · confira antes de enviar`)}${bbCertHTML(p)}
+  <div class="dfoot"><button class="btn sec" data-a="bbPdf" data-v="${p.id}">${ic('arrowDn',14,2)}Baixar PDF</button><button class="btn pri" data-a="bbSend" data-v="${p.id}">${ic('mail',14)}${p.certOk?'Reenviar à família':'Enviar à família'}</button></div>`,'lg bb-cdlg');},
+ bbPdf:v=>{const p=BBP.find(x=>x.id===v);toast(`Baixando Certificado-${p.bebe.split(' ')[0]}.pdf`);},
+ bbSend:(v,bt)=>{const p=BBP.find(x=>x.id===v);busy(bt,800,'Enviado',()=>{const was=p.certOk;p.certOk=true;setTimeout(()=>{closeDlg();bbRe();toast(`${was?'Certificado reenviado':'Certificado enviado'} para ${p.pais.map(n=>n.split(' ')[0]).join(' e ')}: no app e por e-mail.`);},300);});},
+ bbOpenDate:()=>{const used=new Set(BBD.map(d=>d.ev)),opts=EVTS.filter(e=>e.kind==='culto'&&e.st==='confirmado'&&!past(e)&&!used.has(e.id)).sort((a,b)=>a.d<b.d?-1:1);let v=BBR.vagas;
+  openDlg(`${dlgHead('Abrir data de apresentação','Escolha o culto. As famílias passam a ver a data no app.')}<div class="pick" id="bbOp">${opts.length?opts.map((e,i)=>`<label class="pk">${dTile(e)}<span><b>${esc(e.t)}</b><small>${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}</small></span><input type="radio" name="bbe" value="${e.id}" ${!i?'checked':''}></label>`).join(''):'<p class="who" style="padding:12px">Todos os cultos futuros já têm apresentação. Cadastre novos cultos em Cultos.</p>'}</div>
+   <div class="fld" style="margin-top:12px"><span class="fl">Vagas neste culto</span><div class="lm2-step" style="align-self:flex-start"><button type="button" id="bbVm" aria-label="Menos">${ic('minus',16,2.4)}</button><output><b id="bbVv">${v}</b></output><button type="button" id="bbVp" aria-label="Mais">${ic('plus',16,2.4)}</button></div><span class="hint">Pedidos fecham ${BBR.prazo} dias antes do culto.</span></div>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="bbDoDate" ${opts.length?'':'disabled'}>Abrir data</button></div>`,'sm');
+  const pt=()=>{$('#bbVv').textContent=v;$('#bbVm').disabled=v<=1;$('#bbVp').disabled=v>=20;};pt();$('#bbVm').onclick=()=>{v--;pt();};$('#bbVp').onclick=()=>{v++;pt();};},
+ bbDoDate:(v,bt)=>{const s=$('input[name=bbe]:checked');if(!s)return;const n=+$('#bbVv').textContent;busy(bt,600,'Aberta',()=>{BBD.push({id:'bd'+Date.now(),ev:s.value,vagas:n,st:'aberta'});setTimeout(()=>{closeDlg();bbRe();toast(`${dBR(eById(s.value).d)} aberta com ${n} vagas. As famílias já veem no app.`);},300);});},
+ bbRules:()=>{let m=BBR.maxM,vg=BBR.vagas,pz=BBR.prazo;const row=(id,lab,val,sub)=>`<div class="bb-rr"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><div class="lm2-step"><button type="button" data-s="${id}|-1">${ic('minus',15,2.4)}</button><output><b id="bbR${id}">${val}</b></output><button type="button" data-s="${id}|1">${ic('plus',15,2.4)}</button></div></div>`;
+  openDlg(`${dlgHead('Regras da apresentação','Valem para os pedidos feitos pelo app.')}<div class="bb-rules">${row('m','Idade máxima',m,'em meses, no dia do culto')}${row('v','Vagas por culto',vg,'padrão ao abrir uma data')}${row('p','Prazo para pedir',pz,'dias antes do culto')}
+   <div class="bb-rr fixed"><div class="dkt"><b>Responsável membro</b><span>Pelo menos um dos responsáveis precisa ser membro ativo</span></div><span class="bb-lock">${ic('lock',13,2)}Sempre</span></div>
+   <div class="bb-rr fixed"><div class="dkt"><b>Certificado</b><span>Emitido depois da apresentação e enviado no app e por e-mail</span></div><span class="bb-lock">${ic('award',13,2)}Sempre</span></div></div>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="bbSaveRules">Salvar</button></div>`,'sm');
+  const lim={m:[1,48],v:[1,20],p:[0,30]},val={m,v:vg,p:pz};$('.bb-rules').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;const [k,d]=b.dataset.s.split('|');val[k]=Math.max(lim[k][0],Math.min(lim[k][1],val[k]+ +d));$('#bbR'+k).textContent=val[k];});window._bbR=val;},
+ bbSaveRules:(v,bt)=>{const r=window._bbR;busy(bt,500,'Salvo',()=>{Object.assign(BBR,{maxM:r.m,vagas:r.v,prazo:r.p});setTimeout(()=>{closeDlg();bbRe();toast(`Regras salvas: até ${bbMaxTx()}, ${BBR.vagas} vagas, pedidos até ${BBR.prazo} dias antes`);},300);});},
+};
 
 /* ================= Espaços › Reservas e Salas ================= */
 Object.assign(I,{
@@ -3323,7 +3581,7 @@ function sgForm(id){const s=id?SONGS.find(x=>x.id===id):null,v=s?{...s,res:{...s
  f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{const res={};$$('[name=res]:checked',f).forEach(x=>res[x.value]=1);const o={n:f.n.value.trim(),art:f.art.value.trim(),key:k+($('#sgMin').checked?'m':''),bpm:+f.bpm.value,cat:f.cat.value,yt:f.yt.value.trim(),res,min:vin?f.min.value:''};if(s)Object.assign(s,o);else{const x=SG(o.n,o.art,o.key,o.bpm,o.cat,false,o.res,o.min);x.yt=o.yt;SONGS.push(x);}closeDlg();ctRe();toast(s?'Música atualizada':`${o.n} adicionada ao repertório`);},600);});
 }
 /* ---------- Jornadas ---------- */
-let _jcid=0,_alid=0;const AL=(t,on=true)=>({id:'al'+(++_alid),t,on,desc:'',yt:'',ref:''});
+let _jcid=0,_alid=0;const AL=(t,on=true)=>({id:'al'+(++_alid),t,on,desc:'',yt:'',ref:'',files:[]});
 const CU=(n,desc,aulas,on=true)=>({id:'cu'+(++_jcid),n,desc,on,aulas:aulas.map(a=>AL(a))});
 const PP=(n,prog,cert=false,certC=[])=>({n,prog,cert,certC});
 const JORNS=[
@@ -3339,6 +3597,9 @@ const CSOLO=[
  {id:'cs2',n:'',solo:true,min:'Louvor',courses:[CU('Teoria Musical Básica','Fundamentos de teoria musical para músicos do ministério.',['Notas, escalas e acordes'])],people:[PP('Bruno Reis',[100]),PP('Diego Faria',[0])],more:0},
  {id:'cs3',n:'',solo:true,min:'',courses:[CU('Primeiros passos na Bíblia','Para quem está começando a ler a Bíblia agora.',['Como ler a Bíblia','Antigo e Novo Testamento','Montando um plano de leitura'],false)],people:[],more:0},
 ];
+(()=>{const c=JORNS[0].courses[0].aulas,o=JORNS[1].courses[0].aulas,f=CSOLO[1].courses[0].aulas;c[0].yt='https://youtube.com/watch?v=fe01';c[0].files=[{n:'Slides-Por-que-acreditar.pdf',kb:1840}];c[1].yt='https://youtube.com/watch?v=fe02';o[1].files=[{n:'Modelo-Diario-de-Oracao.pdf',kb:420},{n:'Plano-30-dias.docx',kb:96}];f[0].files=[{n:'Apostila-Teoria-Musical.pdf',kb:3260},{n:'Exercicios-escalas.pdf',kb:880},{n:'Audio-intervalos.mp3',kb:5400}];})();
+const alSum=a=>{const p=[];if(a.yt)p.push(`${ic('play',11)}Vídeo`);if(a.files.length)p.push(`${ic('file',11)}${a.files.length} arquivo${a.files.length===1?'':'s'}`);if(a.ref)p.push(esc(a.ref));return p.length?p.join(' · '):`<span class="al-none">${ic('alert',11,2.4)}Sem vídeo nem arquivos</span>`;};
+const alFiles=fs=>fs.length?fs.map((f,i)=>`<div class="ct-file">${fTile(f.n,38)}<span class="dkt"><b>${esc(f.n)}</b><span>${fSize(f.kb)}</span></span><button type="button" class="ibtn sm" data-a="alFDel" data-v="${i}" aria-label="Remover ${esc(f.n)}">${ic('x',13)}</button></div>`).join('')+`<button type="button" class="btn ghost sm" data-a="alFUp" style="margin-top:8px">${ic('upload',13)}Enviar mais</button>`:`<div class="ct-drop" data-a="alFUp">${ic('upload',18)}<span><b>Apostila, slides, áudio ou exercícios</b><small>Arraste aqui ou clique para enviar · PDF, DOCX, PPTX, MP3 até 50 MB</small></span></div>`;
 const jById=id=>JORNS.find(j=>j.id===id)||CSOLO.find(j=>j.id===id);
 Object.assign(S,{csq:'',csf:'todos'});
 const csAll=()=>[...JORNS.flatMap(j=>j.courses.map(c=>({c,j}))),...CSOLO.map(j=>({c:j.courses[0],j}))];
@@ -3426,8 +3687,8 @@ function cuDetail(){const j=jById(S.jor),c=j&&cuById(j,S.cur);if(!c){S.cur=null;
   `<label class="tog cm-bt ct-ontog"><input type="checkbox" id="cuOn" ${c.on?'checked':''}><span class="sw"></span><span>${c.on?'Ativo':'Inativo'}</span></label>`)
  +`<div class="rise" style="--d:2">${S.ctab==='det'?`<section class="card ct-cdet"><form id="cuF" class="fgrid one" novalidate><label class="fld"><span class="fl">Nome do curso</span><input name="n" value="${esc(c.n)}"></label><label class="fld"><span class="fl cm-cnt">Descrição <small id="cuDc">${c.desc.length}/500</small></span><textarea class="ta" name="desc" rows="4" maxlength="500">${esc(c.desc)}</textarea></label></form>
    <aside class="ct-cpos">${j.solo?`<p class="fl">Vínculo</p><div class="ct-vin"><div class="cm-q"><button type="button" data-sv="0" class="${j.min?'':'on'}">Avulso</button><button type="button" data-sv="1" class="${j.min?'on':''}">Ministério</button></div></div><span class="selw ${j.min?'':'ct-hide'}" id="cuMinW" style="margin-top:8px"><select id="cuMin">${MINIS.filter(m=>m.active).map(m=>`<option ${m.n===j.min?'selected':''}>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span><p class="hint" style="margin:8px 0 0">Para colocar este curso numa trilha, adicione-o a uma jornada.</p>`:`<p class="fl">Posição na trilha</p><ol>${j.courses.map((x,i)=>`<li class="${x===c?'on':''}"><i>${i+1}</i>${esc(x.n)}</li>`).join('')}</ol><button class="lnk" data-a="cuTrail">Mudar a ordem na trilha ${ic('arrowR',13,2)}</button>`}<p class="who" style="margin:14px 0 0">As alterações salvam sozinhas. <span id="cuSv"></span></p><button class="btn ghostd sm" data-a="cuDel" data-v="${c.id}" style="margin-top:14px">Excluir curso</button></aside></section>`
-  :S.ctab==='aulas'?`<section class="card ct-trail"><div class="sh"><p class="who" style="margin:0">${ic('grip',13,2)} Arraste para reordenar. Clique numa aula para editar vídeo, versículo e texto.</p><button class="btn pri sm" data-a="alNew">${ic('plus',14,2.2)}Adicionar aula</button></div>
-   <ol class="ct-al" id="alList">${c.aulas.map((a,i)=>`<li data-id="${a.id}" class="${a.on?'':'off'}"><span class="cm-grip">${ic('grip',14,2)}</span><span class="ct-an">${i+1}</span><button class="ct-at" data-a="alEdit" data-v="${a.id}"><b>${esc(a.t)}</b><span>${a.yt?`${ic('play',11)}Vídeo`:'<span class="soft">Sem vídeo</span>'}${a.ref?` · ${esc(a.ref)}`:''}</span></button><label class="tog cm-bt"><input type="checkbox" data-al="${a.id}" ${a.on?'checked':''}><span class="sw"></span><span>${a.on?'Ativa':'Oculta'}</span></label><button class="ibtn sm" data-a="alDel" data-v="${a.id}" aria-label="Excluir aula">${ic('x',13)}</button></li>`).join('')}</ol>
+  :S.ctab==='aulas'?`<section class="card ct-trail"><div class="sh"><p class="who" style="margin:0">${ic('grip',13,2)} Arraste para reordenar. Clique numa aula para editar vídeo, arquivos, versículo e texto.</p><button class="btn pri sm" data-a="alNew">${ic('plus',14,2.2)}Adicionar aula</button></div>
+   <ol class="ct-al" id="alList">${c.aulas.map((a,i)=>`<li data-id="${a.id}" class="${a.on?'':'off'}"><span class="cm-grip">${ic('grip',14,2)}</span><span class="ct-an">${i+1}</span><button class="ct-at" data-a="alEdit" data-v="${a.id}"><b>${esc(a.t)}</b><span>${alSum(a)}</span></button><label class="tog cm-bt"><input type="checkbox" data-al="${a.id}" ${a.on?'checked':''}><span class="sw"></span><span>${a.on?'Ativa':'Oculta'}</span></label><button class="ibtn sm" data-a="alDel" data-v="${a.id}" aria-label="Excluir aula">${ic('x',13)}</button></li>`).join('')}</ol>
    ${c.aulas.length?'':'<div class="mempty"><p>Nenhuma aula ainda.</p><span>Comece pela primeira — o título basta.</span></div>'}</section>`
   :S.ctab==='insc'?peopleTab(j.people,j.courses,ci,0):certTab(j,ci)}</div>`;
 }
@@ -3467,9 +3728,32 @@ const CTA={
  cuOpen:(v,b,e)=>{if(e&&e.target.closest('.cm-grip'))return;S.cur=v;S.ctab='det';ctGo();},cuBack:()=>{S.cur=null;S.jtab='trilha';if(S.active==='cursos')S.jor=null;ctGo();},cuTrail:()=>{S.active='jornadas';S.cur=null;S.jtab='trilha';ctGo();},csF:v=>{S.csf=v;ctRe();},csNew:()=>csForm(),csOpen:v=>{const [j,c]=v.split('|');S.jor=j;S.cur=c;S.ctab='det';ctGo();},cuTab:v=>{S.ctab=v;ctRe();},
  cuNew:()=>{const j=jById(S.jor);simpleForm('Novo curso',`Entra como curso ${j.courses.length+1} da trilha.`,`<label class="fld"><span class="fl">Nome do curso</span><input name="n" data-req autocomplete="off"></label><label class="fld"><span class="fl cm-cnt">Descrição <small>opcional</small></span><textarea class="ta" name="desc" rows="3" maxlength="500"></textarea></label>`,'Adicionar curso',f=>{const c=CU(f.n.value.trim(),f.desc.value.trim(),[]);j.courses.push(c);j.people.forEach(p=>p.prog.push(0));ctRe();toast(`${c.n} adicionado à trilha`);});},
  cuDel:v=>{const j=jById(S.jor),c=cuById(j,v);confirmDel({title:`Excluir ${esc(c.n)}?`,body:`As ${c.aulas.length} aulas e o progresso dos inscritos neste curso serão apagados.`,typed:c.n,onConfirm:()=>{if(j.solo){CSOLO.splice(CSOLO.indexOf(j),1);}else{const i=j.courses.indexOf(c);j.courses.splice(i,1);j.people.forEach(p=>p.prog.splice(i,1));}S.cur=null;S.jtab='trilha';if(S.active==='cursos'||j.solo)S.jor=null;ctGo();toast('Curso excluído');}});},
- alNew:()=>{const c=cuById(jById(S.jor),S.cur);simpleForm('Nova aula',`Aula ${c.aulas.length+1} do curso. Vídeo e versículo você adiciona clicando nela.`,`<label class="fld"><span class="fl">Título</span><input name="t" data-req autocomplete="off"></label>`,'Adicionar aula',f=>{c.aulas.push(AL(f.t.value.trim()));ctRe();toast('Aula adicionada');});},
- alEdit:v=>{const c=cuById(jById(S.jor),S.cur),a=c.aulas.find(x=>x.id===v);openDlg(`${dlgHead(`Aula ${c.aulas.indexOf(a)+1}`,esc(c.n))}<form id="alF" class="fgrid one" novalidate><label class="fld"><span class="fl">Título</span><input name="t" value="${esc(a.t)}"></label><label class="fld"><span class="fl">Vídeo <small>opcional</small></span><span class="cm-pre">${ic('link',14)}<input name="yt" value="${esc(a.yt)}" placeholder="https://youtube.com/…"></span></label><label class="fld"><span class="fl">Versículo-base <small>opcional</small></span><span class="cm-pre">${ic('book',14)}<input name="ref" value="${esc(a.ref)}" placeholder="Ex.: Hebreus 11:1"></span></label><label class="fld"><span class="fl">Texto da aula</span><textarea class="ta" name="desc" rows="5" placeholder="O conteúdo que a pessoa lê no app">${esc(a.desc)}</textarea></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit">Salvar aula</button></div></form>`);
-  const f=$('#alF');f.addEventListener('submit',e=>{e.preventDefault();Object.assign(a,{t:f.t.value.trim()||a.t,yt:f.yt.value.trim(),ref:f.ref.value.trim(),desc:f.desc.value.trim()});closeDlg();ctRe();toast('Aula salva');});},
+ alNew:()=>{const c=cuById(jById(S.jor),S.cur);simpleForm('Nova aula',`Aula ${c.aulas.length+1} do curso. Vídeo, arquivos e versículo você adiciona clicando nela.`,`<label class="fld"><span class="fl">Título</span><input name="t" data-req autocomplete="off"></label>`,'Adicionar aula',f=>{c.aulas.push(AL(f.t.value.trim()));ctRe();toast('Aula adicionada');});},
+ alEdit:v=>{const c=cuById(jById(S.jor),S.cur),a=c.aulas.find(x=>x.id===v);window._alD={a,files:a.files.map(f=>({...f}))};
+  openDlg(`${dlgHead(`Aula ${c.aulas.indexOf(a)+1}`,esc(c.n))}<form id="alF" class="al-f" novalidate>
+   <div class="al-c1"><label class="fld"><span class="fl">Título</span><input name="t" value="${esc(a.t)}" autocomplete="off"><span class="err"></span></label>
+    <div class="fld"><span class="fl">Formato</span><div class="segc al-fmt" role="group">${[['video','Vídeo'],['arq','Só arquivos'],['ambos','Vídeo + arquivos']].map(z=>`<button type="button" data-fmt="${z[0]}" aria-pressed="${(a.yt&&a.files.length?'ambos':!a.yt&&a.files.length?'arq':'video')===z[0]}">${z[1]}</button>`).join('')}</div></div>
+    <label class="fld al-yt"><span class="fl">Vídeo</span><span class="cm-pre">${ic('link',14)}<input name="yt" value="${esc(a.yt)}" placeholder="https://youtube.com/…" autocomplete="off"></span><span class="err"></span></label>
+    <label class="fld"><span class="fl">Versículo-base <small>opcional</small></span><span class="cm-pre">${ic('book',14)}<input name="ref" value="${esc(a.ref)}" placeholder="Ex.: Hebreus 11:1" autocomplete="off"></span></label>
+    <label class="fld"><span class="fl">Texto da aula <small>opcional</small></span><textarea class="ta" name="desc" rows="5" placeholder="O conteúdo que a pessoa lê no app">${esc(a.desc)}</textarea></label></div>
+   <section class="al-c2"><div class="sh" style="margin-bottom:10px"><p class="fl" style="margin:0">${ic('file',13)} Arquivos <small id="alFc">${a.files.length||''}</small></p></div><div id="alFl">${alFiles(window._alD.files)}</div><p class="hint al-fh">A pessoa baixa ou abre no app, na própria aula.</p><span class="err" id="alFe"></span></section>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit">Salvar aula</button></div></form>`,'lg');
+  const f=$('#alF'),D=window._alD;let fmt=(a.yt&&a.files.length)?'ambos':(!a.yt&&a.files.length)?'arq':'video';
+  const paint=()=>{f.classList.toggle('nov',fmt==='arq');$$('[data-fmt]',f).forEach(b=>b.setAttribute('aria-pressed',b.dataset.fmt===fmt));};paint();
+  f.querySelector('.al-fmt').addEventListener('click',e=>{const b=e.target.closest('[data-fmt]');if(!b)return;fmt=b.dataset.fmt;paint();if(fmt!=='arq')setTimeout(()=>f.yt.focus(),30);});
+  f.addEventListener('input',e=>{const l=e.target.closest('.fld');l&&l.classList.remove('bad');});
+  f.addEventListener('submit',e=>{e.preventDefault();const t=f.t.value.trim(),yt=fmt==='arq'?'':f.yt.value.trim();let ok=true;const bad=(el,m)=>{const l=el.closest('.fld')||el.parentNode;l.classList.add('bad');(l.querySelector('.err')||$('#alFe')).textContent=m;ok=false;};
+   if(!t)bad(f.t,'Dê um título');
+   if(fmt!=='arq'&&!yt)bad(f.yt,fmt==='ambos'?'Cole o link do vídeo ou escolha “Só arquivos”':'Cole o link do vídeo');
+   else if(yt&&!/^https?:\/\/\S+\.\S+/.test(yt))bad(f.yt,'Link inválido. Comece com https://');
+   if(fmt!=='video'&&!D.files.length){$('#alFe').textContent='Envie pelo menos um arquivo';$('.al-c2').classList.add('bad');ok=false;}
+   if(!ok)return;
+   const sb=f.querySelector('[type=submit]');sb.classList.add('busy');setTimeout(()=>{Object.assign(a,{t,yt,ref:f.ref.value.trim(),desc:f.desc.value.trim(),files:fmt==='video'?[]:D.files});closeDlg();ctRe();toast(fmt==='video'&&D.files.length?'Aula salva. Os arquivos foram removidos (formato só vídeo)':'Aula salva');},500);});},
+ alFUp:()=>{const D=window._alD;if(!D)return;const k=D.files.length%4,nm=['Apostila','Slides','Exercicios','Audio'][k],ex=['pdf','pptx','pdf','mp3'][k];
+  if(D.files.length>=10){toast('Limite de 10 arquivos por aula');return;}
+  const fl=$('#alFl');fl.insertAdjacentHTML('beforeend',`<div class="al-up"><span>${ic('upload',13)}Enviando ${nm}-${D.a.t.split(' ')[0]}.${ex}…</span><i></i></div>`);
+  setTimeout(()=>{D.files.push({n:`${nm}-${norm(D.a.t).split(' ').slice(0,2).join('-')}.${ex}`,kb:[1820,2640,540,4800][k]});fl.innerHTML=alFiles(D.files);$('#alFc').textContent=D.files.length;$('.al-c2').classList.remove('bad');$('#alFe').textContent='';},700);},
+ alFDel:v=>{const D=window._alD,f=D.files.splice(+v,1)[0];$('#alFl').innerHTML=alFiles(D.files);$('#alFc').textContent=D.files.length||'';toast(`${f.n} removido`,()=>{D.files.splice(+v,0,f);const l=$('#alFl');if(l){l.innerHTML=alFiles(D.files);$('#alFc').textContent=D.files.length;}});},
  alDel:v=>{const c=cuById(jById(S.jor),S.cur),a=c.aulas.find(x=>x.id===v);confirmDel({title:'Excluir esta aula?',body:`“${esc(a.t)}” sai do curso.`,onConfirm:()=>{const i=c.aulas.indexOf(a);c.aulas.splice(i,1);ctRe();toast('Aula excluída',()=>{c.aulas.splice(i,0,a);ctRe();});}});},
  certOne:(v,b)=>{const [i,ci]=v.split('|'),j=jById(S.jor),p=j.people[+i];busy(b,700,'Emitido',()=>{if(ci==='')p.cert=true;else p.certC.push(+ci);setTimeout(ctRe,350);toast(`Certificado de ${p.n.split(' ')[0]} emitido e enviado por e-mail`);});},
  certAll:(v,b)=>{const j=jById(S.jor),ci=v===''?null:+v,l=j.people.filter(p=>(ci==null?pAvg(p.prog):p.prog[ci])===100&&!(ci==null?p.cert:p.certC.includes(ci)));busy(b,900,'Emitidos',()=>{l.forEach(p=>ci==null?p.cert=true:p.certC.push(ci));setTimeout(ctRe,350);toast(`${l.length} certificado${l.length===1?'':'s'} emitido${l.length===1?'':'s'}`);});},
@@ -4035,6 +4319,82 @@ const AXA={
  mvF:v=>{S.mvf=S.mvf===v?'todos':v;axRe();},
 };
 
+/* ================= Meu perfil ================= */
+const ME={n:'Rafael Pereira',first:'Rafael',email:'rafael.pereira@alvaigreja.com.br',tel:'(11) 98456-2210',nasc:'1984-06-12',cargo:'Pastor presidente',since:'2019-03-10',bio:'',tone:'ceu',
+ tfa:true,notif:{email:true,push:true,resumo:true,urg:true},
+ sess:[{d:'Chrome · Windows',where:'São Paulo, SP',when:'agora',cur:true,ic:'monitor'},{d:'App Alva · iPhone',where:'São Paulo, SP',when:'há 2 horas',ic:'phone'},{d:'Safari · MacBook',where:'Campinas, SP',when:'há 4 dias',ic:'monitor'}]};
+Object.assign(S,{pft:'dados'});
+function perfilPage(){
+ const c=CHURCHES[S.church],role=c.role,perm=(typeof RPERM!=='undefined'&&RPERM[role])||{},mods=Object.keys(perm),full=mods.filter(m=>perm[m].length>=4).length;
+ const tabs=[['dados','Dados pessoais'],['acesso','Igrejas e acesso',CHURCHES.length],['seg','Segurança'],['pref','Preferências']];
+ return `<header class="card prof pf-h rise" style="--d:1">
+  <div class="pid"><div class="pf-av"><span class="av xl" style="background:var(--tone-${ME.tone});color:var(--tone-${ME.tone}-ink)">${initials(ME.n)}</span><button class="pf-cam" data-a="pfPhoto" aria-label="Alterar foto" title="Alterar foto">${ic('camera',14,2)}</button></div>
+   <div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(ME.n)}</h1><span class="stp" style="--c:var(--brand-text);--b:var(--brand-soft)"><i></i>${role}</span></div>
+   <p>${esc(ME.cargo)} · ${esc(ME.email)}</p></div></div>
+  <div class="pact"><button class="btn sec" data-a="openMobile">${ic('phone',15)}Ver no app</button></div>
+  <div class="ikpi hk"><div><b>${CHURCHES.length}</b><span>Igrejas com acesso</span></div><div><b>${full}<small class="kof">/${MODS.length}</small></b><span>Áreas com acesso total</span></div><div><b>${new Date().getFullYear()-+ME.since.slice(0,4)}<small class="kof"> anos</small></b><span>Na Alva</span></div><div><b>${ME.tfa?'Ativa':'Off'}</b><span>Verificação em 2 etapas</span></div></div>
+  <div class="ptabs" role="tablist">${tabs.map(t=>`<button role="tab" class="${S.pft===t[0]?'on':''}" data-a="pfTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
+ </header>
+ <div class="rise" style="--d:2">${S.pft==='dados'?pfDados():S.pft==='acesso'?pfAcesso(c,perm):S.pft==='seg'?pfSeg():pfPref()}</div>`;
+}
+function pfDados(){return `<section class="card pc pf-form"><div class="sh"><h2>Dados pessoais</h2><span class="who" id="pfSaved">Altere e salve</span></div>
+ <form id="pfF" class="fgrid" novalidate>
+  <label class="fld"><span class="fl">Nome completo</span><input name="n" value="${esc(ME.n)}" autocomplete="name"><span class="err"></span></label>
+  <label class="fld"><span class="fl">Como prefere ser chamado</span><input name="first" value="${esc(ME.first)}"><span class="err"></span></label>
+  <label class="fld"><span class="fl">E-mail</span><input name="email" type="email" value="${esc(ME.email)}" autocomplete="email"><span class="hint">É o seu login. Ao trocar, enviamos um link de confirmação.</span><span class="err"></span></label>
+  <label class="fld"><span class="fl">Celular</span><input name="tel" value="${esc(ME.tel)}" inputmode="tel"><span class="err"></span></label>
+  <label class="fld"><span class="fl">Data de nascimento</span><input name="nasc" type="date" value="${ME.nasc}"></label>
+  <label class="fld"><span class="fl">Cargo ou função <small>aparece para a equipe</small></span><input name="cargo" value="${esc(ME.cargo)}"></label>
+  <label class="fld wide"><span class="fl">Sobre você <small>opcional</small></span><textarea class="ta" name="bio" rows="3" maxlength="240" placeholder="Uma linha sobre você para a equipe">${esc(ME.bio)}</textarea></label>
+  <div class="dfoot"><button type="button" class="btn sec" data-a="pfReset">Descartar</button><button type="submit" class="btn pri" disabled>Salvar alterações</button></div>
+ </form></section>`;}
+function pfAcesso(c,perm){
+ const mods=Object.keys(perm),lvl=a=>a.length>=4?['Total','var(--st-int)','var(--st-int-bg)']:a.length?[a.join(', '),'var(--st-sol)','var(--st-sol-bg)']:['Sem acesso','var(--ink-muted)','var(--surface-2)'];
+ return `<div class="pgrid"><section class="card pc"><div class="sh"><h2>Permissões em ${esc(c.n)}</h2><span class="who">perfil ${c.role}</span></div>
+  <p class="who" style="margin:-6px 0 14px">Definidas em Administração › Usuários e permissões. Para mudar, fale com outro administrador da rede.</p>
+  <div class="pf-perm">${mods.map(m=>{const l=lvl(perm[m]);return `<div class="pf-pr"><span>${esc(m)}</span><span class="stp" style="--c:${l[1]};--b:${l[2]}"><i></i>${l[0]}</span></div>`;}).join('')}</div></section>
+  <section class="card pc"><div class="sh"><h2>Suas igrejas</h2><span class="who">${NETWORK}</span></div><div class="pf-ch">${CHURCHES.map((x,i)=>`<div class="pf-c ${i===S.church?'on':''}">${chTile(x,36)}<span class="dkt"><b>${esc(x.n)}</b><span>${x.role} · último acesso ${x.last}</span></span>${i===S.church?'<span class="pf-now">Atual</span>':`<button class="btn sec sm" data-a="setChurch" data-v="${i}">Entrar</button>`}</div>`).join('')}</div></section></div>`;}
+function pfSeg(){return `<div class="pgrid"><div class="stack-col">
+ <section class="card pc"><div class="sh"><h2>Senha</h2><span class="who">alterada há 3 meses</span></div><p class="who" style="margin:-6px 0 14px">Use pelo menos 8 caracteres, com letras e números.</p><button class="btn sec" data-a="pfPwd">${ic('lock',15)}Alterar senha</button></section>
+ <section class="card pc"><div class="sh"><h2>Verificação em 2 etapas</h2></div><label class="tog"><input type="checkbox" id="pfTfa" ${ME.tfa?'checked':''}><span class="sw"></span><span><b>${ME.tfa?'Ativa':'Desativada'}</b><small>Pedimos um código do celular ao entrar em um aparelho novo</small></span></label></section></div>
+ <section class="card pc"><div class="sh"><h2>Aparelhos conectados</h2><span class="who">${ME.sess.length}</span></div><div class="pf-ch">${ME.sess.map((x,i)=>`<div class="pf-c"><span class="pf-di">${ic(x.ic,17)}</span><span class="dkt"><b>${x.d}</b><span>${x.where} · ${x.when}</span></span>${x.cur?'<span class="pf-now">Este aparelho</span>':`<button class="btn sec sm" data-a="pfOut" data-v="${i}">Desconectar</button>`}</div>`).join('')}</div>
+  ${ME.sess.length>1?`<button class="btn ghost sm" data-a="pfOutAll" style="margin-top:12px">Desconectar todos os outros</button>`:''}</section></div>`;}
+function pfPref(){const N=ME.notif;return `<div class="pgrid"><section class="card pc"><div class="sh"><h2>Notificações</h2></div><div class="pf-tg">
+ ${[['email','Por e-mail','Avisos de aprovações, inscrições e escalas'],['push','No celular','Pelo app Alva, em tempo real'],['resumo','Resumo semanal','Toda segunda, o que mudou na igreja'],['urg','Casos urgentes de cuidado','Sempre avisar na hora, mesmo fora do horário']].map(t=>`<label class="tog"><input type="checkbox" data-nt="${t[0]}" ${N[t[0]]?'checked':''}><span class="sw"></span><span><b>${t[1]}</b><small>${t[2]}</small></span></label>`).join('')}</div></section>
+ <section class="card pc"><div class="sh"><h2>Aparência</h2></div><div class="pf-th">${[['dia','Dia'],['noite','Noite']].map(t=>`<button class="pf-thb ${S.theme===t[0]?"on":""}" data-a="pfTheme" data-v="${t[0]}"><span class="pf-sw ${t[0]}"><i></i><i></i><i></i></span>${t[1]}</button>`).join('')}</div>
+  <label class="fld" style="margin-top:16px"><span class="fl">Idioma</span><span class="selw"><select><option>Português (Brasil)</option><option>English</option><option>Español</option></select>${ic('updown',14)}</span></label></section></div>`;}
+function perfilAfter(){
+ requestAnimationFrame(()=>typeof tabInd==='function'&&tabInd());
+ const f=$('#pfF');if(f){const sb=f.querySelector('[type=submit]'),orig=new FormData(f);const dirty=()=>[...new FormData(f)].some(([k,v])=>orig.get(k)!==v);
+  f.addEventListener('input',e=>{e.target.closest('.fld')?.classList.remove('bad');sb.disabled=!dirty();$('#pfSaved').textContent=dirty()?'Alterações não salvas':'Altere e salve';});
+  f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f),bad=(n,m)=>{const i=f[n];i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;};let ok=true;
+   if(fd.get('n').trim().split(/\s+/).length<2){bad('n','Informe nome e sobrenome');ok=false;}
+   if(!fd.get('first').trim()){bad('first','Como devemos te chamar?');ok=false;}
+   if(!/^\S+@\S+\.\S+$/.test(fd.get('email'))){bad('email','E-mail inválido');ok=false;}
+   if(fd.get('tel').replace(/\D/g,'').length<10){bad('tel','Celular com DDD');ok=false;}
+   if(!ok)return;const em=fd.get('email')!==ME.email;
+   busy(sb,700,'Salvo',()=>{['n','first','email','tel','nasc','cargo','bio'].forEach(k=>ME[k]=fd.get(k).trim());setTimeout(()=>{render();toast(em?`Dados salvos. Enviamos um link de confirmação para ${ME.email}`:'Dados salvos');},300);});});}
+ const t=$('#pfTfa');if(t)t.addEventListener('change',()=>{if(!t.checked){t.checked=true;confirmDel({title:'Desativar a verificação em 2 etapas?',body:'Sua conta fica menos protegida: basta a senha para entrar em qualquer aparelho.',label:'Desativar',onConfirm:()=>{ME.tfa=false;render();toast('Verificação em 2 etapas desativada');}});}else{ME.tfa=true;render();toast('Verificação em 2 etapas ativada');}});
+ $$('[data-nt]').forEach(i=>i.addEventListener('change',()=>{ME.notif[i.dataset.nt]=i.checked;toast(i.checked?'Notificação ligada':'Notificação desligada');}));
+}
+const PFA={
+ myProfile:v=>{closePops();S.active='perfil';S.pft=v||'dados';S.member=null;$('#side').classList.remove('open');render();window.scrollTo({top:0});},
+ pfTab:v=>{S.pft=v;const y=window.scrollY;render();window.scrollTo(0,y);},
+ pfTheme:v=>{A.theme(v);const y=window.scrollY;render();window.scrollTo(0,y);},
+ pfReset:()=>{render();toast('Alterações descartadas');},
+ pfPhoto:()=>toast('Escolha uma foto quadrada, até 5 MB'),
+ pfPwd:()=>{openDlg(`${dlgHead('Alterar senha','Você continua conectado neste aparelho.')}<form id="pwF" class="fgrid one" novalidate>
+   <label class="fld"><span class="fl">Senha atual</span><input type="password" name="a" autocomplete="current-password"><span class="err"></span></label>
+   <label class="fld"><span class="fl">Nova senha</span><input type="password" name="b" autocomplete="new-password"><span class="hint">Mínimo de 8 caracteres, com letras e números.</span><span class="err"></span></label>
+   <label class="fld"><span class="fl">Repita a nova senha</span><input type="password" name="c" autocomplete="new-password"><span class="err"></span></label>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Alterar senha</button></div></form>`,'sm');
+  const f=$('#pwF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));f.addEventListener('submit',e=>{e.preventDefault();const bad=(n,m)=>{f[n].closest('.fld').classList.add('bad');f[n].closest('.fld').querySelector('.err').textContent=m;};
+   if(!f.a.value)return bad('a','Informe a senha atual');if(f.a.value==='errada')return bad('a','Senha atual incorreta');if(f.b.value.length<8||!/\d/.test(f.b.value)||!/[a-z]/i.test(f.b.value))return bad('b','Use 8+ caracteres, com letras e números');if(f.b.value===f.a.value)return bad('b','A nova senha precisa ser diferente');if(f.c.value!==f.b.value)return bad('c','As senhas não conferem');
+   busy(f.querySelector('[type=submit]'),700,'Alterada',()=>{setTimeout(()=>{closeDlg();toast('Senha alterada. Avisamos por e-mail.');},300);});});},
+ pfOut:v=>{const s=ME.sess[+v];confirmDel({title:`Desconectar ${s.d}?`,body:`Esse aparelho precisará entrar de novo com e-mail e senha.`,label:'Desconectar',onConfirm:()=>{ME.sess.splice(+v,1);render();toast('Aparelho desconectado');}});},
+ pfOutAll:()=>{confirmDel({title:'Desconectar todos os outros aparelhos?',body:`${ME.sess.length-1} aparelho(s) precisarão entrar de novo. Este continua conectado.`,label:'Desconectar todos',onConfirm:()=>{ME.sess=ME.sess.filter(s=>s.cur);render();toast('Outros aparelhos desconectados');}});},
+};
+
 /* ===== Alva async buttons — mesmo padrão do app mobile ===== */
 const AWORK={Entrar:'Entrando',Enviar:'Enviando',Salvar:'Salvando',Criar:'Criando',Confirmar:'Confirmando',Adicionar:'Adicionando',Publicar:'Publicando',Aprovar:'Aprovando',Aprovado:'Aprovando',Importar:'Importando',Emitir:'Emitindo',Excluir:'Excluindo',Remover:'Removendo',Desativar:'Desativando',Cancelar:'Cancelando',Rejeitar:'Rejeitando',Registrar:'Registrando',Transferir:'Transferindo',Agendar:'Agendando',Gerar:'Gerando',Reenviar:'Enviando',Lembrar:'Enviando',Marcar:'Salvando',Encerrar:'Encerrando',Continuar:'Carregando',Convidar:'Convidando',Vincular:'Vinculando',Iniciar:'Iniciando',Entrar_:'Entrando',Descartar:'Descartando',Reativar:'Reativando',Duplicar:'Duplicando'};
 const ackSvg=`<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ckp" d="M5 12.5l4.5 4.5L19 7"/></svg>`;
@@ -4123,7 +4483,7 @@ function setDone(id,v){const t=TASKS.find(x=>x.id===id);t.done=v;const el=$('#'+
  const n=openCount(),c=$('#cnt');c.textContent=n;c.style.visibility=n?'':'hidden';c.animate([{transform:'scale(1.3)'},{transform:'none'}],{duration:320,easing:'cubic-bezier(.2,.8,.2,1)'});
  $('#undoAll').style.display=n<3&&n>0?'':'none';$('#lede').innerHTML=lede(n);softSide();}
 const A={
- nav:v=>{S.active=v;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
+ nav:v=>{S.active=v;S.navOpen={};S.case=null;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
  churchMenu:(v,b)=>{const p=$('#churchPop');closePops(p);p.classList.toggle('open');b.setAttribute('aria-expanded',p.classList.contains('open'));},
  setChurch:v=>{S.church=+v;softSide();toast(`Agora em ${CHURCHES[S.church].n}`);},
  meMenu:()=>{const p=$('#mePop');closePops(p);p.classList.toggle('open');},
@@ -4133,7 +4493,7 @@ const A={
  logout:()=>{closePops();S.auth='login';S.authErr=0;render();window.scrollTo({top:0});},
  cmd:()=>cmdOpen(),
  side:()=>$('#side').classList.add('open'),
- navToggle:v=>{const t=$(`.ni.par[data-v=${v}]`).closest('.ntree');const open=!t.classList.contains('open');S.navOpen[v]=open;t.classList.toggle('open',open);t.querySelector('.par').setAttribute('aria-expanded',open);const cb=t.querySelector('.par .cnt');if(open&&cb)cb.remove();else if(!open&&!cb&&!TASKS[0].done&&v==='pessoas')t.querySelector('.par .chev').insertAdjacentHTML('beforebegin',cntBadge());},
+ navToggle:v=>{const t=$(`.ni.par[data-v=${v}]`).closest('.ntree');const open=!t.classList.contains('open');if(open)$$('.ntree.open').forEach(o=>{if(o===t)return;const k=o.querySelector('.par').dataset.v;S.navOpen[k]=false;o.classList.remove('open');o.querySelector('.par').setAttribute('aria-expanded',false);if(k==='pessoas'&&!TASKS[0].done&&!o.querySelector('.par .cnt'))o.querySelector('.par .chev').insertAdjacentHTML('beforebegin',cntBadge());});S.navOpen[v]=open;t.classList.toggle('open',open);t.querySelector('.par').setAttribute('aria-expanded',open);const cb=t.querySelector('.par .cnt');if(open&&cb)cb.remove();else if(!open&&!cb&&!TASKS[0].done&&v==='pessoas')t.querySelector('.par .chev').insertAdjacentHTML('beforebegin',cntBadge());},
  closeSide:()=>$('#side').classList.remove('open'),
  done:v=>{setDone(v,true);const lab={t1:'Acolhimento',t2:'Escala de domingo',t3:'Escalas de outubro'}[v];toast(`${lab} marcado como resolvido`,()=>setDone(v,false));},
  undoAll:()=>TASKS.forEach(t=>t.done&&setDone(t.id,false)),
@@ -4161,5 +4521,5 @@ $('#q').addEventListener('input',e=>cmdList(e.target.value));
 $('#res').addEventListener('click',e=>{const b=e.target.closest('.ri');if(b)cmdPick(+b.dataset.i);});
 $('#res').addEventListener('mousemove',e=>{const b=e.target.closest('.ri');if(b&&+b.dataset.i!==sel){sel=+b.dataset.i;$$('.ri').forEach(x=>x.classList.toggle('sel',x===b));}});
 $('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim')cmdClose();});
-Object.assign(A,PA,IA,DA,CA,HA,RA,KA,AA,AU,GA,EA,LMA,SPA,CMA,CTA,FIA,AXA,BKA);
+Object.assign(A,PA,IA,DA,CA,HA,RA,KA,AA,AU,GA,EA,LMA,CKA,BBA,PFA,SPA,CMA,CTA,FIA,AXA,BKA);
 render();

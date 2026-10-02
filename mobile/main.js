@@ -52,6 +52,7 @@ const I={
  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
  eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
  eyeOff:'<path d="M10.6 5.6A9.7 9.7 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.2 6.9C3.8 8.6 2.5 12 2.5 12S6 18.5 12 18.5c1.9 0 3.5-.6 4.9-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18"/>',
+ pacifier:'<circle cx="12" cy="5" r="2.6"/><path d="M12 7.6V10"/><path d="M12 10c-2-1.7-6.2-1.9-7.4.3-.9 1.7.5 3.8 2.9 4.1 1.8.3 3.4-.3 4.5-1.3 1.1 1 2.7 1.6 4.5 1.3 2.4-.3 3.8-2.4 2.9-4.1-1.2-2.2-5.4-2-7.4-.3z"/><path d="M10.9 14c-.3.9-.9 2-.9 3.3a2 2 0 0 0 4 0c0-1.3-.6-2.4-.9-3.3"/>',
  baby:'<path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>',
  door:'<path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.56v16.16a1 1 0 0 1-1.24.97L5 20V5.56a2 2 0 0 1 1.52-1.94l4-1A2 2 0 0 1 13 4.56z"/>',
  sliders:'<path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/>',
@@ -84,11 +85,10 @@ const TODAY={y:2026,m:9,d:29};
 const MONTHS=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const MON3=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const WD=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-const ROLES={visitante:['Visitante','damasco'],membro:['Membro','ceu'],lider:['Líder','menta'],admin:['Administrador','brasa'],staff:['Staff de eventos','lima']};
+const ROLES={visitante:['Visitante','damasco'],membro:['Membro','ceu'],lider:['Líder','menta'],admin:['Administrador','brasa']};
 const USERS={
  'renan.ferreira@email.com':{first:'Renan',name:'Renan Ferreira',role:'membro'},
- 'giovanna.martins@email.com':{first:'Giovanna',name:'Giovanna Martins',role:'lider'},
- 'equipe.eventos@email.com':{first:'Equipe',name:'Equipe de Eventos',role:'staff'}
+ 'giovanna.martins@email.com':{first:'Giovanna',name:'Giovanna Martins',role:'lider'}
 };
 const CHURCHES=[
  {id:'sede',name:'Alva Sede',city:'São Paulo, SP',members:'1.240',tone:'brasa'},
@@ -356,8 +356,8 @@ const moodAfter=()=>!S.mood?'':S.mood==='Preciso de oração'?'<button class="li
 const upcoming=()=>EVENTS.filter(e=>evKey(e)>=todayKey).sort((a,b)=>evKey(a)-evKey(b));
 const poster=e=>`<button class="poster gr-${e.g}" data-a="event" data-v="${e.id}" aria-label="${esc(e.t)}"><div class="top">${tag(e.tone,e.cat,true)}${dateblk(e)}</div><div class="bot"><h4>${esc(e.t)}</h4><div class="meta"><span>${ic('clock',14)}${WD[dow(e.y,e.m,e.d)]} · ${e.h}</span><span>${ic('pin',14)}${esc(e.p)}</span></div>${S.rsvp[e.id]?status('success','Confirmado'):''}</div></button>`;
 
-V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tabs:'home',html:`${appHead(`<div class="row between" style="align-items:center"><div class="stack g2"><p class="eyebrow">${S.church.name}</p><h1 class="t1">Olá, ${esc(S.user.first)}!</h1></div><button class="avatar tap" style="${tone('ceu')};border:0" data-a="tab" data-v="mais" aria-label="Abrir perfil">${initials(S.user.name)}<span class="online"></span></button></div>`)}
- ${S.role==='visitante'?visitorCard():''}${S.role==='staff'?staffCard():''}${(()=>{const n=S.role==='visitante'?0:S.escalas.filter(x=>x.st==='pendente').length+S.discs.filter(x=>x.st==='pendente').length;return n?`<div class="pad" style="margin:-6px 0 20px"><button class="pendpill" data-a="goPending"><span class="pcount">${n}</span><span class="grow">${n>1?n+' respostas pendentes':'1 resposta pendente'} na agenda</span>${ic('chevR',16,2.25)}</button></div>`:'';})()}
+V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tabs:'home',html:`${appHead(`<div class="row between" style="align-items:center"><div class="stack g2"><p class="eyebrow">${S.church.name}</p><h1 class="t1">${S.role==='visitante'?'Seja bem-vindo!':'Olá, '+esc(S.user.first)+'!'}</h1></div><button class="avatar tap" style="${tone('ceu')};border:0" data-a="tab" data-v="mais" aria-label="Abrir perfil">${initials(S.user.name)}<span class="online"></span></button></div>`)}
+ ${S.role==='visitante'?visitorCard():''}${svcHome()}${(()=>{const n=S.role==='visitante'?0:S.escalas.filter(x=>x.st==='pendente').length+S.discs.filter(x=>x.st==='pendente').length;return n?`<div class="pad" style="margin:-6px 0 20px"><button class="pendpill" data-a="goPending"><span class="pcount">${n}</span><span class="grow">${n>1?n+' respostas pendentes':'1 resposta pendente'} na agenda</span>${ic('chevR',16,2.25)}</button></div>`:'';})()}
  <div class="stack g8">
   <div>
    <div class="carousel" id="car">
@@ -373,11 +373,11 @@ V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tab
    <div id="moodAfter" aria-live="polite">${moodAfter()}</div>
   </section>
   <nav class="pad jump" aria-label="Atalhos">
-   ${[['Agenda','tab','agenda',S.escalas.filter(x=>x.st==='pendente').length+S.discs.filter(x=>x.st==='pendente').length],['Grupos','tab','grupos',0],['Cursos','tab','cursos',0],['Oração','prayer','',0],['Contribuir','give','',0],['Ao vivo','sub','aoVivo','live']].map(j=>`<button class="jw" data-a="${j[1]}" data-v="${j[2]}"><span>${j[0]}</span>${j[3]==='live'?'<sup class="jlive" aria-label="ao vivo agora"></sup>':j[3]?`<sup aria-label="${j[3]} pendentes">${j[3]}</sup>`:''}</button>`).join('')}
+   ${(S.role==='visitante'?[['Agenda','tab','agenda',0],['Casas','tab','grupos',0],['Oração','prayer','',0],['Quem somos','sub','quemSomos',0],['Ao vivo','sub','aoVivo','live']]:[['Agenda','tab','agenda',S.escalas.filter(x=>x.st==='pendente').length+S.discs.filter(x=>x.st==='pendente').length],['Grupos','tab','grupos',0],['Cursos','tab','cursos',0],['Oração','prayer','',0],['Contribuir','give','',0],['Apresentações','sub','bebes',0],['Ao vivo','sub','aoVivo','live']]).map(j=>`<button class="jw" data-a="${j[1]}" data-v="${j[2]}"><span>${j[0]}</span>${j[3]==='live'?'<sup class="jlive" aria-label="ao vivo agora"></sup>':j[3]?`<sup aria-label="${j[3]} pendentes">${j[3]}</sup>`:''}</button>`).join('')}
   </nav>
   <section class="pad stack g3">
    <div class="row g3" style="align-items:stretch">
-    <div class="cta gr-lima grow" style="color:#010f12"><div><h3>Contribuir</h3><p>Dízimos, ofertas e missões</p></div><button class="btn dark md" data-a="give">Contribuir</button></div>
+    ${S.role==='visitante'?`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Quero fazer parte</h3><p>Conheça o caminho para ser membro</p></div><button class="btn dark md" data-a="wantMember">Começar</button></div>`:`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Contribuir</h3><p>Dízimos, ofertas e missões</p></div><button class="btn dark md" data-a="give">Contribuir</button></div>`}
     <div class="cta gr-vinho grow" style="color:#fff"><div><h3>Pedido de oração</h3><p>Nossa equipe ora por você</p></div><button class="btn onmedia md" data-a="prayer">Pedir oração</button></div>
    </div>
    <div class="card row g3" style="padding:16px;border-radius:var(--r-md)"><span class="iconbox" style="${tone('salvia')}">${ic('message',22)}</span><div class="grow stack" style="gap:2px"><span class="it-title">Assistente no WhatsApp</span><span class="it-sub">Tire dúvidas a qualquer hora</span></div><button class="btn secondary sm" data-a="whats">Conversar</button></div>
@@ -404,6 +404,20 @@ function calendarHTML(anim){
  return `<div class="card cal" id="cal"><div class="cal-grid ${anim||''}" id="calGrid">${cells}</div>
   <div class="cal-foot">${cats.length?cats.map(([c,t])=>`<span class="lg"><i style="background:${MK[t]}"></i>${c}</span>`).join(''):'<span class="lg">Sem eventos neste mês</span>'}<span class="lg"><i class="lg-mine"></i>Sua escala</span></div></div>`;
 }
+
+const EVPPL=['Ana Costa','Bruno Reis','Clara Nunes','Diego Faria','Elisa Moura','Felipe Andrade','Helena Duarte','Igor Santana'];
+const evAvs=e=>`<span class="ev-avs">${[0,1,2].map(i=>{const n=EVPPL[(e.d+i*3)%EVPPL.length];return `<span style="${tone(['ceu','menta','damasco','lima','rosado'][(e.d+i)%5])}">${initials(n)}</span>`;}).join('')}</span><span class="ev-n">${e.n>999?(e.n/1000).toFixed(1).replace('.',',')+' mil':e.n} vão</span>`;
+const evRel=(e,base)=>{const dd=Math.round((new Date(e.y,e.m-1,e.d)-new Date(Math.floor(base/10000),Math.floor(base/100)%100-1,base%100))/864e5);return dd===1?'Amanhã':dd<7?`Em ${dd} dias`:dd<14?'Semana que vem':`Em ${Math.round(dd/7)} semanas`;};
+const evWeekLbl=(e,base)=>{const b=new Date(Math.floor(base/10000),Math.floor(base/100)%100-1,base%100),d=new Date(e.y,e.m-1,e.d),sow=x=>{const c=new Date(x);c.setDate(c.getDate()-c.getDay());c.setHours(0,0,0,0);return c.getTime();},w=Math.round((sow(d)-sow(b))/(7*864e5));return w<=0?'Ainda esta semana':w===1?'Próxima semana':'Mais adiante';};
+const evCard=(e,base,i)=>`<button class="ev-c ev-min" data-a="event" data-v="${e.id}" style="--t:var(--tone-${e.tone});--i:${i}"><span class="ev-dt"><b>${e.d}</b><small>${WD[dow(e.y,e.m,e.d)].toLowerCase()}</small></span>
+ <span class="grow stack" style="gap:3px;min-width:0;align-items:flex-start"><span class="ev-t"><i class="ev-tdot"></i>${esc(e.t)}</span><span class="ev-m">${e.h}<span class="ev-dot"></span><span class="ev-pl">${esc(e.p)}</span></span></span>
+ ${S.rsvp[e.id]?`<span class="ev-go">${ic('check',12,3)}Vou</span>`:`<span class="ev-chev">${ic('chevR',16,2)}</span>`}</button>`;
+const evHero=e=>`<button class="ev-hero" data-a="event" data-v="${e.id}" style="--t:var(--tone-${e.tone});--ti:var(--tone-${e.tone}-ink)"><span class="ev-hc"><span class="ev-cat light"><i></i>${esc(e.cat)}</span><span class="ev-ht">${esc(e.t)}</span><span class="ev-hm">${ic('clock',14,2)}${e.h}<span class="ev-dot"></span>${ic('pin',14,2)}${esc(e.p)}</span></span>
+ <span class="ev-hf">${evAvs(e)}<span class="ev-hb">${S.rsvp[e.id]?`${ic('check',14,3)}Você vai`:`Ver detalhes${ic('arrowR',14,2)}`}</span></span></button>`;
+const apbFor=e=>typeof S!=='undefined'&&S.apb?S.apb.datas.find(d=>d.y===e.y&&d.m===e.m&&d.d===e.d):null;
+const apbOpen=d=>d&&d.used<d.vagas&&apbDays(d)>=S.apb.prazo;
+const apbChip=e=>{const d=apbFor(e);if(!d||S.role==='visitante')return '';const l=d.vagas-d.used;return `<span class="ev-apb ${apbOpen(d)?'':'off'}">${ic('pacifier',12,2)}Apresentações · ${apbOpen(d)?(l===1?'1 vaga':l+' vagas'):d.used>=d.vagas?'esgotado':'encerrado'}</span>`;};
+const apbEvBlock=e=>{const d=apbFor(e);if(!d||S.role==='visitante')return '';const ok=apbOpen(d),l=d.vagas-d.used;return `<div class="apb-evb"><span class="apb-av">${ic('pacifier',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">Apresentação de bebês</span><span class="it-sub">${ok?`Neste culto · ${l===1?'1 vaga':l+' vagas'}`:d.used>=d.vagas?'Vagas esgotadas neste culto':'Pedidos encerrados para este culto'}</span></div>${ok?`<button class="btn primary sm" data-a="apbFromEv" data-v="${d.id}">Agendar</button>`:''}</div>`;};
 const evRow=e=>`<button class="item" data-a="event" data-v="${e.id}">${dateblk(e,true)}<span class="grow stack" style="gap:2px"><span class="it-title">${esc(e.t)}</span><span class="it-sub">${e.h} · ${esc(e.p)}</span></span>${S.rsvp[e.id]?status('success','Vou'):tag(e.tone,e.cat,true)}</button>`;
 function limUse(y,m){const l=S.escalas.filter(x=>x.y===y&&x.m===m&&x.st!=='recusado'),reg=l.filter(x=>!x.over).length,ex=l.filter(x=>x.over).length,pend=l.filter(x=>x.st==='pendente').length;return {reg,ex,pend,tot:l.length,lim:S.lim.church,pref:S.lim.pref};}
 function limCard(){const y=2026,m=10,u=limUse(y,m),full=u.reg>=u.lim,mon=MONTHS[m-1];const cap=u.pref&&u.pref<u.lim?u.pref:u.lim;
@@ -412,23 +426,38 @@ function limCard(){const y=2026,m=10,u=limUse(y,m),full=u.reg>=u.lim,mon=MONTHS[
   <div class="row g3" style="align-items:flex-end"><span class="lim-big">${u.reg}<small>/${u.lim}</small></span><div class="lim-dots" aria-hidden="true">${Array.from({length:Math.max(u.lim,u.tot)},(_,i)=>`<i class="${i<u.reg?'on':i<u.lim?'':'ex'}${i>=cap&&i<u.lim?' pf':''}"></i>`).join('')}</div></div>
   <p class="lim-sub">${sub}</p>
   <div class="lim-foot"><span>${ic('users',14,2)}Limite da igreja: ${u.lim} por mês</span><button type="button" class="lim-pref" data-a="limPref">${ic('heart',14,2)}${u.pref?'Prefiro até '+u.pref:'Definir preferência'}</button></div></section>`;}
+
+const ST2=(k,t)=>`<span class="st2 ${k}"><i></i>${t}</span>`;
+const MINTONE={Louvor:'laranja','Recepção':'menta',Infantil:'ambar',Kids:'ambar',Jovens:'lima',Intercessão:'vinho'};
+function escCard(x,i){const k=K(x.y,x.m,x.d),bl=blockedAt(k),o=KD(k),tn=MINTONE[x.min]||'ceu',off=x.st==='recusado';
+ return `<article class="ev-c es2 ${off?'off':''} ${x.over&&!off?'lim-ov':''}" style="--t:var(--tone-${tn});--i:${i}">
+  <div class="es2-r"><span class="ev-dt"><b>${o.d}</b><small>${WD[dow(o.y,o.m,o.d)].toLowerCase()}</small></span>
+   <span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-cat"><i></i>${esc(x.min)}<em>· ${x.h}</em></span><span class="ev-t">${esc(x.fn)}</span><span class="ev-m">${esc(x.what||x.area)}</span></span>
+   ${x.st==='confirmado'?ST2('ok','Confirmado'):off?ST2('mute','Recusado'):ST2('warn','Aguardando')}</div>
+  ${x.id==='s0'?svcBox():''}
+  ${x.over&&!off?`<div class="lim-note">${ic('alert',16,2.2)}<div><b>Acima do seu limite do mês</b><span>${x.st==='confirmado'?'Você topou servir além do limite. Obrigado!':`O líder pediu mesmo assim${x.why?': “'+esc(x.why)+'”':''}. Tudo bem recusar.`}</span></div></div>`:''}
+  ${bl&&!off?`<div class="es2-warn">${ic('alert',14,2)}Conflita com seu bloqueio de ${fmtK(bl.a)}${bl.a!==bl.b?' a '+fmtK(bl.b):''}</div>`:''}
+  ${x.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="escalaOk" data-v="${x.id}">Confirmar</button><button class="btn ghost2 sm" data-a="escalaNo" data-v="${x.id}">Recusar</button></div>`:x.st==='confirmado'?`<div class="es2-a"><button class="tlink sm2" data-a="escalaNo" data-v="${x.id}">Não vou conseguir ir</button></div>`:''}
+ </article>`;}
+function discCard(x,i){const k=K(x.y,x.m,x.d),o=KD(k),off=x.st==='recusado';
+ return `<article class="ev-c es2 ${off?'off':''}" style="--t:var(--tone-${x.tone||'ceu'});--i:${i}">
+  <div class="es2-r"><span class="ev-dt"><b>${o.d}</b><small>${WD[dow(o.y,o.m,o.d)].toLowerCase()}</small></span>
+   <span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-cat"><i></i>${esc(x.who.split(' ').slice(0,2).join(' '))}<em>· ${x.h}</em></span><span class="ev-t">${esc(x.theme)}</span><span class="ev-m">${ic(x.remote?'monitor':'pin',13,2)}<span class="ev-pl">${esc(x.place)}</span></span></span>
+   ${x.st==='aceito'?ST2('ok','Aceito'):off?ST2('mute','Recusado'):ST2('warn','Aguardando')}</div>
+  ${x.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="discOk" data-v="${x.id}">Aceitar</button><button class="btn ghost2 sm" data-a="discNo" data-v="${x.id}">Recusar</button></div>`:x.st==='aceito'&&x.remote?`<div class="es2-a"><button class="tlink sm2" data-a="joinCall">${ic('monitor',14,2)}Entrar na chamada</button></div>`:''}
+ </article>`;}
 function agendaTab(){
  const t=S.ag.tab;
- if(t==='Eventos'){const {y,m,sel}=S.ag;const k=y*10000+m*100+sel;const day=EVENTS.filter(e=>evKey(e)===k);const nxt=EVENTS.filter(e=>evKey(e)>Math.max(k,todayKey-1)&&evKey(e)!==k).sort((a,b)=>evKey(a)-evKey(b)).slice(0,5);
-  return `<div class="stack g3"><p class="eyebrow" style="color:var(--ink-muted)">${sel} de ${MONTHS[m-1]}${k===todayKey?' · hoje':''}</p>${day.length?`<div class="list">${day.map(evRow).join('')}</div>`:`<div class="card row g3" style="padding:16px;border-radius:var(--r-md)"><span class="iconbox" style="background:var(--surface-raised);color:var(--ink-muted)">${ic('calendar',20)}</span><span class="callout">Nada marcado para este dia.</span></div>`}</div>
-   <div class="stack g3"><p class="eyebrow" style="color:var(--ink-muted)">Próximos</p>${nxt.length?`<div class="list">${nxt.map(evRow).join('')}</div>`:'<p class="callout">Nenhum evento depois desta data.</p>'}</div>`;}
- if(t==='Escalas'){return `${limCard()}<div class="stack g3"><p class="eb2">Minhas escalas de serviço</p>${S.escalas.map(x=>{const k=K(x.y,x.m,x.d),bl=blockedAt(k);return `<article class="card stack g3 ${x.over&&x.st!=='recusado'?'lim-ov':''}" style="padding:18px;border-radius:var(--r-lg)">
-   <div class="row between g3" style="align-items:flex-start"><div class="stack" style="gap:2px"><span class="t3">${x.min}</span><span class="it-sub">${x.area}</span></div>${x.st==='confirmado'?status('success','Confirmado'):x.st==='recusado'?status('danger','Recusado'):status('warning','Aguardando')}</div>
-   <div class="callout" style="color:var(--ink)">Função: <b>${x.fn}</b> · ${fmtK(k)} · ${x.h}</div>
-   ${x.over&&x.st!=='recusado'?`<div class="lim-note">${ic('alert',16,2.2)}<div><b>Acima do seu limite do mês</b><span>${x.st==='confirmado'?'Você topou servir além do limite. Obrigado!':`O líder pediu mesmo assim${x.why?': “'+esc(x.why)+'”':''}. Tudo bem recusar.`}</span></div></div>`:''}
-   ${bl&&x.st!=='recusado'?`<div class="row g2 foot" style="color:var(--danger-text)">${ic('alert',14,2)}Conflita com seu bloqueio de ${fmtK(bl.a)}${bl.a!==bl.b?' a '+fmtK(bl.b):''}</div>`:''}
-   ${x.st==='pendente'?`<div class="row g2"><button class="btn primary md grow" data-a="escalaOk" data-v="${x.id}">Confirmar</button><button class="btn outline md grow" data-a="escalaNo" data-v="${x.id}">Recusar</button></div>`:x.st==='confirmado'?`<button class="tlink" style="align-self:flex-start;padding:0" data-a="escalaNo" data-v="${x.id}">Não vou conseguir ir</button>`:''}
-  </article>`;}).join('')}</div>`;}
- if(t==='Discipulado'){return `<div class="stack g3"><p class="eb2">Encontros de discipulado agendados</p>${S.discs.map(x=>{const k=K(x.y,x.m,x.d);return `<article class="card stack g3" style="padding:18px;border-radius:var(--r-lg)">
-   <div class="row g3" style="align-items:flex-start"><span class="avatar" style="${tone(x.tone)}">${initials(x.who)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${x.who}</span><span class="it-sub">${x.theme}</span></div>${x.st==='aceito'?status('success','Você aceitou'):x.st==='recusado'?status('danger','Recusado'):status('warning','Aguardando você')}</div>
-   <div class="stack" style="gap:4px;padding-left:56px"><span class="callout row" style="gap:6px;color:var(--ink)">${ic('clock',15)}${fmtK(k)} · ${x.h}</span><span class="callout row" style="gap:6px">${ic(x.remote?'monitor':'pin',15)}${x.place}</span></div>
-   ${x.st==='pendente'?`<div class="row g2"><button class="btn primary md grow" data-a="discOk" data-v="${x.id}">Aceitar</button><button class="btn outline md grow" data-a="discNo" data-v="${x.id}">Recusar</button></div>`:x.st==='aceito'&&x.remote?`<button class="tlink" style="align-self:flex-start;padding:0 0 0 56px" data-a="joinCall">Entrar na chamada</button>`:''}
-  </article>`;}).join('')}</div>`;}
+ if(t==='Eventos'){const {y,m,sel}=S.ag;const k=y*10000+m*100+sel;const day=EVENTS.filter(e=>evKey(e)===k);const nxt=EVENTS.filter(e=>evKey(e)>Math.max(k,todayKey-1)&&evKey(e)!==k).sort((a,b)=>evKey(a)-evKey(b)).slice(0,6);
+  const grp={};nxt.forEach(e=>{const g=evWeekLbl(e,k);(grp[g]=grp[g]||[]).push(e);});
+  return `<div class="stack g3"><p class="eyebrow" style="color:var(--ink-muted)">${k===todayKey?'Hoje · ':''}${WD[dow(y,m,sel)].toLowerCase()}, ${sel} de ${MONTHS[m-1]}</p>${day.length?day.map(evHero).join(''):`<div class="ev-none"><span>${ic('calendar',20)}</span><div class="stack" style="gap:2px"><b>Dia livre</b><span>Nada marcado. Que tal descansar ou chamar alguém para um café?</span></div></div>`}</div>
+   ${nxt.length?Object.entries(grp).map(([g,l])=>`<div class="stack g3"><p class="eyebrow" style="color:var(--ink-muted)">${g}</p><div class="ev-list">${l.map((e,i)=>evCard(e,k,i)).join('')}</div></div>`).join(''):'<p class="callout">Nenhum evento depois desta data.</p>'}`;}
+ if(t==='Escalas'){const seg=`<div class="seg esub" role="tablist">${[['minhas','Minhas escalas'],['disp','Disponibilidade']].map(z=>`<button type="button" aria-selected="${(S.ag.esub||'minhas')===z[0]}" data-a="esSub" data-v="${z[0]}">${z[1]}${z[0]==='disp'&&S.blocks.length?`<small>${S.blocks.length}</small>`:''}</button>`).join('')}</div>`;if(S.ag.esub==='disp')return seg+dispoHTML();return `${seg}${limCard()}<div class="stack g3"><p class="eb2">Minhas escalas de serviço</p>${S.escalas.map(escCard).join('')}</div>`;}
+ if(t==='Discipulado'){return `<div class="stack g3"><p class="eb2">Encontros de discipulado</p><div class="ev-list">${S.discs.map(discCard).join('')}</div></div>`;}
+ if(t==='Acompanhamento')return careBody();
+ return dispoHTML();
+}
+function dispoHTML(){
  const bl=[...S.blocks].sort((p,q)=>p.a-q.a);
  return `<div class="stack g5"><p class="callout" style="margin:0">Bloqueie os períodos em que você não pode ser escalado. Vale para qualquer ministério (Louvor, Kids, Recepção, Estacionamento…). Quem monta a escala verá o conflito.</p>
   <button class="btn primary block" data-a="newBlock">Bloquear período</button>
@@ -439,7 +468,7 @@ function agendaTab(){
 V.agenda=()=>{const {y,m}=S.ag;const isNow=y===TODAY.y&&m===TODAY.m&&S.ag.sel===TODAY.d;return{sb:'var(--ink)',tabs:'agenda',html:`${appHead(`<div class="agh"><div class="row between" style="min-height:48px"><p class="eyebrow">Agenda</p><div class="mnav ${isNow?'':'has-today'}" role="group" aria-label="Trocar mês"><button data-a="month" data-v="-1" aria-label="Mês anterior" ${y*100+m<=202609?'disabled':''}>${ic('chevL',18,2.5)}</button><span></span><button class="mtoday" data-a="goToday" ${isNow?'tabindex="-1" aria-hidden="true"':''}>Hoje</button><span class="s2"></span><button data-a="month" data-v="1" aria-label="Próximo mês">${ic('chevR',18,2.5)}</button></div></div><h1 class="mtitle" id="mTitle"><span class="mname">${MONTHS[m-1]}</span> <span class="myear">${y}</span></h1>
   <p class="msum" id="mSum">${monthSummary()}</p></div>`,['#07486e','#6da8a7'])}
  <div class="pad stack g5">${calendarHTML()}
-  ${S.role==='visitante'?'':`<div class="utabs" role="tablist">${['Eventos','Escalas','Discipulado','Disponibilidade'].map(t=>`<button role="tab" aria-selected="${S.ag.tab===t}" data-a="agTab" data-v="${t}">${t}</button>`).join('')}</div>`}
+  ${S.role==='visitante'?'':`<div class="utabs" role="tablist">${['Eventos','Escalas','Discipulado','Acompanhamento'].map(t=>`<button role="tab" aria-selected="${S.ag.tab===t}" data-a="agTab" data-v="${t}">${t}${t==='Acompanhamento'&&S.care.next&&S.care.next.st==='pendente'?'<i class="tdot"></i>':''}</button>`).join('')}</div>`}
   <div class="stack g6" id="agBody">${agendaTab()}</div>
  </div>`};};
 
@@ -480,15 +509,15 @@ V.curso=()=>{const c=COURSES[S.cu.open];const total=c.lessons.length,fin=c.done=
  </div>`};};
 
 /* mais */
-const MAIS_ITEMS=[['Meus dados','user','damasco','meusDados'],['Notificações','bell','ambar','notifs'],['Quem somos','church','brasa','quemSomos'],['Cuidado pastoral','care','rosado','cuidado'],['Contribuir','gift','lima','contribuir'],['Inscrições','ticket','laranja','inscricoes'],['Ao vivo','radio','brasa','aoVivo'],['Meus ministérios','flame','laranja','meusMin'],['Pedidos de oração','hands','vinho','oracao'],['Fale com a secretaria','phone','ceu','secretaria'],['Assistente no WhatsApp','message','salvia','assistente'],['Privacidade e dados','lock','oceano','privacidade']];
+const MAIS_ITEMS=[['Meus dados','user','damasco','meusDados'],['Notificações','bell','ambar','notifs'],['Quem somos','church','brasa','quemSomos'],['Acompanhamento','care','rosado','cuidado'],['Contribuir','gift','lima','contribuir'],['Inscrições','ticket','laranja','inscricoes'],['Ao vivo','radio','brasa','aoVivo'],['Meus ministérios','flame','laranja','meusMin'],['Pedidos de oração','hands','vinho','oracao'],['Fale com a secretaria','phone','ceu','secretaria'],['Assistente no WhatsApp','message','salvia','assistente'],['Privacidade e dados','lock','oceano','privacidade']];
 V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=[!S.me.nasc,!S.me.end].filter(Boolean).length,ins=S.insc.mine.length,prW=S.prayers.filter(p=>p.st==='aguardando').length,care=S.care.next&&S.care.next.st==='pendente';
  const row=(label,v,meta,hot)=>`<button class="mrow" data-a="sub" data-v="${v}"><span class="mt">${label}</span>${meta?`<span class="mm ${hot?'hot':''}">${meta}</span>`:''}<span class="ma" aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
  const grp=(t,rows)=>`<section class="mgrp"><p class="eb2">${t}</p>${rows}</section>`;
  return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
  <div class="pad stack g8" style="padding-top:16px">
   ${grp('Você',row('Meus dados','meusDados',miss?miss+' dados faltando':'')+row('Notificações','notifs',nN?nN+(nN>1?' novas':' nova'):'',nN>0)+row('Privacidade e dados','privacidade',''))}
-  ${grp('Sua caminhada',(S.role==='visitante'?'':row('Meus ministérios','meusMin',MYMIN.length+' ministérios'))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+row('Cuidado pastoral','cuidado',care?'Encontro a confirmar':'',care))}
-  ${['lider','admin'].includes(S.role)?grp('Liderança',row('Casos urgentes','urgentes',URG.length+' abertos',true)):''}
+  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria','Primeiros passos'):row('Meus ministérios','meusMin',MYMIN.length+' ministérios'))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
+  ${['lider','admin'].includes(S.role)?grp('Liderança',row('Acompanhamentos','urgentes',URG.length+' urgentes',true)):''}
   ${grp('A igreja',row('Quem somos','quemSomos','')+row('Fale com a secretaria','secretaria','Seg a sex')+row('Assistente no WhatsApp','assistente',''))}
   <section class="stack g3">
    <section class="mgrp"><p class="eb2" style="margin-bottom:4px">Conta</p>
@@ -501,7 +530,7 @@ V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=[!S.me.nasc,!S.me.
  </div>`};};
 
 /* ---------- engine ---------- */
-const tabsFor=()=>S.role==='staff'?TABS.map(t=>t[0]==='cursos'?['checkin','scan','Check-in']:t):TABS;
+const tabsFor=()=>S.role==='visitante'?TABS.filter(t=>t[0]!=='cursos'):TABS;
 const TABS=[['home','home','Início'],['agenda','calendar','Agenda'],['grupos','users','Grupos'],['cursos','book','Cursos'],['mais','dots','Mais']];
 const APP=['home','agenda','grupos','cursos','curso','mais'];
 let resendTimer=null,playTimer=null,expTimer=null;
@@ -575,6 +604,7 @@ function eventSheet(id){
  sheet(`<div class="sheet-hero gr-${e.g}" style="margin-top:-10px;border-radius:var(--r-xl) var(--r-xl) 0 0">${tag(e.tone,e.cat,true)}<h3>${esc(e.t)}</h3><div class="row g4" style="font:400 15px/20px var(--font-text);flex-wrap:wrap"><span class="row" style="gap:4px">${ic('calendar',16)}${e.range||WD[dow(e.y,e.m,e.d)]+', '+e.d+' de '+MONTHS[e.m-1]}</span><span class="row" style="gap:4px">${ic('clock',16)}${e.h}</span><span class="row" style="gap:4px">${ic('pin',16)}${esc(e.p)}</span></div></div>
  <div class="stack g5"><p class="body">${DESC[e.cat]||''}</p>
   <div class="row between">${avs(4,(e.n+(on?1:0))+(e.sign?' inscritos':' confirmados'),'var(--surface-raised)')}${on?status('success',e.sign?'Inscrito':'Confirmado'):''}</div>
+  ${apbEvBlock(e)}
   <div class="stack g3">${on?`<button class="btn outline block" data-a="rsvp" data-v="${e.id}">${e.sign?'Cancelar inscrição':'Cancelar presença'}</button>`:`<button class="btn primary block split" data-a="rsvp" data-v="${e.id}"><span>${e.sign?'Inscrever-se':'Confirmar presença'}</span><span class="meta">${e.sign?'Gratuito':WD[dow(e.y,e.m,e.d)]+' '+e.d+'/'+String(e.m).padStart(2,'0')}</span></button>`}
   <div class="row g3"><button class="btn secondary md grow" data-a="addCal">Salvar na agenda</button><button class="btn secondary md grow" data-a="shareEv">Compartilhar</button></div></div></div>`);
 }
@@ -598,7 +628,7 @@ function miniSheet(id){const m=MINIS.find(x=>x.id===id);const on=S.serving[id];
   <p class="body" style="color:var(--ink);margin:0">${m.d}</p>
   <div class="gfacts"><div style="grid-column:span 2"><span class="eb2">Quando</span><b style="font-size:17px;line-height:22px;letter-spacing:-.02em">${m.when}</b></div><div><span class="eb2">Equipe</span><b>${m.n}</b><small>voluntários</small></div></div>
   <div class="chlist"><div class="prow"><span class="grow stack" style="gap:2px"><span class="eb2">Liderança</span><span class="pt" style="font-size:16px">${m.lead}</span></span></div><div class="prow" style="align-items:flex-start"><span class="grow stack" style="gap:6px"><span class="eb2">Para servir aqui</span>${m.need.map(n=>`<span class="row g2" style="align-items:flex-start;font:400 15px/20px var(--font-text)"><span class="mico" style="width:auto;color:var(--brand-text);margin-top:2px">${ic('check',14,2.5)}</span>${n}</span>`).join('')}</span></div></div>
-  <div class="servebox" id="serveBox">${serveBox(m,on)}</div><button class="btn secondary block talkbtn" data-a="talkLeader" data-v="m|${m.id}">${ic('message',18)}Falar com o líder</button></div>`);}
+  <div class="servebox" id="serveBox">${S.role==='visitante'?`<div class="svc-note" style="margin:0">${ic('info',16,2)}<div><b>Servir é para membros</b><span>Depois da integração você pode servir em qualquer ministério. Enquanto isso, converse com o líder para conhecer.</span></div></div>`:serveBox(m,on)}</div><button class="btn secondary block talkbtn" data-a="talkLeader" data-v="m|${m.id}">${ic('message',18)}Falar com o líder</button></div>`);}
 function giveSheet(){
  const st={type:'Dízimo',amt:50,method:'Pix'};
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Contribuir</h3><p class="callout">Sua generosidade sustenta a obra da ${esc(S.church?S.church.name:'igreja')}.</p></div>
@@ -708,7 +738,7 @@ const soon=(what)=>toast('info',what||'Em construção','Esta tela entra na pró
 const A={
  go:v=>go(v),back,
  closeSheet:()=>closeSheet(),
- tab:v=>{ensureChurch();closeSheet();if(S.screen===v)return;S.hist=[];S.screen=v;render('tab');},
+ tab:v=>{ensureChurch();closeSheet();if(S.role==='visitante'&&v==='cursos'){toast('info','Cursos são para membros','Depois da integração você tem acesso às jornadas e cursos.');return;}if(S.screen===v)return;S.hist=[];S.screen=v;render('tab');},
  reveal:(v,el)=>{const i=$('#'+v);const show=i.type==='password';i.type=show?'text':'password';el.innerHTML=ic(show?'eyeOff':'eye',el.closest('.bigwrap')?22:20,1.75);el.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha');el.setAttribute('aria-pressed',show);const n=i.value.length;i.focus();try{i.setSelectionRange(n,n)}catch(_){}},
  forgot:()=>forgotSheet(),
  startSignup:()=>go('signupStart'),
@@ -723,7 +753,7 @@ const A={
  toggleTerms:(v,el)=>{el.setAttribute('aria-checked',el.getAttribute('aria-checked')!=='true');clearErr('sTerms');},
  sw:(v,el)=>el.setAttribute('aria-checked',el.getAttribute('aria-checked')!=='true'),
  resend:async(v,el)=>{el.disabled=true;el.textContent='Enviando…';await wait(900);const was=S.su.att<=0;S.su.att=5;S.su.expAt=Date.now()+15*60000;toast('success','Novo código enviado','O anterior deixou de valer.');if(was){softRender();}else{startResend();}},
- pickChurch:async(v,el)=>{if(el&&el.classList){$$('.chrow').forEach(c=>c.classList.toggle('dim',c!==el));el.classList.add('chosen');await wait(380);}S.church=CHURCHES.find(c=>c.id===v);overlayLoading('Entrando em '+S.church.name+'…');await wait(1000);S.hist=[];S.screen=S.role==='staff'?'checkin':'home';$('#overlay').innerHTML='';render();},
+ pickChurch:async(v,el)=>{if(el&&el.classList){$$('.chrow').forEach(c=>c.classList.toggle('dim',c!==el));el.classList.add('chosen');await wait(380);}S.church=CHURCHES.find(c=>c.id===v);overlayLoading('Entrando em '+S.church.name+'…');await wait(1000);S.hist=[];S.screen='home';$('#overlay').innerHTML='';render();},
  cancelChurch:()=>{S.hist=[];S.screen='welcome';render('back');toast('info','Acesso cancelado','Você precisa escolher uma igreja para usar o app.');},
  /* home */
  event:v=>eventSheet(v),
@@ -740,6 +770,7 @@ const A={
  pickDay:v=>{S.ag.sel=+v;S.ag.tab='Eventos';$$('#calGrid .day.sel').forEach(d=>{d.classList.remove('sel');d.removeAttribute('aria-pressed');});const b=$(`#calGrid [data-v="${v}"]`);b.classList.add('sel');b.setAttribute('aria-pressed','true');$$('.utabs button').forEach(x=>x.setAttribute('aria-selected',x.dataset.v==='Eventos'));const body=$('#agBody');body.innerHTML=agendaTab();body.classList.remove('swap');void body.offsetWidth;body.classList.add('swap');const isNow=S.ag.y===TODAY.y&&S.ag.m===TODAY.m&&S.ag.sel===TODAY.d;const nav=$('.mnav'),mt=$('.mtoday');nav.classList.toggle('has-today',!isNow);if(isNow){mt.setAttribute('tabindex','-1');mt.setAttribute('aria-hidden','true');}else{mt.removeAttribute('tabindex');mt.removeAttribute('aria-hidden');}},
  month:v=>{let m=S.ag.m+(+v),y=S.ag.y;if(m<1){m=12;y--;}if(m>12){m=1;y++;}if(y*100+m<202609){toast('error','Sem histórico','A agenda mostra de setembro de 2026 em diante.');return;}S.ag.m=m;S.ag.y=y;S.ag.sel=(y===TODAY.y&&m===TODAY.m)?TODAY.d:1;monthSwap(+v>0?'next':'prev');},
  goToday:()=>{const dir=(S.ag.y*100+S.ag.m)>(TODAY.y*100+TODAY.m)?'prev':'next';const same=S.ag.y===TODAY.y&&S.ag.m===TODAY.m;S.ag.y=TODAY.y;S.ag.m=TODAY.m;S.ag.sel=TODAY.d;S.ag.tab='Eventos';monthSwap(same?null:dir);},
+ esSub:v=>{S.ag.esub=v;$('#agBody').innerHTML=agendaTab();},
  agTab:v=>{S.ag.tab=v;$$('.utabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));$('#agBody').innerHTML=agendaTab();},
  limPref:()=>{let v=S.lim.pref||Math.min(2,S.lim.church);const u=limUse(2026,10);const paint=sh=>{$('#lpV',sh).textContent=v;$('#lpM',sh).disabled=v<=1;$('#lpP',sh).classList.toggle('dim',v>=S.lim.church);$('#lpP',sh).setAttribute('aria-disabled',v>=S.lim.church);$('#lpW',sh).hidden=!(v<u.tot);$('#lpH',sh).textContent=v>=S.lim.church?'Esse é o limite da igreja. Para servir mais, fale com seu líder.':v===1?'Uma vez por mês.':'Até '+v+' vezes por mês.';};
   sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Quantas vezes você quer servir por mês?</h3><p class="callout">Os líderes veem sua preferência ao montar a escala. O limite da igreja é ${S.lim.church} por mês, somando todos os ministérios.</p></div>
@@ -750,7 +781,7 @@ const A={
    paint(sh);$('#lpM',sh).addEventListener('click',()=>{if(v>1){v--;paint(sh);}});$('#lpP',sh).addEventListener('click',()=>{if(v<S.lim.church){v++;paint(sh);}else toast('info','Esse é o limite da igreja','Para servir mais vezes, fale com o líder do seu ministério.');});
    $('#lpGo',sh).addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Salvo');S.lim.pref=v;await closeSheet();$('#agBody').innerHTML=agendaTab();toast('success','Preferência salva','Até '+v+(v===1?' vez':' vezes')+' por mês. Os líderes veem isso ao te escalar.');});
    const c=$('#lpClr',sh);if(c)c.addEventListener('click',async()=>{S.lim.pref=null;await closeSheet();$('#agBody').innerHTML=agendaTab();toast('info','Preferência removida','Vale só o limite da igreja: '+S.lim.church+' por mês.');});});},
- escalaOk:async(v,el)=>{const x=S.escalas.find(e=>e.id===v);const k=K(x.y,x.m,x.d);if(blockedAt(k)){toast('error','Essa data está bloqueada','Remova o bloqueio em Disponibilidade para confirmar.');return;}await busy(el,600,null,'Confirmado');x.st='confirmado';$('#agBody').innerHTML=agendaTab();const u=limUse(x.y,x.m);toast('success','Escala confirmada',x.over?'Obrigado por topar! Essa foi uma exceção ao seu limite de '+MONTHS[x.m-1]+'.':u.reg>=u.lim&&u.pend===0?x.min+' · '+fmtK(k)+'. Você fechou seu mês: '+u.reg+' de '+u.lim+'.':x.min+' · '+fmtK(k)+' · '+x.h+'.');},
+ escalaOk:async(v,el)=>{const x=S.escalas.find(e=>e.id===v);const k=K(x.y,x.m,x.d);if(blockedAt(k)){toast('error','Essa data está bloqueada','Remova o bloqueio em Escalas › Disponibilidade para confirmar.');return;}await busy(el,600,null,'Confirmado');x.st='confirmado';$('#agBody').innerHTML=agendaTab();const u=limUse(x.y,x.m);toast('success','Escala confirmada',x.over?'Obrigado por topar! Essa foi uma exceção ao seu limite de '+MONTHS[x.m-1]+'.':u.reg>=u.lim&&u.pend===0?x.min+' · '+fmtK(k)+'. Você fechou seu mês: '+u.reg+' de '+u.lim+'.':x.min+' · '+fmtK(k)+' · '+x.h+'.');},
  escalaNo:v=>refuseSheet('escala',v),
  discOk:async(v,el)=>{const x=S.discs.find(e=>e.id===v);await busy(el,600,null,'Aceito');x.st='aceito';$('#agBody').innerHTML=agendaTab();toast('success','Encontro aceito',x.who.split(' ')[0]+' recebeu sua confirmação.');},
  discNo:v=>refuseSheet('disc',v),
@@ -925,17 +956,21 @@ V.quemSomos=()=>sub('Quem somos','',`
   <section class="stack g3"><p class="eb2">Onde estamos</p><div class="list">${CHURCHES.map(c=>`<div class="item" style="cursor:default"><span class="iconbox" style="${tone(c.tone)};font:800 17px/1 var(--font-display)">A</span><span class="grow stack" style="gap:2px"><span class="it-title">${c.name}</span><span class="it-sub">${c.city} · cultos aos domingos</span></span></div>`).join('')}</div></section>`);
 
 /* 4. Cuidado pastoral */
-V.cuidado=()=>{const c=S.care,nx=c.next;return sub('Cuidado pastoral','Passando por um momento difícil ou precisa conversar com um pastor? Conte um pouco aqui e alguém da equipe pastoral entra em contato.',`
+function careBody(inTab){const c=S.care,nx=c.next;return `${inTab===false?'':'<p class="callout" style="margin:0">Passando por um momento difícil ou precisa conversar com um pastor? Conte aqui: alguém da equipe pastoral entra em contato.</p>'}<div class="stack g6">
   <form class="stack g4" data-submit="sendCare" novalidate>
    ${field({id:'cText',label:'Como podemos te ajudar?',area:true,ph:'Conte o que está acontecendo',max:600,hint:'Só o pastor responsável lê.'})}
    <div class="stack g2"><span class="eb2">Urgência</span><div class="seg" id="urgSeg">${['Normal','Urgente'].map(u=>`<button type="button" aria-selected="${c.urg===u}" data-a="urg" data-v="${u}">${u}</button>`).join('')}</div>
    ${c.urg==='Urgente'?`<p class="foot" style="margin:4px 0 0">Respondemos pedidos urgentes no mesmo dia. Em risco imediato, ligue 188 (CVV) ou 192 (SAMU).</p>`:''}</div>
    <button class="btn primary block" type="submit">Solicitar atendimento</button>
   </form>
-  ${nx?`<section class="stack g3"><p class="eb2">Meu próximo encontro</p><article class="card stack g3" style="padding:18px"><div class="row between g3" style="align-items:flex-start"><div class="stack" style="gap:2px"><span class="it-title">${nx.who}</span><span class="it-sub">${nx.when} · ${nx.remote?'Remoto':'Presencial'}</span></div>${nx.st==='aceito'?status('success','Confirmado'):nx.st==='recusado'?status('danger','Recusado'):status('warning','Aguardando você')}</div>
-   ${nx.st==='pendente'?`<div class="row g2"><button class="btn primary md grow" data-a="careOk">Aceitar</button><button class="btn outline md grow" data-a="careNo">Recusar</button></div>`:nx.st==='aceito'?`<p class="foot" style="margin:0">O link da chamada aparece aqui 15 minutos antes.</p>`:`<p class="foot" style="margin:0">Avisamos o pastor. Ele vai propor outro horário.</p>`}</article></section>`:''}
-  <section class="stack g3"><p class="eb2">Meus atendimentos</p><p class="foot" style="margin:-4px 0 0">Casos em aberto, urgentes primeiro. O histórico completo fica no painel web.</p>
-   <div class="list">${[...c.list].sort((a,b)=>(a.st==='urgente'?0:1)-(b.st==='urgente'?0:1)).map(x=>`<div class="item" style="cursor:default;align-items:flex-start;padding-block:14px"><span class="grow stack" style="gap:2px"><span class="it-title">${esc(x.t)}</span><span class="it-sub">${x.d} · ${x.who}</span></span>${x.st==='urgente'?status('danger','Urgente'):x.st==='novo'?status('info','Recebido'):status('info','Em andamento')}</div>`).join('')}</div></section>`);};
+  ${nx?`<section class="stack g3"><p class="eb2">Meu próximo encontro</p><article class="ev-c es2 care1" style="--t:var(--tone-oceano)"><div class="es2-r"><span class="avatar" style="${tone('oceano')};width:44px;height:44px;font-size:14px">${initials(nx.who.replace(/^\w+\.\s/,''))}</span>
+   <span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-t">${nx.who}</span><span class="ev-m">${ic('clock',13,2)}${nx.when}<span class="ev-dot"></span>${ic(nx.remote?'monitor':'pin',13,2)}${nx.remote?'Remoto':'Presencial'}</span></span>
+   ${nx.st==='aceito'?ST2('ok','Confirmado'):nx.st==='recusado'?ST2('mute','Recusado'):ST2('warn','Responda')}</div>
+   ${nx.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="careOk">Aceitar</button><button class="btn ghost2 sm" data-a="careNo">Recusar</button></div>`:`<p class="es2-note">${nx.st==='aceito'?'O link da chamada aparece aqui 15 minutos antes.':'Avisamos o pastor. Ele vai propor outro horário.'}</p>`}</article></section>`:''}
+  <section class="stack g3"><div class="row between"><p class="eb2">Meus atendimentos</p><span class="foot">urgentes primeiro</span></div>
+   <div class="ev-list">${[...c.list].sort((a,b)=>(a.st==='urgente'?0:1)-(b.st==='urgente'?0:1)).map((x,i)=>{const k=x.st==='urgente'?['bad','Urgente','vinho','alert']:x.st==='novo'?['info','Recebido','ceu','mail']:['info','Em andamento','menta','care'];return `<div class="ev-c es2 care2" style="--t:var(--tone-${k[2]});--i:${i};cursor:default"><div class="es2-r"><span class="care-i">${ic(k[3],17,2)}</span><span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-t" style="font-size:15px">${esc(x.t)}</span><span class="ev-m">${x.d.slice(0,5)}<span class="ev-dot"></span><span class="ev-pl">${esc(x.who)}</span></span></span>${ST2(k[0],k[1])}</div></div>`;}).join('')}</div>
+   <p class="foot" style="text-align:center;margin:2px 0 0">O histórico completo fica com a equipe pastoral.</p></section></div>`;}
+V.cuidado=()=>sub('Acompanhamento','Passando por um momento difícil ou precisa conversar com um pastor? Conte um pouco aqui e alguém da equipe pastoral entra em contato.',careBody(false));
 
 /* 5. Contribuir */
 V.contribuir=()=>{const g=S.give;const amt=g.amt;return sub('Contribuir','',`
@@ -1008,7 +1043,8 @@ function playerSheet(v){sheet(`<div class="stack g4"><div class="player gr-${v.g
 
 /* ---------- actions ---------- */
 Object.assign(A,{
- sub:v=>{ensureChurch();go(v);},
+ wantMember:async(v,el)=>{if(el)await busy(el,600,null,'Enviado');toast('success','Que alegria!','A secretaria vai te chamar para a integração. Enquanto isso, que tal visitar uma Casa?');},
+ sub:v=>{ensureChurch();if(v==='cuidado'&&S.role!=='visitante'){S.ag.tab='Acompanhamento';A.tab('agenda');return;}go(v);},
  give:()=>{ensureChurch();go('contribuir');},prayer:()=>{ensureChurch();go('oracao');},whats:()=>go('assistente'),
  mood:(v,el)=>{S.mood=S.mood===v?null:v;$$('#moods .moodt').forEach(c=>c.setAttribute('aria-checked',c.dataset.v===S.mood));const a=$('#moodAfter');a.innerHTML=moodAfter();a.classList.remove('swap');void a.offsetWidth;a.classList.add('swap');},
  inscr:()=>go('inscricoes'),
@@ -1080,96 +1116,20 @@ const _login=F.login;F.login=async function(f){await _login(f);const e=(S.email|
  if(e==='renan.ferreira@email.com'&&!S.insc.mine.length)S.insc.mine.push({id:'i1',st:'ok',method:'-'});
  if(e==='giovanna.martins@email.com'&&!S.give.hist.length)S.give.hist.push({v:350,dest:'Contribuição livre',m:'Pix',d:'05/09/2026',st:'ok'},{v:350,dest:'Contribuição livre',m:'Pix',d:'05/08/2026',st:'ok'},{v:120,dest:'Retiro de Jovens 2026',m:'Cartão',d:'20/07/2026',st:'ok'});
  if(S.user&&S.user.name)S.me.nome=S.user.name;};
-RAIL.push(...[['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Mais › Cuidado pastoral'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
+RAIL.push(...[['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
 $('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
-/* =========================================================
-   STAFF DE EVENTOS › Check-in  ·  cenários por tipo de usuário
-   ========================================================= */
-I.scan='<path d="M17 12v4a1 1 0 0 1-1 1h-4"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 8V7"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M7 17h.01"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="5" height="5" rx="1"/>';
-I.maximize='<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
-APP.push('checkin','checkinEv');
-const PEOPLE=['Ana Souza','Bruno Lima','Carla Reis','Davi Melo','Elisa Prado','Felipe Costa','Gabriela Nunes','Heitor Alves','Isabela Rocha','João Pedro Santos','Larissa Martins','Mateus Oliveira','Natália Ferreira','Otávio Ribeiro','Paula Mendes','Rafael Pereira'];
-const mkList=(n,done,seed)=>Array.from({length:n},(_,i)=>{const nm=PEOPLE[(i+seed)%PEOPLE.length];return {id:seed+'-'+i,n:nm,e:nm.split(' ')[0].toLowerCase()[0]+'***@email.com',code:'#'+String(240+i*7+seed).padStart(4,'0'),at:i<done?`${19+Math.floor(i/40)}h${String((2+i*3)%60).padStart(2,'0')}`:null};});
-const CK=[
- {id:'c1',t:'Culto + Batismo',when:'Hoje · 19h30',type:'Evento único',total:120,g:'mar',today:true,list:mkList(16,9,0),base:39},
- {id:'c2',t:'12 Horas de Oração',when:'Hoje · 5h às 17h',type:'Por período',slots:['5h–9h','9h–13h','13h–17h'],total:36,g:'vinho',today:true,list:mkList(12,7,3),base:14},
- {id:'c3',t:'Retiro de Jovens 2026',when:'17 a 19 out',type:'Por período',slots:['Sex 17','Sáb 18','Dom 19'],total:60,g:'lima',list:mkList(12,0,6),base:0},
- {id:'c4',t:'Conferência de Missões',when:'Sáb, 7 nov',type:'Evento único',total:42,g:'brasa',list:mkList(12,0,9),base:0}
-];
-const ckDone=ev=>ev.base+ev.list.filter(p=>p.at).length;
-Object.assign(S,{ck:{open:'c1',mode:'qr',slot:0,q:'',recent:[]}});
-
-V.checkin=()=>{const today=CK.filter(e=>e.today),next=CK.filter(e=>!e.today);
- const row=ev=>{const d=ckDone(ev),p=Math.round(d/ev.total*100);return `<button class="ckrow" data-a="ckOpen" data-v="${ev.id}"><span class="grow stack" style="gap:6px"><span class="row between" style="gap:10px;align-items:baseline"><span class="chn" style="font-size:22px;line-height:26px">${ev.t}</span><span class="cktype">${ev.type}</span></span><span class="chm">${ev.when}</span><span class="row g3" style="margin-top:4px"><span class="bar grow"><i style="width:${p}%"></i></span><b class="ckcount">${d}<span>/${ev.total}</span></b></span></span></button>`;};
- return {sb:'var(--ink)',tabs:'checkin',html:`${appHead(`<div class="stack g2"><p class="eyebrow">Staff de eventos</p><h1 class="t1">Check-in</h1><p class="callout">Escolha o evento para confirmar a entrada.</p></div>`,['#008582','#07486e'])}
- <div class="pad stack g6">
-  <section class="stack"><p class="eb2" style="margin-bottom:4px">Acontecendo hoje</p><div class="chlist">${today.map(row).join('')}</div></section>
-  <section class="stack"><p class="eb2" style="margin-bottom:4px">Próximos</p><div class="chlist">${next.map(row).join('')}</div></section>
- </div>`};};
-
-function ckPanel(ev){const m=S.ck.mode;
- if(m==='qr')return `<div class="scanner" id="scanner"><span class="sc tl"></span><span class="sc tr"></span><span class="sc bl"></span><span class="sc br"></span><span class="scline"></span><p class="schint">Aponte para o QR Code da inscrição</p><div class="scres" id="scres" aria-live="assertive"></div></div>
-  <div class="stack g2"><p class="eb2">Simular leitura</p><div class="row g2" style="flex-wrap:wrap"><button class="chip" data-a="ckSim" data-v="ok">Código válido</button><button class="chip" data-a="ckSim" data-v="dup">Já utilizado</button><button class="chip" data-a="ckSim" data-v="bad">De outro evento</button></div></div>
-  ${S.ck.recent.length?`<section class="stack"><p class="eb2" style="margin-bottom:4px">Últimas entradas</p><div class="chlist">${S.ck.recent.slice(0,5).map(r=>`<div class="prow" style="padding:12px 0"><span class="avatar" style="${tone('lima')};width:34px;height:34px;font-size:12px">${initials(r.n)}</span><span class="grow stack" style="gap:1px"><span class="pt" style="font-size:16px">${esc(r.n)}</span><span class="chm">${r.code}</span></span><span class="nwhen">${r.at}</span></div>`).join('')}</div></section>`:''}`;
- if(m==='totem')return `<div class="totem gr-${ev.g}"><p class="eb2" style="color:inherit;opacity:.85">Modo autoatendimento</p><div class="qr" style="align-self:center">${qrSVG('totem-'+ev.id)}</div><p class="mask" style="margin:0;text-align:center;color:inherit;opacity:.85">ALVA-TOTEM-${ev.id.toUpperCase()}</p><button class="btn onmedia md" style="align-self:center" data-a="ckTotem">Abrir em tela cheia</button></div>
-  <section class="stack g3"><p class="eb2">Como funciona</p><ol class="steps"><li>O membro abre Mais › Inscrições no app Alva.</li><li>Aponta a câmera para o QR Code do totem.</li><li>O check-in é confirmado na hora.</li><li>A impressora libera a pulseira ou o crachá.</li></ol></section>`;
- const q=S.ck.q.toLowerCase();const l=ev.list.filter(p=>!q||p.n.toLowerCase().includes(q)||p.code.includes(q));
- return `<div class="fbox" style="min-height:52px">${ic('search',20)}<input id="ckQ" type="search" placeholder="Nome, e-mail ou nº da inscrição" value="${esc(S.ck.q)}" aria-label="Buscar inscrito"></div>
-  <div id="ckList">${ckListHTML(ev,l)}</div>`;}
-function ckListHTML(ev,l){if(!l.length)return `<div class="empty"><span class="it-title" style="color:var(--ink)">Ninguém com esse nome</span><span class="callout">Confira a grafia ou busque pelo número da inscrição.</span></div>`;
- return `<div class="chlist">${l.map(p=>`<div class="prow"><span class="avatar" style="${tone(p.at?'lima':'menta')};width:36px;height:36px;font-size:12px">${initials(p.n)}</span><span class="grow stack" style="gap:1px"><span class="pt" style="font-size:16px">${esc(p.n)}</span><span class="chm">${p.code} · ${p.e}</span></span>${p.at?`<span class="ckdone">${ic('check',14,2.75)}${p.at}</span>`:`<button class="btn inverse sm" data-a="ckManual" data-v="${p.id}">Check-in</button>`}</div>`).join('')}</div>`;}
-
-V.checkinEv=()=>{const ev=CK.find(e=>e.id===S.ck.open);const d=ckDone(ev),p=Math.round(d/ev.total*100);
- return {sb:'var(--ink)',tabs:'checkin',html:`${appHead(`<button class="iconbtn" data-a="back" aria-label="Voltar para eventos">${ic('chevL',20,2.25)}</button>
-  <div class="stack g2" style="margin-top:14px"><p class="eyebrow">${ev.type} · ${ev.when}</p><h1 class="t1">${ev.t}</h1></div>
-  <div class="ckhero"><div class="stack" style="gap:0"><b class="cknum" id="ckNum">${d}</b><span class="callout">de ${ev.total} confirmados</span></div><div class="ring" style="--p:${p}"><span>${p}%</span></div></div>`,['#008582','#07486e'])}
- <div class="pad stack g5">
-  ${ev.slots?`<div class="row g2" style="flex-wrap:wrap">${ev.slots.map((s,i)=>`<button class="chip" aria-pressed="${S.ck.slot===i}" data-a="ckSlot" data-v="${i}">${s}</button>`).join('')}</div>`:''}
-  <div class="seg" role="tablist">${[['qr','Ler QR Code'],['totem','Totem'],['busca','Buscar pessoa']].map(t=>`<button role="tab" aria-selected="${S.ck.mode===t[0]}" data-a="ckMode" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
-  <div class="stack g5" id="ckPanel">${ckPanel(ev)}</div>
- </div>`};};
-HOOK.checkinEv=function(){const q=$('#ckQ');if(q)q.addEventListener('input',()=>{S.ck.q=q.value;const ev=CK.find(e=>e.id===S.ck.open);const qq=q.value.toLowerCase();$('#ckList').innerHTML=ckListHTML(ev,ev.list.filter(p=>!qq||p.n.toLowerCase().includes(qq)||p.code.includes(qq)));});};
-
-function ckBump(ev){const d=ckDone(ev),p=Math.round(d/ev.total*100);const n=$('#ckNum');if(n){n.textContent=d;n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump');}const r=$('.ckhero .ring');if(r){r.style.setProperty('--p',p);$('span',r).textContent=p+'%';}}
-const nowHM=()=>{const t=new Date();return t.getHours()+'h'+String(t.getMinutes()).padStart(2,'0');};
-function scanResult(kind,title,sub){const r=$('#scres');if(!r)return;r.className='scres '+kind;r.innerHTML=`<span class="scicon">${ic(kind==='ok'?'check':kind==='dup'?'clock':'x',30,2.75)}</span><b>${esc(title)}</b><span>${esc(sub)}</span>`;clearTimeout(r._t);r._t=setTimeout(()=>{r.className='scres';},2300);}
-
-Object.assign(A,{
- ckOpen:v=>{S.ck.open=v;S.ck.mode='qr';S.ck.slot=0;S.ck.q='';S.ck.recent=[];go('checkinEv');},
- ckMode:v=>{S.ck.mode=v;$$('.seg [data-a=ckMode]').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));const pnl=$('#ckPanel');pnl.innerHTML=ckPanel(CK.find(e=>e.id===S.ck.open));pnl.classList.remove('swap');void pnl.offsetWidth;pnl.classList.add('swap');HOOK.checkinEv();},
- ckSlot:(v,el)=>{S.ck.slot=+v;$$('[data-a=ckSlot]').forEach(b=>b.setAttribute('aria-pressed',b===el));},
- ckSim:v=>{const ev=CK.find(e=>e.id===S.ck.open);const sc=$('#scanner');sc.classList.remove('flash');void sc.offsetWidth;sc.classList.add('flash');
-  setTimeout(()=>{if(v==='ok'){const p=ev.list.find(x=>!x.at);if(!p){scanResult('dup','Todos já entraram','Não há inscrições pendentes neste evento.');return;}p.at=nowHM();S.ck.recent.unshift({n:p.n,code:p.code,at:p.at});scanResult('ok',p.n,'Inscrição '+p.code+' · entrada liberada');ckBump(ev);
-    const pnl=$('#ckPanel');setTimeout(()=>{if(S.screen==='checkinEv'&&S.ck.mode==='qr'){pnl.innerHTML=ckPanel(ev);}},2400);}
-   else if(v==='dup'){const p=ev.list.find(x=>x.at);scanResult('dup',p?p.n:'Inscrição repetida','Já fez check-in às '+(p?p.at:'19h02')+'. Não libere nova pulseira.');}
-   else scanResult('bad','Código de outro evento','Este QR Code é da Conferência de Missões.');},450);},
- ckManual:async(v,el)=>{const ev=CK.find(e=>e.id===S.ck.open);const p=ev.list.find(x=>x.id===v);await busy(el,700,null,'Feito');p.at=nowHM();S.ck.recent.unshift({n:p.n,code:p.code,at:p.at});const q=(S.ck.q||'').toLowerCase();$('#ckList').innerHTML=ckListHTML(ev,ev.list.filter(x=>!q||x.n.toLowerCase().includes(q)||x.code.includes(q)));ckBump(ev);toast('success','Entrada confirmada',p.n+' · '+p.code);},
- ckTotem:()=>{const ev=CK.find(e=>e.id===S.ck.open);const o=$('#overlay');
-  o.innerHTML=`<div class="totemfull gr-${ev.g}"><p class="eb2" style="color:inherit;opacity:.85">${ev.t}</p><h2 class="big" style="color:inherit;text-align:center;margin:0">Aponte a câmera<br>do app Alva</h2><div class="qr">${qrSVG('totem-'+ev.id)}</div><div class="totemcount"><b id="tNum">${ckDone(ev)}</b><span>de ${ev.total} já entraram</span></div><div class="totemhi" id="tHi" aria-live="polite"></div><button class="btn onmedia md" data-a="ckTotemClose">Sair do modo totem</button></div>`;
-  clearInterval(S._tt);S._tt=setInterval(()=>{const p=ev.list.find(x=>!x.at);const t=$('#tNum');if(!p||!t){clearInterval(S._tt);return;}p.at=nowHM();S.ck.recent.unshift({n:p.n,code:p.code,at:p.at});t.textContent=ckDone(ev);t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump');const h=$('#tHi');h.innerHTML=`<span>${ic('check',16,2.75)}Bem-vindo, ${esc(p.n.split(' ')[0])}!</span>`;h.classList.remove('in');void h.offsetWidth;h.classList.add('in');},3200);},
- ckTotemClose:()=>{clearInterval(S._tt);$('#overlay').innerHTML='';softRender();}
-});
-
-/* ---------- home cards per role ---------- */
+/* ---------- cenários por tipo de usuário ---------- */
 function visitorCard(){return `<div class="pad" style="margin:-4px 0 22px"><div class="vcard gr-aurora"><p class="eb2" style="color:#fff;opacity:.85">Primeira vez por aqui?</p><p class="vtitle">Que bom ter você com a gente.</p><p style="margin:0;font:400 15px/20px var(--font-text);color:rgba(255,255,255,.88)">O melhor jeito de conhecer a Alva é numa Casa de Apascentamento perto de você.</p><div class="row g2" style="margin-top:6px"><button class="btn dark md" data-a="tab" data-v="grupos">Encontrar uma Casa</button><button class="btn onmedia md" data-a="sub" data-v="quemSomos">Quem somos</button></div></div></div>`;}
-function staffCard(){const ev=CK.find(e=>e.today);const d=ckDone(ev);return `<div class="pad" style="margin:-4px 0 22px"><button class="scard" data-a="ckOpenHome" data-v="${ev.id}"><span class="grow stack" style="gap:4px"><span class="eb2">Seu turno de hoje</span><span class="chn" style="font-size:22px">${ev.t}</span><span class="chm">${ev.when} · ${d} de ${ev.total} entradas</span></span><span class="ring sm" style="--p:${Math.round(d/ev.total*100)}"><span>${Math.round(d/ev.total*100)}%</span></span></button></div>`;}
-A.ckOpenHome=v=>{S.ck.open=v;S.ck.mode='qr';S.ck.recent=[];S.hist=['checkin'];S.screen='checkinEv';render('tab');};
-
-/* ---------- role switching + demo scenarios ---------- */
-function roleApply(){if(S.role==='visitante')S.ag.tab='Eventos';if(S.role!=='staff'&&(S.screen==='checkin'||S.screen==='checkinEv')){S.hist=[];S.screen='home';render('tab');return;}if(APP.includes(S.screen))softRender();}
+function roleApply(){if(S.role==='visitante'){S.ag.tab='Eventos';if(['cursos','curso','bebes','bebeNovo','meusMin','svcTeam','urgentes','contribuir'].includes(S.screen)){S.hist=[];S.screen='home';render('tab');return;}}if(APP.includes(S.screen))softRender();}
 const SCN={
  visitante:()=>{S.user={first:'Lucas',name:'Lucas Almeida'};S.role='visitante';S.me.nome='Lucas Almeida';S.ag.tab='Eventos';return 'home';},
- membro:()=>{S.user={first:'Rafael',name:'Rafael Pereira'};S.role='membro';S.me.nome='Rafael Pereira';return 'home';},
- staff:()=>{S.user={first:'Marina',name:'Marina Castro'};S.role='staff';S.me.nome='Marina Castro';return 'checkin';}
+ membro:()=>{S.user={first:'Rafael',name:'Rafael Pereira'};S.role='membro';S.me.nome='Rafael Pereira';return 'home';}
 };
 (function(){const nav=$('#demoUsers');if(!nav)return;const sec=nav.closest('.rail-sec');const box=document.createElement('div');box.className='rail-sec';
- box.innerHTML=`<span class="rail-lbl">Cenários por tipo de usuário</span><div class="rail-nav" id="scnUsers"><button type="button" data-v="visitante">Visitante · primeiro acesso</button><button type="button" data-v="membro">Membro · agenda e escalas</button><button type="button" data-v="staff">Staff de eventos · check-in</button></div>`;
+ box.innerHTML=`<span class="rail-lbl">Cenários por tipo de usuário</span><div class="rail-nav" id="scnUsers"><button type="button" data-v="visitante">Visitante · primeiro acesso</button><button type="button" data-v="membro">Membro · agenda e escalas</button></div>`;
  sec.parentNode.insertBefore(box,sec);
  $('#scnUsers').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.church=S.church||CHURCHES[0];const scr=SCN[b.dataset.v]();$('#overlay').innerHTML='';S.hist=[];S.screen=scr;render('tab');});
- RAIL.push(['checkin','Staff › Check-in'],['checkinEv','Staff › Evento (leitor)']);
- $('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
- $('#railNav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.s==='checkin'||b.dataset.s==='checkinEv'){if(S.role!=='staff'){S.role='staff';S.user={first:'Marina',name:'Marina Castro'};}if(b.dataset.s==='checkinEv')S.hist=['checkin'];setTimeout(()=>render('none'),0);}},true);
 })();
 
 /* ---------- Liderança › Casos urgentes ---------- */
@@ -1178,15 +1138,201 @@ const URG=[{id:'u1',who:'Maria Santos',kind:'Hospital',tone:'vinho',d:'16/09/202
  {id:'u2',who:'Pedro Almeida',kind:'Oração',tone:'ambar',d:'14/09/2026',txt:'Pediu oração pela família depois de perder o emprego. Casa Centro acompanhando.',resp:'Pr. Marcos Lima',upd:'Atualizado há 5 dias'},
  {id:'u3',who:'Joana Ribeiro',kind:'Visita',tone:'oceano',d:'12/09/2026',txt:'Mora sozinha e pediu visita depois da alta médica. Prefere as manhãs.',resp:'Diac. Ana Costa',upd:'Atualizado há 1 semana'}];
 S.urgOpen='u1';
-V.urgentes=()=>({sb:'var(--ink)',tabs:S.role==='staff'?'checkin':'mais',html:`${subHead('Casos urgentes','Consulta rápida. Para editar, agendar ou encerrar um caso, use o painel admin.')}
+V.urgentes=()=>({sb:'var(--ink)',tabs:'mais',html:`${subHead('Acompanhamentos','Casos que você acompanha, urgentes primeiro. Para editar, agendar ou encerrar, use o painel web.')}
  <div class="pad stack g5" style="padding-top:8px">
   <div class="chlist">${URG.map(u=>{const o=S.urgOpen===u.id;return `<div class="urg ${o?'open':''}"><button class="urg-h" data-a="urgToggle" data-v="${u.id}" aria-expanded="${o}"><span class="chdot" style="background:${MK[u.tone]||'var(--ink-muted)'}"></span><span class="grow stack" style="gap:2px"><span class="chn" style="font-size:22px;line-height:26px">${u.who}</span><span class="chm">${u.kind} · ${u.d}</span></span><span class="chev acc-c">${ic('chevR',18,2)}</span></button>
    ${o?`<div class="urg-b"><p class="body" style="color:var(--ink);margin:0">${esc(u.txt)}</p><div class="stack" style="gap:2px"><span class="chm">Responsável: <b style="color:var(--ink)">${u.resp}</b></span><span class="foot">${u.upd}</span></div><button class="btn outline md" style="align-self:flex-start" data-a="admin">Abrir no painel</button></div>`:''}</div>`;}).join('')}</div>
   <p class="foot" style="margin:0;text-align:center">Só líderes e administradores veem esta lista.</p>
  </div>`});
 A.urgToggle=v=>{S.urgOpen=S.urgOpen===v?null:v;softRender();};
-RAIL.push(['urgentes','Liderança › Casos urgentes']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
+RAIL.push(['urgentes','Liderança › Acompanhamentos']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 $('#railNav').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.s==='urgentes'&&!['lider','admin'].includes(S.role)){S.role='lider';}},true);
 
+
+/* ================= Escala › presença no dia (check-in com localização) ================= */
+S.escalas.unshift({id:'s0',min:'Louvor',area:'Ministério de Louvor',fn:'Vocal',y:2026,m:9,d:29,h:'20h',st:'confirmado',what:'Ensaio do Louvor',place:'Templo principal'});
+S.svc={now:18*60+40,geo:'perto',perm:null,leader:'Daniela Rocha',
+ team:[{n:'Rafael Pereira',fn:'Vocal',me:true},{n:'Elisa Moura',fn:'Vocal',ck:{at:'18h22',dist:12}},{n:'Diego Faria',fn:'Bateria',ck:{at:'18h31',dist:85}},{n:'Igor Santana',fn:'Baixo'},{n:'Clara Nunes',fn:'Teclado',ck:{at:'18h05',dist:30},pr:'ok'}]};
+const SVC_R=150,SVC_GEO={perto:{dist:40,acc:12},longe:{dist:2300,acc:20},fraco:{dist:90,acc:600},negado:null};
+const svcHM=m=>`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}`.replace('h00','h');
+const svcEsc=()=>S.escalas.find(x=>x.id==='s0');
+const svcWin=()=>{const st=20*60;return {open:st-120,start:st,close:st+120};};
+const svcPhase=()=>{const w=svcWin(),n=S.svc.now;return n<w.open?'antes':n>w.close?'fim':'aberto';};
+const svcMe=()=>S.svc.team.find(p=>p.me);
+const svcOf=p=>p.pr==='ok'?'ok':p.pr==='falta'?'falta':p.ck?'ck':'pend';
+const svcDist=d=>d>=1000?(d/1000).toFixed(1).replace('.',',')+' km':d+' m';
+function svcStatus(){const x=svcEsc(),me=svcMe(),ph=svcPhase(),w=svcWin(),k=svcOf(me);
+ if(!x||x.st==='recusado')return null;
+ if(x.st==='pendente')return {k:'conf',t:'Confirme a escala para liberar o check-in',s:'O check-in abre às '+svcHM(w.open)+', 2h antes.',btn:['Confirmar escala','escalaOk','s0']};
+ if(k==='ok')return {k:'ok',t:'Presença confirmada',s:me.manual?'Marcada por '+S.svc.leader.split(' ')[0]+' · '+me.why:'Check-in às '+me.ck.at+' · confirmado por '+S.svc.leader.split(' ')[0]};
+ if(k==='falta')return {k:'falta',t:'Falta registrada',s:'Se você esteve lá, fale com '+S.svc.leader.split(' ')[0]+' para corrigir.',btn:['Falar com o líder','svcTalk','']};
+ if(k==='ck')return {k:'ck',t:'Check-in feito às '+me.ck.at,s:'A '+svcDist(me.ck.dist)+' do local · aguardando '+S.svc.leader.split(' ')[0]+' confirmar'};
+ if(ph==='antes')return {k:'antes',t:'Check-in abre às '+svcHM(w.open),s:'Faltam '+svcHM(w.open-S.svc.now).replace('h',' h ').replace(/ $/,'')+'. Você precisa estar no local.'};
+ if(ph==='fim')return {k:'fim',t:'Check-in encerrado às '+svcHM(w.close),s:'Se você esteve lá, avise '+S.svc.leader.split(' ')[0]+': o líder pode marcar sua presença.',btn:['Avisar o líder','svcTalk','']};
+ return {k:'aberto',t:'Check-in aberto até '+svcHM(w.close),s:'Funciona a até '+SVC_R+' m de '+x.place+'.',btn:['Fazer check-in','svcStart','']};}
+function svcBox(compact){const st=svcStatus();if(!st)return '';const x=svcEsc();
+ return `<div class="svc-box ${st.k}"><div class="row g3" style="align-items:center"><span class="svc-ic">${ic(st.k==='ok'?'check':st.k==='falta'?'x':st.k==='conf'?'alert':'pin',18,2.2)}</span><div class="grow stack" style="gap:2px"><span class="svc-t">${st.t}</span><span class="svc-s">${st.s}</span></div></div>${st.btn?`<button type="button" class="btn ${st.k==='aberto'||st.k==='conf'?'primary':'outline'} md block" data-a="${st.btn[1]}" data-v="${st.btn[2]}">${st.k==='aberto'?ic('pin',16,2.2):''}${st.btn[0]}</button>`:''}</div>`;}
+function svcHome(){const x=svcEsc();if(!x||x.st==='recusado'||S.role==='visitante')return '';
+ const lead=['lider','admin'].includes(S.role),team=S.svc.team,c=k=>team.filter(p=>svcOf(p)===k).length;
+ return `<div class="pad" style="margin:-4px 0 22px"><section class="svc-card"><div class="row between" style="align-items:flex-start"><div class="stack" style="gap:3px"><span class="eb2" style="color:inherit;opacity:.8">Hoje você serve</span><span class="svc-h">${x.what}</span><span class="svc-m">${x.min} · ${x.fn} · ${x.h} · ${x.place}</span></div><span class="svc-day"><b>${x.d}</b>${MONTHS[x.m-1].slice(0,3)}</span></div>${svcBox()}</section>
+  ${lead?`<button class="scard svc-lead" data-a="svcTeam" style="margin-top:12px"><span class="grow stack" style="gap:4px"><span class="eb2">Você lidera hoje</span><span class="chn" style="font-size:19px">Presença do time</span><span class="chm">${c('ok')} presentes · ${c('ck')} para confirmar · ${c('pend')} sem check-in</span></span><span class="ring sm" style="--p:${Math.round((c('ok'))/team.length*100)}"><span>${c('ok')}/${team.length}</span></span></button>`:''}</div>`;}
+/* sheet de check-in */
+function svcSheet(){const x=svcEsc();
+ sheet(`<div class="stack g5" id="svcSh"><div class="stack g2"><h3 class="t2">Check-in da escala</h3><p class="callout">${x.what} · ${x.fn} · hoje, ${x.h}</p></div>
+  <div class="svc-map" id="svcMap"><div class="svc-rad"><i></i><i></i><i></i></div><span class="svc-pin">${ic('church',16,2)}</span><span class="svc-me" id="svcMe"></span><span class="svc-lbl">${x.place} · raio de ${SVC_R} m</span></div>
+  <div id="svcMsg"></div><div class="stack g3" id="svcAct"></div></div>`,sh=>{svcStep(sh,S.svc.perm?'ready':'perm');});}
+function svcStep(sh,step,data){const msg=$('#svcMsg',sh),act=$('#svcAct',sh),map=$('#svcMap',sh),me=$('#svcMe',sh);map.className='svc-map '+step;
+ const B=(lab,id,pri=true)=>`<button type="button" class="btn ${pri?'primary':'outline'} block" id="${id}">${lab}</button>`;
+ if(step==='perm'){msg.innerHTML=`<div class="svc-note">${ic('pin',16,2)}<div><b>Precisamos da sua localização</b><span>Só no momento do check-in, para confirmar que você está no local. Não acompanhamos você depois.</span></div></div>`;act.innerHTML=B('Permitir localização','svP')+'<button type="button" class="tlink" data-a="closeSheet">Agora não</button>';
+  $('#svP',sh).onclick=()=>{if(S.svc.geo==='negado'){S.svc.perm='negado';return svcStep(sh,'negado');}S.svc.perm='ok';svcStep(sh,'ready');};return;}
+ if(step==='ready'){msg.innerHTML=`<p class="callout" style="text-align:center">Chegou? Confirme sua presença. O check-in só vale a até ${SVC_R} m do local.</p>`;act.innerHTML=B(ic('pin',16,2.2)+'Estou aqui','svGo');
+  $('#svGo',sh).onclick=async e=>{if(S.svc.geo==='negado'){S.svc.perm='negado';return svcStep(sh,'negado');}const b=e.currentTarget;svcStep(sh,'loc');};return;}
+ if(step==='loc'){msg.innerHTML=`<p class="callout" style="text-align:center">Buscando sua localização…</p>`;act.innerHTML='';
+  setTimeout(()=>{const g=SVC_GEO[S.svc.geo];if(!g)return svcStep(sh,'negado');if(g.acc>SVC_R)return svcStep(sh,'fraco',g);if(g.dist>SVC_R)return svcStep(sh,'longe',g);svcStep(sh,'ok',g);},1400);return;}
+ if(step==='longe'){me.style.setProperty('--d','1');msg.innerHTML=`<div class="svc-note bad">${ic('alert',16,2.2)}<div><b>Você está a ${svcDist(data.dist)} do local</b><span>O check-in só funciona a até ${SVC_R} m de ${svcEsc().place}. Chegue lá e tente de novo.</span></div></div>`;act.innerHTML=B('Tentar de novo','svR')+B('Ver no mapa','svM',false);$('#svR',sh).onclick=()=>svcStep(sh,'loc');$('#svM',sh).onclick=()=>toast('info','Abrindo o mapa',svcEsc().place+' · Rua das Flores, 120');return;}
+ if(step==='fraco'){msg.innerHTML=`<div class="svc-note warn">${ic('alert',16,2.2)}<div><b>Localização imprecisa (± ${svcDist(data.acc)})</b><span>Não dá para confirmar que você está no local. Ligue o Wi-Fi ou vá para perto de uma janela e tente de novo.</span></div></div>`;act.innerHTML=B('Tentar de novo','svR');$('#svR',sh).onclick=()=>svcStep(sh,'loc');return;}
+ if(step==='negado'){msg.innerHTML=`<div class="svc-note bad">${ic('lock',16,2.2)}<div><b>Localização bloqueada</b><span>Ative em Ajustes › Alva › Localização. Se não der, avise ${S.svc.leader.split(' ')[0]}: o líder pode marcar sua presença.</span></div></div>`;act.innerHTML=B('Abrir ajustes','svA')+B('Avisar o líder','svL',false);$('#svA',sh).onclick=()=>toast('info','Abrindo os ajustes do aparelho','Volte aqui depois de permitir.');$('#svL',sh).onclick=async()=>{await closeSheet();A.svcTalk();};return;}
+ if(step==='ok'){msg.innerHTML=`<div class="svc-note ok">${ic('check',16,2.4)}<div><b>Você está no local · a ${svcDist(data.dist)}</b><span>Confirme para registrar sua presença.</span></div></div>`;act.innerHTML=B('Confirmar presença','svC');
+  $('#svC',sh).onclick=async e=>{await busy(e.currentTarget,700,null,'Presença registrada');const m=svcMe();m.ck={at:svcHM(S.svc.now),dist:data.dist};await wait(250);await closeSheet();softRender();toast('success','Check-in feito às '+m.ck.at,S.svc.leader.split(' ')[0]+' vai confirmar sua presença. Bom serviço!');};}
+}
+/* tela do líder */
+V.svcTeam=()=>{const x=svcEsc(),t=S.svc.team,c=k=>t.filter(p=>svcOf(p)===k).length,ph=svcPhase(),w=svcWin(),nck=c('ck');
+ return {sb:'var(--ink)',html:`${subHead('Presença do time',`${x.what} · hoje, ${x.h} · ${x.place}`)}
+ <div class="pad stack g5" style="padding-bottom:40px">
+  <div class="svc-sum ${ph}"><div class="row g4" style="align-items:center"><span class="ring" style="--p:${Math.round(c('ok')/t.length*100)}"><span><b style="font:700 20px/1 var(--font-display)">${c('ok')}</b><small style="display:block;font-size:10px;opacity:.7">de ${t.length}</small></span></span>
+   <div class="grow stack" style="gap:6px"><span class="it-title">${ph==='antes'?'Check-in abre às '+svcHM(w.open):ph==='fim'?'Check-in encerrado às '+svcHM(w.close):'Check-in aberto até '+svcHM(w.close)}</span><div class="svc-cn"><span class="ck"><b>${nck}</b> para confirmar</span><span><b>${c('pend')}</b> sem check-in</span>${c('falta')?`<span class="falta"><b>${c('falta')}</b> falta${c('falta')===1?'':'s'}</span>`:''}</div></div></div>
+   ${nck?`<button type="button" class="btn primary md block" data-a="svcAll" style="margin-top:14px">Confirmar ${nck} check-in${nck===1?'':'s'}</button>`:''}</div>
+  <div class="stack g3"><p class="eb2">Time</p><div class="svc-list">${t.map((p,i)=>{const k=svcOf(p);return `<div class="svc-row ${k}"><span class="avatar" style="${tone(['ceu','menta','lima','damasco','vinho'][i%5])};width:40px;height:40px;font-size:13px">${initials(p.n)}</span>
+   <div class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(p.n.split(' ')[0])}${p.me?' <span class="it-sub">· você</span>':' '+esc(p.n.split(' ').slice(1).join(' '))}</span><span class="it-sub">${p.fn} · ${k==='ok'?(p.manual?'marcado por você · '+p.why:'presente · check-in '+p.ck.at):k==='ck'?'check-in '+p.ck.at+' · a '+svcDist(p.ck.dist):k==='falta'?'falta registrada':'sem check-in'}</span></div>
+   ${k==='ck'?`<button type="button" class="btn primary sm" data-a="svcOk" data-v="${i}">Confirmar</button>`:k==='pend'?`<button type="button" class="svc-more" data-a="svcPend" data-v="${i}" aria-label="Opções para ${esc(p.n)}">${ic('dots',18,2)}</button>`:`${status(k==='ok'?'success':'danger',k==='ok'?'Presente':'Faltou')}<button type="button" class="svc-more" data-a="svcUndo" data-v="${i}" aria-label="Desfazer">${ic('swap',16,2)}</button>`}</div>`;}).join('')}</div></div>
+  <p class="foot" style="text-align:center">Check-in só vale a até ${SVC_R} m do local. Quem esqueceu ou ficou sem sinal, você marca aqui.</p></div>`};};
+APP.push('svcTeam');SUBS.push('svcTeam');
+Object.assign(A,{
+ svcStart:()=>{const ph=svcPhase();if(ph!=='aberto'){toast('error',ph==='antes'?'O check-in ainda não abriu':'O check-in já encerrou',ph==='antes'?'Abre às '+svcHM(svcWin().open)+'.':'Fale com o líder para marcar sua presença.');return;}svcSheet();},
+ svcTalk:async(v,el)=>{if(el)await busy(el,600,null,'Avisado');toast('success','Aviso enviado para '+S.svc.leader.split(' ')[0],'Ela pode marcar sua presença pelo app.');},
+ svcTeam:()=>go('svcTeam'),
+ svcOk:async(v,el)=>{const p=S.svc.team[+v];await busy(el,500,null,'Confirmado');p.pr='ok';softRender();toast('success','Presença confirmada',p.n.split(' ')[0]+' recebe a confirmação no app.');},
+ svcAll:async(v,el)=>{const l=S.svc.team.filter(p=>svcOf(p)==='ck');await busy(el,700,null,'Confirmados');l.forEach(p=>p.pr='ok');softRender();toast('success',l.length+' presenças confirmadas',l.map(p=>p.n.split(' ')[0]).join(', ')+'.');},
+ svcUndo:v=>{const p=S.svc.team[+v],o={pr:p.pr,manual:p.manual,why:p.why};delete p.pr;delete p.manual;delete p.why;softRender();toast('info','Presença reaberta',p.n.split(' ')[0]+' volta para '+(p.ck?'“para confirmar”':'“sem check-in”')+'.');},
+ svcPend:v=>{const p=S.svc.team[+v],f=p.n.split(' ')[0],w=svcWin(),pre=S.svc.now<w.start;
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${esc(p.n)}</h3><p class="callout">Ainda não fez check-in.</p></div>
+   <div class="stack g2"><span class="eb2">Marcar presente · por quê?</span><div class="row g2" style="flex-wrap:wrap" id="svW">${['Esqueceu o celular','Sem internet','Localização bloqueada','Chegou depois'].map(w=>`<button type="button" class="chip" aria-pressed="false" data-v="${w}">${w}</button>`).join('')}</div></div>
+   <div class="otpmsg" id="svE" role="alert" style="min-height:0"></div>
+   <div class="stack g3"><button type="button" class="btn primary block" id="svMan">Marcar presente</button><button type="button" class="btn outline block" id="svF" ${pre?'disabled':''}>Registrar falta</button>${pre?`<p class="foot" style="text-align:center;margin-top:-4px">Falta só pode ser registrada depois do início (${svcHM(w.start)}).</p>`:''}<button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
+   let why=null;$('#svW',sh).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('#svW button',sh).forEach(z=>z.setAttribute('aria-pressed',z===b));why=b.dataset.v;$('#svE',sh).textContent='';});
+   $('#svMan',sh).addEventListener('click',async e=>{if(!why){$('#svE',sh).textContent='Escolha um motivo. Fica no histórico.';return;}await busy(e.currentTarget,600,null,'Marcado');Object.assign(p,{pr:'ok',manual:true,why});await closeSheet();softRender();toast('success',f+' marcado(a) como presente',why+'.');});
+   $('#svF',sh).addEventListener('click',()=>{sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Registrar falta de ${esc(f)}?</h3><p class="callout">${esc(p.n)} recebe um aviso gentil no app. A falta fica no histórico de serviço e dá para desfazer.</p></div><div class="stack g3"><button type="button" class="btn primary block danger" id="svFOk">Registrar falta</button><button type="button" class="tlink" data-a="closeSheet">Cancelar</button></div></div>`,s2=>{$('#svFOk',s2).addEventListener('click',async ev=>{await busy(ev.currentTarget,600,null,'Registrada');p.pr='falta';await closeSheet();softRender();toast('info','Falta de '+f+' registrada','Dá para desfazer na lista.');});});});});},
+});
+/* rail: simulação de horário e localização */
+(function(){const nav=$('#demoUsers');if(!nav)return;const sec=nav.closest('.rail-sec');const box=document.createElement('div');box.className='rail-sec';
+ box.innerHTML=`<span class="rail-lbl">Check-in de escala · horário</span><div class="rail-chips" id="svcT">${[[16*60+30,'16h30 · antes'],[18*60+40,'18h40 · aberto'],[20*60+25,'20h25 · durante'],[22*60+30,'22h30 · encerrado']].map(t=>`<button type="button" data-v="${t[0]}" aria-pressed="${S.svc.now===t[0]}">${t[1]}</button>`).join('')}</div>
+  <span class="rail-lbl" style="margin-top:10px">Check-in de escala · localização</span><div class="rail-chips" id="svcG">${[['perto','No local (40 m)'],['longe','Longe (2,3 km)'],['fraco','GPS fraco'],['negado','Sem permissão']].map(g=>`<button type="button" data-v="${g[0]}" aria-pressed="${S.svc.geo===g[0]}">${g[1]}</button>`).join('')}</div>`;
+ sec.parentNode.insertBefore(box,sec);
+ const clock=()=>{const s=$('.statusbar span');if(s)s.textContent=Math.floor(S.svc.now/60)+':'+String(S.svc.now%60).padStart(2,'0');};clock();
+ $('#svcT').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.svc.now=+b.dataset.v;$$('#svcT button').forEach(x=>x.setAttribute('aria-pressed',x===b));clock();if(['home','agenda','svcTeam'].includes(S.screen))softRender();});
+ $('#svcG').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.svc.geo=b.dataset.v;if(b.dataset.v!=='negado'&&S.svc.perm==='negado')S.svc.perm=null;$$('#svcG button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+ RAIL.push(['svcTeam','Líder › Presença do time']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
+ $('#railNav').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.s==='svcTeam'&&!['lider','admin'].includes(S.role)){S.role='lider';}},true);
+})();
+
+
+/* ================= Apresentação de Bebês ao Senhor (membro) ================= */
+S.apb={max:24,prazo:7,
+ datas:[{id:'bd1',y:2026,m:10,d:4,h:'10h',t:'Culto de Celebração',vagas:5,used:2},{id:'bd2',y:2026,m:10,d:11,h:'10h',t:'Culto de Celebração',vagas:6,used:2},{id:'bd4',y:2026,m:10,d:25,h:'10h',t:'Culto de Celebração',vagas:6,used:6},{id:'bd5',y:2026,m:11,d:8,h:'10h',t:'Culto de Celebração',vagas:6,used:1}],
+ kids:[{id:'k1',n:'Helena Pereira',nasc:'2026-02-10'},{id:'k2',n:'Lucas Pereira',nasc:'2023-05-02'}],
+ pedidos:[{id:'ap1',kid:'k2',bebe:'Lucas Pereira',cert:'Lucas Pereira',pais:['Rafael Pereira','Camila Pereira'],when:'Dom, 14 mai 2023 · 10h',culto:'Culto de Celebração',st:'realizada'}],
+ f:null};
+const APB_ST={aguardando:['warning','Aguardando'],confirmado:['success','Confirmado'],realizada:['success','Realizada'],recusado:['danger','Recusado'],cancelado:['danger','Cancelado']};
+const apbM=(nasc,y,m,d)=>{const a=new Date(nasc+'T12:00'),b=new Date(y,m-1,d,12);let n=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());if(b.getDate()<a.getDate())n--;return Math.max(0,n);};
+const apbAge=n=>n<1?'recém-nascido(a)':n<12?`${n} ${n===1?'mês':'meses'}`:(()=>{const y=Math.floor(n/12),r=n%12;return `${y} ano${y>1?'s':''}${r?` e ${r} ${r===1?'mês':'meses'}`:''}`;})();
+const apbMaxTx=()=>S.apb.max%12?`${S.apb.max} meses`:`${S.apb.max/12} anos`;
+const apbDays=dt=>Math.round((new Date(dt.y,dt.m-1,dt.d,12)-new Date(TODAY.y,TODAY.m-1,TODAY.d,12))/864e5);
+const apbKidNow=k=>apbM(k.nasc,TODAY.y,TODAY.m,TODAY.d);
+const apbActive=kid=>S.apb.pedidos.find(p=>p.kid===kid&&['aguardando','confirmado','realizada'].includes(p.st));
+function apbCertHTML(p){return `<div class="apb-cert"><div class="apb-cert-in"><span class="apb-c-eb">Certificado de</span><h2 class="apb-c-t">Apresentação ao Senhor</h2><p class="apb-c-tx">Certificamos que</p><p class="apb-c-n">${esc(p.cert)}</p><p class="apb-c-tx">filho(a) de ${p.pais.map(esc).join(' e ')}, foi apresentado(a) ao Senhor diante da igreja reunida no ${esc(p.culto)}, ${p.when.split(' · ')[0].replace(/^\w+, /,'')}.</p><blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote><div class="apb-c-sig"><span><i></i>Pr. Rafael Pereira</span><span><i></i>${esc(S.church.name||'Alva Sede')}</span></div></div></div>`;}
+
+V.bebes=()=>{const P=S.apb.pedidos,open=S.apb.datas.filter(d=>apbDays(d)>=S.apb.prazo&&d.used<d.vagas);
+ return {sb:'var(--ink)',html:`${subHead('Apresentações','Seu bebê apresentado ao Senhor no culto, com a igreja reunida.')}
+ <div class="pad stack g6" style="padding-bottom:24px">
+  <section class="apb-hero"><span class="apb-hi">${ic('pacifier',22,1.8)}</span><blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote><p>Os pais trazem o bebê à frente no culto, a igreja ora pela família e vocês recebem o certificado no app.</p></section>
+  ${P.length?`<section class="stack g3"><p class="eb2">Seus pedidos</p>${P.map(p=>{const s=APB_ST[p.st];return `<article class="card apb-p ${p.st}"><div class="row g3" style="align-items:flex-start"><span class="apb-av">${ic('pacifier',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${esc(p.bebe)}</span><span class="it-sub">${p.culto} · ${p.when}</span></div>${status(s[0],s[1])}</div>
+   ${p.st==='aguardando'?`<p class="apb-note">${ic('clock',14,2)}A secretaria confirma em até 3 dias úteis. Você recebe um aviso aqui no app.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Cancelar pedido</button>`:p.st==='confirmado'?`<p class="apb-note ok">${ic('check',14,2.4)}Chegue 20 minutos antes e procure a recepção. Vocês serão chamados à frente.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Não vamos conseguir</button>`:p.st==='realizada'?`<button class="btn outline md block" data-a="apbCert" data-v="${p.id}">${ic('award',16,2)}Ver certificado</button>`:p.why?`<p class="apb-note bad">${ic('info',14,2)}${esc(p.why)}</p>`:''}</article>`;}).join('')}</section>`:''}
+  <section class="stack g3"><p class="eb2">Como funciona</p><ol class="steps"><li>Escolha um dos cultos com apresentação.</li><li>A secretaria confirma o pedido.</li><li>No culto, vocês apresentam o bebê à frente.</li><li>O certificado chega aqui no app.</li></ol>
+   <p class="foot">Para bebês de até ${apbMaxTx()}. Pelo menos um dos responsáveis precisa ser membro. Pedidos até ${S.apb.prazo} dias antes do culto.</p></section>
+ </div>
+ <div class="apb-dock"><button class="btn primary block" data-a="apbNew" ${open.length?'':'disabled'}>${open.length?'Agendar apresentação':'Sem datas abertas no momento'}</button></div>`};};
+
+V.bebeNovo=()=>{const F=S.apb.f,st=F.step;
+ const steps=['Bebê','Data','Confirmar'];
+ let body='';
+ if(st===1){const pd=F.date&&S.apb.datas.find(x=>x.id===F.date);body=`${pd?`<div class="apb-evb"><span class="apb-av">${ic('calendar',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${pd.t}</span><span class="it-sub">${fmtK(K(pd.y,pd.m,pd.d))} · ${pd.h} · culto escolhido</span></div></div>`:''}<div class="stack g3"><p class="eb2">Quem será apresentado?</p>${S.apb.kids.map(k=>{const n=apbKidNow(k),done=apbActive(k.id),ov=n>S.apb.max,dis=done||ov;return `<button class="apb-k ${F.kid===k.id?'on':''}" data-a="apbKid" data-v="${k.id}" ${dis?'disabled':''}><span class="apb-av">${ic('pacifier',18,1.8)}</span><span class="grow stack" style="gap:2px;align-items:flex-start"><span class="it-title">${esc(k.n)}</span><span class="it-sub">${apbAge(n)}${done?` · ${done.st==='realizada'?'já apresentado(a)':'já tem pedido'}`:ov?` · acima de ${apbMaxTx()}`:''}</span></span>${dis?ic('lock',16,2):`<span class="apb-rd"></span>`}</button>`;}).join('')}
+   ${S.apb.kids.some(k=>apbKidNow(k)>S.apb.max&&!apbActive(k.id))?`<p class="foot">${ic('info',13,2)} Criança acima de ${apbMaxTx()}? Fale com a secretaria.</p>`:''}
+   <button class="apb-add ${F.adding?'on':''}" data-a="apbAddKid">${ic('plus',18,2.2)}Cadastrar outro bebê</button>
+   ${F.adding?`<div class="stack g4 apb-nk">${field({id:'apbN',label:'Nome completo do bebê',ph:'Como no registro',val:F.nk.n})}${field({id:'apbD',label:'Data de nascimento',type:'date',val:F.nk.d})}<button class="btn outline md block" data-a="apbSaveKid">Adicionar à família</button></div>`:''}</div>`;}
+ if(st===2){const k=S.apb.kids.find(x=>x.id===F.kid);body=`<div class="stack g3"><p class="eb2">Em qual culto?</p>${S.apb.datas.map(d=>{const dd=apbDays(d),full=d.used>=d.vagas,late=dd<S.apb.prazo,m=apbM(k.nasc,d.y,d.m,d.d),ov=m>S.apb.max,dis=full||late||ov,left=d.vagas-d.used;
+   return `<button class="apb-d ${F.date===d.id?'on':''}" data-a="apbDate" data-v="${d.id}" ${dis?'disabled':''}><span class="apb-dt"><b>${d.d}</b>${MONTHS[d.m-1].slice(0,3)}</span><span class="grow stack" style="gap:2px;align-items:flex-start"><span class="it-title">${d.t}</span><span class="it-sub">${fmtK(K(d.y,d.m,d.d)).split(',')[0]} · ${d.h} · ${esc(k.n.split(' ')[0])} com ${apbAge(m)}</span></span><span class="apb-v ${dis?'x':left<=2?'few':''}">${full?'Esgotado':late?'Prazo encerrado':ov?'Acima da idade':left===1?'1 vaga':left+' vagas'}</span></button>`;}).join('')}
+   <p class="foot">Os pedidos fecham ${S.apb.prazo} dias antes de cada culto.</p></div>`;}
+ if(st===3){const k=S.apb.kids.find(x=>x.id===F.kid),d=S.apb.datas.find(x=>x.id===F.date);body=`<div class="stack g5"><div class="apb-sum"><span class="apb-av lg">${ic('pacifier',22,1.8)}</span><div class="stack" style="gap:2px"><span class="it-title">${esc(k.n)}</span><span class="it-sub">${d.t} · ${fmtK(K(d.y,d.m,d.d))} · ${d.h}</span></div></div>
+   ${field({id:'apbC',label:'Nome no certificado',val:F.cert,hint:'Confira a grafia: é assim que sai no certificado.'})}
+   <div class="stack g2"><span class="eb2">Responsáveis</span><div class="apb-r"><span class="it-title">Rafael Pereira</span><span class="apb-mb">${ic('check',11,3)}Membro</span></div></div>
+   ${field({id:'apbP2',label:'Outro responsável (opcional)',val:F.p2,ph:'Nome completo'})}
+   <p class="apb-note">${ic('info',14,2)}A presença dos responsáveis no culto é obrigatória: vocês serão chamados à frente com o bebê.</p></div>`;}
+ return {sb:'var(--ink)',html:`<header class="subhead"><div class="row between"><button class="iconbtn" data-a="apbBack" aria-label="Voltar">${ic('chevL',20,2.25)}</button><span class="apb-steps">${steps.map((s,i)=>`<i class="${i+1<st?'done':i+1===st?'on':''}"></i>`).join('')}</span></div><h1 class="t1" style="margin-top:14px">Agendar apresentação</h1><p class="callout">Passo ${st} de 3 · ${steps[st-1]}</p></header>
+ <div class="pad stack g5" style="padding-bottom:24px">${body}</div>
+ <div class="apb-dock"><button class="btn primary block" data-a="apbNext" id="apbGo">${st===3?'Enviar pedido':'Continuar'}</button></div>`};};
+HOOK.bebeNovo=function(){const F=S.apb.f;[['apbN',v=>F.nk.n=v],['apbD',v=>F.nk.d=v],['apbC',v=>F.cert=v],['apbP2',v=>F.p2=v]].forEach(([id,fn])=>{const el=$('#'+id);if(el)el.addEventListener('input',()=>{fn(el.value);clearErr(id);});});};
+V.bebeCert=()=>{const p=S.apb.pedidos.find(x=>x.id===S.apb.cert);return {sb:'var(--ink)',html:`${subHead('Certificado',esc(p.bebe))}<div class="pad stack g5" style="padding-bottom:40px">${apbCertHTML(p)}<div class="stack g3"><button class="btn primary block" data-a="apbPdf">${ic('share',16,2)}Compartilhar</button><button class="btn outline block" data-a="apbPdf" data-v="pdf">Baixar PDF</button></div></div>`};};
+APP.push('bebes','bebeNovo','bebeCert');SUBS.push('bebes','bebeNovo','bebeCert');
+Object.assign(A,{
+ apbNew:()=>{if(S.role==='visitante'){toast('error','Só para membros','Pelo menos um dos responsáveis precisa ser membro. Fale com a secretaria.');return;}S.apb.f={step:1,kid:null,date:null,cert:'',p2:'Camila Pereira',ok:false,adding:false,nk:{n:'',d:''}};go('bebeNovo');},
+ apbBack:()=>{const F=S.apb.f;if(F.step>1){F.step--;render('back');}else back();},
+ apbKid:v=>{S.apb.f.kid=v;S.apb.f.adding=false;softRender();},
+ apbDate:v=>{S.apb.f.date=v;softRender();},
+ apbAddKid:()=>{S.apb.f.adding=!S.apb.f.adding;softRender();setTimeout(()=>{const n=$('#apbN');n&&n.focus();},50);},
+ apbSaveKid:()=>{const F=S.apb.f,n=F.nk.n.trim(),d=F.nk.d;let ok=true;
+  if(n.split(/\s+/).length<2){setErr('apbN','Informe nome e sobrenome');ok=false;}
+  if(!d){setErr('apbD','Informe a data de nascimento');ok=false;}else{const t=new Date(d+'T12:00'),now=new Date(TODAY.y,TODAY.m-1,TODAY.d,12);if(t>now){setErr('apbD','A data não pode ser no futuro');ok=false;}else if(apbM(d,TODAY.y,TODAY.m,TODAY.d)>S.apb.max){setErr('apbD',`Acima de ${apbMaxTx()}. Fale com a secretaria.`);ok=false;}}
+  if(!ok)return;const k={id:'k'+Date.now(),n,nasc:d};S.apb.kids.push(k);F.kid=k.id;F.adding=false;F.nk={n:'',d:''};softRender();toast('success',n.split(' ')[0]+' adicionado(a) à família','A secretaria confere os dados na confirmação.');},
+ apbTog:(v,el)=>{const on=el.getAttribute('aria-checked')!=='true';el.setAttribute('aria-checked',on);S.apb.f.ok=on;clearErr('apbOk');},
+ apbNext:async(v,el)=>{const F=S.apb.f;
+  if(F.step===1){if(!F.kid){toast('error','Escolha o bebê','Ou cadastre um novo.');return;}const k=S.apb.kids.find(x=>x.id===F.kid);if(!F.cert)F.cert=k.n;F.step=2;render('fwd');return;}
+  if(F.step===2){if(!F.date){toast('error','Escolha um culto','Datas esgotadas ou fora do prazo ficam bloqueadas.');return;}{const d=S.apb.datas.find(x=>x.id===F.date),k=S.apb.kids.find(x=>x.id===F.kid);if(apbM(k.nasc,d.y,d.m,d.d)>S.apb.max||!apbOpen(d)){F.date=null;softRender();toast('error','Esse culto não serve para '+k.n.split(' ')[0],'Escolha outra data da lista.');return;}}F.step=3;render('fwd');return;}
+  let ok=true;if(!F.cert.trim()||F.cert.trim().split(/\s+/).length<2){setErr('apbC','Informe o nome completo');ok=false;}if(!ok)return;
+  await busy(el,800,null,'Pedido enviado');const k=S.apb.kids.find(x=>x.id===F.kid),d=S.apb.datas.find(x=>x.id===F.date);d.used++;
+  S.apb.pedidos.unshift({id:'ap'+Date.now(),kid:k.id,bebe:k.n,cert:F.cert.trim(),pais:['Rafael Pereira',F.p2.trim()].filter(Boolean),when:fmtK(K(d.y,d.m,d.d))+' · '+d.h,culto:d.t,st:'aguardando'});
+  S.notifs.unshift({id:'n'+Date.now(),t:'Pedido de apresentação enviado: '+k.n.split(' ')[0],s:d.t+' · '+fmtK(K(d.y,d.m,d.d))+'. A secretaria confirma em até 3 dias.',when:'Agora',grp:'Hoje',tone:'damasco',i:'pacifier',go:'bebes',unread:true});
+  S.hist=S.hist.filter(h=>h!=='bebeNovo');S.screen='bebes';render('back');toast('success','Pedido enviado','Avisamos aqui quando a secretaria confirmar.');},
+ apbCancel:v=>{const p=S.apb.pedidos.find(x=>x.id===v);sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${p.st==='confirmado'?'Cancelar a apresentação?':'Cancelar o pedido?'}</h3><p class="callout">${esc(p.bebe)} · ${p.when}. A vaga volta a ficar livre para outra família.</p></div><div class="stack g3"><button type="button" class="btn primary block danger" id="apbX">Cancelar ${p.st==='confirmado'?'apresentação':'pedido'}</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{$('#apbX',sh).addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Cancelado');p.st='cancelado';p.why='Cancelado por você. Dá para pedir outra data quando quiser.';const d=S.apb.datas.find(x=>p.when.startsWith(fmtK(K(x.y,x.m,x.d))));if(d)d.used--;await closeSheet();softRender();toast('info','Cancelado','A secretaria foi avisada.');});});},
+ apbCert:v=>{S.apb.cert=v;go('bebeCert');},
+ apbFromEv:async v=>{await closeSheet();A.apbNew();if(S.apb.f){S.apb.f.date=v;}},
+ apbPdf:(v,el)=>toast('success',v==='pdf'?'Baixando o certificado':'Compartilhando',v==='pdf'?'Certificado-'+S.apb.pedidos.find(x=>x.id===S.apb.cert).bebe.split(' ')[0]+'.pdf':'Escolha onde enviar.'),
+});
+RAIL.push(['bebes','Membro › Apresentações']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
+
 render('none');
+/* ================= Splash screen ================= */
+function splashSVG(){const C={x:60,y:58},R0=27,R1=40,ang=[-162,-126,-90,-54,-18],del=[.98,.72,.46,.6,.86],sh=[1.62,1.5,1.42,1.47,1.56];
+ const L=(a,i,cls,st)=>{const r=a*Math.PI/180,x1=C.x+R0*Math.cos(r),y1=C.y+R0*Math.sin(r),x2=C.x+R1*Math.cos(r),y2=C.y+R1*Math.sin(r);return `<line class="${cls}" style="${st}" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" pathLength="1"/>`;};
+ return `<svg class="sp-sun" viewBox="0 0 120 76" aria-hidden="true"><defs><linearGradient id="spG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sp-s1"/><stop offset="1" class="sp-s2"/></linearGradient><clipPath id="spC"><rect x="0" y="0" width="120" height="${C.y}"/></clipPath>
+  <filter id="spBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.6"/></filter></defs>
+  <g class="sp-halo" filter="url(#spBlur)" stroke-width="7" stroke-linecap="round">${ang.map((a,i)=>L(a,i,'sp-hr',`--d:${sh[i]}s`)).join('')}</g>
+  <g class="sp-rays" stroke-width="5.2" stroke-linecap="round">${ang.map((a,i)=>L(a,i,'sp-ray',`--d:${del[i]}s`)).join('')}</g>
+  <g class="sp-shine" stroke-width="5.2" stroke-linecap="round">${ang.map((a,i)=>L(a,i,'sp-sh',`--d:${sh[i]}s`)).join('')}</g>
+  <g clip-path="url(#spC)"><circle class="sp-disc" cx="${C.x}" cy="${C.y}" r="21" fill="url(#spG)"/><rect class="sp-dsh" x="30" y="30" width="16" height="30" fill="#fff" transform="skewX(-20)"/></g>
+  <line class="sp-hz" x1="14" y1="66" x2="106" y2="66" stroke-width="5.2" stroke-linecap="round" pathLength="1"/></svg>`;}
+function showSplash(){const ph=$('#phone');if(!ph)return;const old=$('#splash');if(old)old.remove();clearTimeout(window._spT1);clearTimeout(window._spT2);clearTimeout(window._spT3);
+ const d=document.createElement('div');d.id='splash';d.className='splash';d.innerHTML=`<div class="sp-glow"></div><div class="sp-mark">${splashSVG()}</div>`;
+ ph.appendChild(d);ph.classList.add('sp-on');
+ window._spT1=setTimeout(()=>{const sun=$('.sp-sun',d),tgt=$('#view .wel-logo .sun')||$('#view .logo .sun');
+  if(tgt){const a=sun.getBoundingClientRect(),b=tgt.getBoundingClientRect();const ax=a.left+a.width*.5,ay=a.top+a.height*58/76,bx=b.left+b.width*.5,by=b.top+b.height*25/32;
+   const k=(b.height*10/32)/(a.width*21/120);sun.style.transformOrigin=`${a.width*.5}px ${a.height*58/76}px`;sun.style.transform=`translate(${bx-ax}px,${by-ay}px) scale(${k})`;d.classList.add('sp-morph');}
+  else d.classList.add('sp-out');
+  ph.classList.remove('sp-on');ph.classList.add('sp-reveal');},2250);
+ window._spT2=setTimeout(()=>d.classList.add('sp-fade'),2900);
+ window._spT3=setTimeout(()=>{d.remove();ph.classList.remove('sp-reveal');},3400);}
+(function(){const nav=$('#demoUsers');if(!nav)return;const sec=nav.closest('.rail-sec');const box=document.createElement('div');box.className='rail-sec';
+ box.innerHTML=`<span class="rail-lbl">Abertura</span><div class="rail-nav"><button type="button" id="spReplay">Rever splash screen</button></div>`;sec.parentNode.insertBefore(box,sec);
+ $('#spReplay').addEventListener('click',()=>{S.hist=[];S.screen='welcome';$('#overlay').innerHTML='';render('none');showSplash();});})();
+showSplash();
+
 })();
