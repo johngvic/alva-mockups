@@ -158,15 +158,33 @@
   function render() {
     const free = plan === 'semente';
     const labels = ['E-mail', 'Código', 'Seus dados', 'Sua igreja', free ? 'Começar' : 'Assinatura'];
+    const descs = ['Para onde enviamos o código', 'Confirme que é você', 'Quem responde pela conta', 'Organização e primeira igreja', free ? 'Revise e crie a conta' : 'Pagamento e confirmação'];
     const summary = `<div class="su-sum"><span>Plano <b>${plans[plan]}</b></span><strong data-su-price>${free ? 'Gratuito' : priceLabel(plan, data.cycle)}</strong><a href="#planos">Trocar de plano</a></div>`;
     let body = '';
-    if (step === 0) body = `<h1>Uma nova caminhada <em>começa aqui.</em></h1><p>Crie sua conta para organizar a vida da sua igreja. Primeiro, vamos confirmar seu e-mail.</p>${summary}${field('email', 'Seu e-mail', 'email', 'email')}<button class="btn pri">Enviar código ${arrow}</button>`;
+    if (step === 0) body = `<h1>Uma nova caminhada <em>começa aqui.</em></h1><p>Crie sua conta para organizar a vida da sua igreja. Primeiro, vamos confirmar seu e-mail.</p>${field('email', 'Seu e-mail', 'email', 'email')}<button class="btn pri">Enviar código ${arrow}</button>`;
     if (step === 1) body = `<h1>Confira seu <em>e-mail.</em></h1><p>Enviamos um código de 6 dígitos para <b>${esc(data.email)}</b>.</p><div class="fld"><span>Código de confirmação</span><div class="otp" role="group" aria-label="Código de confirmação"><input class="otp-i" id="su-otp0" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1 de 6"><input class="otp-i" id="su-otp1" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 2 de 6"><input class="otp-i" id="su-otp2" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 3 de 6"><input class="otp-i" id="su-otp3" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 4 de 6"><input class="otp-i" id="su-otp4" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 5 de 6"><input class="otp-i" id="su-otp5" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Dígito 6 de 6"></div><input type="hidden" name="code"></div><p class="fine">Não recebeu? Confira a caixa de spam ou peça um novo código.</p><button class="btn pri">Confirmar e-mail ${arrow}</button><button type="button" class="btn sec su-full" id="resend" disabled>Reenviar código em 30s</button>`;
     if (step === 2) body = `<h1>Como podemos <em>chamar você?</em></h1><p>Este será o nome do responsável pela organização no Alva.</p>${field('name', 'Seu nome', 'text', 'name')}<p class="fine">Você pode entrar com um código por e-mail, sem criar senha agora.</p><button class="btn pri">Continuar ${arrow}</button>`;
     if (step === 3) body = `<h1>Um lugar para a sua <em>comunidade.</em></h1><p>Comece com a organização e a primeira igreja. Elas podem ter o mesmo nome.</p>${field('org', 'Nome da organização', 'text', 'organization')}${field('church', 'Nome da igreja inicial')}<button class="btn pri">Revisar ${free ? 'cadastro' : 'assinatura'} ${arrow}</button>`;
-    if (step === 4) body = `<h1>${free ? 'Tudo pronto para' : 'Seu próximo'} <em>${free ? 'começar.' : 'passo.'}</em></h1>${summary}<dl class="su-dl"><dt>Responsável</dt><dd>${esc(data.name)}</dd><dt>E-mail</dt><dd>${esc(data.email)}</dd><dt>Organização</dt><dd>${esc(data.org)}</dd><dt>Igreja inicial</dt><dd>${esc(data.church)}</dd></dl>${free ? '<p>O plano Semente é gratuito. Não é preciso informar cartão nem fazer pagamento.</p>' : `<label class="fld">Ciclo da assinatura<select id="su-cycle" name="cycle"><option value="mensal" ${data.cycle === 'mensal' ? 'selected' : ''}>Mensal</option><option value="anual" ${data.cycle === 'anual' ? 'selected' : ''}>Anual · 2 meses grátis</option></select></label><div class="su-pay"><b>Pagamento</b><p>Aceitamos Pix, cartão de crédito e boleto.</p><span class="tnum" data-total></span></div>`}<button class="btn pri">${free ? 'Começar gratuitamente' : 'Assinar ' + plans[plan]} ${arrow}</button>`;
-    if (step === 5) body = `<div class="su-check">${okIcon}</div><p class="eb">${free ? 'Cadastro concluído' : 'Assinatura confirmada'}</p><h1 style="margin-top:8px">Bem-vindo ao <em>Alva.</em></h1><p>${esc(data.name)}, sua igreja está pronta para o próximo passo.</p>${summary}<a class="btn pri" href="../web/">Conhecer o painel ${arrow}</a>`;
-    host.innerHTML = `<a class="lnk back" href="#planos">${backIc}Voltar aos planos</a><ol class="su-steps" aria-label="Etapas do cadastro">${labels.map((x, i) => `<li ${i === Math.min(step, 4) ? 'aria-current="step"' : ''} class="${i < step ? 'done' : ''}"><span>${i < step ? '✓' : i + 1}</span>${x}</li>`).join('')}</ol><section class="su-card"><form>${body}<p role="status" id="su-status"></p>${step > 0 && step < 5 ? `<button type="button" class="lnk su-prev" id="previous">${backIc}Etapa anterior</button>` : ''}</form></section>`;
+    if (step === 4) body = `<h1>${free ? 'Tudo pronto para' : 'Seu próximo'} <em>${free ? 'começar.' : 'passo.'}</em></h1><p>Confira seus dados antes de ${free ? 'criar a conta' : 'assinar'}.</p><dl class="su-dl"><dt>Responsável</dt><dd>${esc(data.name)}</dd><dt>E-mail</dt><dd>${esc(data.email)}</dd><dt>Organização</dt><dd>${esc(data.org)}</dd><dt>Igreja inicial</dt><dd>${esc(data.church)}</dd></dl>${free ? '<p>O plano Semente é gratuito. Não é preciso informar cartão nem fazer pagamento.</p>' : `<label class="fld">Ciclo da assinatura<select id="su-cycle" name="cycle"><option value="mensal" ${data.cycle === 'mensal' ? 'selected' : ''}>Mensal</option><option value="anual" ${data.cycle === 'anual' ? 'selected' : ''}>Anual · 2 meses grátis</option></select></label><div class="su-pay"><b>Pagamento</b><p>Aceitamos Pix, cartão de crédito e boleto.</p><span class="tnum" data-total></span></div>`}<button class="btn pri">${free ? 'Começar gratuitamente' : 'Assinar ' + plans[plan]} ${arrow}</button>`;
+    if (step === 5) body = `<div class="su-check">${okIcon}</div><p class="eb">${free ? 'Cadastro concluído' : 'Assinatura confirmada'}</p><h1 style="margin-top:8px">Bem-vindo ao <em>Alva.</em></h1><p>${esc(data.name)}, sua igreja está pronta para o próximo passo.</p><a class="btn pri" href="../web/">Conhecer o painel ${arrow}</a>`;
+    const cur = Math.min(step, 4), okI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    const chk = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    const icMap = { semente: 'seed', essencial: 'church', crescimento: 'growth' };
+    const kicker = step < 5 ? `<div class="su-top">${step > 0 ? `<button type="button" class="lnk su-back" id="previous">${backIc}Voltar</button>` : ''}<p class="su-kicker">Etapa ${step + 1} de 5<i style="--p:${(step + 1) * 20}%"></i></p></div>` : '';
+    host.innerHTML = `<div class="su-shell">
+      <aside class="su-side">
+        <a class="lnk back" href="#planos">${backIc}Voltar aos planos</a>
+        <svg class="sun" viewBox="0 0 48 32" aria-hidden="true" data-sun></svg>
+        <p class="eb">Criar conta</p>
+        <h2 class="su-side-h">${free ? 'Comece grátis em poucos minutos.' : 'Sua igreja organizada em poucos minutos.'}</h2>
+        <ol class="su-steps" aria-label="Etapas do cadastro">${labels.map((x, i) => `<li ${i === cur && step < 5 ? 'aria-current="step"' : ''} class="${i < step ? 'done' : ''}"><span class="dot">${i < step ? okI : i + 1}</span><b>${x}</b><small>${descs[i]}</small></li>`).join('')}</ol>
+        <div class="su-plan"><span class="pic" data-ic="${icMap[plan] || 'seed'}"></span><div><b>Plano ${plans[plan]}</b><span data-su-price>${free ? 'Gratuito' : priceLabel(plan, data.cycle)}</span></div>${step < 5 ? '<a href="#planos">Trocar</a>' : ''}</div>
+        <div class="su-prog" aria-hidden="true">${labels.map((x, i) => `<i class="${i <= cur || step === 5 ? 'on' : ''}"></i>`).join('')}</div>
+      </aside>
+      <div class="su-main"><section class="su-card">${kicker}<form>${body}<p role="status" id="su-status"></p></form></section></div>
+    </div>`;
+    host.querySelectorAll('[data-sun]').forEach(el => el.innerHTML = sunInner());
+    host.querySelectorAll('[data-ic]').forEach(el => el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${shapes[el.dataset.ic]}</svg>`);
     const tot = host.querySelector('[data-total]');
     const upd = () => { if (tot) tot.textContent = `Total: ${money(total(plan, data.cycle))}${data.cycle === 'anual' ? ' por ano' : ' por mês'}`; host.querySelectorAll('[data-su-price]').forEach(e => e.textContent = free ? 'Gratuito' : priceLabel(plan, data.cycle)); };
     upd();
@@ -261,6 +279,33 @@
   };
   if (!RM) { addEventListener('scroll', paint, { passive: true }); paint(); }
 
+
+  /* ---------- recursos: abas que avançam sozinhas ---------- */
+  {
+    const tabs = [...document.querySelectorAll('.tab')], panes = [...document.querySelectorAll('.pane')];
+    const DUR = 6000; let cur = 0, timer;
+    const show = k => {
+      cur = k;
+      tabs.forEach((t, i) => { t.classList.remove('on'); t.setAttribute('aria-selected', String(i === k)); t.style.setProperty('--dur', DUR + 'ms'); });
+      void document.body.offsetWidth;
+      tabs[k].classList.add('on');
+      panes.forEach((p, i) => p.classList.toggle('on', i === k));
+      clearTimeout(timer); timer = setTimeout(() => show((cur + 1) % tabs.length), DUR);
+    };
+    tabs.forEach((t, i) => t.addEventListener('click', () => show(i)));
+    tabs.forEach(t => t.classList.remove('static'));
+    const box = document.querySelector('.tabs');
+    if ('IntersectionObserver' in window) new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting) { show(0); o.disconnect(); } }), { threshold: .35 }).observe(box);
+    else show(0);
+  }
+
+  /* ---------- rodapé: a alvorada acontece quando a página termina ---------- */
+  const ftp = document.querySelector('.ft');
+  if (ftp && !RM) {
+    let ftq = 0;
+    const ftPaint = () => { ftq = 0; const r = ftp.getBoundingClientRect(); const p = Math.min(1, Math.max(0, (innerHeight - r.top) / r.height)); ftp.style.setProperty('--rise', (p * p * (3 - 2 * p)).toFixed(3)); };
+    addEventListener('scroll', () => { if (!ftq) ftq = requestAnimationFrame(ftPaint); }, { passive: true }); ftPaint();
+  }
   /* ---------- barra flutuante ---------- */
   const dock = g('dock'), panel = document.querySelector('.hero-panel'), closing = document.querySelector('.closing');
   const dockUpd = () => {
