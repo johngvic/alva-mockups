@@ -282,7 +282,7 @@ V.otp=()=>{const su=S.otpCtx==='signup';const dest=su?maskEmail(S.su.email):S.em
   <div class="stack g3"><div class="otpu" id="otp" role="group" aria-label="Código de 6 dígitos">${[0,1,2,3,4,5].map(i=>`<input inputmode="numeric" autocomplete="${i?'off':'one-time-code'}" maxlength="1" aria-label="Dígito ${i+1}" data-i="${i}">`).join('')}</div>
   <div class="otpmeta"><span id="otpExp">expira em 15:00</span><span id="otpAtt">Tentativas: ${S.su.att} de 5</span></div>
   <div class="otpmsg" id="otpMsg" role="alert"></div></div>`,
- dock:`<div class="nochg"><b>Não chegou?</b><p>Verifique a caixa de spam. O remetente é <span class="mask">nao-responda@alva.app</span>.</p><button type="button" class="tlink" id="resend" data-a="resend" disabled>Reenviar em 0:30</button></div>`})};};
+ dock:`<div class="nochg"><b>Não chegou?</b><p>Verifique a caixa de spam. O remetente é <span class="mask">nao-responda@alva.app</span>.</p><button type="button" class="tlink" id="resend" data-a="resend" disabled>Reenviar em 1:00</button></div>`})};};
 
 V.signupStart=()=>({sb:'var(--ink)',html:flow({pct:12,
  body:`${head('','Já tem um cadastro conosco?','Nos ajude a encontrá-lo. Se acharmos, seus dados vêm preenchidos e você só revisa.')}
@@ -595,7 +595,7 @@ const HOOK={
  grupos(){const q=$('#grQ');if(q)q.addEventListener('input',()=>{S.gr.q=q.value;$('#casas').innerHTML=casasList();});},
  curso(){if(S.cu.playing)startPlay();}
 };
-function startResend(){clearInterval(resendTimer);let n=30;const b=$('#resend');if(!b)return;b.disabled=true;b.textContent='Reenviar em 0:30';resendTimer=setInterval(()=>{n--;if(!document.body.contains(b)){clearInterval(resendTimer);return;}b.textContent='Reenviar em 0:'+String(n).padStart(2,'0');if(n<=0){clearInterval(resendTimer);b.disabled=false;b.textContent='Reenviar código';}},1000);}
+function startResend(){clearInterval(resendTimer);let n=60;const b=$('#resend');if(!b)return;b.disabled=true;b.textContent='Reenviar em 1:00';resendTimer=setInterval(()=>{n--;if(!document.body.contains(b)){clearInterval(resendTimer);return;}b.textContent='Reenviar em 0:'+String(n).padStart(2,'0');if(n<=0){clearInterval(resendTimer);b.disabled=false;b.textContent='Reenviar código';}},1000);}
 function startPlay(){let t=0;const pp=$('#pp'),pt=$('#pt');clearInterval(playTimer);playTimer=setInterval(()=>{if(!pp){clearInterval(playTimer);return;}t+=4;const pc=Math.min(t/760*100,100);pp.style.width=pc+'%';pt.textContent=Math.floor(t/60)+':'+String(t%60).padStart(2,'0');if(pc>=100)clearInterval(playTimer);},250);}
 
 /* ---------- sheets ---------- */

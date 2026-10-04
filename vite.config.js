@@ -13,6 +13,8 @@ export default defineConfig({
         main: page('./index.html'),
         web: page('./web/index.html'),
         mobile: page('./mobile/index.html'),
+        site: page('./site/index.html'),
+        subscriptions: page('./subscriptions/index.html'),
       },
     },
   },

@@ -1939,7 +1939,7 @@ const AUDEMO=['rafael@alvasede.com.br','demo1234'];
 Object.assign(S,{auth:'login',authErr:0,authEmail:'',authUser:null,signStep:1,sign:{}});
 const RROLE={g1:'Administrador',g2:'Administrador',g3:'Administrador'};
 const brand=()=>`<aside class="au-brand">
- <div class="au-top">${logo(26,!S.auAnim)}${S.auth==='login'?`<button class="au-mcta" data-a="auGo" data-v="signup">Nova igreja?<b>Cadastrar</b></button>`:''}</div>
+ <div class="au-top">${logo(26,!S.auAnim)}${S.auth==='login'?`<button class="au-mcta" data-a="auGo" data-v="signup">Nova igreja?<b>Conhecer o Alva</b></button>`:''}</div>
  <div class="au-mid"><p class="au-line">O cuidado da sua igreja,<br>em <em>um só lugar</em>.</p><p class="au-sub">Pessoas, comunidade, cuidado e operação para quem lidera, em todas as igrejas da sua rede.</p></div>
  <div class="au-hz ${S.auAnim?'still':''}" aria-hidden="true"><span class="au-sun"></span><span class="au-line2"></span></div>
  <p class="au-foot">Alva Web · painel de gestão</p></aside>`;
@@ -1954,14 +1954,16 @@ function authView(){
    <label class="fld"><span class="fl">Senha</span><span class="au-pw"><input name="p" type="password" autocomplete="current-password" placeholder="Sua senha" ${locked?'disabled':''}>${eye}</span><span class="err"></span><button type="button" class="lnk au-forgot" data-a="auGo" data-v="forgot">Esqueci minha senha</button></label>
    ${S.authErr&&!locked?`<p class="au-warn">${ic('alert',14,2)}E-mail ou senha incorretos. ${5-S.authErr} ${5-S.authErr===1?'tentativa restante':'tentativas restantes'}.</p>`:''}
    ${locked?`<div class="au-lock">${ic('lock',16,2)}<div><b>Acesso bloqueado por 15 minutos</b><span>Por segurança, depois de 5 tentativas. Você pode redefinir a senha agora.</span></div></div>`:''}
-   <label class="tog au-keep"><input type="checkbox" name="keep" checked><span class="sw"></span><span><b>Manter conectado</b><small>Neste dispositivo, por 30 dias</small></span></label>
    <button class="btn pri au-cta" type="submit" ${locked?'disabled':''}>Entrar</button>
+   <button class="btn sec au-cta" type="button" data-a="auGo" data-v="codeEmail">Entrar com código por e-mail</button>
    ${locked?'':`<button type="button" class="btn sec au-cta au-demob" data-a="auDemo">${ic('sparkle',15)}Entrar com conta demo</button>`}
    ${locked?`<button type="button" class="btn sec au-cta" data-a="auGo" data-v="forgot">Redefinir senha</button>`:''}
   </form>
   <div class="au-alt"><button class="au-opt" data-a="auGo" data-v="invite">${ic('mail',18)}<span><b>Primeiro acesso</b><small>Recebi um convite por e-mail</small></span>${ic('chevR',16)}</button>
-   <button class="au-opt" data-a="auGo" data-v="signup">${ic('church',18)}<span><b>Cadastrar minha igreja</b><small>Para pastores e secretarias</small></span>${ic('chevR',16)}</button></div>
+   <button class="au-opt" data-a="auGo" data-v="signup">${ic('church',18)}<span><b>Conhecer o Alva para minha igreja</b><small>Planos e apresentação do produto</small></span>${ic('chevR',16)}</button></div>
   <p class="au-demo">Demonstração: qualquer e-mail entra. Senha <code>errada</code> mostra o erro. Um e-mail com <code>novo</code> não tem conta.</p>`;}
+ else if(v==='codeEmail')body=`${back('login','Entrar com senha')}<div class="au-h"><h1>Entrar com código</h1><p>Receba um código no e-mail cadastrado pela sua igreja.</p></div><form id="codeEmailF" class="au-form"><label class="fld"><span class="fl">E-mail</span><input name="e" type="email" required autocomplete="email" placeholder="nome@suaigreja.com.br" value="${esc(S.authEmail)}"><span class="err"></span></label><button class="btn pri au-cta" type="submit">Enviar código</button></form>`;
+ else if(v==='loginCode')body=`${back('codeEmail','Trocar e-mail')}<div class="au-h"><h1>Confira seu e-mail</h1><p>Se houver um acesso para <b>${esc(S.authEmail)}</b>, o código chegará em instantes. Confira também o spam.</p></div><form id="loginCodeF" class="au-form"><label class="fld"><span class="fl">Código de 6 dígitos</span><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required placeholder="000000" style="font-size:26px;letter-spacing:.35em;text-align:center"><span class="err"></span></label><p class="who">Válido por 15 minutos. Até 5 tentativas.</p><button class="btn pri au-cta" type="submit">Entrar</button><button type="button" class="btn sec au-cta" id="loginCodeResend">Reenviar código</button><p class="au-demo">Demonstração: use <code>123456</code>. Nenhum e-mail é enviado.</p></form>`;
  else if(v==='forgot')body=`${back('login','Voltar para entrar')}<div class="au-h"><h1>Redefinir senha</h1><p>Enviamos um link para criar uma nova senha. Ele vale por 1 hora.</p></div>
   <form id="fgF" class="au-form" novalidate><label class="fld"><span class="fl">E-mail</span><input name="e" type="email" autocomplete="email" placeholder="nome@suaigreja.com.br" value="${esc(S.authEmail)}"><span class="err"></span></label><button class="btn pri au-cta" type="submit">Enviar link</button></form>`;
  else if(v==='sent')body=`<div class="au-done"><span class="au-ic">${ic('mail',24)}</span><h1>Confira seu e-mail</h1><p>Se <b>${esc(S.authEmail||'seu e-mail')}</b> tiver uma conta, o link chega em instantes. Olhe também o spam.</p>
@@ -2014,6 +2016,11 @@ const pwRules=v=>({len:v.length>=8,num:/\d/.test(v),case:/[a-z]/.test(v)&&/[A-Z]
 function bindPw(f){const p=f.querySelector('[name=p]'),r=$('#rules');if(!p||!r)return;p.addEventListener('input',()=>{const s=pwRules(p.value);r.querySelectorAll('li').forEach(li=>li.classList.toggle('ok',s[li.dataset.r]));});}
 function fBad(f,n,m){const i=typeof n==='string'?f.querySelector(`[name=${n}]`):n;const fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;return i;}
 function authAfter(){
+ const cf=$('#codeEmailF');if(cf)cf.addEventListener('submit',e=>{e.preventDefault();S.authEmail=cf.elements.e.value.trim();S.codeAttempts=0;S.codeIssued=Date.now();S.codeResendAt=Date.now()+60000;S.auth='loginCode';render();});
+ const oc=$('#loginCodeF');if(oc){const resend=$('#loginCodeResend');const refresh=()=>{const seconds=Math.max(0,Math.ceil((S.codeResendAt-Date.now())/1000));resend.disabled=seconds>0;resend.textContent=seconds?'Reenviar em '+seconds+'s':'Reenviar código';};refresh();const timer=setInterval(()=>{if(!resend.isConnected){clearInterval(timer);return;}refresh();},1000);
+ resend.addEventListener('click',()=>{S.codeAttempts=0;S.codeIssued=Date.now();S.codeResendAt=Date.now()+60000;render();toast('Novo código simulado. Use 123456.');});
+ oc.addEventListener('submit',e=>{e.preventDefault();if(S.codeAttempts>=5){fBad(oc,'code','Limite de tentativas. Solicite um novo código.').focus();return;}if(Date.now()-S.codeIssued>=900000){fBad(oc,'code','Código expirado. Solicite um novo código.').focus();return;}if(oc.elements.code.value!=='123456'){S.codeAttempts++;fBad(oc,'code','Código inválido. '+(5-S.codeAttempts)+' tentativas restantes.').focus();return;}S.authErr=0;S.authUser=USERS[0];S.auth='church';render();});}
+
  if(!S.auAnim)setTimeout(()=>S.auAnim=true,50);
  const all=$$('#auth form');all.forEach(f=>{f.addEventListener('input',e=>{e.target.closest('.fld')?.classList.remove('bad');});bindPw(f);});
  const lf=$('#auF');if(lf){setTimeout(()=>(lf.e.value?lf.p:lf.e).focus(),80);lf.addEventListener('submit',e=>{e.preventDefault();const em=lf.e.value.trim(),pw=lf.p.value;let first=null;
@@ -2040,7 +2047,7 @@ function authAfter(){
 const AU={
  auDemo:(v,b)=>{const f=$('#auF');if(!f)return;b.disabled=true;f.e.value='';f.p.value='';let i=0;const [em,pw]=AUDEMO;
   const step=()=>{if(i<em.length){f.e.value+=em[i++];setTimeout(step,14);}else if(i<em.length+pw.length){f.p.value+=pw[i++-em.length];setTimeout(step,28);}else setTimeout(()=>f.requestSubmit(),160);};step();},
- auGo:v=>{if(v==='signup1'){S.signStep=1;S.auth='signup';}else{if(v==='signup'&&S.auth!=='signup'){S.signStep=1;S.sign={};}if(v==='invite')S.inviteOk=false;S.auth=v;}render();window.scrollTo({top:0});},
+ auGo:v=>{const email=$('#auF [name=e]');if(email)S.authEmail=email.value.trim();if(v==='signup'){window.location.href='../site/#planos';return;}if(v==='signup1'){S.signStep=1;S.auth='signup';}else{if(v==='signup'&&S.auth!=='signup'){S.signStep=1;S.sign={};}if(v==='invite')S.inviteOk=false;S.auth=v;}render();window.scrollTo({top:0});},
  auEye:(v,b)=>{const i=b.parentNode.querySelector('input');const show=i.type==='password';i.type=show?'text':'password';b.innerHTML=ic(show?'eyeOff':'eye',18);b.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha');i.focus();},
  auResend:(v,b)=>{b.disabled=true;toast('Link reenviado');let t=30;const it=setInterval(()=>{t--;if(t<=0){clearInterval(it);b.disabled=false;b.textContent='Reenviar link';}else b.textContent=`Reenviar em ${t}s`;},1000);},
  auPick:(v,b)=>{b.classList.add('pk-on');setTimeout(()=>{S.church=+v;S.auth=null;S.active='hoje';S.animated=false;render();window.scrollTo({top:0});toast(`Você está em ${CHURCHES[S.church].n}`);},350);},

@@ -1,0 +1,69 @@
+/* Alva · tokens compartilhados (web + mobile). Dia = claro, Noite = escuro. */
+:root{
+  --font-display:"Inter","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font-text:"Inter","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font-serif:"Instrument Serif",Georgia,serif;
+  --r-sm:10px;--r-md:14px;--r-lg:20px;--r-xl:28px;
+  /* Dia */
+  --bg:#f1f4f2;--surface:#ffffff;--surface-2:#f6f8f6;--surface-3:#eaefec;--glass:rgba(255,255,255,.74);
+  --ink:#0a1714;--ink-muted:#475852;--ink-soft:#7a8883;--line:rgba(10,23,20,.09);--line-strong:rgba(10,23,20,.18);
+  --brand:#0b5d4b;--on-brand:#ffffff;--brand-text:#0b5d4b;--brand-soft:rgba(11,93,75,.09);--focus:#0f8f73;
+  --pos:#14703f;--pos-bg:rgba(30,160,95,.13);   /* receita / recebido */
+  --neg:#b3311f;--neg-bg:rgba(220,70,45,.12);   /* despesa / pago */
+  --pend:#8a5a00;--pend-bg:rgba(245,170,40,.2); /* pendente / previsto */
+  --trf:#1f5f9c;--trf-bg:rgba(50,120,200,.13);  /* transferência interna */
+  --warn:#8a5a00;--danger:#b3311f;--ok:#14703f;
+  --a1:rgba(120,200,170,.28);--a2:rgba(170,205,225,.30);
+  --shadow-card:0 1px 2px rgba(10,23,20,.05),0 10px 30px rgba(10,23,20,.06);
+  --shadow-pop:0 2px 6px rgba(10,23,20,.08),0 24px 60px rgba(10,23,20,.18);
+  /* tons por unidade (identidade visual da unidade ativa) */
+  --tn-ceu:#2f6fb0;--tn-ceu-bg:rgba(47,111,176,.14);
+  --tn-damasco:#b4620b;--tn-damasco-bg:rgba(240,150,50,.2);
+  --tn-rosado:#b0407a;--tn-rosado-bg:rgba(200,80,140,.15);
+  --tn-menta:#0b7d6f;--tn-menta-bg:rgba(20,160,140,.16);
+  --tn-lima:#5f8a12;--tn-lima-bg:rgba(140,190,40,.2);
+  --c1:#0b5d4b;--c2:#2f8f7a;--c3:#6fb7a1;--c4:#b6dccd;--c5:#e0a43a;--c6:#c4563a;--c7:#4f7fb8;--c8:#8e6bb3;
+  color-scheme:light;
+}
+:root[data-theme="noite"]{
+  --bg:#08130f;--surface:#112019;--surface-2:#0c1913;--surface-3:#1a2d24;--glass:rgba(17,32,25,.74);
+  --ink:#f1f6f3;--ink-muted:#b3c1ba;--ink-soft:#83978e;--line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.19);
+  --brand:#6fd6b4;--on-brand:#04251c;--brand-text:#7fe0bf;--brand-soft:rgba(111,214,180,.12);--focus:#9af0d2;
+  --pos:#6fe09a;--pos-bg:rgba(80,210,130,.15);
+  --neg:#ff9b86;--neg-bg:rgba(255,120,95,.15);
+  --pend:#ffcb6b;--pend-bg:rgba(255,190,70,.16);
+  --trf:#8fc2f2;--trf-bg:rgba(100,160,230,.16);
+  --warn:#ffcb6b;--danger:#ff9b86;--ok:#6fe09a;
+  --a1:rgba(20,100,80,.45);--a2:rgba(30,70,110,.35);
+  --shadow-card:inset 0 1px 0 rgba(255,255,255,.05),0 14px 34px rgba(0,0,0,.32);
+  --shadow-pop:inset 0 1px 0 rgba(255,255,255,.06),0 24px 60px rgba(0,0,0,.6);
+  --tn-ceu:#8fc2f2;--tn-ceu-bg:rgba(100,160,230,.18);
+  --tn-damasco:#ffc07a;--tn-damasco-bg:rgba(255,170,80,.16);
+  --tn-rosado:#ff9fcb;--tn-rosado-bg:rgba(255,120,180,.16);
+  --tn-menta:#7fe6d4;--tn-menta-bg:rgba(60,200,180,.16);
+  --tn-lima:#c7ee7a;--tn-lima-bg:rgba(170,220,70,.16);
+  --c1:#6fd6b4;--c2:#4fae95;--c3:#2f7f6c;--c4:#1f5a4c;--c5:#f0bb5a;--c6:#ef8a6e;--c7:#7fa9d9;--c8:#b79be0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+.ic{flex:none;display:inline-block;vertical-align:middle}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.mute{color:var(--ink-muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* logo */
+.logo{display:inline-flex;align-items:center;gap:.45em;line-height:1;font-weight:800;letter-spacing:-.045em;color:var(--ink)}
+.logo svg{flex:none}
+/* status chips: nunca só cor, sempre ícone + texto */
+.st{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border-radius:999px;font:600 12px/1 var(--font-text);white-space:nowrap}
+.st.pago,.st.recebido,.st.quitado{background:var(--pos-bg);color:var(--pos)}
+.st.pendente,.st.aberto,.st.parcial,.st.prevista{background:var(--pend-bg);color:var(--pend)}
+.st.vencido,.st.atrasada{background:var(--neg-bg);color:var(--neg)}
+.st.transf,.st.aberta,.st.fechada{background:var(--trf-bg);color:var(--trf)}
+.st.neutro{background:var(--surface-3);color:var(--ink-muted)}
+
+/* Alva: superfícies, azul institucional e foco verde-petróleo. */
+:root{--bg:#EEF0EA;--surface:#fff;--surface-2:#f7f8f3;--surface-3:#e5eae2;--ink:#010F12;--ink-muted:#4F5A58;--ink-soft:#62706d;--brand:#07486E;--brand-text:#07486E;--brand-soft:#07486e0d;--focus:#008582;--on-brand:#fff}
+[data-theme="noite"]{--bg:#010F12;--surface:#13292D;--surface-2:#173237;--surface-3:#203c40;--ink:#fff;--ink-muted:#c0cece;--ink-soft:#a4bbbb;--brand:#A9C8DA;--brand-text:#A9C8DA;--brand-soft:#A9C8DA18;--focus:#C7EBEA;--on-brand:#010F12}
