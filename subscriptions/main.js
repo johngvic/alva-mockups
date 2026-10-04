@@ -1,7 +1,16 @@
 /* Assinaturas · administração multiproduto · protótipo. Sistema à parte, com login próprio de administrador.
    Adaptação para Alva. Regras comerciais ainda pendentes; dados fictícios, sem integração ou persistência. */
-import { $, $$, esc, ic, logo, wait, fmtFull } from './shared/ui.js';
+import { $, $$, esc, ic, logo, logoMark, wait, fmtFull } from './shared/ui.js';
 
+let DEFER = false, Q = [];
+const ZK_LOGO = new URL('./shared/zelos-kids.webp', import.meta.url).href;
+const ZK_SHEEP = new URL('./shared/zk-sheep.webp', import.meta.url).href;
+/* marca da plataforma: neutra, porque aqui se administram vários produtos */
+const pmark = (sz = 32) => `<span class="pmark" style="--s:${sz}px" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11V10a4 4 0 0 1 4-4h13"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 13v1a4 4 0 0 1-4 4h-13"/></svg></span>`;
+const brandP = (sz = 32, sub = true) => `<span class="brandp">${pmark(sz)}<span><b>Assinaturas</b>${sub ? '<small>Administração multiproduto</small>' : ''}</span></span>`;
+/* logo de cada produto, em um selo com fundo claro */
+const plogo = (code, size = 'md') => code === 'zeloskids' ? `<span class="plogo ${size} zk" title="Zelos Kids"><img src="${ZK_LOGO}" alt="Zelos Kids"></span>` : code === 'alva' ? `<span class="plogo ${size} al" title="Alva">${logo(size === 'lg' ? 26 : size === 'md' ? 15 : 11)}</span>` : `<span class="plogo ${size}">${esc((prodOf(code)?.name || '?').slice(0, 2))}</span>`;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TODAY = '2026-10-16', CUR = TODAY.slice(0, 7);
 const brl = c => 'R$ ' + (c / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 const addDays = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
@@ -88,7 +97,7 @@ D.changes.push({ sub: SB(7).id, at: '2026-09-28', from: 'semente · mensal', to:
 SB(2).discounts.push({ id: 'd1', label: 'BEMVINDO10', kind: 'pct', value: 10, left: 2, reason: 'Voucher de boas-vindas', by: 'Cliente', at: '2026-08-20' });
 D.audit.push({ at: '2026-10-15 17:20', who: 'Financeiro', what: 'Reenviou cobrança PIX', ref: 'Diego Ramos', product: 'alva' }, { at: '2026-10-14 09:05', who: 'Administrador', what: 'Alterou preço do plano Essencial mensal de R$ 37,90 para R$ 39,90', ref: 'Plano Essencial', product: 'alva' }, { at: '2026-10-10 16:00', who: 'Administrador', what: 'Revisou configuração demonstrativa do Zelos Kids', ref: 'Produtos', product: 'zeloskids' });
 
-const S = { screen: 'login', admin: null, theme: 'dia', q: '', f: {}, cid: null, sid: null, tab: 'resumo', prod: 'all', pid: null, ptab: 'geral' };
+const S = { screen: 'login', admin: null, theme: 'auto', q: '', f: {}, cid: null, sid: null, tab: 'resumo', prod: 'all', pid: null, ptab: 'geral' };
 try { const t = localStorage.getItem('org-theme'); if (t) S.theme = t; } catch (e) { /* sem storage */ }
 const A = {};
 const cust = x => D.customers.find(c => c.id === x), subOf = x => D.subs.find(s => s.id === x), prodOf = c => D.products.find(p => p.code === c);
@@ -101,13 +110,14 @@ const SS = { active: ['pago', 'Ativa'], past_due: ['vencido', 'Em atraso'], susp
 const CS = { paid: ['pago', 'Paga'], pending: ['pendente', 'Pendente'], overdue: ['vencido', 'Atrasada'], paused: ['transf', 'Pausada'], canceled: ['neutro', 'Cancelada'] };
 const chip = ([k, l]) => `<span class="st ${k}">${l}</span>`;
 const note = (i, h, tn = '') => `<div class="note ${tn}">${ic(i, 17, 2)}<div>${h}</div></div>`;
-function toast(m, tn = 'ok') { const b = $('#toasts'), e = document.createElement('div'); e.className = 'toast ' + tn; e.textContent = m; b.appendChild(e); setTimeout(() => e.remove(), 3400); }
+function toast(m, tn = 'ok') { if (DEFER) { Q.push(() => toast(m, tn)); Q.toast = Q.toast || tn; return; } const b = $('#toasts'), e = document.createElement('div'); e.className = 'toast ' + tn; e.setAttribute('role', 'status'); e.innerHTML = `${ic(tn === 'bad' ? 'alert' : 'check', 16, 2.4)}<span>${esc(m)}</span>`; b.appendChild(e); setTimeout(() => e.remove(), 3400); }
 const val = i => ($('#' + i)?.value ?? '').trim();
 function fld(i, label, o = {}) { const { type = 'text', v = '', hint = '', opts, ta } = o; return `<div class="fld" id="f-${i}"><label for="${i}">${label}</label>${opts ? `<select id="${i}">${opts.map(([k, l]) => `<option value="${esc(k)}" ${k === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>` : ta ? `<textarea id="${i}">${esc(v)}</textarea>` : `<input id="${i}" type="${type}" value="${esc(v)}">`}<span class="hint">${esc(hint)}</span></div>`; }
 const ferr = (i, m) => { const f = $('#f-' + i); f.classList.add('bad'); $('.hint', f).textContent = m; return false; };
 const fclear = () => $$('.fld.bad').forEach(f => { f.classList.remove('bad'); $('.hint', f).textContent = ''; });
-function dlg(html, wide) { $$('.dlgw').forEach(d => d.remove()); const d = document.createElement('div'); d.className = 'dlgw'; d.innerHTML = `<div class="dlg ${wide ? 'wide' : ''}" role="dialog" aria-modal="true">${html}</div>`; d.addEventListener('click', e => { if (e.target === d) d.remove(); }); document.body.append(d); return d; }
-const closeDlg = () => $$('.dlgw').forEach(d => d.remove());
+function dlg(html, wide) { $$('.dlgw').forEach(d => d.remove()); const d = document.createElement('div'); d.className = 'dlgw'; d.innerHTML = `<div class="dlg ${wide ? 'wide' : ''}" role="dialog" aria-modal="true"><button class="ibtn dlg-x" data-a="closeDlg" aria-label="Fechar">${ic('x', 16, 2.2)}</button>${html}</div>`; setTimeout(() => d.querySelector('input:not([type=radio]):not([type=checkbox]):not([readonly]),select,textarea')?.focus({ preventScroll: true }), 60); d.addEventListener('click', e => { if (e.target === d) d.remove(); }); document.body.append(d); return d; }
+const closeDlg0 = () => $$('.dlgw').forEach(d => d.remove());
+const closeDlg = () => { if (DEFER) { Q.push(closeDlg0); return; } closeDlg0(); };
 A.closeDlg = closeDlg;
 
 /* ---------- escopo de produtos e seletor ---------- */
@@ -123,20 +133,26 @@ const mAudit = () => D.audit.filter(a => !a.product || inSel(a.product));
 const prodCombo = () => (visProd().length > 1 ? `<select data-a="prod" aria-label="Filtrar por produto"><option value="all" ${S.prod === 'all' ? 'selected' : ''}>Todos os produtos</option>${visProd().map(p => `<option value="${p.code}" ${S.prod === p.code ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : '');
 const guide = (title, body) => `<section class="guide"><span class="gtag">Guia · não faz parte do sistema</span><h2>${title}</h2>${body}</section>`;
 const multi = () => S.prod === 'all' && visProd().length > 1;
-const ptag = pc => `<span class="ptag">${esc(prodOf(pc).name)}</span>`;
+const ptag = pc => `<span class="ptag">${pc === 'alva' ? `<i class="pt-al">${logoMark(9)}</i>` : pc === 'zeloskids' ? `<i class="pt-zk"><img src="${ZK_SHEEP}" alt=""></i>` : ''}${esc(prodOf(pc).name)}</span>`;
 const log = (what, ref, product) => D.audit.unshift({ at: `${TODAY} 14:32`, who: S.admin.name, what, ref, product: product || (S.prod !== 'all' ? S.prod : null) });
 const isAdm = () => S.admin.role === 'Administrador', canWrite = () => S.admin.role !== 'Suporte';
 const guard = () => { if (!canWrite()) { toast('Seu perfil (Suporte) só consulta e reenvia.', 'bad'); return false; } return true; };
 const emit = (sub, type) => D.events.unshift({ id: id('e'), sub, type, at: `${TODAY} 14:32`, status: 'ok', attempts: 1 });
-const page = (t, p, right = '') => `<div class="ph"><div><h1>${t}</h1>${p ? `<p>${p}</p>` : ''}</div><div>${right}</div></div>`;
+const ebOf = () => { const g = NAVG.find(([, ks]) => ks.includes(S.screen)); return g ? `<p class="eb">${g[0]}</p>` : ''; };
+const crumb = (k, l, cur) => `<nav class="crumb" aria-label="Trilha"><button class="crumb-bk" data-a="go" data-v="${k}" aria-label="Voltar para ${l}">${ic('chevL', 16, 2.2)}<span>Voltar</span></button><i class="crumb-sep"></i><a href="#" data-a="go" data-v="${k}">${l}</a>${ic('chevR', 13, 2)}<span>${cur}</span></nav>`;
+const prodChip = () => S.prod !== 'all' && visProd().length > 1 && !['produto', 'equipe', 'auditoria', 'produtos'].includes(S.screen) ? `<div class="pfilter">${S.prod === 'zeloskids' ? `<span class="pf-ic"><img src="${ZK_SHEEP}" alt=""></span>` : `<span class="pf-ic al">${logoMark(10)}</span>`}<span>Mostrando só <b>${esc(prodOf(S.prod).name)}</b></span><button class="pf-x" data-a="prodAll">${ic('x', 13, 2.4)}Ver todos os produtos</button></div>` : '';
+const page = (t, p, right = '', eb = null) => `<div class="ph"><div>${eb ?? ebOf()}<h1>${t}</h1>${p ? `<p>${p}</p>` : ''}${prodChip()}</div><div>${right}</div></div>`;
 const empty = t => `<div class="empty">${t}</div>`;
 const cLink = (s, tab = 'resumo') => `<a href="#" class="clink" data-a="cliente" data-v="${s.customer}|${tab}|${s.id}">${esc(subCust(s).name)}</a>`;
-const bars = items => { const mx = Math.max(1, ...items.map(i => i[1])); return `<div class="bars">${items.map(([l, v, t]) => `<div class="bar"><span class="bv num">${t ?? brl(v)}</span><i style="height:${Math.max(3, v / mx * 100)}%"></i><small>${esc(l)}</small></div>`).join('')}</div>`; };
+const brlS = c => c >= 100000 ? 'R$ ' + (c / 100000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil' : brl(c).replace(',00', '');
+const bars = items => { const mx = Math.max(1, ...items.map(i => i[1])); return `<div class="bars">${items.map(([l, v, t]) => `<div class="bar" title="${esc(l)}: ${t ?? brl(v)}"><span class="bv num">${t ?? brlS(v)}</span><i style="height:${Math.max(3, v / mx * 100)}%"></i><small>${esc(l)}</small></div>`).join('')}</div>`; };
 const hbars = items => { const mx = Math.max(1, ...items.map(i => i[1])); return `<ul class="hb">${items.map(([l, v, t]) => `<li><span>${esc(l)}</span><b style="--w:${Math.max(2, v / mx * 100)}%"></b><em class="num">${t ?? brl(v)}</em></li>`).join('')}</ul>`; };
 const pendingConsents = s => prodOf(s.product).terms.filter(t => { const c = s.consents[t.id]; return t.required ? !c || c.version !== t.version : !c; }).map(t => ({ documentId: t.id, type: t.type, version: t.version, required: t.required }));
 /* resposta da consulta de acesso (contrato: INTEGRATION-CONTRACT, seção 1) */
 const accessResponse = s => ({ productCode: s.product, memberId: s.memberId, status: s.status, plan: { code: s.plan, cycle: s.cycle === 'anual' ? 'yearly' : 'monthly', validUntil: s.end || s.next || s.suspended?.frozenNext || null }, entitlements: planOfSub(s).ent, graceUntil: null, reasonCode: s.status === 'suspended' ? s.suspended.kind : s.status === 'past_due' ? 'payment' : null, pendingConsents: pendingConsents(s), checkedAt: `${TODAY}T14:32:00Z`, cacheTtlSeconds: prodOf(s.product).params.cacheTtl });
+const actionList = s => s.status === 'suspended' ? [['resume', 'refresh', 'Reativar…'], ['cancel', 'ban', 'Cancelar assinatura', 1]] : s.status === 'canceled' ? [['reactivate', 'refresh', 'Reativar']] : s.status === 'canceling' ? [['discount', 'percent', 'Aplicar voucher ou desconto'], ['undoCancel', 'undo', 'Desfazer cancelamento'], ['endNow', 'ban', 'Encerrar agora', 1]] : [['discount', 'percent', 'Aplicar voucher ou desconto'], ['chPlan', 'swap', 'Trocar plano'], ['suspend', 'clock', 'Suspender'], ['cancel', 'ban', 'Cancelar assinatura', 1]];
 const actions = (s, big) => {
+  if (!big) return `<button class="ibtn more" data-a="rowMenu" data-v="${s.id}" aria-label="Ações da assinatura de ${esc(subCust(s).name)}" aria-haspopup="menu">${ic('dots', 18, 2)}</button>`;
   const b = (a, l, cls = 'sec') => `<button class="btn ${cls} sm" data-a="${a}" data-v="${s.id}">${l}</button>`;
   if (s.status === 'suspended') return b('resume', 'Reativar…', big ? '' : 'sec') + b('cancel', 'Cancelar');
   if (s.status === 'canceled') return b('reactivate', 'Reativar', big ? '' : 'sec');
@@ -147,12 +163,26 @@ const actions = (s, big) => {
 /* ---------- login próprio com segundo fator ---------- */
 function login() {
   const mfa = S.pending;
-  return `<div class="auth"><div class="box">${logo(30)}<h1>${mfa ? 'Confirme o código' : 'Administração de assinaturas'}</h1><p class="lede">${mfa ? `Digite o código enviado por e-mail. <em>Protótipo: 123456.</em>` : 'Plataforma multiproduto. Acesso restrito à equipe, com login próprio, separado dos clientes e dos produtos.'}</p>
-${mfa ? `${fld('mC', 'Código de 6 dígitos')}<button class="btn block" id="mGo">Entrar</button>` : `${fld('lE', 'E-mail', { type: 'email', v: 'admin@alva.app' })}${fld('lP', 'Senha', { type: 'password', v: 'senha-admin' })}<button class="btn block" id="lGo">Continuar</button><p style="margin-top:14px;font-size:12.5px;color:var(--ink-soft)">Perfis de teste: admin@alva.app (administrador), financeiro@alva.app, suporte@alva.app (só consulta e reenvios) e ana@zeloskids.app (financeiro só do Zelos Kids). Senha <code>errada</code> recusa.</p>`}</div></div>`;
+  const prods = D.products.map(p => `<li>${plogo(p.code, 'lg')}<span><b>${esc(p.name)}</b><small>${esc(p.tagline)}</small></span></li>`).join('');
+  return `<div class="auth"><aside class="auth-art">${brandP(36)}<div class="art-body"><p class="art-eb">Uma operação, vários produtos</p><h2>Clientes, planos e cobranças de cada produto, <em>em um só lugar.</em></h2><p>Cada produto mantém o seu provedor de pagamento, as suas chaves, os seus planos e os seus termos. A equipe enxerga só o que o seu escopo libera.</p><ul class="art-prods" aria-label="Produtos administrados">${prods}</ul></div><small class="art-ft">Acesso restrito à equipe · login próprio, separado dos clientes e dos produtos</small></aside>
+<div class="auth-main"><div class="box"><div class="auth-brand">${brandP(30, false)}</div><p class="eb">${mfa ? 'Segundo fator' : 'Administração'}</p><h1>${mfa ? 'Confirme o código' : 'Entrar'}</h1><p class="lede">${mfa ? `Enviamos um código de 6 dígitos para <b>${esc(mfa.email)}</b>. <em>Protótipo: 123456.</em>` : 'Use o e-mail da equipe para acessar a administração dos produtos.'}</p>
+${mfa ? `<div class="fld" id="f-mC"><label for="otp0">Código de 6 dígitos</label><div class="otp" role="group" aria-label="Código de 6 dígitos">${[0, 1, 2, 3, 4, 5].map(k => `<input class="otp-i" id="otp${k}" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="${k ? 'off' : 'one-time-code'}" aria-label="Dígito ${k + 1} de 6" placeholder="·">`).join('')}</div><input type="hidden" id="mC"><span class="hint"></span></div><button class="btn block" id="mGo">Entrar</button><button class="btn ghost block" data-a="loginBack" style="margin-top:8px">Usar outro e-mail</button>` : `${fld('lE', 'E-mail', { type: 'email', v: 'admin@alva.app' })}${fld('lP', 'Senha', { type: 'password', v: 'senha-admin' })}<button class="btn block" id="lGo">Continuar</button><div class="auth-prods" aria-hidden="true">${D.products.map(p => plogo(p.code, 'sm')).join('')}<span>${D.products.length} produtos nesta administração</span></div><p class="test">Perfis de teste: admin@alva.app (administrador), financeiro@alva.app, suporte@alva.app (só consulta e reenvios) e ana@zeloskids.app (financeiro só do Zelos Kids). Senha <code>errada</code> recusa.</p>`}</div></div></div>`;
 }
+A.loginBack = () => { S.pending = null; render(); };
 function bindLogin() {
-  $('#lGo')?.addEventListener('click', async () => { fclear(); const a = D.team.find(x => x.email === val('lE').toLowerCase()); if (!a || val('lP') === 'errada' || val('lP').length < 6) return ferr('lP', 'E-mail ou senha incorretos.'); if (a.status === 'invited') return ferr('lE', 'Convite ainda não aceito. Use o link enviado ao e-mail.'); await wait(500); S.pending = a; render(); });
-  $('#mGo')?.addEventListener('click', async () => { fclear(); if (val('mC') !== '123456') return ferr('mC', 'Código inválido.'); await wait(400); const a = S.pending; S.pending = null; S.admin = { email: a.email, name: a.name, role: a.role, scope: a.scope }; a.last = `${TODAY} 14:32`; S.prod = a.scope !== 'all' && a.scope.length === 1 ? a.scope[0] : 'all'; S.screen = 'overview'; render(); });
+  const otps = $$('.otp-i');
+  if (otps.length) {
+    const box = $('.otp'), sync = () => { $('#mC').value = otps.map(o => o.value).join(''); otps.forEach(o => o.classList.toggle('filled', !!o.value)); fclear(); box.classList.remove('bad'); if (otps.every(o => o.value)) setTimeout(() => { const g = $('#mGo'); if (g && !g.classList.contains('is-busy')) g.click(); }, 120); };
+    otps.forEach((o, k) => {
+      o.addEventListener('input', () => { o.value = o.value.replace(/\D/g, '').slice(-1); if (o.value && otps[k + 1]) otps[k + 1].focus(); sync(); });
+      o.addEventListener('keydown', e => { if (e.key === 'Backspace' && !o.value && otps[k - 1]) { otps[k - 1].value = ''; otps[k - 1].focus(); sync(); e.preventDefault(); } if (e.key === 'ArrowLeft' && otps[k - 1]) otps[k - 1].focus(); if (e.key === 'ArrowRight' && otps[k + 1]) otps[k + 1].focus(); if (e.key === 'Enter') $('#mGo')?.click(); });
+      o.addEventListener('focus', () => o.select());
+      o.addEventListener('paste', e => { const d = ((e.clipboardData && e.clipboardData.getData('text')) || '').replace(/\D/g, '').slice(0, 6); if (!d) return; e.preventDefault(); d.split('').forEach((c, x) => { if (otps[x]) otps[x].value = c; }); (otps[d.length] || otps[5]).focus(); sync(); });
+    });
+    setTimeout(() => otps[0].focus(), 40);
+  }
+  $('#lGo')?.addEventListener('click', async () => { fclear(); const a = D.team.find(x => x.email === val('lE').toLowerCase()); if (!a || val('lP') === 'errada' || val('lP').length < 6) return ferr('lP', 'E-mail ou senha incorretos.'); if (a.status === 'invited') return ferr('lE', 'Convite ainda não aceito. Use o link enviado ao e-mail.'); const bt = $('#lGo'); aStart(bt, 500); await wait(500); S.pending = a; render(); });
+  $('#mGo')?.addEventListener('click', async () => { fclear(); if (val('mC').length < 6) { ferr('mC', 'Digite os 6 dígitos do código.'); $$('.otp-i').find(o => !o.value)?.focus(); return; } if (val('mC') !== '123456') { const bx = $('.otp'); bx.classList.remove('bad'); void bx.offsetWidth; bx.classList.add('bad'); ferr('mC', 'Código incorreto. Confira o e-mail e tente de novo.'); setTimeout(() => { $$('.otp-i').forEach(o => { o.value = ''; o.classList.remove('filled'); }); $('#mC').value = ''; $('#otp0')?.focus(); }, 450); return; } const bt = $('#mGo'); aStart(bt, 400); await wait(400); aDone(bt, 'Tudo certo'); await wait(450); const a = S.pending; S.pending = null; S.admin = { email: a.email, name: a.name, role: a.role, scope: a.scope }; a.last = `${TODAY} 14:32`; S.prod = a.scope !== 'all' && a.scope.length === 1 ? a.scope[0] : 'all'; S.screen = 'overview'; render(); });
 }
 
 /* ---------- visão geral ---------- */
@@ -174,8 +204,11 @@ function overview() {
   const list=(items,blank)=>items.length?`<ul class="dash-queue">${items.join('')}</ul>`:empty(blank);
   const item=(s,title,detail,tab='resumo',action='Ver assinatura')=>`<li><span class="dash-dot"></span><div><b>${esc(title)}</b><p>${esc(subCust(s).name)} · ${esc(prodOf(s.product).name)}</p><small>${esc(detail)}</small></div><span class="dash-link">${cLink(s,tab)}<small>${action} →</small></span></li>`;
   const section=(id,title,items,blank)=>`<section class="card" id="${id}"><h2>${title} <span class="dash-count">${items.length}</span></h2>${list(items,blank)}</section>`;
-  const alert=(anchor,label,count)=>`<a class="dash-alert" href="#${anchor}"><strong>${count}</strong><span>${label}</span><b aria-hidden="true">↗</b></a>`;
-  const header=`${page('Visão geral',`${S.prod==='all'?'Todos os produtos':esc(prodOf(S.prod).name)} · ${fmtFull(TODAY)}`)}<nav class="tabs" aria-label="Visão do dashboard">${allowed.map(v=>`<button data-a="dashboardView" data-v="${v}" aria-pressed="${v===view}" class="${v===view?'active':''}">${v==='financial'?'Financeira':'Operacional'}</button>`).join('')}</nav><p class="foot">${view==='financial'?'Recebimentos, inadimplência e próximos compromissos.':'Continuidade do acesso e entregas aos produtos. Priorize o que precisa de intervenção.'}</p>`;
+  const alert=(anchor,label,count)=>`<a class="dash-alert" href="#${anchor}" data-a="jump" data-v="${anchor}"><strong>${count}</strong><span>${label}</span><b aria-hidden="true">${ic('arrowR',15,2)}</b></a>`;
+  const desc=view==='financial'?'Recebimentos, inadimplência e próximos compromissos.':'Continuidade do acesso e entregas aos produtos.';
+  const seg=allowed.length>1?`<nav class="tabs seg" aria-label="Visão do dashboard">${allowed.map(v=>`<button data-a="dashboardView" data-v="${v}" aria-pressed="${v===view}">${ic(v==='financial'?'wallet':'activity',15,2)}${v==='financial'?'Financeira':'Operacional'}</button>`).join('')}</nav>`:'';
+  const wd=new Date(TODAY+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  const header=page('Visão geral',`${S.prod==='all'?'Todos os produtos':esc(prodOf(S.prod).name)} · ${desc}`,seg,`<p class="eb">${wd}</p>`);
   if(view==='financial') {
     const lateTotal=sum(late), nextCharges=charges.filter(c=>c.status==='pending' && c.due>=TODAY && c.due<=addDays(TODAY,30));
     const forecast=sum(nextCharges)+renewals.filter(s=>!nextCharges.some(c=>c.sub===s.id && c.due===s.next)).reduce((n,s)=>n+net(s),0);
@@ -197,20 +230,63 @@ function overview() {
 }
 
 /* ---------- relatórios ---------- */
+/* ---------- gráficos dos relatórios ---------- */
+const brlK = c => c >= 100000 ? 'R$ ' + (c / 100000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil' : 'R$ ' + Math.round(c / 100).toLocaleString('pt-BR');
+const niceMax = v => { if (v <= 0) return 100; const p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p; };
+let gid = 0;
+function areaChart(pts, { partial } = {}) {
+  const W = 520, H = 210, L = 54, R = 14, T = 16, B = 28, pw = W - L - R, ph = H - T - B, mx = niceMax(Math.max(...pts.map(p => p[1])) * 1.1), k = ++gid, n = pts.length;
+  const x = i => L + (n > 1 ? i * pw / (n - 1) : pw / 2), y = v => T + ph - v / mx * ph;
+  const grid = [0, .5, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${y(mx * f)}" y2="${y(mx * f)}" class="gl"/><text x="${L - 10}" y="${y(mx * f) + 4}" text-anchor="end" class="axt">${brlK(mx * f)}</text>`).join('');
+  const full = partial ? pts.slice(0, -1) : pts;
+  const path = arr => arr.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');
+  const line = path(full), area = `${path(pts)} L${x(n - 1)},${T + ph} L${x(0)},${T + ph} Z`;
+  const tail = partial && n > 1 ? `<path d="M${x(n - 2)},${y(pts[n - 2][1])} L${x(n - 1)},${y(pts[n - 1][1])}" class="ln tail"/>` : '';
+  const dots = pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p[1])}" r="4" class="dot${partial && i === n - 1 ? ' part' : ''}" data-i="${i}"/>`).join('');
+  const labels = pts.map((p, i) => `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" class="axt">${esc(p[0])}</text>`).join('');
+  const data = esc(JSON.stringify(pts.map((p, i) => [p[0], brl(p[1]), x(i) / W, y(p[1]) / H, partial && i === n - 1 ? 'mês em andamento' : ''])));
+  return `<div class="rcw" data-pts="${data}"><svg class="rc area" viewBox="0 0 ${W} ${H}" role="img" aria-label="Receita recebida por mês: ${pts.map(p => p[0] + ' ' + brl(p[1])).join(', ')}"><defs><linearGradient id="ag${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--brand)" stop-opacity=".18"/><stop offset="1" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#ag${k})" class="ar"/><line class="guide" x1="0" x2="0" y1="${T}" y2="${T + ph}"/><path d="${line}" class="ln" pathLength="1"/>${tail}${dots}${labels}</svg><div class="tip" hidden></div>${partial ? '<p class="rc-note"><i></i>Outubro ainda em andamento</p>' : ''}</div>`;
+}
+function colChart(items) {
+  const W = 520, H = 210, L = 54, R = 14, T = 26, B = 28, pw = W - L - R, ph = H - T - B, mx = niceMax(Math.max(...items.map(i => i[1]))), n = items.length, gw = pw / n, bw = Math.min(56, gw * .5);
+  const y = v => T + ph - v / mx * ph;
+  const grid = [0, .5, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${y(mx * f)}" y2="${y(mx * f)}" class="gl"/><text x="${L - 10}" y="${y(mx * f) + 4}" text-anchor="end" class="axt">${brlK(mx * f)}</text>`).join('');
+  const cols = items.map(([l, v, sub], i) => { const cx = L + gw * i + gw / 2, h = Math.max(0, T + ph - y(v)); return `<g class="col" style="--i:${i}"><title>${esc(l)}: ${brl(v)}</title>${v ? `<rect x="${cx - bw / 2}" y="${y(v)}" width="${bw}" height="${h}" rx="8" class="${i === 0 ? 'now' : ''}"/><text x="${cx}" y="${y(v) - 8}" text-anchor="middle" class="vl">${brlK(v)}</text>` : `<rect x="${cx - bw / 2}" y="${T + ph - 4}" width="${bw}" height="4" rx="2" class="zero"/><text x="${cx}" y="${T + ph - 12}" text-anchor="middle" class="axt">sem previsão</text>`}<text x="${cx}" y="${H - 8}" text-anchor="middle" class="axt">${esc(l)}</text></g>`; }).join('');
+  return `<svg class="rc cols" viewBox="0 0 ${W} ${H}" role="img" aria-label="Previsão de recebimento por semana">${grid}${cols}</svg>`;
+}
+function donutChart(items, center) {
+  const tot = items.reduce((a, i) => a + i[1], 0) || 1, r = 15.9155, C = 2 * Math.PI * r, cols = ['var(--seq4)', 'var(--seq2)', 'var(--seq3)', 'var(--seq1)']; let off = 0;
+  const arcs = items.map(([l, v], i) => { const len = v / tot * C, g = items.length > 1 ? .8 : 0, d = `<circle r="${r}" cx="21" cy="21" fill="none" stroke="${cols[i % 4]}" stroke-width="5" stroke-linecap="butt" stroke-dasharray="${Math.max(.1, len - g)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 21 21)" class="arc" style="--i:${i}"><title>${esc(l)}: ${brl(v)}</title></circle>`; off += len; return d; }).join('');
+  return `<div class="dn"><div class="dn-c"><svg viewBox="0 0 42 42" role="img" aria-label="Distribuição"><circle r="${r}" cx="21" cy="21" fill="none" stroke="var(--surface-3)" stroke-width="5"/>${arcs}</svg><span><b>${center[0]}</b><small>${center[1]}</small></span></div><ul class="rlg">${items.map(([l, v, t], i) => `<li><i style="background:${cols[i % 4]}"></i><span>${esc(l)}</span><b>${Math.round(v / tot * 100)}%</b><small>${t ?? brl(v)}</small></li>`).join('')}</ul></div>`;
+}
+function stackBar(items, fmt = brl, cols = ['var(--st-sol)', 'color-mix(in srgb,var(--st-rec) 60%,var(--st-sol))', 'var(--st-rec)']) {
+  const tot = items.reduce((a, i) => a + i[1], 0);
+  return `<div class="sb">${tot ? items.map(([l, v], i) => v ? `<i style="flex:${v};background:${cols[i % 3]}" title="${esc(l)}: ${fmt(v)}"></i>` : '').join('') : '<i class="none"></i>'}</div><ul class="rlg row">${items.map(([l, v], i) => `<li><i style="background:${cols[i % 3]}"></i><span>${esc(l)}</span><b>${fmt(v)}</b></li>`).join('')}</ul>`;
+}
+const rank = (items, fmt = brl) => { const mx = Math.max(1, ...items.map(i => i[1])); return `<ol class="rk">${items.sort((a, b) => b[1] - a[1]).map(([l, v, t]) => `<li><span class="rk-l">${esc(l)}</span><span class="rk-v num">${t ?? fmt(v)}</span><span class="rk-b"><i style="--w:${Math.max(3, v / mx * 100)}%"></i></span></li>`).join('')}</ol>`; };
+const delta = (a, b) => { if (!b) return ''; const p = Math.round((a - b) / b * 100); return `<span class="dl ${p >= 0 ? 'up' : 'dn2'}">${ic(p >= 0 ? 'up' : 'down', 13, 2.4)}${Math.abs(p)}%</span>`; };
+const rh = (title, big, sub, extra = '') => `<div class="rh"><h2>${title}</h2><div class="rh-n"><b class="num">${big}</b>${extra}</div>${sub ? `<p class="rh-s">${sub}</p>` : ''}</div>`;
+
 function relatorios() {
-  const act = mSubs().filter(s => s.status === 'active'), twelve = Array.from({ length: 6 }, (_, i) => shiftYm(CUR, i - 5));
+  const act = mSubs().filter(s => s.status === 'active'), months = Array.from({ length: 6 }, (_, i) => shiftYm(CUR, i - 5));
   const byMethod = {}; mCharges().filter(c => c.status === 'paid').forEach(c => { const k = c.method === 'PIX' ? 'PIX' : 'Cartão'; byMethod[k] = (byMethod[k] || 0) + c.amount; });
   const late = mCharges().filter(c => c.status === 'overdue'), aging = [['1 a 3 dias', 1, 3], ['4 a 7 dias', 4, 7], ['Mais de 7 dias', 8, 999]].map(([l, a, b]) => [l, late.filter(c => { const d = diff(TODAY, c.due); return d >= a && d <= b; }).reduce((s, c) => s + c.amount, 0)]);
   const reasons = {}; mCancels().forEach(c => { reasons[c.reason] = (reasons[c.reason] || 0) + 1; });
-  const fc = Array.from({ length: 4 }, (_, i) => { const a = addDays(TODAY, i * 7), b = addDays(TODAY, i * 7 + 6); const v = mCharges().filter(c => c.status === 'pending' && c.due >= a && c.due <= b).reduce((s, c) => s + c.amount, 0) + act.filter(s => s.cycle === 'mensal' && !D.charges.some(c => c.sub === s.id && c.status === 'pending') && s.next >= a && s.next <= b).reduce((s, x) => s + net(x), 0); return [fmtFull(a).slice(0, 5), v]; });
+  const fc = Array.from({ length: 4 }, (_, i) => { const a = addDays(TODAY, i * 7), b = addDays(TODAY, i * 7 + 6); const v = mCharges().filter(c => c.status === 'pending' && c.due >= a && c.due <= b).reduce((s, c) => s + c.amount, 0) + act.filter(s => s.cycle === 'mensal' && !D.charges.some(c => c.sub === s.id && c.status === 'pending') && s.next >= a && s.next <= b).reduce((s, x) => s + net(x), 0); return [i === 0 ? 'Esta semana' : fmtFull(a).slice(0, 5), v]; });
   const disc = act.filter(s => (s.discounts || []).length).map(s => [subCust(s).name, gross(s) - net(s)]);
-  const ratio = { mensal: act.filter(s => s.cycle === 'mensal').length, anual: act.filter(s => s.cycle === 'anual').length };
+  const ratio = [['Mensal', act.filter(s => s.cycle === 'mensal').length], ['Anual', act.filter(s => s.cycle === 'anual').length]];
   const perProd = visProd().map(p => [p.name, mrrOf(D.subs.filter(s => s.product === p.code && s.status === 'active'))]);
-  return `${page('Relatórios', `${S.prod === 'all' ? 'Todos os produtos' : esc(prodOf(S.prod).name)}. Valores em reais; dados fictícios.`, '<button class="btn sec sm" data-a="expCsv">Exportar CSV</button>')}
-${multi() ? `<section class="card"><h2>Receita recorrente por produto</h2>${hbars(perProd)}<p class="foot">Compara os produtos entre si. Selecione um produto no menu lateral para ver só ele.</p></section>` : ''}
-<div class="g2"><section class="card"><h2>Receita recebida por mês</h2>${bars(twelve.map(ym => [MON[+ym.slice(5) - 1], monthPaid(ym)]))}</section><section class="card"><h2>Previsão de recebimento, próximas 4 semanas</h2>${bars(fc)}<p class="foot">Cobranças pendentes e próximos ciclos mensais. PIX só entra quando a cobrança é gerada.</p></section></div>
-<div class="g2"><section class="card"><h2>Inadimplência por tempo de atraso</h2>${hbars(aging)}<p class="foot">${late.length} cobrança(s) atrasada(s). Depois da tolerância de cada produto, a situação vira em atraso.</p></section><section class="card"><h2>Formas de pagamento (total recebido)</h2>${hbars(Object.entries(byMethod))}<h2 style="margin-top:18px">Ciclo das assinaturas ativas</h2>${hbars([['Mensal', ratio.mensal, ratio.mensal + ' assinaturas'], ['Anual', ratio.anual, ratio.anual + ' assinaturas']])}</section></div>
-<div class="g2"><section class="card"><h2>Cancelamentos por motivo</h2>${Object.keys(reasons).length ? hbars(Object.entries(reasons).map(([k, v]) => [k, v, v + ' cancelamento(s)'])) : empty('Sem cancelamentos.')}</section><section class="card"><h2>Descontos ativos</h2>${disc.length ? hbars(disc) : empty('Nenhum desconto ativo.')}<p class="foot">Quanto se deixa de cobrar por mês. Vouchers e descontos manuais ficam registrados no cliente.</p></section></div>`;
+  const rec = months.map(ym => [MON[+ym.slice(5) - 1], monthPaid(ym)]), recTot = rec.reduce((a, r) => a + r[1], 0), cur = rec.at(-1)[1], prev = rec.at(-2)[1];
+  const fcTot = fc.reduce((a, f) => a + f[1], 0), lateTot = aging.reduce((a, x) => a + x[1], 0), payTot = Object.values(byMethod).reduce((a, v) => a + v, 0);
+  const canc = Object.entries(reasons), discTot = disc.reduce((a, d) => a + d[1], 0), mrrTot = perProd.reduce((a, p) => a + p[1], 0);
+  return `${page('Relatórios', `${S.prod === 'all' ? 'Todos os produtos' : esc(prodOf(S.prod).name)} · valores em reais`, '<button class="btn sec" data-a="expCsv">Exportar CSV</button>')}
+${multi() ? `<section class="card rcard rprod"><div class="rp-l">${rh('Receita recorrente por produto', brl(mrrTot), 'por mês, somando os produtos')}${donutChart(perProd, [brlK(mrrTot), 'por mês'])}</div><div class="rp-r">${visProd().map((p, i) => { const a = D.subs.filter(s => s.product === p.code && s.status === 'active'), m = mrrOf(a), all = D.subs.filter(s => s.product === p.code), late = all.filter(s => s.status === 'past_due').length; return `<button class="rp-c" data-a="prodView" data-v="${p.code}"><span class="rp-h">${plogo(p.code, 'sm')}<b>${esc(p.name)}</b><i style="background:${['var(--seq4)', 'var(--seq2)', 'var(--seq3)'][i % 3]}"></i></span><span class="rp-m num">${brl(m)}<small>/mês</small></span><span class="rp-k"><span><small>Ativas</small><b class="num">${a.length}</b></span><span><small>Ticket médio</small><b class="num">${a.length ? brlK(m / a.length) : '—'}</b></span><span><small>Em atraso</small><b class="num${late ? ' neg' : ''}">${late}</b></span></span><span class="rp-go">Ver só ${esc(p.name)} ${ic('arrowR', 14, 2.2)}</span></button>`; }).join('')}</div></section>` : ''}
+<div class="g2 g2w"><section class="card rcard">${rh('Receita recebida', brl(recTot), `nos últimos 6 meses · outubro até ${fmtFull(TODAY).slice(0, 5)}`)}${areaChart(rec, { partial: true })}</section>
+<section class="card rcard">${rh('Previsão de recebimento', brl(fcTot), 'nas próximas 4 semanas')}${colChart(fc)}<p class="foot">Cobranças pendentes e próximos ciclos mensais. PIX só entra quando a cobrança é gerada.</p></section></div>
+<div class="g2 g2w"><section class="card rcard">${rh('Inadimplência', brl(lateTot), `${late.length} cobrança${late.length === 1 ? '' : 's'} em atraso, por tempo de atraso`)}${stackBar(aging)}<p class="foot">Depois da tolerância de cada produto, a situação vira em atraso.</p></section>
+<section class="card rcard">${rh('Formas de pagamento', brl(payTot), 'total recebido')}${donutChart(Object.entries(byMethod), [Object.keys(byMethod).length, 'formas'])}<div class="rsub"><h3>Ciclo das assinaturas ativas</h3>${stackBar(ratio, v => v + (v === 1 ? ' assinatura' : ' assinaturas'), ['var(--seq4)', 'var(--seq2)'])}</div></section></div>
+<div class="g2 g2w"><section class="card rcard">${rh('Cancelamentos', String(canc.reduce((a, c) => a + c[1], 0)), 'por motivo')}${canc.length ? rank(canc.map(([k, v]) => [k, v, v + (v === 1 ? ' cancelamento' : ' cancelamentos')])) : `<div class="r-empty">${ic('check', 18, 2.2)}<span>Nenhum cancelamento ${S.prod === 'all' ? '' : 'neste produto '}até agora.</span></div>`}</section>
+<section class="card rcard">${rh('Descontos ativos', brl(discTot), 'deixam de ser cobrados por mês')}${disc.length ? rank(disc) : `<div class="r-empty">${ic('check', 18, 2.2)}<span>Nenhum desconto ativo.</span></div>`}<p class="foot">Vouchers e descontos manuais ficam registrados no cliente.</p></section></div>`;
 }
 A.expCsv = () => toast('Exportação gerada (simulada): relatorio-assinaturas.csv');
 
@@ -218,7 +294,7 @@ A.expCsv = () => toast('Exportação gerada (simulada): relatorio-assinaturas.cs
 const PS = { active: ['pago', 'Ativo'], draft: ['pendente', 'Rascunho'], paused: ['neutro', 'Pausado'] };
 function produtos() {
   return `${page('Produtos', 'Cada produto tem o seu provedor de pagamento, as suas chaves, os seus parâmetros, os seus planos e os seus termos.', ``)}${isAdm() ? '' : note('lock', 'Só o administrador cadastra produtos e mexe em chaves e provedor.')}
-<div class="tw"><table><thead><tr><th>Produto</th><th>Provedor</th><th>Planos</th><th class="r">Ativas</th><th class="r">Receita mensal</th><th>Chave</th><th>Situação</th></tr></thead><tbody>${visProd().map(p => { const a = D.subs.filter(s => s.product === p.code && s.status === 'active'), k = p.keys.find(x => x.active); return `<tr class="row" tabindex="0" data-a="produto" data-v="${p.code}"><td><b>${esc(p.name)}</b><small>${esc(p.tagline)} · <code>${p.code}</code></small></td><td>${PNAME[p.provider]}<small>${p.env}</small></td><td>${D.plans.filter(x => x.product === p.code).length}</td><td class="r num">${a.length}</td><td class="r num">${brl(mrrOf(a))}</td><td><code>••••${k ? k.tail : '—'}</code></td><td>${chip(PS[p.status])}</td></tr>`; }).join('')}</tbody></table></div>`;
+<div class="tw"><table><thead><tr><th>Produto</th><th>Provedor</th><th>Planos</th><th class="r">Ativas</th><th class="r">Receita mensal</th><th>Chave</th><th>Situação</th></tr></thead><tbody>${visProd().map(p => { const a = D.subs.filter(s => s.product === p.code && s.status === 'active'), k = p.keys.find(x => x.active); return `<tr class="row" tabindex="0" data-a="produto" data-v="${p.code}"><td><span class="pcell">${plogo(p.code, 'md')}<span><b>${esc(p.name)}</b><small>${esc(p.tagline)} · <code>${p.code}</code></small></span></span></td><td>${PNAME[p.provider]}<small>${p.env}</small></td><td>${D.plans.filter(x => x.product === p.code).length}</td><td class="r num">${a.length}</td><td class="r num">${brl(mrrOf(a))}</td><td><code>••••${k ? k.tail : '—'}</code></td><td>${chip(PS[p.status])}</td></tr>`; }).join('')}</tbody></table></div>`;
 }
 A.produto = c => { S.pid = c; S.ptab = 'geral'; S.screen = 'produto'; closeDlg(); render(); window.scrollTo(0, 0); };
 A.ptab = v => { S.ptab = v; render(); };
@@ -278,7 +354,7 @@ A.configSave = ref => {
 const PTABS = [['geral', 'Geral'], ['integracao', 'Integração e chaves'], ['parametros', 'Parâmetros'], ['termos', 'Termos e consentimentos']];
 function produtoPage() {
   const p = prodOf(S.pid), pl = D.plans.filter(x => x.product === p.code), subs = D.subs.filter(s => s.product === p.code), act = subs.filter(s => s.status === 'active');
-  const head = `<button class="btn ghost sm" data-a="go" data-v="produtos" style="margin-bottom:8px">${ic('chevL', 15, 2.4)}Produtos</button>${page(esc(p.name), `${esc(p.tagline)} · <code>${p.code}</code> · ${chip(PS[p.status])}`, isAdm() ? (p.status === 'active' ? `<button class="btn sec sm" data-a="pStatus" data-v="paused">Pausar vendas</button>` : p.status === 'paused' ? `<button class="btn sm" data-a="pStatus" data-v="active">Retomar vendas</button>` : `<button class="btn sm" data-a="pStatus" data-v="active">Ativar produto</button>`) : '')}<nav class="tabs" role="tablist">${PTABS.map(([k, l]) => `<button role="tab" aria-selected="${S.ptab === k}" data-a="ptab" data-v="${k}">${l}</button>`).join('')}</nav>`;
+  const head = `${crumb('produtos', 'Produtos', esc(p.name))}${page(`<span class="ph-prod">${plogo(p.code, 'lg')}<span>${esc(p.name)}</span></span>`, `${esc(p.tagline)} · <code>${p.code}</code> · ${chip(PS[p.status])}`, isAdm() ? (p.status === 'active' ? `<button class="btn sec sm" data-a="pStatus" data-v="paused">Pausar vendas</button>` : p.status === 'paused' ? `<button class="btn sm" data-a="pStatus" data-v="active">Retomar vendas</button>` : `<button class="btn sm" data-a="pStatus" data-v="active">Ativar produto</button>`) : '')}<nav class="tabs" role="tablist">${PTABS.map(([k, l]) => `<button role="tab" aria-selected="${S.ptab === k}" data-a="ptab" data-v="${k}">${l}</button>`).join('')}</nav>`;
   let body = '';
   if (S.ptab === 'geral') body = `<section class="kpis"><div class="kpi"><small>Assinaturas ativas</small><b>${act.length}</b><span>${subs.length} no total</span></div><div class="kpi"><small>Receita mensal</small><b>${brl(mrrOf(act))}</b></div><div class="kpi"><small>Planos</small><b>${pl.length}</b><span>${pl.filter(x => x.active).length} ativos</span></div><div class="kpi"><small>Termos vigentes</small><b>${p.terms.length}</b><span>${subs.filter(s => pendingConsents(s).some(c => c.required)).length} membro(s) com aceite pendente</span></div></section>
 <section class="card"><h2>Dados do produto</h2><dl class="kv"><div><dt>Nome</dt><dd>${esc(p.name)}</dd></div><div><dt>Código</dt><dd><code>${p.code}</code></dd></div><div><dt>Provedor de pagamento</dt><dd><select data-a="prov" aria-label="Provedor" ${isAdm() ? '' : 'disabled'}>${PROVIDERS.map(([k, l]) => `<option value="${k}" ${p.provider === k ? 'selected' : ''}>${l}</option>`).join('')}</select></dd></div><div><dt>Ambiente</dt><dd>${p.env}</dd></div><div><dt>Campos extras do checkout</dt><dd>${esc(p.fields)}</dd></div></dl>${note('info', 'O provedor vale por produto. Trocar o provedor afeta só as cobranças novas; as existentes continuam onde estão. O pagamento é transparente (sem PCI): nunca vemos dados de cartão.')}<div class="chips"><button class="btn sec sm" data-a="go" data-v="planos">Ver planos do produto</button></div></section>`;
@@ -312,7 +388,7 @@ function clientes() {
   const q = S.q.toLowerCase(), rows = [];
   D.customers.filter(c => !q || (c.name + c.email).toLowerCase().includes(q)).forEach(c => custSubs(c.id).filter(s => inSel(s.product)).forEach((s, i) => rows.push({ c, s, first: i === 0 })));
   return `${page('Clientes', 'Uma linha por assinatura: a mesma pessoa aparece uma vez para cada produto que assina, cada uma com o seu plano e o seu valor pago. Toque para ver tudo: pagamentos, assinatura, descontos, termos, avisos e atividade.')}<div class="tools">${prodCombo()}<input id="q" placeholder="Buscar por nome ou e-mail" value="${esc(S.q)}" aria-label="Buscar"></div>
-<div class="tw"><table><thead><tr><th>Cliente</th><th>Produto</th><th>Plano</th><th>Situação</th><th class="r">Pago até hoje</th></tr></thead><tbody>${rows.map(({ c, s, first }) => { const paid = D.charges.filter(h => h.sub === s.id && h.status === 'paid').reduce((x, h) => x + h.amount, 0); return `<tr class="row ${first ? '' : 'again'}" tabindex="0" data-a="cliente" data-v="${c.id}|resumo|${s.id}"><td><b>${esc(c.name)}</b><small>${esc(c.email)}</small></td><td>${ptag(s.product)}</td><td>${esc(planOfSub(s).name)} · ${s.cycle}${(s.discounts || []).length ? ' <span class="pill">desconto</span>' : ''}</td><td>${chip(SS[s.status])}</td><td class="r num">${brl(paid)}</td></tr>`; }).join('') || `<tr><td colspan="5">${empty('Nenhum cliente encontrado.')}</td></tr>`}</tbody></table></div>`;
+<div class="tw"><table><thead><tr><th>Cliente</th><th>Produto</th><th>Plano</th><th>Situação</th><th class="r">Pago até hoje</th></tr></thead><tbody>${pageOf('cl', rows).map(({ c, s, first }) => { const paid = D.charges.filter(h => h.sub === s.id && h.status === 'paid').reduce((x, h) => x + h.amount, 0); return `<tr class="row ${first ? '' : 'again'}" tabindex="0" data-a="cliente" data-v="${c.id}|resumo|${s.id}"><td><b>${esc(c.name)}</b><small>${esc(c.email)}</small></td><td>${ptag(s.product)}</td><td>${esc(planOfSub(s).name)} · ${s.cycle}${(s.discounts || []).length ? ' <span class="pill">desconto</span>' : ''}</td><td>${chip(SS[s.status])}</td><td class="r num">${brl(paid)}</td></tr>`; }).join('') || `<tr><td colspan="5">${empty('Nenhum cliente encontrado.')}</td></tr>`}</tbody></table>${pager('cl', rows.length)}</div>`;
 }
 A.cliente = v => { const [cid, tab, sid] = v.split('|'); S.cid = cid; S.tab = tab || 'resumo'; S.sid = sid || null; S.screen = 'cliente'; closeDlg(); render(); window.scrollTo(0, 0); };
 A.pickSub = sid => { S.sid = sid; render(); };
@@ -323,7 +399,7 @@ function clientePage() {
   const ch = D.charges.filter(h => h.sub === s.id).sort((a, b) => b.due.localeCompare(a.due)), paid = ch.filter(h => h.status === 'paid'), tot = paid.reduce((a, h) => a + h.amount, 0), p = prodOf(s.product);
   const ev = D.events.filter(e => e.sub === s.id), act = D.audit.filter(a => a.ref === c.name), disc = s.discounts || [], months = Math.max(0, Math.floor(diff(TODAY, s.start) / 30)), pc = pendingConsents(s);
   const sw = all.length > 1 ? `<div class="swt" role="group" aria-label="Assinaturas desta pessoa">${all.map(x => `<button data-a="pickSub" data-v="${x.id}" aria-pressed="${x.id === s.id}">${esc(prodOf(x.product).name)} · ${esc(planOf(x.product, x.plan).name)} ${chip(SS[x.status])}</button>`).join('')}</div>` : '';
-  const head = `<button class="btn ghost sm" data-a="go" data-v="clientes" style="margin-bottom:8px">${ic('chevL', 15, 2.4)}Clientes</button>${page(esc(c.name), `${esc(c.email)} · ${ptag(s.product)} <code>${s.memberId}</code>`, actions(s, true))}${sw}
+  const head = `${crumb('clientes', 'Clientes', esc(c.name))}${page(esc(c.name), `${esc(c.email)} · ${ptag(s.product)} <code>${s.memberId}</code>`, actions(s, true))}${sw}
 <nav class="tabs" role="tablist">${TABS.map(([k, l]) => `<button role="tab" aria-selected="${S.tab === k}" data-a="tab" data-v="${k}">${l}${k === 'avisos' && ev.some(e => e.status === 'failed') ? ' <span class="badge">!</span>' : ''}${k === 'termos' && pc.some(x => x.required) ? ' <span class="badge">!</span>' : ''}</button>`).join('')}</nav>`;
   let body = '';
   const warn = s.status === 'suspended' ? note('warn', `<b>Contrato suspenso</b> desde ${fmtFull(s.suspended.at)} por ${esc(s.suspended.by)}. Motivo: ${esc(s.suspended.reason)}. Cobranças e vigência estão pausadas; o titular ainda pode exportar os dados e excluir a conta no produto.`) : s.status === 'canceling' ? note('warn', `<b>Cancelamento agendado.</b> O acesso continua até ${fmtFull(s.end)}.`) : '';
@@ -333,7 +409,7 @@ function clientePage() {
 
 <section class="card"><h2>Últimos pagamentos</h2>${chTable(ch.slice(0, 4), false)}<p style="margin-top:10px"><button class="btn ghost sm" data-a="tab" data-v="pagamentos">Ver todo o histórico</button></p></section>
 ${guide('O que o produto recebe na consulta de acesso', `<pre class="json">${esc(JSON.stringify(accessResponse(s), null, 2))}</pre><p class="foot">Exemplo para quem integra: o produto consulta este estado e decide o que fazer. Esta resposta é montada pela API; não é uma tela do sistema.</p>`)}`;
-  else if (S.tab === 'pagamentos') body = `<section class="kpis"><div class="kpi"><small>Total pago</small><b>${brl(tot)}</b><span>${paid.length} cobrança(s) paga(s)</span></div><div class="kpi"><small>Pendente</small><b>${brl(ch.filter(h => h.status === 'pending').reduce((a, h) => a + h.amount, 0))}</b></div><div class="kpi"><small>Atrasado</small><b class="${ch.some(h => h.status === 'overdue') ? 'neg' : ''}">${brl(ch.filter(h => h.status === 'overdue').reduce((a, h) => a + h.amount, 0))}</b></div><div class="kpi"><small>Descontos dados</small><b>${brl(ch.reduce((a, h) => a + (h.discount || 0), 0))}</b></div></section><section class="card"><h2>Histórico completo de cobranças · ${esc(p.name)}</h2>${chTable(ch, true)}</section>`;
+  else if (S.tab === 'pagamentos') body = `<section class="kpis"><div class="kpi"><small>Total pago</small><b>${brl(tot)}</b><span>${paid.length} cobrança(s) paga(s)</span></div><div class="kpi"><small>Pendente</small><b>${brl(ch.filter(h => h.status === 'pending').reduce((a, h) => a + h.amount, 0))}</b></div><div class="kpi"><small>Atrasado</small><b class="${ch.some(h => h.status === 'overdue') ? 'neg' : ''}">${brl(ch.filter(h => h.status === 'overdue').reduce((a, h) => a + h.amount, 0))}</b></div><div class="kpi"><small>Descontos dados</small><b>${brl(ch.reduce((a, h) => a + (h.discount || 0), 0))}</b></div></section><section class="card"><h2>Histórico completo de cobranças · ${esc(p.name)}</h2>${chTable(pageOf('cli', ch), true)}${pager('cli', ch.length)}</section>`;
   else if (S.tab === 'assinatura') body = `<div class="g2"><section class="card"><h2>Descontos e vouchers</h2>${disc.length ? `<ul class="tl">${disc.map(d => `<li><b>${esc(d.label)}</b> · ${d.kind === 'pct' ? d.value + '%' : brl(d.value)} · ${d.left ? d.left + ' cobrança(s) restante(s)' : 'durante a vigência do plano'}<small>${esc(d.reason)} · ${esc(d.by)} · ${fmtFull(d.at)} <button class="btn ghost sm" data-a="discOff" data-v="${s.id}|${d.id}">Remover</button></small></li>`).join('')}</ul>` : empty('Nenhum desconto aplicado.')}<div class="chips" style="margin-top:12px"><button class="btn sm" data-a="discount" data-v="${s.id}">Aplicar voucher ou desconto</button></div></section>
 <section class="card"><h2>Trocas de plano</h2>${D.changes.filter(x => x.sub === s.id).length ? `<ul class="tl">${D.changes.filter(x => x.sub === s.id).map(x => `<li>${esc(x.from)} → <b>${esc(x.to)}</b> <span class="pill">${x.kind}</span><small>${fmtFull(x.at)} · ${esc(x.by)}</small></li>`).join('')}</ul>` : empty('Sem trocas de plano.')}${D.cancels.filter(x => x.sub === s.id).map(x => note('warn', `Cancelamento pedido em ${fmtFull(x.at)} (${esc(x.reason)}) por ${esc(x.by)}. Acesso até ${fmtFull(x.until)}.`)).join('')}</section></div>`;
   else if (S.tab === 'termos') body = `<section class="card"><h2>Termos e consentimentos · ${esc(p.name)}</h2>${pc.some(x => x.required) ? note('warn', 'Há aceite obrigatório pendente. A consulta de acesso lista o documento em <code>pendingConsents</code> e o produto pede o aceite.') : note('ok', 'Todos os documentos obrigatórios estão aceitos na versão vigente.')}<div class="tw" style="box-shadow:none;margin:0"><table><thead><tr><th>Documento</th><th>Versão vigente</th><th>Situação</th></tr></thead><tbody>${p.terms.map(t => { const k = s.consents[t.id]; let st; if (t.required) st = k && k.version === t.version ? chip(['pago', 'Aceito']) + `<small>v${k.version} em ${fmtFull(k.at)}</small>` : k ? chip(['vencido', 'Desatualizado']) + `<small>aceitou v${k.version}; vigente v${t.version}</small>` : chip(['vencido', 'Pendente']); else st = k && k.accepted ? chip(['pago', 'Aceitou']) + `<small>em ${fmtFull(k.at)}</small>` : chip(['neutro', 'Não aceitou']); return `<tr><td><b>${esc(t.title)}</b><small>${esc(t.type)} · ${t.required ? 'obrigatório' : 'opcional (opt-in)'}</small></td><td>v${t.version}</td><td>${st}</td></tr>`; }).join('')}</tbody></table></div></section>`;
@@ -349,7 +425,7 @@ function assinaturas() {
   const f = S.f.subs || {}, list = mSubs().filter(s => (!f.st || s.status === f.st) && (!f.pl || s.plan === f.pl));
   const plans = D.plans.filter(p => inSel(p.product));
   return `${page('Assinaturas', 'Trocar plano, aplicar voucher ou desconto, suspender, cancelar e reativar. Cada mudança avisa o produto e fica na auditoria.')}<div class="tools">${prodCombo()}<select data-a="flt" data-k="subs.st" aria-label="Situação"><option value="">Todas as situações</option>${Object.entries(SS).map(([k, v]) => `<option value="${k}" ${f.st === k ? 'selected' : ''}>${v[1]}</option>`).join('')}</select><select data-a="flt" data-k="subs.pl" aria-label="Plano"><option value="">Todos os planos</option>${[...new Set(plans.map(p => p.code))].map(c => `<option value="${c}" ${f.pl === c ? 'selected' : ''}>${esc(plans.find(p => p.code === c).name)}</option>`).join('')}</select></div>
-<div class="tw"><table><thead><tr><th>Cliente</th>${multi() ? '<th>Produto</th>' : ''}<th>Plano</th><th>Valor cobrado</th><th>Situação</th><th>Próxima cobrança / fim</th><th></th></tr></thead><tbody>${list.map(s => `<tr class="row" tabindex="0" data-a="cliente" data-v="${s.customer}|assinatura|${s.id}"><td><b>${esc(subCust(s).name)}</b><small>${esc(s.method)}</small></td>${multi() ? `<td>${ptag(s.product)}</td>` : ''}<td>${esc(planOfSub(s).name)} · ${s.cycle}</td><td class="num">${brl(net(s))}${(s.discounts || []).length ? `<small>cheio ${brl(gross(s))}</small>` : ''}</td><td>${chip(SS[s.status])}</td><td>${s.status === 'suspended' ? 'Pausada' : fmtFull(s.end || s.next || s.start)}</td><td><div class="act">${actions(s)}</div></td></tr>`).join('') || `<tr><td colspan="7">${empty('Nenhuma assinatura neste filtro.')}</td></tr>`}</tbody></table></div>`;
+<div class="tw"><table><thead><tr><th>Cliente</th>${multi() ? '<th>Produto</th>' : ''}<th>Plano</th><th>Valor cobrado</th><th>Situação</th><th>Próxima cobrança / fim</th><th></th></tr></thead><tbody>${pageOf('as', list).map(s => `<tr class="row" tabindex="0" data-a="cliente" data-v="${s.customer}|assinatura|${s.id}"><td><b>${esc(subCust(s).name)}</b><small>${esc(s.method)}</small></td>${multi() ? `<td>${ptag(s.product)}</td>` : ''}<td>${esc(planOfSub(s).name)} · ${s.cycle}</td><td class="num">${brl(net(s))}${(s.discounts || []).length ? `<small>cheio ${brl(gross(s))}</small>` : ''}</td><td>${chip(SS[s.status])}</td><td>${s.status === 'suspended' ? 'Pausada' : fmtFull(s.end || s.next || s.start)}</td><td><div class="act">${actions(s)}</div></td></tr>`).join('') || `<tr><td colspan="7">${empty('Nenhuma assinatura neste filtro.')}</td></tr>`}</tbody></table>${pager('as', list.length)}</div>`;
 }
 A.flt = (v, el) => { const [a, k] = el.dataset.k.split('.'); (S.f[a] ||= {})[k] = v; render(); };
 const lg = (s, what) => log(what, subCust(s).name, s.product);
@@ -399,7 +475,7 @@ A.discOff = v => { if (!guard()) return; const [sid, did] = v.split('|'), s = su
 function vouchers() {
   const list = D.vouchers.filter(v => inSel(v.product));
   return `${page('Vouchers', 'Descontos prontos para aplicar em uma assinatura. Cada voucher pertence a um produto. O desconto vale pela duração definida e fica registrado no cliente.', `<button class="btn sm" data-a="vNew" ${canWrite() ? '' : 'disabled'}>${ic('plus', 15, 2.4)}Novo voucher</button>`)}
-<div class="tools">${prodCombo()}</div><div class="tw"><table><thead><tr><th>Código</th>${multi() ? '<th>Produto</th>' : ''}<th>Desconto</th><th>Duração</th><th class="r">Usos</th><th>Situação</th><th></th></tr></thead><tbody>${list.map(v => `<tr><td><b>${esc(v.code)}</b><small>${esc(v.label)}</small></td>${multi() ? `<td>${ptag(v.product)}</td>` : ''}<td>${v.kind === 'pct' ? v.value + '%' : brl(v.value)}</td><td>${v.cycles ? v.cycles + ' cobrança(s)' : 'Durante a vigência'}</td><td class="r num">${v.uses}</td><td>${v.active ? chip(['pago', 'Ativo']) : chip(['neutro', 'Inativo'])}</td><td><div class="act"><button class="btn sec sm" data-a="vOn" data-v="${v.product}|${v.code}">${v.active ? 'Desativar' : 'Ativar'}</button></div></td></tr>`).join('') || `<tr><td colspan="7">${empty('Nenhum voucher neste produto.')}</td></tr>`}</tbody></table></div>${note('info', 'Depois, a vitrine do produto pode aceitar o código no checkout. Neste protótipo, a equipe aplica o voucher na assinatura.')}`;
+<div class="tools">${prodCombo()}</div><div class="tw"><table><thead><tr><th>Código</th>${multi() ? '<th>Produto</th>' : ''}<th>Desconto</th><th>Duração</th><th class="r">Usos</th><th>Situação</th><th></th></tr></thead><tbody>${pageOf('vo', list).map(v => `<tr><td><b>${esc(v.code)}</b><small>${esc(v.label)}</small></td>${multi() ? `<td>${ptag(v.product)}</td>` : ''}<td>${v.kind === 'pct' ? v.value + '%' : brl(v.value)}</td><td>${v.cycles ? v.cycles + ' cobrança(s)' : 'Durante a vigência'}</td><td class="r num">${v.uses}</td><td>${v.active ? chip(['pago', 'Ativo']) : chip(['neutro', 'Inativo'])}</td><td><div class="act"><button class="btn sec sm" data-a="vOn" data-v="${v.product}|${v.code}">${v.active ? 'Desativar' : 'Ativar'}</button></div></td></tr>`).join('') || `<tr><td colspan="7">${empty('Nenhum voucher neste produto.')}</td></tr>`}</tbody></table>${pager('vo', list.length)}</div>${note('info', 'Depois, a vitrine do produto pode aceitar o código no checkout. Neste protótipo, a equipe aplica o voucher na assinatura.')}`;
 }
 A.vOn = v => { if (!guard()) return; const [p, c] = v.split('|'), x = D.vouchers.find(y => y.product === p && y.code === c); x.active = !x.active; log(`${x.active ? 'Ativou' : 'Desativou'} o voucher ${c}`, 'Vouchers', p); render(); };
 const prodField = (id0) => (S.prod === 'all' ? fld(id0, 'Produto', { opts: visProd().map(p => [p.code, p.name]) }) : '');
@@ -412,7 +488,7 @@ A.vNew = () => { if (!guard()) return; const d = dlg(`<h2>Novo voucher</h2>${pro
 function cobrancas() {
   const f = S.f.ch || {}, list = mCharges().filter(c => !f.st || c.status === f.st).sort((a, b) => b.due.localeCompare(a.due));
   return `${page('Cobranças e pagamentos', 'Uma cobrança por ciclo. Toque numa linha para abrir o cliente e ver todo o histórico.')}<div class="tools">${prodCombo()}<select data-a="flt" data-k="ch.st" aria-label="Situação"><option value="">Todas</option>${Object.entries(CS).map(([k, v]) => `<option value="${k}" ${f.st === k ? 'selected' : ''}>${v[1]}</option>`).join('')}</select></div>
-<div class="tw"><table><thead><tr><th>Cliente</th>${multi() ? '<th>Produto</th>' : ''}<th>Vencimento</th><th class="r">Valor</th><th>Forma</th><th>Situação</th><th></th></tr></thead><tbody>${list.map(c => { const s = subOf(c.sub); return `<tr class="row" tabindex="0" data-a="cliente" data-v="${s.customer}|pagamentos|${s.id}"><td><b>${esc(subCust(s).name)}</b><small>${esc(planOfSub(s).name)} · ${s.cycle}</small></td>${multi() ? `<td>${ptag(s.product)}</td>` : ''}<td>${fmtFull(c.due)}${c.paidAt ? `<small>paga em ${fmtFull(c.paidAt)}</small>` : ''}</td><td class="r num">${brl(c.amount)}${c.discount ? `<small>desc. ${brl(c.discount)}</small>` : ''}</td><td>${esc(c.method)}</td><td>${chip(CS[c.status])}${c.attempts ? `<small>${c.attempts} tentativa(s)</small>` : ''}</td><td><div class="act">${['pending', 'overdue'].includes(c.status) ? `<button class="btn sec sm" data-a="resend" data-v="${c.id}">Reenviar cobrança</button><button class="btn sec sm" data-a="markPaid" data-v="${c.id}">Marcar como paga</button>` : ''}</div></td></tr>`; }).join('') || `<tr><td colspan="7">${empty('Nenhuma cobrança neste filtro.')}</td></tr>`}</tbody></table></div>`;
+<div class="tw"><table><thead><tr><th>Cliente</th>${multi() ? '<th>Produto</th>' : ''}<th>Vencimento</th><th class="r">Valor</th><th>Forma</th><th>Situação</th><th></th></tr></thead><tbody>${pageOf('ch', list).map(c => { const s = subOf(c.sub); return `<tr class="row" tabindex="0" data-a="cliente" data-v="${s.customer}|pagamentos|${s.id}"><td><b>${esc(subCust(s).name)}</b><small>${esc(planOfSub(s).name)} · ${s.cycle}</small></td>${multi() ? `<td>${ptag(s.product)}</td>` : ''}<td>${fmtFull(c.due)}${c.paidAt ? `<small>paga em ${fmtFull(c.paidAt)}</small>` : ''}</td><td class="r num">${brl(c.amount)}${c.discount ? `<small>desc. ${brl(c.discount)}</small>` : ''}</td><td>${esc(c.method)}</td><td>${chip(CS[c.status])}${c.attempts ? `<small>${c.attempts} tentativa(s)</small>` : ''}</td><td><div class="act">${['pending', 'overdue'].includes(c.status) ? `<button class="btn sec sm" data-a="resend" data-v="${c.id}">Reenviar cobrança</button><button class="btn sec sm" data-a="markPaid" data-v="${c.id}">Marcar como paga</button>` : ''}</div></td></tr>`; }).join('') || `<tr><td colspan="7">${empty('Nenhuma cobrança neste filtro.')}</td></tr>`}</tbody></table>${pager('ch', list.length)}</div>`;
 }
 A.resend = cid => { const c = D.charges.find(x => x.id === cid), s = subOf(c.sub); c.attempts++; lg(s, `Reenviou cobrança ${c.method} de ${brl(c.amount)}`); toast(c.method === 'PIX' ? 'Nova cobrança PIX enviada por e-mail.' : 'Nova tentativa no cartão solicitada ao provedor.'); render(); };
 A.markPaid = cid => { if (!guard()) return; const c = D.charges.find(x => x.id === cid), s = subOf(c.sub), d = dlg(`<h2>Marcar como paga</h2><p class="lede">Use só para reconciliar um pagamento que o provedor confirmou fora do fluxo. Fica na auditoria.</p>${fld('mP', 'Motivo e comprovante', { ta: true, hint: 'Ex.: PIX recebido direto na conta, comprovante nº…' })}<div class="ft2"><button class="btn sec sm" data-a="closeDlg">Cancelar</button><button class="btn sm" id="mpGo">Confirmar</button></div>`);
@@ -423,7 +499,7 @@ const entText = o => Object.entries(o).map(([k, v]) => `${k} = ${v}`).join('\n')
 function planos() {
   const list = D.plans.filter(p => inSel(p.product));
   return `${page('Planos', 'Planos dos dois produtos. Preços demonstrativos; recursos e limites ainda em definição.', `<button class="btn sm" data-a="plNew" ${canWrite() ? '' : 'disabled'}>${ic('plus', 15, 2.4)}Novo plano</button>`)}
-<div class="tools">${prodCombo()}</div><div class="tw"><table><thead><tr><th>Plano</th>${multi() ? '<th>Produto</th>' : ''}<th>Recursos</th><th class="r">Mensal</th><th class="r">Anual</th><th>Situação</th><th></th></tr></thead><tbody>${list.map(x => `<tr><td><b>${esc(x.name)}</b><small>${x.code}</small></td>${multi() ? `<td>${ptag(x.product)}</td>` : ''}<td>${Object.entries(x.ent).map(([k, v]) => `${esc(k)}: <b>${esc(v)}</b>`).join('<br>') || 'A definir'}</td><td class="r num">${x.mensal != null ? brl(x.mensal) : '—'}</td><td class="r num">${x.anual != null ? brl(x.anual) : '—'}</td><td>${x.active ? chip(['pago', 'Ativo']) : chip(['neutro', 'Inativo'])}</td><td><div class="act"><button class="btn sec sm" data-a="plEdit" data-v="${x.product}|${x.code}">Editar</button><button class="btn sec sm" data-a="planOn" data-v="${x.product}|${x.code}">${x.active ? 'Desativar' : 'Ativar'}</button></div></td></tr>`).join('') || `<tr><td colspan="7">${empty('Nenhum plano neste produto.')}</td></tr>`}</tbody></table></div>`;
+<div class="tools">${prodCombo()}</div><div class="tw"><table><thead><tr><th>Plano</th>${multi() ? '<th>Produto</th>' : ''}<th>Recursos</th><th class="r">Mensal</th><th class="r">Anual</th><th>Situação</th><th></th></tr></thead><tbody>${pageOf('pl', list).map(x => `<tr><td><b>${esc(x.name)}</b><small>${x.code}</small></td>${multi() ? `<td>${ptag(x.product)}</td>` : ''}<td>${Object.entries(x.ent).map(([k, v]) => `${esc(k)}: <b>${esc(v)}</b>`).join('<br>') || 'A definir'}</td><td class="r num">${x.mensal != null ? brl(x.mensal) : '—'}</td><td class="r num">${x.anual != null ? brl(x.anual) : '—'}</td><td>${x.active ? chip(['pago', 'Ativo']) : chip(['neutro', 'Inativo'])}</td><td><div class="act"><button class="btn sec sm" data-a="plEdit" data-v="${x.product}|${x.code}">Editar</button><button class="btn sec sm" data-a="planOn" data-v="${x.product}|${x.code}">${x.active ? 'Desativar' : 'Ativar'}</button></div></td></tr>`).join('') || `<tr><td colspan="7">${empty('Nenhum plano neste produto.')}</td></tr>`}</tbody></table>${pager('pl', list.length)}</div>`;
 }
 A.planOn = v => { if (!guard()) return; const [pr, c] = v.split('|'), p = planOf(pr, c); p.active = !p.active; log(`${p.active ? 'Ativou' : 'Desativou'} o plano ${p.name}`, 'Planos', pr); toast(p.active ? 'Plano ativo para novas vendas.' : 'Plano fora de venda. Assinantes atuais não mudam.'); render(); };
 const planForm = (p, prod) => `${p ? '' : fld('pC', 'Código', { hint: 'Letras minúsculas e números. Não muda depois.' })}${fld('pN', 'Nome', { v: p?.name || '' })}${fld('pE', 'Recursos por plano (a definir)', { ta: true, v: p ? entText(p.ent) : '', hint: 'Opcional no mock. Recursos e limites comerciais ainda não foram aprovados.' })}<div class="fgrid2">${prod.params.cycles.includes('mensal') ? fld('pM', 'Mensal (R$)', { v: p?.mensal != null ? (p.mensal / 100).toFixed(2).replace('.', ',') : '' }) : ''}${prod.params.cycles.includes('anual') ? fld('pA', 'Anual (R$)', { v: p?.anual != null ? (p.anual / 100).toFixed(2).replace('.', ',') : '', hint: 'Sugestão: 10 vezes o mensal.' }) : ''}</div>`;
@@ -455,7 +531,7 @@ const EVENTS = [
 const EVL = Object.fromEntries(EVENTS.map(e => [e[0], e[3]]));
 const eventos = () => `${page('Avisos aos produtos', 'Mensagens automáticas que este sistema envia aos produtos a cada mudança. O produto também pode consultar o estado a qualquer momento.')}${note('info', '<b>Para que servem:</b> o produto não sabe quem pagou. Quando alguém paga pela primeira vez, atrasa, é suspenso, cancela ou troca de plano, este sistema avisa o produto, que decide se libera ou bloqueia. Cada aviso é assinado (para ninguém falsificar) e tem um identificador (para não valer duas vezes). Se um aviso falha, ele é reenviado com o mesmo identificador.')}
 
-<div class="tools">${prodCombo()}</div><div class="tw"><table><thead><tr><th>Cliente</th>${multi() ? '<th>Produto</th>' : ''}<th>Evento</th><th>Quando</th><th>Entrega</th><th></th></tr></thead><tbody>${mEvents().slice(0, 40).map(e => { const s = subOf(e.sub); return `<tr class="row" tabindex="0" data-a="cliente" data-v="${s.customer}|avisos|${s.id}"><td><b>${esc(subCust(s).name)}</b><small>${s.memberId}</small></td>${multi() ? `<td>${ptag(s.product)}</td>` : ''}<td><code>${esc(e.type)}</code><small>${esc(e.id)} · ${EVL[e.type] || ''}</small></td><td>${e.at}</td><td>${e.status === 'ok' ? chip(['pago', 'Entregue']) : chip(['vencido', 'Falhou'])}<small>${e.attempts} tentativa(s)</small></td><td>${e.status === 'failed' ? `<button class="btn sec sm" data-a="evRetry" data-v="${e.id}">Reenviar</button>` : ''}</td></tr>`; }).join('')}</tbody></table></div>
+<div class="tools">${prodCombo()}</div><div class="tw"><table><thead><tr><th>Cliente</th>${multi() ? '<th>Produto</th>' : ''}<th>Evento</th><th>Quando</th><th>Entrega</th><th></th></tr></thead><tbody>${pageOf('ev', mEvents()).map(e => { const s = subOf(e.sub); return `<tr class="row" tabindex="0" data-a="cliente" data-v="${s.customer}|avisos|${s.id}"><td><b>${esc(subCust(s).name)}</b><small>${s.memberId}</small></td>${multi() ? `<td>${ptag(s.product)}</td>` : ''}<td><code>${esc(e.type)}</code><small>${esc(e.id)} · ${EVL[e.type] || ''}</small></td><td>${e.at}</td><td>${e.status === 'ok' ? chip(['pago', 'Entregue']) : chip(['vencido', 'Falhou'])}<small>${e.attempts} tentativa(s)</small></td><td>${e.status === 'failed' ? `<button class="btn sec sm" data-a="evRetry" data-v="${e.id}">Reenviar</button>` : ''}</td></tr>`; }).join('')}</tbody></table>${pager('ev', mEvents().length)}</div>
 ${guide('Catálogo de eventos', `<p class="foot" style="margin:0 0 10px">Nome padronizado <code>entidade.ação</code>, ação no passado. Cada evento leva a situação nova do contrato e vale para qualquer produto.</p><div class="tw" style="box-shadow:none;margin:0"><table><thead><tr><th>Evento</th><th>Quando</th><th>Situação nova</th><th>Efeito sugerido no produto</th></tr></thead><tbody>${EVENTS.map(e => `<tr><td><code>${e[0]}</code></td><td>${e[1]}</td><td>${e[2]}</td><td>${e[3]}</td></tr>`).join('')}</tbody></table></div>`)}`;
 A.evRetry = eid => { const e = D.events.find(x => x.id === eid), s = subOf(e.sub); e.attempts++; e.status = 'ok'; lg(s, `Reenviou aviso ${e.type}`); toast('Aviso reenviado com o mesmo identificador. O produto confirmou.'); render(); };
 
@@ -475,32 +551,250 @@ A.mScope = e => { if (!isAdm()) return; const m = D.team.find(x => x.email === e
 A.mRole = (v, el) => { const m = D.team.find(x => x.email === el.dataset.k); log(`Mudou a permissão de ${m.email} de ${m.role} para ${v}`, 'Equipe'); m.role = v; toast('Permissão atualizada.'); render(); };
 A.mAccept = e => { const m = D.team.find(x => x.email === e); m.status = 'active'; m.last = `${TODAY} 14:32`; log(`${e} aceitou o convite`, 'Equipe'); toast('Convite aceito (simulado).'); render(); };
 A.mDel = e => { if (!isAdm()) return; const adm = D.team.filter(m => m.role === 'Administrador' && m.status === 'active'), m = D.team.find(x => x.email === e); if (m.role === 'Administrador' && adm.length <= 1) return toast('A equipe precisa de ao menos um administrador.', 'bad'); D.team = D.team.filter(x => x.email !== e); log(`Removeu ${e} da equipe`, 'Equipe'); toast('Acesso removido. As sessões dessa pessoa foram encerradas.'); render(); };
-const auditoria = () => `${page('Auditoria', 'Quem fez o quê, quando e em qual produto. Os registros não são editados.')}<section class="card"><ul class="tl">${mAudit().map(a => `<li><b>${esc(a.what)}</b><small>${esc(a.who)} · ${a.at} · ${esc(a.ref)}${a.product ? ' · ' + esc(prodOf(a.product).name) : ''}</small></li>`).join('')}</ul></section>`;
+const ACOL = { Alterou: 'var(--st-ace)', Trocou: 'var(--st-ace)', Mudou: 'var(--st-ace)', Revisou: 'var(--st-ace)', Criou: 'var(--st-int)', Gerou: 'var(--st-int)', Convidou: 'var(--st-int)', Publicou: 'var(--st-int)', Ativou: 'var(--st-int)', Reativou: 'var(--st-int)', Aplicou: 'var(--st-int)', Marcou: 'var(--st-int)', Reenviou: 'var(--st-sol)', Suspendeu: 'var(--st-sol)', Pausou: 'var(--st-sol)', Rotacionou: 'var(--st-sol)', Desfez: 'var(--st-sol)', Removeu: 'var(--st-rec)', Revogou: 'var(--st-rec)', Cancelou: 'var(--st-rec)', Desativou: 'var(--st-rec)', Encerrou: 'var(--st-rec)' };
+const verbOf = a => a.what.split(' ')[0];
+const auditoria = () => {
+  S.af ||= 'todas'; S.aq ??= '';
+  const all = mAudit(), q = S.aq.trim().toLowerCase(), verbs = [...new Set(all.map(verbOf))];
+  if (S.af !== 'todas' && !verbs.includes(S.af)) S.af = 'todas';
+  const l = all.filter(a => (S.af === 'todas' || verbOf(a) === S.af) && (!q || (a.who + ' ' + a.what + ' ' + a.ref).toLowerCase().includes(q)));
+  const days = {}; l.forEach(a => (days[a.at.slice(0, 10)] ||= []).push(a));
+  const dayLabel = d => d === TODAY ? 'Hoje' : diff(TODAY, d) === 1 ? 'Ontem' : new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }).replace('.', '');
+  const people = new Set(all.map(a => a.who)).size, last = all.map(a => a.at).sort().at(-1);
+  const line = a => { const v = verbOf(a), rest = a.what.slice(v.length + 1); return `<li><span class="at">${a.at.slice(11, 16)}</span><span class="adot" style="background:${ACOL[v] || 'var(--ink-soft)'}"></span><span class="ab"><b>${esc(a.who)}</b> <span class="aa" style="color:${ACOL[v] || 'var(--ink-muted)'}">${esc(v.toLowerCase())}</span> ${esc(rest)}${a.ref && !a.what.includes(a.ref) ? ` <span class="soft">· ${esc(a.ref)}</span>` : ''}</span>${a.product ? ptag(a.product) : '<em class="tag">Geral</em>'}</li>`; };
+  return `${page('Auditoria', 'Quem fez o quê, quando e em qual produto. Os registros não são editados.', '<button class="btn sec" data-a="expAudit">Exportar CSV</button>')}
+<section class="kpis k3"><div class="kpi"><small>Ações registradas</small><b>${all.length}</b><span>${S.prod === 'all' ? 'todos os produtos' : esc(prodOf(S.prod).name)}</span></div><div class="kpi"><small>Pessoas da equipe</small><b>${people}</b><span>com ações registradas</span></div><div class="kpi"><small>Último registro</small><b>${last ? last.slice(11, 16) : '—'}</b><span>${last ? (last.slice(0, 10) === TODAY ? 'hoje' : fmtFull(last.slice(0, 10))) : 'sem registros'}</span></div></section>
+<section class="tw alogc"><div class="tbar"><label class="sbox">${ic('search', 16)}<input id="aq" placeholder="Buscar por pessoa ou registro" value="${esc(S.aq)}" autocomplete="off" aria-label="Buscar na auditoria"></label><div class="chipsf" role="group" aria-label="Filtrar por ação">${[['todas', 'Todas'], ...verbs.map(v => [v, v])].map(([k, t]) => `<button class="chipf${S.af === k ? ' on' : ''}" data-a="af" data-v="${esc(k)}" aria-pressed="${S.af === k}">${k !== 'todas' ? `<i style="background:${ACOL[k] || 'var(--ink-soft)'}"></i>` : ''}${esc(t)}<small>${k === 'todas' ? all.length : all.filter(a => verbOf(a) === k).length}</small></button>`).join('')}</div></div>
+${l.length ? Object.keys(days).sort().reverse().map(d => `<div class="mgh"><span>${dayLabel(d)}</span><b>${days[d].length}</b></div><ol class="alog">${days[d].sort((x, y) => y.at.localeCompare(x.at)).map(line).join('')}</ol>`).join('') : `<div class="mempty"><p>Nada encontrado.</p><span>Nenhum registro corresponde a essa busca ou filtro.</span></div>`}
+<div class="tfoot"><span>Os registros não podem ser editados nem apagados.</span><span>${l.length} de ${all.length}</span></div></section>`;
+};
+A.af = v => { S.af = v; render(); };
+A.expAudit = () => toast('Exportação gerada (simulada): auditoria-assinaturas.csv');
 
 /* ---------- shell ---------- */
+const NAVG = [['Geral', ['overview', 'relatorios']], ['Comercial', ['clientes', 'assinaturas', 'cobrancas', 'planos', 'vouchers']], ['Ciclo de vida', ['cancelamentos', 'trocas', 'eventos']], ['Configuração', ['produtos', 'equipe', 'auditoria']]];
 const NAV = [['overview', 'home', 'Visão geral'], ['relatorios', 'chart', 'Relatórios'], ['produtos', 'grid', 'Produtos'], ['clientes', 'users', 'Clientes'], ['assinaturas', 'repeat', 'Assinaturas'], ['cobrancas', 'receipt', 'Cobranças'], ['planos', 'tag', 'Planos'], ['vouchers', 'percent', 'Vouchers'], ['cancelamentos', 'ban', 'Cancelamentos'], ['trocas', 'swap', 'Trocas de plano'], ['eventos', 'send', 'Avisos aos produtos'], ['equipe', 'user', 'Equipe'], ['auditoria', 'shield', 'Auditoria']];
 const VIEWS = { overview, relatorios, produtos, produto: produtoPage, clientes, cliente: clientePage, assinaturas, cobrancas, planos, vouchers, cancelamentos, trocas, eventos, equipe, auditoria };
 const NAV_OF = { produto: 'produtos', cliente: 'clientes' };
-function render() {
+function render() { if (DEFER) { Q.push(render0); return; } render0(); }
+function render0() {
   document.documentElement.dataset.theme = S.theme === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'noite' : 'dia') : S.theme;
   if (!S.admin) { $('#root').innerHTML = login(); document.title = 'Entrar · Assinaturas'; return bindLogin(); }
   if (S.prod !== 'all' && !scopeOf().includes(S.prod)) S.prod = 'all';
   const bad = mCharges().filter(c => c.status === 'overdue').length + mEvents().filter(e => e.status === 'failed').length, cur = NAV_OF[S.screen] || S.screen, vp = visProd();
-  const sel = `<div class="psel"><label for="prodSel">Produto</label><select id="prodSel" data-a="prod">${vp.length > 1 ? `<option value="all" ${S.prod === 'all' ? 'selected' : ''}>Todos os produtos</option>` : ''}${vp.map(p => `<option value="${p.code}" ${S.prod === p.code ? 'selected' : ''}>${esc(p.name)}${p.status !== 'active' ? ' (' + PS[p.status][1].toLowerCase() + ')' : ''}</option>`).join('')}</select>${S.prod !== 'all' ? `<small>${PNAME[prodOf(S.prod).provider]} · ${prodOf(S.prod).env}</small>` : ''}</div>`;
-  $('#root').innerHTML = `<div class="app"><aside class="side"><div class="brand">${logo(24)}<small>Assinaturas · multiproduto</small></div>${sel}<nav class="nv" aria-label="Principal">${NAV.filter(([k]) => k !== 'produtos' || true).map(([k, i, l]) => `<button data-a="go" data-v="${k}" ${cur === k ? 'aria-current="page"' : ''}>${ic(i, 17, 2)}${l}${k === 'cobrancas' && bad ? `<span class="badge">${bad}</span>` : ''}</button>`).join('')}</nav><div class="who"><b>${esc(S.admin.name)}</b>${esc(S.admin.email)}<br><small>${esc(S.admin.role)} · ${S.admin.scope === 'all' ? 'todos os produtos' : S.admin.scope.map(c => prodOf(c).name).join(', ')}</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn sec sm" data-a="theme">${S.theme === 'noite' ? 'Dia' : 'Noite'}</button><button class="btn sec sm" data-a="logout">Sair</button></div></div></aside><main id="main"><div class="mock-note"><b>Ambiente de demonstração</b> · Apenas Alva e Zelos Kids. Valores, ciclos, provedores e regras financeiras são fictícios para explorar as telas. Não são ofertas ou decisões comerciais. Limites dos planos ainda não definidos.</div>${VIEWS[S.screen]()}</main></div>`;
+  const pIco = S.prod !== 'all' ? (S.prod === 'zeloskids' ? `<span class="psel-ic zk"><img src="${ZK_SHEEP}" alt=""></span>` : `<span class="psel-ic al">${logoMark(13)}</span>`) : `<span class="psel-ic all">${ic('grid', 17, 2)}</span>`;
+  const pMeta = S.prod !== 'all' ? `${PNAME[prodOf(S.prod).provider]} · ${prodOf(S.prod).env}` : `${vp.length} produtos`;
+  const sel = `<div class="psel">${pIco}<div class="psel-b"><label for="prodSel">Produto</label><select id="prodSel" data-a="prod" aria-label="Produto">${vp.length > 1 ? `<option value="all" ${S.prod === 'all' ? 'selected' : ''}>Todos os produtos</option>` : ''}${vp.map(p => `<option value="${p.code}" ${S.prod === p.code ? 'selected' : ''}>${esc(p.name)}${p.status !== 'active' ? ' (' + PS[p.status][1].toLowerCase() + ')' : ''}</option>`).join('')}</select><small>${pMeta}</small></div></div>`;
+  const navItem = k => { const [, i, l] = NAV.find(x => x[0] === k); return `<button data-a="go" data-v="${k}" ${cur === k ? 'aria-current="page"' : ''}>${ic(i, 18, 1.9)}<span>${l}</span>${k === 'cobrancas' && bad ? `<span class="badge" aria-label="${bad} pendências">${bad}</span>` : ''}</button>`; };
+  const ini = S.admin.name.split(/[\s(]+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  const dark = document.documentElement.dataset.theme === 'noite';
+  $('#root').innerHTML = `<div class="app"><aside class="side" id="side" aria-label="Menu"><div class="brand">${brandP(30)}<button class="ibtn side-x" data-a="navClose" aria-label="Fechar menu">${ic('x', 16, 2.2)}</button></div>${sel}<button class="sbtn" data-a="cmdOpen">${ic('search', 17, 2)}<span>Buscar</span><kbd>${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} K</kbd></button><nav class="nv" aria-label="Principal">${NAVG.map(([g, ks]) => `<p class="nv-h">${g}</p>${ks.map(navItem).join('')}`).join('')}</nav><div class="who-w"><button class="who" data-a="whoMenu" aria-haspopup="menu" aria-expanded="false"><span class="av" aria-hidden="true">${ini}</span><span class="who-t"><b>${esc(S.admin.name)}</b><small>${esc(S.admin.email)}</small></span>${ic('updown', 15, 2.2)}</button></div></aside><div class="veil" data-a="navClose"></div><div class="shell"><header class="topbar"><button class="ibtn" data-a="navOpen" aria-label="Abrir menu">${ic('menu', 18, 2)}</button>${brandP(26, false)}<span class="tb-sp"></span><button class="ibtn" data-a="cmdOpen" aria-label="Buscar">${ic('search', 17, 2)}</button></header><main id="main"><div class="wrap">${VIEWS[S.screen]()}</div></main></div></div>`;
+  enhance();
   document.title = `${S.screen === 'cliente' ? cust(S.cid).name : S.screen === 'produto' ? prodOf(S.pid).name : NAV.find(x => x[0] === S.screen)[2]} · Assinaturas`;
-  const q = $('#q'); if (q) q.addEventListener('input', e => { S.q = e.target.value; const p = e.target.selectionStart; render(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); });
+  const aq = $('#aq'); if (aq) aq.addEventListener('input', e => { S.aq = e.target.value; const p = e.target.selectionStart; render(); const n = $('#aq'); n.focus(); n.setSelectionRange(p, p); });
+  const q = $('#q'); if (q) q.addEventListener('input', e => { S.q = e.target.value; if (S.pg) S.pg.cl = 0; const p = e.target.selectionStart; render(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); });
 }
 A.go = v => { S.screen = v; render(); window.scrollTo(0, 0); };
+A.navOpen = () => { $('#side')?.classList.add('open'); $('#side .nv button[aria-current]')?.focus({ preventScroll: true }); };
+A.navClose = () => $('#side')?.classList.remove('open');
+A.demoInfo = () => { A.navClose(); dlg(`<h2>Ambiente de demonstração</h2><p class="lede">Dois produtos de exemplo: Alva e Zelos Kids. Valores, ciclos, provedores e regras financeiras são fictícios para explorar as telas. Não são ofertas ou decisões comerciais. Limites dos planos ainda não definidos.</p><p class="lede">Nada é salvo: ao recarregar a página, os dados voltam ao início.</p><div class="ft2"><button class="btn" data-a="closeDlg">Entendi</button></div>`); };
+A.jump = v => { document.getElementById(v)?.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'start' }); };
 A.prod = v => { S.prod = v; render(); };
-A.theme = () => { S.theme = S.theme === 'noite' ? 'dia' : 'noite'; try { localStorage.setItem('org-theme', S.theme); } catch (e) { /* sem storage */ } render(); };
+A.theme = () => { S.theme = document.documentElement.dataset.theme === 'noite' ? 'dia' : 'noite'; try { localStorage.setItem('org-theme', S.theme); } catch (e) { /* sem storage */ } render(); };
 A.logout = () => { S.admin = null; render(); };
 document.addEventListener('click', e => { const t = e.target.closest('[data-a]'); if (!t || t.matches('select')) return; const f = A[t.dataset.a]; if (!f) return; e.preventDefault(); f(t.dataset.v ?? '', t); });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('tr.row')) e.target.click(); if (e.key === 'Escape') closeDlg(); });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('tr.row')) e.target.click(); if (e.key === 'Escape') { closeDlg(); A.navClose(); } });
 document.addEventListener('change', e => { const t = e.target.closest('select[data-a]'); if (t && A[t.dataset.a]) A[t.dataset.a](t.value, t); });
 const q = new URLSearchParams(location.search);
 if (q.get('theme')) S.theme = q.get('theme');
 if (q.get('u')) { const a = D.team.find(x => x.email.startsWith(q.get('u'))); if (a) { S.admin = { email: a.email, name: a.name, role: a.role, scope: a.scope }; S.screen = VIEWS[q.get('screen')] ? q.get('screen') : 'overview'; if (q.get('prod') && prodOf(q.get('prod'))) S.prod = q.get('prod'); else if (a.scope !== 'all' && a.scope.length === 1) S.prod = a.scope[0]; if (S.screen === 'cliente') S.cid = q.get('cid') || D.customers[0].id; if (S.screen === 'produto') S.pid = q.get('pid') || 'alva'; } }
 render();
 
+/* ===== botões assíncronos: mesmo padrão do Alva Web e do Alva Mobile ===== */
+const AWORK = { Entrar: 'Entrando', Continuar: 'Verificando', Enviar: 'Enviando', Salvar: 'Salvando', Criar: 'Criando', Confirmar: 'Confirmando', Aplicar: 'Aplicando', Publicar: 'Publicando', Suspender: 'Suspendendo', Cancelar: 'Cancelando', Reativar: 'Reativando', Reenviar: 'Enviando', Marcar: 'Salvando', Gerar: 'Gerando', Exportar: 'Exportando', Desativar: 'Desativando', Ativar: 'Ativando', Remover: 'Removendo', Revogar: 'Revogando', Encerrar: 'Encerrando', Desfazer: 'Desfazendo', Rotacionar: 'Rotacionando', Pausar: 'Pausando', Retomar: 'Retomando', Simular: 'Simulando', Trocar: 'Trocando', Já: 'Concluindo' };
+const ADONE = { Enviar: 'Enviado', Salvar: 'Salvo', Criar: 'Criado', Confirmar: 'Confirmado', Aplicar: 'Aplicado', Publicar: 'Publicado', Suspender: 'Suspenso', Cancelar: 'Cancelado', Reativar: 'Reativado', Reenviar: 'Enviado', Marcar: 'Marcada', Gerar: 'Gerada', Exportar: 'Exportado', Desativar: 'Desativado', Ativar: 'Ativado', Remover: 'Removido', Revogar: 'Revogada', Encerrar: 'Encerrado', Desfazer: 'Desfeito', Rotacionar: 'Rotacionado', Pausar: 'Pausadas', Retomar: 'Retomadas', Simular: 'Aceito', Trocar: 'Trocado' };
+const ackSvg = `<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ckp" d="M5 12.5l4.5 4.5L19 7"/></svg>`;
+function aStart(b, ms) { if (!b || b.dataset.ahtml != null) return; const first = b.textContent.trim().split(/\s+/)[0]; b.dataset.ahtml = b.innerHTML; b.style.minWidth = b.getBoundingClientRect().width + 'px'; b.style.setProperty('--dur', (ms || 900) + 'ms'); b.classList.add('is-busy'); b.innerHTML = `<span class="bprog"></span><span class="bl"><i class="bspin"></i>${AWORK[first] || 'Um instante'}</span>`; requestAnimationFrame(() => requestAnimationFrame(() => b.classList.add('run'))); }
+function aDone(b, label) { if (!b) return; b.classList.add('is-done'); b.innerHTML = `<span class="bl">${ackSvg}${esc(label)}</span>`; }
+/* Cada clique em botão roda a ação com a tela "segurada": se a ação terminou com sucesso (toast positivo),
+   o botão mostra o progresso e a confirmação antes de fechar o diálogo e atualizar a tela. */
+let pressed = null;
+document.addEventListener('click', e => { const b = e.target.closest('.btn'); if (!b || b.disabled || b.classList.contains('is-busy')) return; pressed = b; DEFER = true; Q = []; }, true);
+document.addEventListener('click', () => {
+  if (!DEFER) return; const q = Q, b = pressed; DEFER = false; Q = []; pressed = null;
+  const run = () => q.forEach(f => f());
+  if (!q.length) return;
+  if (q.toast !== 'ok' || RM || !b || !b.isConnected) return run();
+  const first = b.textContent.trim().split(/\s+/)[0];
+  aStart(b, 650); setTimeout(() => { aDone(b, ADONE[first] || 'Pronto'); setTimeout(run, 520); }, 650);
+});
 
+
+/* ===== menu de ações da linha: popover no desktop, folha no celular ===== */
+const closeMenu = () => { $$('.menu,.menu-veil').forEach(m => m.remove()); $$('.more[aria-expanded]').forEach(b => b.removeAttribute('aria-expanded')); };
+A.rowMenu = (sid, el) => {
+  const open = el.getAttribute('aria-expanded'); closeMenu(); if (open) return;
+  const s = subOf(sid), m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'menu');
+  m.innerHTML = `<p class="menu-h">${esc(subCust(s).name)}<small>${esc(prodOf(s.product).name)} · ${esc(planOfSub(s).name)} ${s.cycle}</small></p>${actionList(s).map(([a, i, l, d]) => `<button class="mi${d ? ' dng' : ''}" role="menuitem" data-a="${a}" data-v="${s.id}">${ic(i, 17, 2)}${l}</button>`).join('')}`;
+  const mobile = matchMedia('(max-width:640px)').matches;
+  if (mobile) { const v = document.createElement('div'); v.className = 'menu-veil'; document.body.append(v); m.classList.add('sheet'); }
+  document.body.append(m); el.setAttribute('aria-expanded', 'true');
+  if (!mobile) { const r = el.getBoundingClientRect(), h = m.offsetHeight; m.style.top = (r.bottom + 6 + h > innerHeight ? r.top - h - 6 : r.bottom + 6) + 'px'; m.style.right = Math.max(12, innerWidth - r.right) + 'px'; }
+  m.querySelector('.mi')?.focus({ preventScroll: true });
+};
+document.addEventListener('click', e => { if (!e.target.closest('.menu') && !e.target.closest('.more')) closeMenu(); }, true);
+document.addEventListener('click', e => { if (e.target.closest('.menu .mi')) closeMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+addEventListener('scroll', () => { if (!$('.menu.sheet')) closeMenu(); }, { passive: true });
+
+/* ===== exclusões e encerramentos passam por confirmação ===== */
+function confirmAct({ title, body, label, fn }) {
+  const d = dlg(`<div class="cf-ic">${ic('alert', 22, 2)}</div><h2>${title}</h2><p class="lede">${body}</p><div class="ft2"><button class="btn sec" data-a="closeDlg">Voltar</button><button class="btn dng" id="cfGo">${label}</button></div>`);
+  $('#cfGo', d).addEventListener('click', () => { closeDlg(); fn(); });
+}
+{
+  const mDel = A.mDel, keyRevoke = A.keyRevoke, discOff = A.discOff, endNow = A.endNow;
+  A.mDel = e => { if (!isAdm()) return; const m = D.team.find(x => x.email === e); confirmAct({ title: `Remover ${esc(m.name)} da equipe?`, body: 'A pessoa perde o acesso agora e as sessões abertas são encerradas. Fica registrado na auditoria.', label: 'Remover pessoa', fn: () => mDel(e) }); };
+  A.keyRevoke = kid => { if (!isAdm()) return; const p = prodOf(S.pid), k = p.keys.find(x => x.id === kid); if (p.keys.filter(x => x.active).length <= 1) return keyRevoke(kid); confirmAct({ title: `Revogar a chave final ${k.tail}?`, body: 'Chamadas com essa chave passam a receber 401. Confira se o produto já usa a chave nova.', label: 'Revogar chave', fn: () => keyRevoke(kid) }); };
+  A.discOff = v => { if (!guard()) return; confirmAct({ title: 'Remover este desconto?', body: 'As próximas cobranças voltam ao valor cheio do plano. Fica registrado na auditoria.', label: 'Remover desconto', fn: () => discOff(v) }); };
+  A.endNow = sid => { if (!guard()) return; const s = subOf(sid); confirmAct({ title: 'Encerrar o acesso agora?', body: `${esc(subCust(s).name)} perde o acesso a ${esc(prodOf(s.product).name)} hoje, em vez de ${fmtFull(s.end)}. O produto é avisado.`, label: 'Encerrar agora', fn: () => endNow(sid) }); };
+}
+
+/* ===== depois de cada render: busca dentro da lista e tabelas legíveis no celular ===== */
+var lastKey = '';
+function countIn(el) { if (el.children.length) return; const t = el.textContent.trim(), m = t.match(/^(R\$\s)?([\d.]+)(,(\d{2}))?(.*)$/); if (!m) return; const money = !!m[1], to = money ? +(m[2].replace(/\./g, '') + (m[4] || '00')) : +m[2].replace(/\./g, ''); if (!to) return; const rest = m[5] || '', t0 = performance.now(), D = 900;
+  const f = now => { const k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3), v = Math.round(to * e); el.textContent = k < 1 ? (money ? brl(v) : v.toLocaleString('pt-BR')) + rest : t; if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
+function enhance() {
+  const key = [S.screen, S.tab, S.ptab, S.dashboardView, S.cid, S.sid, S.pid, S.prod].join('|'), w = $('.wrap');
+  if (w && key !== lastKey && !RM) { w.classList.add('enter'); [...w.children].forEach((el, i) => el.style.setProperty('--d', Math.min(i, 8))); $$('.kpi b, .dash-alert strong', w).forEach(countIn); }
+  lastKey = key;
+  $$('.tools').forEach(t => { const n = t.nextElementSibling; if (n && n.classList.contains('tw')) n.prepend(t); });
+  $$('.tw table').forEach(tb => { const hs = $$('thead th', tb).map(th => th.textContent.trim()); $$('tbody tr', tb).forEach(tr => [...tr.children].forEach((td, i) => { if (!td.hasAttribute('colspan')) td.dataset.label = hs[i] || ''; })); });
+  enhanceSelects($('#root'));
+}
+enhance();
+
+/* ===== paginação (cobranças e histórico de pagamentos) ===== */
+function pageOf(k, list) { S.pg ||= {}; const PG_SIZE = 10, max = Math.max(0, Math.ceil(list.length / PG_SIZE) - 1), n = Math.min(S.pg[k] || 0, max); S.pg[k] = n; return list.slice(n * PG_SIZE, n * PG_SIZE + PG_SIZE); }
+function pager(k, total) {
+  const PG_SIZE = 10; S.pg ||= {}; if (!total) return ''; if (total <= PG_SIZE) return `<nav class="pager" aria-label="Paginação"><span class="pg-info">Mostrando <b>${total}</b> de <b>${total}</b></span></nav>`;
+  const n = S.pg[k] || 0, pages = Math.ceil(total / PG_SIZE), a = n * PG_SIZE + 1, b = Math.min(total, a + PG_SIZE - 1);
+  const nums = []; for (let i = 0; i < pages; i++) if (i === 0 || i === pages - 1 || Math.abs(i - n) <= 1) nums.push(i); else if (nums[nums.length - 1] !== '…') nums.push('…');
+  return `<nav class="pager" aria-label="Paginação"><span class="pg-info">Mostrando <b>${a}–${b}</b> de <b>${total}</b></span><div class="pg-btns"><button class="pg-b" data-a="pg" data-v="${k}|${n - 1}" ${n === 0 ? 'disabled' : ''} aria-label="Página anterior">${ic('chevL', 16, 2.2)}</button>${nums.map(i => i === '…' ? '<span class="pg-gap">…</span>' : `<button class="pg-b${i === n ? ' on' : ''}" data-a="pg" data-v="${k}|${i}" ${i === n ? 'aria-current="page"' : ''} aria-label="Página ${i + 1}">${i + 1}</button>`).join('')}<button class="pg-b" data-a="pg" data-v="${k}|${n + 1}" ${n >= pages - 1 ? 'disabled' : ''} aria-label="Próxima página">${ic('chevR', 16, 2.2)}</button></div></nav>`;
+}
+A.pg = v => { const [k, n] = v.split('|'); S.pg ||= {}; S.pg[k] = Math.max(0, +n); render(); const t = $(`.pager`)?.closest('.tw,.card'); if (t && t.getBoundingClientRect().top < 0) t.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'start' }); };
+{ const flt = A.flt, prod = A.prod, cli = A.cliente, pick = A.pickSub;
+  A.flt = (v, el) => { S.pg = {}; flt(v, el); }; A.prod = v => { S.pg = {}; prod(v); };
+  A.cliente = v => { S.pg = { ...S.pg, cli: 0 }; cli(v); }; A.pickSub = v => { S.pg = { ...S.pg, cli: 0 }; pick(v); }; }
+
+/* ===== selects próprios: mesma lista de opções em todo o painel =====
+   O <select> nativo continua no DOM (valor, eventos e validações não mudam); só a aparência é trocada. */
+const csClose = () => { $$('.cs-pop,.cs-veil').forEach(x => x.remove()); $$('.cs[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false')); };
+function csLabel(sel) { const o = sel.options[sel.selectedIndex]; return o ? o.textContent : ''; }
+function csName(sel) { return sel.getAttribute('aria-label') || (sel.id && document.querySelector(`label[for="${sel.id}"]`)?.textContent) || ''; }
+function enhanceSelects(root = document) {
+  $$('select:not(.cs-native)', root).forEach(sel => {
+    sel.classList.add('cs-native'); sel.tabIndex = -1; sel.setAttribute('aria-hidden', 'true');
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cs'; b.disabled = sel.disabled;
+    b.setAttribute('role', 'combobox'); b.setAttribute('aria-haspopup', 'listbox'); b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-label', csName(sel));
+    b.innerHTML = `<span class="cs-v">${esc(csLabel(sel))}</span>${ic('updown', 15, 2.2)}`;
+    sel.after(b); b._sel = sel;
+    if (sel.id) { const l = document.querySelector(`label[for="${sel.id}"]`); if (l) l.addEventListener('click', e => { e.preventDefault(); b.focus(); }); }
+    sel.addEventListener('change', () => { b.querySelector('.cs-v').textContent = csLabel(sel); });
+  });
+}
+function csOpen(b) {
+  const sel = b._sel, cur = sel.selectedIndex, mobile = matchMedia('(max-width:640px)').matches;
+  csClose(); b.setAttribute('aria-expanded', 'true');
+  const pop = document.createElement('div'); pop.className = 'cs-pop' + (mobile ? ' sheet' : ''); pop.setAttribute('role', 'listbox');
+  pop.innerHTML = (mobile ? `<p class="cs-h">${esc(csName(b._sel) || 'Escolha uma opção')}</p>` : '') + [...sel.options].map((o, i) => `<button type="button" class="cs-o${i === cur ? ' on' : ''}" role="option" aria-selected="${i === cur}" data-i="${i}" ${o.disabled ? 'disabled' : ''}><span>${esc(o.textContent)}</span>${i === cur ? ic('check', 16, 2.4) : ''}</button>`).join('');
+  if (mobile) { const v = document.createElement('div'); v.className = 'cs-veil'; v.addEventListener('click', csClose); document.body.append(v); }
+  document.body.append(pop);
+  if (!mobile) { const r = b.getBoundingClientRect(); pop.style.minWidth = Math.max(r.width, 200) + 'px'; pop.style.left = Math.min(r.left, innerWidth - pop.offsetWidth - 12) + 'px'; const h = pop.offsetHeight, below = innerHeight - r.bottom; pop.style.top = (below < h + 12 && r.top > below ? Math.max(12, r.top - h - 6) : r.bottom + 6) + 'px'; }
+  pop._btn = b; (pop.querySelector('.cs-o.on') || pop.querySelector('.cs-o'))?.focus({ preventScroll: true });
+  pop.querySelector('.cs-o.on')?.scrollIntoView({ block: 'nearest' });
+}
+function csPick(pop, i) { const b = pop._btn, sel = b._sel; csClose(); b.focus({ preventScroll: true }); if (sel.selectedIndex === i) return; sel.selectedIndex = i; b.querySelector('.cs-v').textContent = csLabel(sel); sel.dispatchEvent(new Event('input', { bubbles: true })); sel.dispatchEvent(new Event('change', { bubbles: true })); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('.cs'); if (b) { e.preventDefault(); e.stopPropagation(); b.getAttribute('aria-expanded') === 'true' ? csClose() : csOpen(b); return; }
+  const o = e.target.closest('.cs-o'); if (o) { e.preventDefault(); e.stopPropagation(); csPick(o.closest('.cs-pop'), +o.dataset.i); return; }
+  if (!e.target.closest('.cs-pop')) csClose();
+}, true);
+document.addEventListener('keydown', e => {
+  const b = e.target.closest?.('.cs'); if (b && ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) { e.preventDefault(); csOpen(b); return; }
+  const pop = e.target.closest?.('.cs-pop'); if (!pop) return;
+  const os = $$('.cs-o:not(:disabled)', pop), k = os.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown') { e.preventDefault(); os[Math.min(os.length - 1, k + 1)]?.focus(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); os[Math.max(0, k - 1)]?.focus(); }
+  else if (e.key === 'Home') { e.preventDefault(); os[0]?.focus(); } else if (e.key === 'End') { e.preventDefault(); os.at(-1)?.focus(); }
+  else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); const bt = pop._btn; csClose(); bt.focus(); e.stopPropagation(); }
+  else if (e.key.length === 1) { const ch = e.key.toLowerCase(), nx = os.slice(k + 1).concat(os.slice(0, k + 1)).find(x => x.textContent.trim().toLowerCase().startsWith(ch)); nx?.focus(); }
+}, true);
+addEventListener('resize', csClose); addEventListener('scroll', e => { if (!e.target.closest?.('.cs-pop') && !$('.cs-pop.sheet')) csClose(); }, { passive: true, capture: true });
+{ const dlg0 = dlg; dlg = (html, wide) => { const d = dlg0(html, wide); enhanceSelects(d); return d; }; }
+enhanceSelects($('#root'));
+
+/* ===== busca rápida (Cmd/Ctrl + K), mesmo desenho do Alva Web ===== */
+let cmdSel = 0, cmdItems = [];
+function cmdEl() {
+  let el = $('#scrim'); if (el) return el;
+  el = document.createElement('div'); el.id = 'scrim'; el.className = 'scrim'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Buscar');
+  el.innerHTML = `<div class="cmd"><div class="in">${ic('search', 18)}<input id="cq" placeholder="Buscar clientes, telas ou ações" autocomplete="off" aria-controls="cres"><kbd>esc</kbd></div><div class="res" id="cres" role="listbox"></div><div class="cft"><span><kbd>↑</kbd><kbd>↓</kbd> navegar</span><span><kbd>↵</kbd> abrir</span><span><kbd>esc</kbd> fechar</span></div></div>`;
+  document.body.append(el);
+  el.addEventListener('click', e => { if (e.target === el) cmdClose(); const r = e.target.closest('.ri'); if (r) cmdPick(+r.dataset.i); });
+  el.addEventListener('mousemove', e => { const r = e.target.closest('.ri'); if (r && +r.dataset.i !== cmdSel) { cmdSel = +r.dataset.i; $$('.ri', el).forEach(b => b.classList.toggle('sel', +b.dataset.i === cmdSel)); } });
+  $('#cq', el).addEventListener('input', e => cmdList(e.target.value));
+  return el;
+}
+const norm = t => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function cmdOpen() { if (!S.admin) return; A.navClose(); csClose(); closeMenu(); const el = cmdEl(); el.classList.add('open'); const i = $('#cq'); i.value = ''; cmdList(''); setTimeout(() => i.focus(), 30); }
+function cmdClose() { $('#scrim')?.classList.remove('open'); }
+function cmdList(q0) {
+  const q = norm(q0.trim());
+  const people = q ? D.customers.map(c => ({ c, subs: custSubs(c.id).filter(s => scopeOf().includes(s.product)) })).filter(x => x.subs.length && norm(x.c.name + ' ' + x.c.email).includes(q)).slice(0, 6).map(({ c, subs }) => ({ k: 'cli', id: c.id, sid: subs[0].id, label: c.name, sub: subs.map(s => prodOf(s.product).name).join(' · ') })) : [];
+  const prods = visProd().filter(p => !q || norm(p.name + ' ' + p.code).includes(q)).map(p => ({ k: 'prod', id: p.code, icon: 'grid', label: p.name, sub: 'Produto' }));
+  const areas = NAV.filter(n => !q || norm(n[2] + ' ' + (NAVG.find(g => g[1].includes(n[0]))?.[0] || '')).includes(q)).map(n => ({ k: 'go', id: n[0], icon: n[1], label: n[2], sub: NAVG.find(g => g[1].includes(n[0]))?.[0] }));
+  const acts = [['vNew', 'percent', 'Novo voucher', canWrite()], ['plNew', 'tag', 'Novo plano', canWrite()], ['mNew', 'user', 'Adicionar pessoa à equipe', isAdm()], ['expCsv', 'download', 'Exportar relatório CSV', true], ['theme', document.documentElement.dataset.theme === 'noite' ? 'sun' : 'moon', document.documentElement.dataset.theme === 'noite' ? 'Usar tema claro' : 'Usar tema escuro', true]].filter(a => a[3] && (!q || norm(a[2]).includes(q))).map(a => ({ k: 'act', id: a[0], icon: a[1], label: a[2], sub: 'Ação' }));
+  if (q) prods.splice(3);
+  cmdItems = [...people, ...areas, ...prods, ...acts]; cmdSel = 0;
+  const sec = (t, arr) => arr.length ? `<div class="pl">${t}</div>${arr.map(it => { const j = cmdItems.indexOf(it); return `<button class="ri${j === cmdSel ? ' sel' : ''}" data-i="${j}" role="option">${it.k === 'cli' ? `<span class="av">${esc(it.label.split(' ').map(w => w[0]).slice(0, 2).join(''))}</span>` : ic(it.icon, 18, 1.9)}<span class="rl">${esc(it.label)}</span>${it.sub ? `<small>${esc(it.sub)}</small>` : ''}</button>`; }).join('')}` : '';
+  $('#cres').innerHTML = cmdItems.length ? sec('Clientes', people) + sec('Ir para', areas) + sec('Produtos', prods) + sec('Ações', acts) : `<div class="nores">Nada encontrado para “${esc(q0)}”.</div>`;
+}
+function cmdPick(i) { const it = cmdItems[i]; if (!it) return; cmdClose();
+  if (it.k === 'go') A.go(it.id); else if (it.k === 'cli') A.cliente(`${it.id}|resumo|${it.sid}`); else if (it.k === 'prod') A.produto(it.id); else A[it.id]?.(); }
+function cmdMove(d) { if (!cmdItems.length) return; cmdSel = (cmdSel + d + cmdItems.length) % cmdItems.length; $$('#cres .ri').forEach(b => b.classList.toggle('sel', +b.dataset.i === cmdSel)); $(`#cres .ri[data-i="${cmdSel}"]`)?.scrollIntoView({ block: 'nearest' }); }
+A.cmdOpen = cmdOpen;
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#scrim.open') ? cmdClose() : cmdOpen(); return; }
+  if (!$('#scrim.open')) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); cmdMove(1); } else if (e.key === 'ArrowUp') { e.preventDefault(); cmdMove(-1); }
+  else if (e.key === 'Enter') { e.preventDefault(); cmdPick(cmdSel); } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cmdClose(); }
+}, true);
+
+/* ===== menu da conta (mesmo padrão do Alva Web) ===== */
+A.whoMenu = (v, el) => {
+  const open = el.getAttribute('aria-expanded') === 'true'; closeMenu(); $$('.who[aria-expanded]').forEach(x => x.setAttribute('aria-expanded', 'false')); if (open) return;
+  const dark = document.documentElement.dataset.theme === 'noite', sc = S.admin.scope === 'all' ? 'Todos os produtos' : S.admin.scope.map(c => prodOf(c).name).join(', ');
+  const m = document.createElement('div'); m.className = 'menu who-menu'; m.setAttribute('role', 'menu');
+  m.innerHTML = `<div class="wm-h"><span class="av">${esc(el.querySelector('.av').textContent)}</span><span><b>${esc(S.admin.name)}</b><small>${esc(S.admin.email)}</small></span></div><dl class="wm-kv"><div><dt>Permissão</dt><dd>${esc(S.admin.role)}</dd></div><div><dt>Produtos</dt><dd>${esc(sc)}</dd></div></dl><button class="mi" role="menuitem" data-a="theme">${ic(dark ? 'sun' : 'moon', 17, 2)}${dark ? 'Usar tema claro' : 'Usar tema escuro'}</button><button class="mi dng" role="menuitem" data-a="logout">${ic('logout', 17, 2)}Sair</button>`;
+  const w = el.closest('.who-w'); w.append(m); el.setAttribute('aria-expanded', 'true'); m.querySelector('.mi')?.focus({ preventScroll: true });
+};
+document.addEventListener('click', e => { if (!e.target.closest('.who-w')) $$('.who[aria-expanded="true"]').forEach(x => { x.setAttribute('aria-expanded', 'false'); x.parentElement.querySelector('.who-menu')?.remove(); }); }, true);
+
+/* ===== tooltip do gráfico de área: o mês mais próximo do cursor ou do toque ===== */
+function rcHover(w, cx) {
+  const pts = JSON.parse(w.dataset.pts), r = w.querySelector('svg').getBoundingClientRect(), fx = (cx - r.left) / r.width;
+  let i = 0; pts.forEach((p, j) => { if (Math.abs(p[2] - fx) < Math.abs(pts[i][2] - fx)) i = j; });
+  const p = pts[i], tip = w.querySelector('.tip'), g = w.querySelector('.guide');
+  w.querySelectorAll('.dot').forEach(d => d.classList.toggle('on', +d.dataset.i === i));
+  g.setAttribute('x1', p[2] * 520); g.setAttribute('x2', p[2] * 520); g.classList.add('on');
+  tip.innerHTML = `<small>${esc(p[0])}${p[4] ? ' · ' + p[4] : ''}</small><b>${p[1]}</b>`; tip.hidden = false;
+  const left = p[2] * r.width, top = p[3] * r.height; tip.style.left = Math.min(r.width - tip.offsetWidth / 2, Math.max(tip.offsetWidth / 2, left)) + 'px'; tip.style.top = top + 'px';
+}
+function rcOut(w) { w.querySelector('.tip').hidden = true; w.querySelector('.guide').classList.remove('on'); w.querySelectorAll('.dot.on').forEach(d => d.classList.remove('on')); }
+document.addEventListener('pointermove', e => { const w = e.target.closest?.('.rcw'); $$('.rcw').forEach(x => { if (x !== w && !x.querySelector('.tip').hidden) rcOut(x); }); if (w) rcHover(w, e.clientX); });
+document.addEventListener('pointerleave', e => { if (e.target.classList?.contains('rcw')) rcOut(e.target); }, true);
+
+/* ===== filtro de produto sempre visível, com saída para todos os produtos ===== */
+A.prodAll = () => A.prod('all');
+A.prodView = v => { A.prod(v); window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); };

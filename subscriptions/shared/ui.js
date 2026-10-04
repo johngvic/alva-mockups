@@ -81,8 +81,10 @@ const I = {
 export const ic = (n, s = 20, w = 1.75) =>
   `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n] || ''}</svg>`;
 
-export const logoMark = (h=24) => `<svg viewBox="0 0 48 36" width="${h*1.3}" height="${h}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 30h36M13 24a11 11 0 0 1 22 0M24 3v6M5 12l5 4M43 12l-5 4"/></svg>`;
-export const logo = (h=24,word=true) => `<span class="logo" role="img" aria-label="Alva" style="font-size:${Math.round(h*1.1)}px">${logoMark(h)}${word?'<span>alva</span>':''}</span>`;
+/* logo Alva: o sol nascendo (mesma geometria do @alva/theme/brand) */
+let _lg = 0;
+export const logoMark = (h = 24) => { const k = ++_lg; return `<svg class="sun" viewBox="0 0 48 32" width="${h * 1.5}" height="${h}" aria-hidden="true"><defs><linearGradient id="lgd${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sun1)"/><stop offset=".5" stop-color="var(--sun2)"/><stop offset="1" stop-color="var(--sun3)"/></linearGradient><clipPath id="lgc${k}"><rect x="0" y="0" width="48" height="25"/></clipPath></defs><g stroke-width="2.6" stroke-linecap="round"><line class="ray" x1="11.16" y1="20.83" x2="5.93" y2="19.13"/><line class="ray" x1="16.06" y1="14.08" x2="12.83" y2="9.63"/><line class="ray" x1="24" y1="11.5" x2="24" y2="6"/><line class="ray" x1="31.94" y1="14.08" x2="35.17" y2="9.63"/><line class="ray" x1="36.84" y1="20.83" x2="42.07" y2="19.13"/></g><g clip-path="url(#lgc${k})"><circle class="disc" cx="24" cy="25" r="10" fill="url(#lgd${k})"/></g><line class="horizon" x1="5" y1="28.5" x2="43" y2="28.5" stroke-width="2.6" stroke-linecap="round"/></svg>`; };
+export const logo = (h = 24, word = true) => `<span class="logo" role="img" aria-label="Alva" style="font-size:${Math.round(h * 1.05)}px">${logoMark(h)}${word ? '<span class="lw">alva</span>' : ''}</span>`;
 
 /* ---------- formatação ---------- */
 export const brl = (c, o = {}) => {
