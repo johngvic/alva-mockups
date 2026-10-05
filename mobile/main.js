@@ -257,14 +257,15 @@ const privacy=`<p class="privacy">${ic('lock',16,1.75)}<span>Usamos esse dado ap
 
 V.welcome=()=>({sb:'var(--ink)',amb:'welcome',html:`<div class="wel">
   <header class="wel-brand">
-   <h1 class="wel-logo">${logo(30,true)}</h1>
-   <p class="wel-line">Sua comunidade,<br>ao alcance de <em>cada momento</em>.</p>
+   <h1 class="wel-logo" aria-label="alva"><span class="lw">alva</span></h1>
+   <p class="wel-line" aria-label="Sua comunidade, ao alcance de cada momento.">${'Sua comunidade,|ao alcance de|<em>cada momento</em>.'.split('|').map((w,i)=>`<span class="wl" style="--w:${i}">${w}</span>`).join(' ')}</p>
   </header>
   <div class="wel-actions">
-   <button class="wbtn" data-a="go" data-v="login">Entrar com senha</button>
-   <button class="wbtn sec" data-a="go" data-v="codeEmail">Entrar com código por e-mail</button>
+   <button class="wbtn glow" data-a="go" data-v="login"><span class="wb-in">${ic('key',19,2)}Entrar com senha</span></button>
+   <button class="wbtn sec" data-a="go" data-v="codeEmail"><span class="wb-in">${ic('mail',19,2)}Entrar com código por e-mail</span></button>
+   <button class="wbtn sec" data-a="startSignup"><span class="wb-in">${ic('userplus',19,2)}Criar conta</span></button>
   </div>
-  <p class="wel-sign">Ainda não tem uma conta? <button class="link" data-a="startSignup">Criar conta</button></p>
+  <p class="wel-legal">Ao continuar, você concorda com os <button class="link" data-a="legal" data-v="termos">Termos de uso</button> e a <button class="link" data-a="legal" data-v="privacidade">Política de privacidade</button>.</p>
  </div>`});
 V.login=()=>({sb:'var(--ink)',html:flow({pct:50,form:'login',
  body:`${head('Entrar com senha','Bem-vindo de volta','Acesse sua conta da igreja.')}
@@ -534,6 +535,14 @@ const tabsFor=()=>S.role==='visitante'?TABS.filter(t=>t[0]!=='cursos'):TABS;
 const TABS=[['home','home','Início'],['agenda','calendar','Agenda'],['grupos','users','Grupos'],['cursos','book','Cursos'],['mais','dots','Mais']];
 const APP=['home','agenda','grupos','cursos','curso','mais'];
 let resendTimer=null,playTimer=null,expTimer=null;
+const AUTHS=['welcome','login','codeEmail','otp','signupStart','lookup','pickRecord','confirmEmail','noEmail','identity','signupForm'];
+function dawnSky(on){
+ const ph=$('#phone');if(!ph)return;let bg=$('#authBg');
+ if(!bg){bg=document.createElement('div');bg.id='authBg';bg.className='authbg';bg.setAttribute('aria-hidden','true');
+  bg.innerHTML='<div class="ab-veil v1"></div><div class="ab-veil v2"></div><div class="ab-veil v3"></div><div class="ab-horizon"></div>';
+  ph.insertBefore(bg,$('#view'));}
+ ph.classList.toggle('auth-on',on);ph.classList.toggle('auth-wel',on&&S.screen==='welcome');
+}
 function render(dir){
  clearInterval(playTimer);S.cu.playing=S.screen==='curso'?S.cu.playing:false;
  const out=V[S.screen]();const view=$('#view');
@@ -541,6 +550,7 @@ function render(dir){
  view.innerHTML=`<div data-amb="${out.amb||AMB[S.screen]||(out.tabs==='mais'?'mais':'auth')}" class="screen ${out.tabs?'has-tabs':''} ${dir==='back'?'enter-back':dir==='none'?'':dir==='tab'?'enter-tab':'enter'}" id="scr">${out.html}</div>`;
  const sbar=$('.statusbar');sbar.style.setProperty('--sb',out.sb||'var(--ink)');sbar.style.setProperty('--sbbg','transparent');const scr=$('#scr');if(out.tabs)scr.addEventListener('scroll',()=>{sbar.style.setProperty('--sbbg',scr.scrollTop>40?'var(--glass)':'transparent');sbar.style.backdropFilter=scr.scrollTop>40?'blur(20px)':'none';},{passive:true});else sbar.style.backdropFilter='none';
  $('#tabbarSlot').innerHTML=out.tabs?`<nav class="tabbar" aria-label="Navegação principal">${tabsFor().map(t=>`<button class="tab" data-a="tab" data-v="${t[0]}" ${out.tabs===t[0]?'aria-current="page"':''}>${ic(t[1],24,out.tabs===t[0]?2.25:1.75)}${t[2]}</button>`).join('')}</nav>`:'';
+ dawnSky(AUTHS.includes(S.screen));
  (HOOK[S.screen]||(()=>{}))();
  if(dir!=='none')motionIn();
  tabIndicator();
@@ -735,6 +745,7 @@ function tabIndicator(){const bar=$('.tabbar');if(!bar)return;const act=$('.tab[
 
 /* ---------- actions ---------- */
 const soon=(what)=>toast('info',what||'Em construção','Esta tela entra na próxima leva do protótipo.');
+const LEGAL={termos:['Termos de uso','Regras de uso do app da igreja: o que você pode fazer, o que a igreja faz com o que você publica e como encerrar a conta quando quiser.'],privacidade:['Política de privacidade','Quais dados guardamos (nome, contato, família e participação), quem na igreja pode ver cada um e como pedir cópia ou exclusão.']};
 const A={
  go:v=>go(v),back,
  closeSheet:()=>closeSheet(),
@@ -742,6 +753,7 @@ const A={
  reveal:(v,el)=>{const i=$('#'+v);const show=i.type==='password';i.type=show?'text':'password';el.innerHTML=ic(show?'eyeOff':'eye',el.closest('.bigwrap')?22:20,1.75);el.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha');el.setAttribute('aria-pressed',show);const n=i.value.length;i.focus();try{i.setSelectionRange(n,n)}catch(_){}},
  forgot:()=>forgotSheet(),
  startSignup:()=>go('signupStart'),
+ legal:v=>{const l=LEGAL[v];sheet(`<div class="stack g4"><div class="stack g2"><h3 class="t2">${l[0]}</h3><p class="body">${l[1]}</p><p class="foot">Versão de demonstração. O texto completo fica disponível no app final.</p></div><button class="btn primary block" data-a="closeSheet">Entendi</button></div>`);},
  pickLookup:async(v,el)=>{$$('.selcard').forEach(c=>c.setAttribute('aria-pressed',c===el));S.lookupMode=v;await wait(260);go('lookup');},
  lookupSwap:()=>{S.lookupMode=S.lookupMode==='phone'?'email':'phone';S.screen='lookup';render();},
  pickRec:(v,el)=>{S.su.sel=+v;$$('.rec').forEach((r,i)=>{const on=i===+v;r.setAttribute('aria-checked',on);$('.radio',r).innerHTML=on?ic('check',14,3):'';});},
@@ -1323,7 +1335,7 @@ function splashSVG(){const C={x:60,y:58},R0=27,R1=40,ang=[-162,-126,-90,-54,-18]
 function showSplash(){const ph=$('#phone');if(!ph)return;const old=$('#splash');if(old)old.remove();clearTimeout(window._spT1);clearTimeout(window._spT2);clearTimeout(window._spT3);
  const d=document.createElement('div');d.id='splash';d.className='splash';d.innerHTML=`<div class="sp-glow"></div><div class="sp-mark">${splashSVG()}</div>`;
  ph.appendChild(d);ph.classList.add('sp-on');
- window._spT1=setTimeout(()=>{const sun=$('.sp-sun',d),tgt=$('#view .wel-logo .sun')||$('#view .logo .sun');
+ window._spT1=setTimeout(()=>{const sun=$('.sp-sun',d),tgt=null;
   if(tgt){const a=sun.getBoundingClientRect(),b=tgt.getBoundingClientRect();const ax=a.left+a.width*.5,ay=a.top+a.height*58/76,bx=b.left+b.width*.5,by=b.top+b.height*25/32;
    const k=(b.height*10/32)/(a.width*21/120);sun.style.transformOrigin=`${a.width*.5}px ${a.height*58/76}px`;sun.style.transform=`translate(${bx-ax}px,${by-ay}px) scale(${k})`;d.classList.add('sp-morph');}
   else d.classList.add('sp-out');

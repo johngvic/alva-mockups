@@ -1051,3 +1051,105 @@ article.lim-ov{background:linear-gradient(165deg,color-mix(in srgb,var(--danger-
 .wel-sign .link{font-size:14px}
 .fresh .wel .rise{animation-duration:.7s}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* =====================================================================
+   Acesso (boas-vindas, login e cadastro): céu de alvorada em movimento.
+   Luz que se move devagar, partículas que brilham, marca no centro.
+   ===================================================================== */
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+.authbg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .6s ease;
+  --sky1:#010f12;--sky2:#03202e;--veil1:rgba(7,72,110,.55);--veil2:rgba(0,133,130,.30);--veil3:rgba(169,200,218,.16);--band:rgba(199,235,234,.10);--hz:rgba(255,214,170,.16);
+  background:radial-gradient(140% 70% at 50% 0%,var(--sky2),var(--sky1) 70%)}
+.phone.dia .authbg{--sky1:#eef0ea;--sky2:#e3edf1;--veil1:rgba(169,200,218,.55);--veil2:rgba(199,235,234,.6);--veil3:rgba(7,72,110,.10);--band:rgba(255,255,255,.55);--hz:rgba(255,205,156,.28)}
+.phone.auth-on .authbg{opacity:1}
+.ab-veil{position:absolute;border-radius:50%;filter:blur(48px);will-change:transform}
+.ab-veil.v1{width:150%;height:46%;left:-30%;top:4%;background:radial-gradient(closest-side,var(--veil1),transparent);animation:abDrift1 38s ease-in-out infinite alternate}
+.ab-veil.v2{width:110%;height:40%;right:-40%;top:30%;background:radial-gradient(closest-side,var(--veil2),transparent);animation:abDrift2 46s ease-in-out infinite alternate}
+.ab-veil.v3{width:90%;height:30%;left:-20%;top:52%;background:radial-gradient(closest-side,var(--veil3),transparent);animation:abDrift1 52s ease-in-out infinite alternate-reverse}
+/* faixa de luz diagonal: a "via" da alvorada, que respira e desliza */
+.ab-band{position:absolute;left:-40%;right:-40%;top:18%;height:26%;transform:rotate(-18deg);background:linear-gradient(90deg,transparent 5%,var(--band) 35%,color-mix(in srgb,var(--band) 160%,transparent) 50%,var(--band) 65%,transparent 95%);filter:blur(22px);opacity:.9;animation:abBand 30s ease-in-out infinite alternate}
+.ab-horizon{position:absolute;left:-10%;right:-10%;bottom:-18%;height:46%;border-radius:50%;background:radial-gradient(closest-side,var(--hz),transparent);filter:blur(20px);animation:abBreath 9s ease-in-out infinite}
+.authbg canvas{position:absolute;inset:0;width:100%;height:100%}
+@keyframes abDrift1{from{transform:translate3d(-6%,0,0) scale(1)}to{transform:translate3d(8%,6%,0) scale(1.12)}}
+@keyframes abDrift2{from{transform:translate3d(4%,-4%,0) scale(1.05)}to{transform:translate3d(-10%,5%,0) scale(.95)}}
+@keyframes abBand{from{transform:rotate(-18deg) translate3d(-6%,0,0)}to{transform:rotate(-14deg) translate3d(6%,4%,0)}}
+@keyframes abBreath{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+
+/* telas de acesso ficam transparentes sobre o céu */
+#view{position:absolute;inset:0;z-index:1}
+.phone.auth-on .screen{background:transparent!important}
+.phone.auth-on .topbar{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.phone.auth-on .dock{background:linear-gradient(to top,color-mix(in srgb,var(--bg) 70%,transparent) 55%,transparent)}
+.phone.auth-on .prog{background:color-mix(in srgb,var(--ink) 10%,transparent)}
+.phone.auth-on .prog i{background:linear-gradient(90deg,var(--sun2),var(--sun1));box-shadow:0 0 10px color-mix(in srgb,var(--sun1) 60%,transparent)}
+.phone.auth-on .flow .btn.primary{position:relative;overflow:hidden}
+.phone.auth-on .flow .btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);animation:wbShine 6s ease-in-out 1.2s infinite;pointer-events:none}
+
+/* ---------- boas-vindas ---------- */
+.screen:has(.wel){padding-bottom:0}
+.wel{min-height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px calc(26px + env(safe-area-inset-bottom,0px))}
+.wel-brand{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding-top:56px;min-height:360px}
+.wel-logo{position:relative;margin:0;font:800 64px/1 var(--font-display);letter-spacing:-.055em;color:var(--ink)}
+.wel-logo .logo{gap:12px;align-items:flex-end;position:relative}
+/* título com gradiente de luz e um brilho que passa de tempos em tempos */
+.wel-logo .lw{background:linear-gradient(100deg,#ffffff 0%,#e6f4f7 30%,#a9c8da 55%,#ffffff 72%,#c7ebea 100%);background-size:220% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lwShine 7s cubic-bezier(.45,0,.2,1) 2.6s infinite;filter:drop-shadow(0 0 18px rgba(199,235,234,.18))}
+.phone.dia .wel-logo .lw{background-image:linear-gradient(100deg,#010f12 0%,#07486e 35%,#008582 55%,#010f12 75%,#07486e 100%);filter:none}
+@keyframes lwShine{0%{background-position:100% 0}45%,100%{background-position:-20% 0}}
+/* halo do sol que respira, e raios que cintilam um a um */
+.wel-glow{position:absolute;left:-26px;top:-34px;width:150px;height:150px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--sun1) 34%,transparent),transparent);filter:blur(6px);animation:welGlow 6s ease-in-out infinite;pointer-events:none}
+.phone.dia .wel-glow{background:radial-gradient(closest-side,rgba(255,205,156,.45),transparent)}
+@keyframes welGlow{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
+.phone:not(.sp-reveal) .wel-logo .sun .ray{animation:rayTw 5s ease-in-out infinite;animation-delay:calc(2.4s + var(--i) * .22s)}
+@keyframes rayTw{0%,72%,100%{opacity:1;filter:none}80%{opacity:1;filter:drop-shadow(0 0 3px var(--sun1)) brightness(1.6)}}
+.wel-line{margin:0;max-width:300px;font:400 21px/28px var(--font-serif);color:var(--ink-muted);letter-spacing:-.005em;text-wrap:balance}
+.wel-line .wl{display:inline-block;animation:wlIn .9s cubic-bezier(.22,.8,.24,1) both;animation-delay:calc(var(--w) * .18s + .5s)}
+.phone.sp-reveal .wel-line .wl{animation-delay:calc(var(--w) * .18s + 1.3s)}
+.wel-line em{font-style:italic;white-space:nowrap;background:linear-gradient(90deg,var(--sun2),var(--sun1),#ffd6aa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.phone.dia .wel-line em{background-image:linear-gradient(90deg,#07486e,#008582)}
+@keyframes wlIn{from{opacity:0;transform:translateY(8px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+
+/* ---------- botões de vidro ---------- */
+.wel-actions{width:100%;max-width:400px;margin-top:0;display:flex;flex-direction:column;gap:10px}
+.wbtn{appearance:none;border:0;width:100%;height:54px;border-radius:999px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font:600 16px/1 var(--font-text);letter-spacing:-.01em;isolation:isolate;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.04));-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(255,255,255,.10),0 10px 30px -14px rgba(0,0,0,.6);transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .2s,background .2s;animation:wbIn .8s cubic-bezier(.22,.8,.24,1) both}
+.wbtn:nth-child(1){animation-delay:.9s}.wbtn:nth-child(2){animation-delay:1s}.wbtn:nth-child(3){animation-delay:1.1s}
+.phone.sp-reveal .wbtn:nth-child(1){animation-delay:1.6s}.phone.sp-reveal .wbtn:nth-child(2){animation-delay:1.7s}.phone.sp-reveal .wbtn:nth-child(3){animation-delay:1.8s}
+.wbtn .wb-in{display:inline-flex;align-items:center;gap:10px;position:relative;z-index:1}
+.wbtn .wb-in .ic{opacity:.85}
+.wbtn.sec:hover{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));color:var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 1px rgba(255,255,255,.18),0 10px 30px -14px rgba(0,0,0,.6)}
+.wbtn:active{transform:scale(.98)}
+.wbtn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.phone.dia .wbtn{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.6));box-shadow:inset 0 1px 0 #fff,inset 0 0 0 1px rgba(1,15,18,.08),0 10px 30px -16px rgba(7,72,110,.35)}
+/* principal: borda de luz girando (cores do nascer do sol) e brilho que atravessa */
+.wbtn.glow{border:1.5px solid transparent;background:linear-gradient(180deg,#0b3a52,#062a3d) padding-box,conic-gradient(from var(--ang),#c7ebea,#a9c8da 20%,#07486e 35%,#ffd6aa 55%,#fff6e0 62%,#6da8a7 80%,#c7ebea) border-box;color:#fff;animation:wbIn .8s cubic-bezier(.22,.8,.24,1) .9s both,wbSpin 6s linear infinite;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 12px 34px -14px rgba(169,200,218,.55)}
+.wbtn.glow::before{content:"";position:absolute;inset:-6px;border-radius:inherit;z-index:-1;background:conic-gradient(from var(--ang),rgba(199,235,234,.0),rgba(199,235,234,.35),rgba(255,214,170,.35),rgba(199,235,234,0) 70%);filter:blur(12px);opacity:.75}
+.wbtn.glow::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-120%);animation:wbShine 6s ease-in-out 2.4s infinite;pointer-events:none}
+.phone.dia .wbtn.glow{background:linear-gradient(180deg,#0a5a85,#07486e) padding-box,conic-gradient(from var(--ang),#c7ebea,#a9c8da 20%,#07486e 35%,#ffcd9c 55%,#fff6e0 62%,#6da8a7 80%,#c7ebea) border-box}
+.phone.sp-reveal .wbtn.glow{animation:wbIn .8s cubic-bezier(.22,.8,.24,1) 1.6s both,wbSpin 6s linear infinite}
+@keyframes wbSpin{to{--ang:360deg}}
+@keyframes wbShine{0%{transform:translateX(-120%)}35%,100%{transform:translateX(120%)}}
+@keyframes wbIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.wel-legal{margin:18px auto 0;max-width:300px;font:400 12px/17px var(--font-text);color:var(--ink-soft,var(--ink-muted));animation:wbIn .8s cubic-bezier(.22,.8,.24,1) 1.25s both}
+.wel-legal .link{font-size:12px;padding:0;height:auto;color:var(--ink-muted);text-decoration:underline;text-underline-offset:2px;min-height:0}
+.wel-legal .link:hover{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.ab-veil,.ab-band,.ab-horizon,.wel-glow,.wel-logo .lw,.wel-logo .sun .ray,.wbtn,.wbtn.glow,.wbtn.glow::after,.wel-line .wl,.wel-legal,.phone.auth-on .flow .btn.primary::after{animation:none!important}}
+
+/* ---- ajuste: mais contido ---- */
+/* título só com a palavra; gradiente suave, brilho discreto */
+.wel-logo{font-size:76px;letter-spacing:-.06em;line-height:.9}
+.wel-logo .lw{display:inline-block;padding:0 .04em .06em;background:linear-gradient(180deg,#ffffff 20%,#c7ebea 70%,#a9c8da);-webkit-background-clip:text;background-clip:text;color:transparent;animation:none;filter:drop-shadow(0 0 22px rgba(199,235,234,.16));position:relative}
+.phone.dia .wel-logo .lw{background:linear-gradient(180deg,#010f12 25%,#07486e);-webkit-background-clip:text;background-clip:text;filter:none}
+.wel-logo::after{content:"alva";position:absolute;inset:0;padding:0 .04em .06em;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);background-size:300% 100%;background-position:120% 0;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lwSheen 9s ease-in-out 1.5s infinite;pointer-events:none}
+.phone.dia .wel-logo::after{background-image:linear-gradient(105deg,transparent 42%,rgba(169,200,218,.65) 50%,transparent 58%)}
+@keyframes lwSheen{0%{background-position:120% 0}30%,100%{background-position:-20% 0}}
+.wel-glow{display:none}
+/* fundo: só o gradiente se movendo */
+.ab-band,.authbg canvas{display:none}
+/* botão principal: só a borda de luz girando, devagar */
+.wbtn.glow::before,.wbtn.glow::after{content:none}
+.wbtn.glow{animation:wbIn .8s cubic-bezier(.22,.8,.24,1) .9s both,wbSpin 14s linear infinite;background:linear-gradient(180deg,#0b3a52,#062a3d) padding-box,conic-gradient(from var(--ang),rgba(199,235,234,.25),rgba(169,200,218,.9) 25%,rgba(199,235,234,.25) 50%,rgba(255,214,170,.7) 75%,rgba(199,235,234,.25)) border-box;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 10px 28px -16px rgba(169,200,218,.5)}
+.phone.dia .wbtn.glow{background:linear-gradient(180deg,#0a5a85,#07486e) padding-box,conic-gradient(from var(--ang),rgba(169,200,218,.4),#a9c8da 25%,rgba(169,200,218,.4) 50%,#ffcd9c 75%,rgba(169,200,218,.4)) border-box}
+.phone.sp-reveal .wbtn.glow{animation:wbIn .8s cubic-bezier(.22,.8,.24,1) 1.6s both,wbSpin 14s linear infinite}
+.phone.auth-on .flow .btn.primary::after{content:none}
+@media (prefers-reduced-motion:reduce){.wel-logo::after{animation:none;display:none}}
