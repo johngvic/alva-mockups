@@ -3193,6 +3193,7 @@ const RESERVAS=[
  RV('s3','2026-10-07','16:00','17:30',4,'Otávio Lins','Aconselhamento pastoral'),
 ];
 const NOWD='2026-10-01',NOWM=15*60+20,H0=7,H1=23;
+setTimeout(()=>{const r=RESERVAS.find(x=>x.why==='Ensaio geral — Conferência Missões');if(r&&!LOANS.some(l=>l.rv===r.id))[['it3',1],['it5',1],['it2',3]].forEach(([id,q])=>{const l=LN(id,q,r.who,r.d,'2026-10-04');l.rv=r.id;l.st='pend';l.asked='2026-09-30';l.note='Reserva · '+slById(r.s).n;LOANS.unshift(l);});},0);
 Object.assign(S,{rvDay:NOWD,rvWk:NOWD,rvq:'',rvf:'prox',rvSala:null,slq:''});
 const slById=id=>ESPS.find(s=>s.id===id);
 const DOWN=['domingo','segunda','terça','quarta','quinta','sexta','sábado'],DOWS=['dom','seg','ter','qua','qui','sex','sáb'];
@@ -3221,7 +3222,10 @@ const vigTxt=u=>u.to?`De ${dShort(u.from)} a ${dShort(u.to)}`:`Desde ${dShort(u.
 function ruleNext(u,n=4){const out=[];let d=u.from>NOWD?u.from:NOWD;for(let i=0;i<800&&out.length<n;i++){if(u.to&&d>u.to)break;if(ruleOn(u,d))out.push(d);d=addD(d,1);}return out;}
 const recOf=(s,k)=>{const r=RECS.find(x=>x[0]===k);if(r)return r;const c=(s.custom||[]).find(x=>x.k===k);return c?[c.k,c.n,'tag']:null;};
 /* disponibilidade de um item do almoxarifado numa data (empréstimos que cobrem o dia, atrasados contam como fora) */
-const avOn=(it,d,skipRv)=>Math.max(0,it.total-LOANS.filter(l=>l.item===it.id&&l.rv!==skipRv&&lnOpen(l)>0&&l.from<=d&&(l.due>=d||l.due<NOWD)).reduce((a,l)=>a+lnOpen(l),0));
+/* disponível em TODO o período: soma o que está fora ou pedido (pendente) em cada dia e pega o pior dia */
+const avOn=(it,d,skipRv,d2)=>{d2=d2||d;let worst=it.total;for(let x=d;x<=d2;x=addD(x,1)){const used=LOANS.filter(l=>l.item===it.id&&l.rv!==skipRv&&l.st!=='rec'&&l.from<=x&&(l.due>=x||(l.st!=='pend'&&l.due<NOWD))).reduce((a,l)=>a+(l.st==='pend'?l.qty:lnOpen(l)),0);worst=Math.min(worst,it.total-used);if(x>=addD(d,60))break;}return Math.max(0,worst);};
+const LNST={pend:['Aguardando almoxarifado','var(--st-sol)','var(--st-sol-bg)'],rec:['Recusado','var(--st-rec)','var(--st-rec-bg)'],ok:['Aprovado','var(--st-int)','var(--st-int-bg)']};
+const lnPill=l=>{const k=l.st==='pend'?'pend':l.st==='rec'?'rec':'ok';return `<span class="stp" style="--c:${LNST[k][1]};--b:${LNST[k][2]}"><i></i>${LNST[k][0]}</span>`;};
 const rvItems=id=>LOANS.filter(l=>l.rv===id);
 const mm=t=>{const [h,m]=t.split(':').map(Number);return h*60+m;};
 const hm=t=>{const [h,m]=t.split(':');return `${+h}h${m!=='00'?m:''}`;};
@@ -3283,23 +3287,20 @@ function rvDlg(rid){const r=RESERVAS.find(x=>x.id===rid),s=slById(r.s),pastR=rvP
   <dl class="rvd-kv"><div><dt>Finalidade</dt><dd>${esc(r.why||'—')}</dd></div><div><dt>Solicitante</dt><dd class="rvw">${avN(r.who)}${esc(r.who)}</dd></div>
    <div><dt>Pessoas</dt><dd><span class="rvp"><span class="tr"><i style="width:${Math.min(100,r.p/s.cap*100)}%"></i></span><span><b>${r.p}</b> de ${s.cap}</span></span></dd></div>
    ${r.st==='cancelada'?`<div><dt>Motivo do cancelamento</dt><dd>${esc(r.reason||'Não informado')}</dd></div>`:''}</dl>
-  ${rvItems(r.id).length?`<div class="rvr-i"><div class="sh"><h3>Itens do almoxarifado</h3><span class="who">empréstimo para o dia</span></div><ul>${rvItems(r.id).map(l=>{const it=itm(l.item);return `<li>${kTile(icat(it.cat),30)}<span>${esc(it.n)}</span><b>${l.qty}×</b></li>`;}).join('')}</ul></div>`:''}
+  ${rvItems(r.id).length?`<div class="rvr-i"><div class="sh"><h3>Itens do almoxarifado</h3><span class="who">${(l=>l.from===l.due?dBR(l.from):`${dBR(l.from).slice(0,5)} a ${dBR(l.due).slice(0,5)}`)(rvItems(r.id)[0])}</span></div><ul>${rvItems(r.id).map(l=>{const it=itm(l.item);return `<li>${kTile(icat(it.cat),30)}<span>${esc(it.n)} · ${l.qty}×${l.st==='rec'&&l.why?`<small class="rvr-why">${esc(l.why)}</small>`:''}</span>${lnPill(l)}</li>`;}).join('')}</ul></div>`:''}
   <div class="dfoot" style="justify-content:space-between">${r.st==='confirmada'&&!pastR?`<button class="btn ghostd" data-a="rvCancel" data-v="${r.id}">Cancelar reserva</button><span class="row2"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="rvEdit" data-v="${r.id}">${ic('clock',15)}Remarcar</button></span>`:r.st==='cancelada'&&!pastR?`<span></span><span class="row2"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="rvRestore" data-v="${r.id}">Reativar reserva</button></span>`:'<span></span><button class="btn sec" data-a="closeDlg">Fechar</button>'}</div>`,'sm');}
 
 function rvForm(o={}){
  const edit=o.id?RESERVAS.find(x=>x.id===o.id):null,d0=o.d||(S.rvDay<NOWD?NOWD:S.rvDay),s0=o.s||'s2';let f0=o.f,t0=o.t;if(!f0){const nf=nextFree(s0,d0,19*60,20*60);f0=tt(nf!=null?nf:19*60);t0=tt((nf!=null?nf:19*60)+60);}
- const v=edit?{...edit}:{s:s0,d:d0,f:f0,t:t0,p:'',who:'',why:''};const pick={};if(edit)rvItems(edit.id).forEach(l=>pick[l.item]=(pick[l.item]||0)+lnOpen(l));let step=1;
+ const v=edit?{...edit}:{s:s0,d:d0,f:f0,t:t0,p:'',who:'',why:''};const pick={};const per={a:'',b:''};if(edit)rvItems(edit.id).filter(l=>l.st!=='rec').forEach(l=>{pick[l.item]=(pick[l.item]||0)+l.qty;per.a=l.from;per.b=l.due;});let step=1;
  openDlg(`${dlgHead(edit?'Remarcar reserva':'Nova reserva',edit?'Mude a sala, o dia, o horário ou os itens. Avisamos o solicitante.':'Sala, horário e, se precisar, itens do almoxarifado.')}
   <ol class="rvw-steps" id="rvSteps">${['Sala e horário','Itens do almoxarifado','Revisão'].map((x,i)=>`<li class="${i?'':'on'}"><i>${i+1}</i><span>${x}</span></li>`).join('')}</ol>
-  <form id="rvF" novalidate><div class="fgrid rvw-p" data-p="1">
-   <div class="fld wide"><span class="fl">Sala</span><div class="sp-pick">${ESPS.filter(s=>s.act).map(s=>`<label><input type="radio" name="s" value="${s.id}" ${v.s===s.id?'checked':''}><span class="htile" style="--s:30px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,15)}</span><span><b>${esc(s.n)}</b><small>${s.cap} lugares · ${esc(s.loc)}</small></span></label>`).join('')}</div></div>
-   <label class="fld wide"><span class="fl">Data</span><input type="date" name="d" value="${v.d}" min="${NOWD}"></label>
-   <label class="fld"><span class="fl">Início</span><input type="time" name="f" value="${v.f}" step="900"></label>
-   <label class="fld"><span class="fl">Término</span><input type="time" name="t" value="${v.t}" step="900"></label>
-   <div class="wide sp-av" id="rvAv"></div>
-   <label class="fld"><span class="fl">Quantidade de pessoas</span><input type="number" name="p" min="1" inputmode="numeric" value="${v.p}" placeholder="0"><span class="sp-cap" id="rvCap"></span></label>
-   <label class="fld"><span class="fl">Solicitante</span><span class="selw"><select name="who"><option value="">Escolha…</option>${MEMBERS.filter((m,i,a)=>a.findIndex(x=>x.n===m.n)===i).map(m=>`<option ${m.n===v.who?'selected':''}>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></label>
-   <label class="fld wide"><span class="fl">Finalidade <small>opcional</small></span><input name="why" value="${esc(v.why)}" placeholder="Ex.: Reunião de liderança" autocomplete="off"></label>
+  <form id="rvF" novalidate><div class="rvw-p rv1" data-p="1">
+   <section class="rv-sec"><h4>Sala</h4><div class="sp-pick rv-pick">${ESPS.filter(s=>s.act).map(s=>`<label><input type="radio" name="s" value="${s.id}" ${v.s===s.id?'checked':''}><span class="htile" style="--s:30px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,15)}</span><span><b>${esc(s.n)}</b><small>${s.cap} lugares · ${esc(s.loc)}</small></span></label>`).join('')}</div></section>
+   <section class="rv-sec"><h4>Quando</h4><div class="rv-when"><label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${v.d}" min="${NOWD}"></label><label class="fld"><span class="fl">Início</span><input type="time" name="f" value="${v.f}" step="900"></label><label class="fld"><span class="fl">Término</span><input type="time" name="t" value="${v.t}" step="900"></label></div><div class="sp-av" id="rvAv"></div></section>
+   <section class="rv-sec"><h4>Detalhes</h4><div class="rv-det"><label class="fld"><span class="fl">Solicitante</span><span class="selw"><select name="who"><option value="">Escolha…</option>${MEMBERS.filter((m,i,a)=>a.findIndex(x=>x.n===m.n)===i).map(m=>`<option ${m.n===v.who?'selected':''}>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></label>
+    <label class="fld"><span class="fl">Pessoas</span><input type="number" name="p" min="1" inputmode="numeric" value="${v.p}" placeholder="0"><span class="sp-cap" id="rvCap"></span></label>
+    <label class="fld rv-why"><span class="fl">Finalidade <small>opcional</small></span><input name="why" value="${esc(v.why)}" placeholder="Ex.: Reunião de liderança" autocomplete="off"></label></div></section>
    </div>
    <div class="rvw-p" data-p="2" hidden></div><div class="rvw-p" data-p="3" hidden></div>
    <div class="dfoot rvw-ft"><button type="button" class="btn sec" id="rvBack">Cancelar</button><span class="rvw-cnt" id="rvCnt"></span><button type="submit" class="btn pri" id="rvOk">Continuar</button></div></form>`,'lg');
@@ -3327,32 +3328,32 @@ function rvForm(o={}){
   const cp=$('#rvCap');if(p>s.cap){cp.innerHTML=`<span class="tr bad"><i style="width:100%"></i></span><span class="sp-bad">Passa ${p-s.cap} da capacidade (${s.cap})</span>`;bad=true;}else cp.innerHTML=`<span class="tr"><i style="width:${p/s.cap*100}%"></i></span><span>${p?`${p} de ${s.cap} lugares`:`Capacidade: ${s.cap} lugares`}</span>`;
   if(!p||!f.who.value)bad=true;ok.disabled=bad;};
  const sumHTML=()=>{const s=slById(f.s.value),n=Object.values(pick).reduce((a,b)=>a+b,0);return n?`${n} ${n>1?'itens':'item'}`:'';};
- const items2=()=>{const d=f.d.value,q=norm(S.rvIq||''),k=S.rvIk||'';const its=ITEMS.filter(i=>i.tipo==='emp'&&(!k||i.cat===k)&&(!q||norm(i.n+' '+(i.sku||'')).includes(q)));
+ const items2=()=>{if(!per.a)per.a=f.d.value;if(!per.b||per.b<per.a)per.b=per.a;const d=per.a,d2=per.b,q=norm(S.rvIq||''),k=S.rvIk||'';const its=ITEMS.filter(i=>i.tipo==='emp'&&(!k||i.cat===k)&&(!q||norm(i.n+' '+(i.sku||'')).includes(q)));
   return `<div class="rvi-top"><label class="sbox">${ic('search',16)}<input id="rvIq" placeholder="Buscar item do almoxarifado" value="${esc(S.rvIq||'')}" autocomplete="off"></label>
    <div class="chips">${[['','Todos'],...ICATS.filter(c=>ITEMS.some(i=>i.tipo==='emp'&&i.cat===c.id)).map(c=>[c.id,c.n])].map(c=>`<button type="button" class="chipf ${k===c[0]?'on':''}" data-rvk="${c[0]}">${c[1]}</button>`).join('')}</div></div>
-   <p class="who rvi-note">${ic('box',14)}<span>Os itens saem como empréstimo em nome de <b>${esc(f.who.value||'quem reserva')}</b> para ${wd(d)}, ${+d.slice(8)}/${d.slice(5,7)}, e voltam ao almoxarifado depois do uso.</span></p>
-   <div class="rvi-list">${its.length?its.map(it=>{const av=avOn(it,d,edit&&edit.id),q=pick[it.id]||0,c=icat(it.cat);return `<div class="rvi ${q?'on':''} ${av===0&&!q?'out':''}">${kTile(c,36)}<span class="dkt"><b>${esc(it.n)}</b><span>${av===0?'Indisponível nessa data':`${av} de ${it.total} disponíveis nessa data`}</span></span>
+   <div class="rvi-per"><label class="fld"><span class="fl">De</span><input type="date" id="rvIa" value="${d}" min="${NOWD}"></label><label class="fld"><span class="fl">Até</span><input type="date" id="rvIb" value="${d2}" min="${d}"></label><p class="who">${ic('box',14)}<span>Pedido em nome de <b>${esc(f.who.value||'quem reserva')}</b>. Um líder do almoxarifado aprova ou recusa; a reserva da sala não depende disso.</span></p></div>
+   <div class="rvi-list">${its.length?its.map(it=>{const av=avOn(it,d,edit&&edit.id,d2),q=pick[it.id]||0,c=icat(it.cat);return `<div class="rvi ${q?'on':''} ${av===0&&!q?'out':''}">${kTile(c,36)}<span class="dkt"><b>${esc(it.n)}</b><span>${av===0?(d===d2?'Indisponível nessa data':'Indisponível no período'):`${av} de ${it.total} disponíveis ${d===d2?'nessa data':'em todo o período'}`}</span></span>
     <span class="rvi-q"><button type="button" class="ibtn sm" data-q="-1" data-it="${it.id}" ${q?'':'disabled'} aria-label="Menos">${ic('minus',14,2.2)}</button><b>${q}</b><button type="button" class="ibtn sm" data-q="1" data-it="${it.id}" ${q>=av?'disabled':''} aria-label="Mais">${ic('plus',14,2.2)}</button></span></div>`;}).join(''):'<div class="mempty"><p>Nada encontrado.</p><span>Tente outra busca.</span></div>'}</div>`;};
  const review=()=>{const s=slById(f.s.value),its=Object.entries(pick).filter(x=>x[1]>0);
   return `<div class="rvr"><div class="rvr-c"><span class="htile" style="--s:42px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,20)}</span><div><b>${esc(s.n)}</b><span>${wd(f.d.value)}, ${fmtDate(f.d.value)} · ${hm(f.f.value)}–${hm(f.t.value)}</span></div><button type="button" class="lnk" data-go="1">Alterar</button></div>
    <dl class="rvd-kv"><div><dt>Solicitante</dt><dd class="rvw">${avN(f.who.value)}${esc(f.who.value)}</dd></div><div><dt>Pessoas</dt><dd>${f.p.value} de ${s.cap}</dd></div><div><dt>Finalidade</dt><dd>${esc(f.why.value.trim()||'—')}</dd></div></dl>
-   <div class="rvr-i"><div class="sh"><h3>Itens do almoxarifado</h3><button type="button" class="lnk" data-go="2">${its.length?'Alterar':'Adicionar'}</button></div>${its.length?`<ul>${its.map(([id,q])=>{const it=itm(id);return `<li>${kTile(icat(it.cat),30)}<span>${esc(it.n)}</span><b>${q}×</b></li>`;}).join('')}</ul><p class="hint">Empréstimo de ${+f.d.value.slice(8)}/${f.d.value.slice(5,7)}, devolução no mesmo dia.</p>`:'<p class="who" style="margin:0">Nenhum item. A reserva é só da sala.</p>'}</div></div>`;};
+   <div class="rvr-i"><div class="sh"><h3>Itens do almoxarifado</h3><button type="button" class="lnk" data-go="2">${its.length?'Alterar':'Adicionar'}</button></div>${its.length?`<ul>${its.map(([id,q])=>{const it=itm(id);return `<li>${kTile(icat(it.cat),30)}<span>${esc(it.n)}</span><b>${q}×</b></li>`;}).join('')}</ul><p class="hint">${per.a===per.b?`Empréstimo para ${dBR(per.a)}`:`Empréstimo de ${dBR(per.a)} até ${dBR(per.b)}`}. Vai para aprovação no almoxarifado.</p>`:'<p class="who" style="margin:0">Nenhum item. A reserva é só da sala.</p>'}</div></div>`;};
  const go=n=>{step=n;$$('.rvw-p',f).forEach(p=>p.hidden=+p.dataset.p!==n);$$('#rvSteps li').forEach((li,i)=>{li.classList.toggle('on',i+1===n);li.classList.toggle('done',i+1<n);});
   if(n===2){$('.rvw-p[data-p="2"]',f).innerHTML=items2();bind2();}if(n===3)$('.rvw-p[data-p="3"]',f).innerHTML=review();
   $('#rvBack').textContent=n===1?'Cancelar':'Voltar';ok.textContent=n===3?(edit?'Salvar alterações':'Confirmar reserva'):'Continuar';
   $('#rvCnt').textContent=n===2?(sumHTML()||'Itens são opcionais'):'';if(n===1)chk();else ok.disabled=false;$('.dlg').scrollTop=0;};
- const bind2=()=>{const p=$('.rvw-p[data-p="2"]',f),q=$('#rvIq');q.addEventListener('input',e=>{S.rvIq=e.target.value;const c=e.target.selectionStart;p.innerHTML=items2();bind2();const n=$('#rvIq');n.focus();n.setSelectionRange(c,c);});};
+ const bind2=()=>{const p=$('.rvw-p[data-p="2"]',f),q=$('#rvIq');const per2=()=>{per.a=$('#rvIa').value||f.d.value;per.b=$('#rvIb').value||per.a;if(per.b<per.a)per.b=per.a;Object.keys(pick).forEach(k=>{const av=avOn(itm(k),per.a,edit&&edit.id,per.b);if(pick[k]>av)pick[k]=av;});p.innerHTML=items2();bind2();$('#rvCnt').textContent=sumHTML()||'Itens são opcionais';};$('#rvIa').addEventListener('change',per2);$('#rvIb').addEventListener('change',per2);q.addEventListener('input',e=>{S.rvIq=e.target.value;const c=e.target.selectionStart;p.innerHTML=items2();bind2();const n=$('#rvIq');n.focus();n.setSelectionRange(c,c);});};
  f.addEventListener('click',e=>{const b=e.target.closest('[data-q],[data-rvk],[data-go]');if(!b)return;
   if(b.dataset.go){go(+b.dataset.go);return;}
   if(b.dataset.rvk!==undefined){S.rvIk=b.dataset.rvk;$('.rvw-p[data-p="2"]',f).innerHTML=items2();bind2();return;}
-  const id=b.dataset.it,it=itm(id),av=avOn(it,f.d.value,edit&&edit.id);pick[id]=Math.max(0,Math.min(av,(pick[id]||0)+ +b.dataset.q));$('.rvw-p[data-p="2"]',f).innerHTML=items2();bind2();$('#rvCnt').textContent=sumHTML()||'Itens são opcionais';});
+  const id=b.dataset.it,it=itm(id),av=avOn(it,per.a||f.d.value,edit&&edit.id,per.b);pick[id]=Math.max(0,Math.min(av,(pick[id]||0)+ +b.dataset.q));$('.rvw-p[data-p="2"]',f).innerHTML=items2();bind2();$('#rvCnt').textContent=sumHTML()||'Itens são opcionais';});
  $('#rvBack').addEventListener('click',()=>{if(step===1)closeDlg();else go(step-1);});
  S.rvIq='';S.rvIk='';
- f.addEventListener('input',e=>{if(step===1)chk();});f.addEventListener('change',e=>{if(step===1){chk();Object.keys(pick).forEach(k=>{const av=avOn(itm(k),f.d.value,edit&&edit.id);if(pick[k]>av)pick[k]=av;});}});chk();
+ f.addEventListener('input',e=>{if(step===1)chk();});f.addEventListener('change',e=>{if(step===1){chk();per.a='';per.b='';}});chk();
  f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;if(step<3){go(step+1);return;}ok.classList.add('busy');setTimeout(()=>{const o2={s:f.s.value,d:f.d.value,f:f.f.value,t:f.t.value,p:+f.p.value,who:f.who.value,why:f.why.value.trim()};
   let rv;if(edit){Object.assign(edit,o2);rv=edit;for(let i=LOANS.length-1;i>=0;i--)if(LOANS[i].rv===edit.id)LOANS.splice(i,1);}else{rv=RV(o2.s,o2.d,o2.f,o2.t,o2.p,o2.who,o2.why);RESERVAS.push(rv);}
-  Object.entries(pick).filter(x=>x[1]>0).forEach(([id,q])=>{const l=LN(id,q,o2.who,o2.d,o2.d);l.rv=rv.id;l.note='Reserva · '+slById(o2.s).n;LOANS.unshift(l);});
-  S.rvDay=o2.d;if(o2.d<S.rvWk||o2.d>addD(S.rvWk,6))S.rvWk=o2.d;closeDlg();render();const ni=Object.values(pick).reduce((a,b)=>a+b,0);toast(edit?`Reserva atualizada · ${o2.who.split(' ')[0]} foi avisado(a)`:`Reserva confirmada · ${slById(o2.s).n}, ${hm(o2.f)}–${hm(o2.t)}${ni?` · ${ni} ${ni>1?'itens':'item'} do almoxarifado`:''}`);},650);});
+  Object.entries(pick).filter(x=>x[1]>0).forEach(([id,q])=>{const l=LN(id,q,o2.who,per.a||o2.d,per.b||per.a||o2.d);l.rv=rv.id;l.st='pend';l.asked=NOWD;l.note='Reserva · '+slById(o2.s).n;LOANS.unshift(l);});
+  S.rvDay=o2.d;if(o2.d<S.rvWk||o2.d>addD(S.rvWk,6))S.rvWk=o2.d;closeDlg();render();const ni=Object.values(pick).reduce((a,b)=>a+b,0);toast(edit?`Reserva atualizada · ${o2.who.split(' ')[0]} foi avisado(a)`:`Reserva confirmada · ${slById(o2.s).n}, ${hm(o2.f)}–${hm(o2.t)}${ni?` · ${ni} ${ni>1?'itens enviados':'item enviado'} para aprovação`:''}`);},650);});
 }
 
 /* ---------- Salas ---------- */
@@ -4493,7 +4494,7 @@ const ADJS=[];
 Object.assign(S,{axq:'',axf:'todos',lnf:'ativos',mvf:'todos'});
 const icat=id=>ICATS.find(c=>c.id===id)||{n:'Sem categoria',c:'#8a8f98',ic:'box'};
 const itm=id=>ITEMS.find(x=>x.id===id);
-const lnOpen=l=>l.qty-l.back.reduce((a,b)=>a+b[0],0);
+const lnOpen=l=>l.st==='pend'||l.st==='rec'?0:l.qty-l.back.reduce((a,b)=>a+b[0],0);
 const outOf=it=>it.tipo==='emp'?LOANS.filter(l=>l.item===it.id).reduce((a,l)=>a+lnOpen(l),0):DISTS.filter(d=>d.item===it.id).reduce((a,d)=>a+d.qty,0);
 const avOf=it=>Math.max(0,it.total-outOf(it));
 const itSt=it=>{const o=outOf(it),a=avOf(it);return a===0?'out':o===0?'ok':'part';};
@@ -4574,10 +4575,17 @@ function kForm(id,after,stack){const c=id?ICATS.find(x=>x.id===id):null;let col=
   if(c){Object.assign(c,{n,c:col,ic:icn});closeDlg();axRe();toast('Categoria atualizada');}else{const k={id:'k'+Date.now(),n,c:col,ic:icn};ICATS.push(k);if(stack){root.remove();after&&after(k);toast(`Categoria ${n} criada`);}else{closeDlg();axRe();toast(`Categoria ${n} criada`);}}});}
 
 /* ---------- Empréstimos / Devoluções ---------- */
+function lnReqs(){const req=LOANS.filter(l=>l.st==='pend');if(!req.length)return '';const g={};req.forEach(l=>(g[l.rv||l.id]=g[l.rv||l.id]||[]).push(l));
+ return `<section class="card pc ln-req rise" style="--d:1"><div class="sh"><div><h2>Solicitações <small class="bdg">${Object.keys(g).length}</small></h2><p class="who" style="margin:4px 0 0">Pedidos feitos junto com reservas de sala. Aprovam líderes com permissão de aprovar empréstimos.</p></div></div>
+  <div class="ln-rl">${Object.values(g).map(ls=>{const l0=ls[0],rv=RESERVAS.find(r=>r.id===l0.rv),sala=rv?slById(rv.s):null,conf=ls.some(l=>avOn(itm(l.item),l.from,l.rv,l.due)<l.qty);
+   return `<article class="ln-r"><div class="ln-rh">${avN(l0.who)}<div class="dkt"><b>${esc(l0.who)}</b><span>${sala?`${esc(sala.n)} · ${esc(rv.why||'Reserva')}`:'Pedido avulso'}</span></div><span class="ln-per">${ic('calendar',13)}${l0.from===l0.due?dBR(l0.from):`${dBR(l0.from).slice(0,5)} – ${dBR(l0.due).slice(0,5)}`}</span></div>
+    <ul>${ls.map(l=>{const it=itm(l.item),av=avOn(it,l.from,l.rv,l.due);return `<li>${kTile(icat(it.cat),30)}<span>${esc(it.n)}</span><b>${l.qty}×</b><small class="${av<l.qty?'bad':''}">${av<l.qty?`só ${av} livre${av===1?'':'s'}`:`${av} livre${av===1?'':'s'}`}</small></li>`;}).join('')}</ul>
+    ${conf?`<p class="uf-warn">${ic('alert',14,2)}Não há unidades suficientes no período. Recuse ou combine outra data.</p>`:''}
+    <footer><button class="btn sec sm" data-a="lnRej" data-v="${l0.rv||l0.id}">Recusar</button><button class="btn pri sm" data-a="lnOk" data-v="${l0.rv||l0.id}" ${conf?'disabled':''}>${ic('check',13,2.4)}Aprovar</button></footer></article>`;}).join('')}</div></section>`;}
 function axLoans(){
  const act=LOANS.filter(l=>lnOpen(l)>0).sort((a,b)=>a.due<b.due?-1:1),late=act.filter(lnLate);
  return axHead('Empréstimos','O que está com quem — e até quando',`<button class="btn pri" data-a="lnNew">${ic('plus',15,2.2)}Novo empréstimo</button>`)
- +`<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Em aberto</span><span class="kv">${act.length}</span><span class="kd">${act.reduce((a,l)=>a+lnOpen(l),0)} unidades fora</span></div><div class="k4"><span class="kl">Atrasados</span><span class="kv" style="${late.length?'color:var(--st-rec)':''}">${late.length}</span><span class="kd">${late.length?'passaram do prazo':'tudo no prazo'}</span></div><div class="k4"><span class="kl">Devolvem esta semana</span><span class="kv" style="color:var(--st-sol)">${act.filter(l=>dDays(l.due)>=0&&dDays(l.due)<=7).length}</span><span class="kd">próximos 7 dias</span></div></section>
+ +lnReqs()+`<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Em aberto</span><span class="kv">${act.length}</span><span class="kd">${act.reduce((a,l)=>a+lnOpen(l),0)} unidades fora</span></div><div class="k4"><span class="kl">Atrasados</span><span class="kv" style="${late.length?'color:var(--st-rec)':''}">${late.length}</span><span class="kd">${late.length?'passaram do prazo':'tudo no prazo'}</span></div><div class="k4"><span class="kl">Devolvem esta semana</span><span class="kv" style="color:var(--st-sol)">${act.filter(l=>dDays(l.due)>=0&&dDays(l.due)<=7).length}</span><span class="kd">próximos 7 dias</span></div></section>
  ${act.length?`<div class="ax-lg rise" style="--d:2">${act.map(l=>{const it=itm(l.item),c=icat(it.cat),d=dDays(l.due),lt=d<0,op=lnOpen(l),span=Math.max(1,dDays(l.due)-dDays(l.from)),el=Math.min(1,Math.max(0,-dDays(l.from)/span));return `<article class="card ax-lc ${lt?'late':d<=3?'soon':''}">
   <div class="ax-lch">${kTile(c,42)}<div class="dkt"><b>${esc(it.n)}</b><span>${op}${op!==l.qty?` de ${l.qty}`:''} unidade${op>1?'s':''}${l.back.length?' · devolução parcial':''}</span></div>${lt?axPill('out','Atrasado'):d<=3?axPill('part',d===0?'Vence hoje':`${d} dia${d>1?'s':''}`):axPill('ok','No prazo')}</div>
   <div class="ax-who">${avN(l.who)}<span class="dkt"><b>${esc(l.who)}</b><span>desde ${dBR(l.from)}</span></span></div>
@@ -4707,6 +4715,9 @@ const AXA={
  kNew:()=>kForm(),kEdit:v=>{closePops();kForm(v);},kMenu:v=>{const p=$('#kPop-'+v);closePops(p);p.classList.toggle('open');},
  kDel:v=>{closePops();const c=ICATS.find(x=>x.id===v),n=ITEMS.filter(i=>i.cat===v).length;if(n){toast(`${c.n} tem ${n} ite${n>1?'ns':'m'} — mova para outra categoria antes`);return;}confirmDel({title:`Excluir ${esc(c.n)}?`,body:'Nenhum item usa essa categoria.',onConfirm:()=>{const i=ICATS.indexOf(c);ICATS.splice(i,1);axRe();toast('Categoria excluída',()=>{ICATS.splice(i,0,c);axRe();});}});},
  lnNew:v=>lnForm(v),lnBack:v=>lnBackForm(v),
+ lnOk:(v,b)=>{const ls=LOANS.filter(l=>l.st==='pend'&&(l.rv||l.id)===v);busy(b,600,'Aprovado',()=>{ls.forEach(l=>{delete l.st;});axRe();toast(`Empréstimo aprovado · ${ls[0].who.split(' ')[0]} foi avisado(a)`,()=>{ls.forEach(l=>l.st='pend');axRe();});});},
+ lnRej:v=>{const ls=LOANS.filter(l=>l.st==='pend'&&(l.rv||l.id)===v);openDlg(`${dlgHead('Recusar pedido de itens',`${esc(ls[0].who)} recebe o motivo. A reserva da sala continua valendo.`)}<div class="fld"><span class="fl">Motivo</span><div class="sp-why">${['Sem unidades no período','Item em manutenção','Uso não permitido','Outro'].map((m,i)=>`<label><input type="radio" name="lw" value="${m}" ${i?'':'checked'}><span>${m}</span></label>`).join('')}</div></div><div class="dfoot"><button class="btn sec" data-a="closeDlg">Voltar</button><button class="btn dang" id="lwOk">Recusar pedido</button></div>`,'sm');
+  $('#lwOk').addEventListener('click',e=>{const why=$('[name=lw]:checked').value;e.target.classList.add('busy');setTimeout(()=>{ls.forEach(l=>{l.st='rec';l.why=why;});closeDlg();axRe();toast('Pedido recusado',()=>{ls.forEach(l=>{l.st='pend';delete l.why;});axRe();});},500);});},
  dsNew:v=>dsForm(v),trNew:v=>trForm(v),
  ajOpen:v=>{closeDlg(true);ajForm(v);},
  mvF:v=>{S.mvf=S.mvf===v?'todos':v;axRe();},
