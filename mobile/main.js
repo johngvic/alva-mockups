@@ -511,7 +511,7 @@ V.curso=()=>{const c=COURSES[S.cu.open];const total=c.lessons.length,fin=c.done=
 
 /* mais */
 const MAIS_ITEMS=[['Meus dados','user','damasco','meusDados'],['Notificações','bell','ambar','notifs'],['Quem somos','church','brasa','quemSomos'],['Acompanhamento','care','rosado','cuidado'],['Contribuir','gift','lima','contribuir'],['Inscrições','ticket','laranja','inscricoes'],['Ao vivo','radio','brasa','aoVivo'],['Meus ministérios','flame','laranja','meusMin'],['Pedidos de oração','hands','vinho','oracao'],['Fale com a secretaria','phone','ceu','secretaria'],['Assistente no WhatsApp','message','salvia','assistente'],['Privacidade e dados','lock','oceano','privacidade']];
-V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=[!S.me.nasc,!S.me.end].filter(Boolean).length,ins=S.insc.mine.length,prW=S.prayers.filter(p=>p.st==='aguardando').length,care=S.care.next&&S.care.next.st==='pendente';
+V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).length,ins=S.insc.mine.length,prW=S.prayers.filter(p=>p.st==='aguardando').length,care=S.care.next&&S.care.next.st==='pendente';
  const row=(label,v,meta,hot)=>`<button class="mrow" data-a="sub" data-v="${v}"><span class="mt">${label}</span>${meta?`<span class="mm ${hot?'hot':''}">${meta}</span>`:''}<span class="ma" aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
  const grp=(t,rows)=>`<section class="mgrp"><p class="eb2">${t}</p>${rows}</section>`;
  return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
@@ -878,7 +878,10 @@ phone.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el|
  if(el.dataset.self&&e.target!==el)return;const fn=A[el.dataset.a];if(!fn)return;e.preventDefault();e.stopPropagation();fn(el.dataset.v,el);});
 phone.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role=button][data-a]')){e.preventDefault();e.target.click();}if(e.key==='Escape'&&$('#overlay .scrim'))closeSheet();});
 phone.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const fn=F[f.dataset.submit];if(fn)fn(f);});
-phone.addEventListener('input',e=>{if(e.target.id)clearErr(e.target.id);});
+phone.addEventListener('input',e=>{if(e.target.id)clearErr(e.target.id);const t=e.target;
+ if(t.id==='mCep'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;if(d.length===8&&!val('mRua')){[['mRua','Rua das Acácias'],['mBairro','Jardins'],['mCid','São Paulo'],['mUf','SP']].forEach(([i,v])=>{const x=$('#'+i);if(x&&!x.value)x.value=v;});$('#mNum')&&$('#mNum').focus();}}
+ if(t.id==='mNasc'||t.id==='fNasc'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>4?d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4):d.length>2?d.slice(0,2)+'/'+d.slice(2):d;}
+ if(t.id==='mTel')t.value=maskPhone(t.value);});
 
 /* ---------- rail ---------- */
 const RAIL=[['welcome','Boas-vindas'],['login','Entrar com senha'],['codeEmail','Entrar com código'],['otp','Digite o código'],['signupStart','Já tem cadastro?'],['lookup','Identificação'],['pickRecord','Qual cadastro é o seu?'],['confirmEmail','Confirmar e-mail'],['noEmail','Cadastro sem e-mail'],['identity','Identidade confirmada'],['signupForm','Criar conta'],['church','Escolher igreja'],['home','Início'],['agenda','Agenda'],['grupos','Grupos'],['cursos','Cursos'],['curso','Aula do curso'],['cursoDone','Curso concluído'],['mais','Mais']];
@@ -908,7 +911,11 @@ const SUBS=['meusDados','notifs','quemSomos','cuidado','contribuir','inscricoes'
 APP.push(...SUBS);
 const brl=n=>'R$ '+Number(n).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 Object.assign(S,{
- me:{nome:'Rafael Pereira',email:'rafael@alvaigreja.com.br',tel:'(11) 99123-4455',nasc:'',end:'',upd:'12/03/2026'},meEdit:false,
+ me:{nome:'Rafael Pereira',email:'rafael@alvaigreja.com.br',tel:'(11) 99123-4455',nasc:'',end:'',upd:'12/03/2026',gen:'Masculino',civil:'Casado(a)',
+  cep:'',rua:'',num:'',comp:'',bairro:'',cid:'',uf:'',
+  since:'2019',integ:'Integrado',bap:'12/05/2019',conv:'Mais de 5 anos',casa:'Casa Jardins',casaLead:'Gabriela Nunes',disc:'Gabriel Souza',
+  fam:[{id:'f1',n:'Camila Pereira',rel:'Esposa',g:'sp',app:true,tone:'rosado'},{id:'f2',n:'Lucas Pereira',rel:'Filho',g:'kid',age:'3 anos',kids:true,tone:'ambar'},{id:'f3',n:'Helena Pereira',rel:'Filha',g:'kid',age:'7 meses',kids:true,tone:'lima'},{id:'f4',n:'Antônio Pereira',rel:'Pai',g:'par',app:false,tone:'salvia'},{id:'f5',n:'Marta Pereira',rel:'Mãe',g:'par',app:true,tone:'menta'}],
+  hist:[['Cadastro criado','pelo app','12/03/2019'],['Integração aceita','por Pr. Rafael Pereira','02/04/2019'],['Batismo','Culto de Celebração','12/05/2019'],['Integrado(a) à comunidade','por Pr. Rafael Pereira','26/05/2019'],['Entrou na Casa Jardins','com Gabriela Nunes','08/09/2019'],['Começou a servir no Louvor','Vocal','03/2021'],['Família vinculada','Camila, Lucas e Helena','14/05/2023']]},meEdit:false,meTab:'dados',
  notifs:[{id:'n0',t:'Convite acima do seu limite: Louvor · Vocal',s:'Dom, 25 out. Você já tem 3 escalas em outubro. Tudo bem recusar.',when:'Hoje · 09h05',grp:'Hoje',tone:'vinho',i:'alert',go:'escalas',unread:true},{id:'n1',t:'Você tem uma nova escala: Infantil · Monitor',s:'Dom, 18 out · 9h. Confirme até sexta.',when:'Hoje · 08h12',grp:'Hoje',tone:'lima',i:'calendar',go:'escalas',unread:true},
   {id:'n2',t:'Inscrições abertas: Conferência Anual 2026',s:'18 a 20 de outubro · gratuito',when:'Hoje · 07h30',grp:'Hoje',tone:'brasa',i:'ticket',go:'inscricoes',unread:true},
   {id:'n3b',t:'Você chegou ao limite de escalas de outubro',s:'3 de 3. Novos convites só chegam como exceção, com aviso.',when:'Hoje · 08h12',grp:'Hoje',tone:'damasco',i:'calendar',go:'escalas',unread:false},
@@ -935,20 +942,55 @@ const subHead=(title,lede,right)=>`<header class="subhead"><div class="row betwe
 const sub=(title,lede,body,right)=>({sb:'var(--ink)',tabs:'mais',html:`${subHead(title,lede,right)}<div class="pad stack g6" style="padding-top:8px">${body}</div>`});
 
 /* 1. Meus dados */
-V.meusDados=()=>{const m=S.me;const row=(l,v,ph)=>`<div class="kr stack2"><span>${l}</span><span${v?'':' style="color:var(--ink-muted);font-weight:400"'}>${v?esc(v):ph}</span></div>`;
- if(!S.meEdit)return sub('Meus dados','',`
-  <div class="row g4"><span class="avatar lg" style="${tone('ceu')}">${initials(m.nome)}</span><div class="stack" style="gap:4px"><span class="t3">${esc(m.nome)}</span><span class="foot">Atualizado em ${m.upd}</span></div></div>
-  <div class="kv">${row('Nome completo',m.nome)}${row('E-mail',m.email)}${row('Telefone',m.tel)}${row('Data de nascimento',m.nasc,'Não informado')}${row('Endereço',m.end,'Não informado')}</div>
-  ${(!m.nasc||!m.end)?`<div class="panel" style="animation:none"><div class="ph"><span class="bang">!</span><div><b>Faltam ${[!m.nasc,!m.end].filter(Boolean).length} dados</b><p>Com aniversário e endereço, sua Casa de Apascentamento consegue te visitar e celebrar com você.</p></div></div></div>`:''}
-  <div class="kv"><div class="kh"><span>Na igreja</span><span>definido pela secretaria</span></div><div class="kr"><span>Igreja</span><span>${S.church.name}</span></div><div class="kr"><span>Perfil</span><span>${ROLES[S.role][0]}</span></div></div>
-  <button class="btn primary block" data-a="meEdit">Editar dados</button>`);
- return sub('Editar dados','Seus dados ficam visíveis só para a liderança da sua igreja.',`<form class="stack g4" data-submit="saveMe" novalidate>
+const ME_ADDR=m=>[m.rua&&(m.rua+(m.num?', '+m.num:'')),m.comp,m.bairro,m.cid&&(m.cid+(m.uf?' - '+m.uf:''))].filter(Boolean).join(' · ');
+const ME_MISS=m=>[['nasc','Data de nascimento'],['rua','Endereço'],['cep','CEP']].filter(x=>!m[x[0]]);
+const FAMG=[['par','Pais'],['me','Você'],['kid','Filhos'],['oth','Outros familiares']];
+/* valor longo ou com detalhe vai para baixo do rótulo, alinhado à esquerda */
+function meRow(l,v,ph,sub){const st=sub||String(v||'').length>24;return `<div class="kr${st?' kr-st':''}"><span>${l}</span><span${v?'':' class="kr-none"'}>${v?esc(v):(ph||'Não informado')}${v&&sub?`<small>${esc(sub)}</small>`:''}</span></div>`;}
+function meDados(m,member){const miss=ME_MISS(m);
+ return `${miss.length?`<div class="panel" style="animation:none"><div class="ph"><span class="bang">!</span><div><b>Faltam ${miss.length} ${miss.length>1?'dados':'dado'}</b><p>${miss.map(x=>x[1].toLowerCase().replace('cep','CEP')).join(', ').replace(/, ([^,]*)$/,' e $1').replace(/^./,c=>c.toUpperCase())}. Com aniversário e endereço, sua Casa consegue te visitar e celebrar com você.</p></div></div><button class="btn primary md block" data-a="meEdit">Completar agora</button></div>`:''}
+  <div class="kv"><div class="kh"><span>Pessoais</span><span>você edita</span></div>${meRow('Nome completo',m.nome)}${meRow('E-mail',m.email)}${meRow('Telefone',m.tel)}${meRow('Nascimento',m.nasc)}${meRow('Gênero',m.gen)}${meRow('Estado civil',m.civil)}</div>
+  <div class="kv"><div class="kh"><span>Endereço</span><span>você edita</span></div>${meRow('Rua e número',m.rua&&(m.rua+(m.num?', '+m.num:'')))}${meRow('Complemento',m.comp,'—')}${meRow('Bairro',m.bairro)}${meRow('Cidade',m.cid&&(m.cid+(m.uf?' - '+m.uf:'')))}${meRow('CEP',m.cep)}</div>
+  <div class="kv"><div class="kh"><span>Na igreja</span><span>definido pela secretaria</span></div>${meRow('Igreja',S.church.name)}${meRow('Perfil',ROLES[S.role][0])}${member?meRow('Membro desde',m.since)+meRow('Integração',m.integ)+meRow('Batismo',m.bap)+meRow('Tempo de conversão',m.conv)+meRow('Casa de Apascentamento',m.casa,'',m.casaLead?'Liderada por '+m.casaLead:'')+meRow('Discipulado',m.disc,'',m.disc?'Seu discipulador':'')+meRow('Ministérios',MYMIN.length?MYMIN.length+(MYMIN.length>1?' ministérios':' ministério'):'','',MYMIN.map(x=>x.t).join(' · ')):''}</div>
+  <button class="btn primary block" data-a="meEdit">Editar meus dados</button>
+  ${member?`<button class="tlink" data-a="go" data-v="secretaria">Algo errado em “Na igreja”? Fale com a secretaria</button>`:''}`;}
+function famNode(p,me){const app=me?'':p.kids?'<span class="fn-tag kid">Kids</span>':p.pend?'<span class="fn-tag wait">Aguardando secretaria</span>':p.app?'<span class="fn-tag on">No app</span>':'<span class="fn-tag">Sem o app</span>';
+ return `<button class="fnode ${me?'me':''}" ${me?'disabled':`data-a="famOpen" data-v="${p.id}"`}><span class="avatar" style="${tone(p.tone||'ceu')}">${initials(me?p.nome:p.n)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="fn-n">${esc(me?p.nome:p.n)}</span><span class="fn-r">${me?'Você':esc(p.rel)+(p.age?' · '+esc(p.age):'')}</span></span>${app}${me?'':`<span class="chev">${ic('chevR',18,2)}</span>`}</button>`;}
+function meFamilia(m){const by=g=>m.fam.filter(p=>p.g===g),sp=by('sp');
+ const grp=(lbl,inner)=>`<section class="fgen"><p class="eb2">${lbl}</p><div class="fgen-l">${inner}</div></section>`;
+ const blocks=[by('par').length?grp('Pais',by('par').map(p=>famNode(p)).join('')):'',grp(sp.length?'Você e '+(sp[0].rel==='Esposa'?'sua esposa':sp[0].rel==='Marido'?'seu marido':'seu cônjuge'):'Você',famNode(m,true)+sp.map(p=>famNode(p)).join('')),by('kid').length?grp('Filhos',by('kid').map(p=>famNode(p)).join('')):'',by('oth').length?grp('Outros familiares',by('oth').map(p=>famNode(p)).join('')):''].filter(Boolean);
+ const n=m.fam.length+1,gens=(by('par').length?1:0)+1+(by('kid').length?1:0),inApp=1+m.fam.filter(p=>p.app).length;
+ return `<div class="fstats"><div><b>${n}</b><span>pessoas</span></div><div><b>${gens}</b><span>${gens>1?'gerações':'geração'}</span></div><div><b>${inApp}</b><span>no app</span></div></div>
+  <div class="ftree">${blocks.join('<i class="fline" aria-hidden="true"></i>')}</div>
+  <button class="btn outline block" data-a="famAdd">${ic('userplus',18,2)}Vincular familiar</button>
+  <p class="foot" style="margin:0;text-align:center">A secretaria confere cada vínculo antes de ele aparecer para a liderança.</p>`;}
+function meCaminhada(m){const steps=[['Cadastro',1,'2019'],['Integração aceita',1,'abr 2019'],['Batismo',1,'mai 2019'],['Integrado(a)',1,'mai 2019'],['Casa de Apascentamento',!!m.casa,'set 2019'],['Serve em um ministério',MYMIN.length>0,'2021']];
+ return `<section class="stack g3"><p class="eb2">Sua caminhada</p><ol class="walk2">${steps.map(x=>`<li class="${x[1]?'done':''}"><span class="w-d">${x[1]?ic('check',14,2.6):''}</span><span class="grow">${x[0]}</span><span class="w-t">${x[1]?x[2]:'próximo passo'}</span></li>`).join('')}</ol></section>
+  <section class="stack g3"><div class="row between"><p class="eb2">Onde você serve</p><button class="link" data-a="go" data-v="meusMin">Ver tudo</button></div><div class="list">${MYMIN.map(x=>`<button class="item" data-a="go" data-v="meusMin"><span class="iconbox" style="${tone(x.tone)}">${ic(x.i,20)}</span><span class="grow stack" style="gap:2px"><span class="it-title">${x.t}</span><span class="it-sub">${x.role} · desde ${x.since}</span></span><span class="chev">${ic('chevR',18,2)}</span></button>`).join('')}</div></section>
+  <section class="stack g3"><p class="eb2">Histórico</p><ol class="mhist">${m.hist.slice().reverse().map(h=>`<li><span class="mh-d">${h[2]}</span><span class="stack" style="gap:2px"><b>${esc(h[0])}</b><span>${esc(h[1])}</span></span></li>`).join('')}</ol></section>`;}
+V.meusDados=()=>{const m=S.me,member=S.role!=='visitante';
+ if(!S.meEdit){const t=member?(S.meTab||'dados'):'dados';
+  return sub('Meus dados','',`
+  <div class="mhead"><span class="avatar lg" style="${tone('ceu')}">${initials(m.nome)}</span><div class="stack" style="gap:6px;min-width:0"><span class="t3">${esc(m.nome)}</span><span class="foot">${member?`Membro desde ${m.since} · ${esc(S.church.name)}`:`Visitante · ${esc(S.church.name)}`}</span>${member?ST2('ok',m.integ):''}</div></div>
+  ${member?`<div class="seg" role="tablist">${[['dados','Dados'],['familia','Família'],['caminhada','Caminhada']].map(z=>`<button role="tab" aria-selected="${t===z[0]}" data-a="meTab" data-v="${z[0]}">${z[1]}</button>`).join('')}</div>`:''}
+  ${t==='familia'?meFamilia(m):t==='caminhada'?meCaminhada(m):meDados(m,member)}
+  <p class="foot" style="margin:0;text-align:center">Atualizado em ${m.upd}. Só a liderança da sua igreja vê esses dados.</p>`);}
+ const opt=(id,label,opts,v)=>`<div class="stack g2" id="f-${id}"><span class="eb2">${label}</span><div class="chips2" role="radiogroup" aria-label="${label}">${opts.map(o=>`<button type="button" class="chip" role="radio" aria-pressed="${v===o}" aria-checked="${v===o}" data-a="meOpt" data-v="${id}|${o}">${o}</button>`).join('')}</div><input type="hidden" id="${id}" value="${esc(v||'')}"></div>`;
+ return sub('Editar dados','Seus dados ficam visíveis só para a liderança da sua igreja.',`<form class="stack g6" data-submit="saveMe" novalidate>
+  <section class="stack g4"><p class="eb2">Pessoais</p>
   ${field({id:'mNome',label:'Nome completo',val:m.nome,ac:'name'})}
   ${field({id:'mEmail',label:'E-mail',type:'email',val:m.email,im:'email'})}
   ${field({id:'mTel',label:'Telefone',type:'tel',val:m.tel,im:'tel',max:15})}
   ${field({id:'mNasc',label:'Data de nascimento',val:m.nasc,ph:'dd/mm/aaaa',im:'numeric',max:10})}
-  ${field({id:'mEnd',label:'Endereço',val:m.end,ph:'Rua, número · bairro, cidade'})}
-  <div class="stack g3" style="margin-top:8px"><button class="btn primary block" type="submit">Salvar alterações</button><button type="button" class="tlink" data-a="meCancel">Cancelar</button></div></form>`);};
+  ${opt('mGen','Gênero',['Feminino','Masculino'],m.gen)}
+  ${opt('mCivil','Estado civil',['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)'],m.civil)}</section>
+  <section class="stack g4"><p class="eb2">Endereço</p>
+  ${field({id:'mCep',label:'CEP',val:m.cep,ph:'00000-000',im:'numeric',max:9,hint:'Preenchemos rua, bairro e cidade a partir do CEP.'})}
+  ${field({id:'mRua',label:'Rua',val:m.rua,ac:'address-line1'})}
+  <div class="frow">${field({id:'mNum',label:'Número',val:m.num,im:'numeric',max:8})}${field({id:'mComp',label:'Complemento',val:m.comp,ph:'Opcional'})}</div>
+  ${field({id:'mBairro',label:'Bairro',val:m.bairro})}
+  <div class="frow r">${field({id:'mCid',label:'Cidade',val:m.cid})}${field({id:'mUf',label:'UF',val:m.uf,max:2})}</div></section>
+  <div class="stack g3"><button class="btn primary block" type="submit">Salvar alterações</button><button type="button" class="tlink" data-a="meCancel">Cancelar</button></div></form>`);};
 
 /* 2. Notificações */
 V.notifs=()=>{const n=S.notifs.filter(x=>x.unread).length;const grps=['Hoje','Esta semana','Anteriores'];
@@ -958,13 +1000,15 @@ V.notifs=()=>{const n=S.notifs.filter(x=>x.unread).length;const grps=['Hoje','Es
   ${grps.map(g=>{const l=S.notifs.filter(x=>x.grp===g);return l.length?`<section class="stack"><p class="eb2" style="margin-bottom:4px">${g}</p><div class="chlist">${l.map(x=>`<button class="nrow ${x.unread?'unread':''}" data-a="openNotif" data-v="${x.id}"><span class="ndot" aria-hidden="true"></span><span class="grow stack" style="gap:3px"><span class="row between" style="gap:12px;align-items:baseline"><span class="nt">${esc(x.t)}</span><span class="nwhen">${x.when.split(' · ').pop()}</span></span><span class="chm">${esc(x.s)}</span></span></button>`).join('')}</div></section>`:'';}).join('')}
  </div>`};};
 
+/* redes da igreja: mesmo formato do Alva Web (t = tipo, n = nome exibido, h = perfil, u = link) */
+const SOCIAL=[{t:'instagram',n:'Instagram',h:'@igrejaalva',u:'instagram.com/igrejaalva'},{t:'tiktok',n:'TikTok',h:'@igrejaalva',u:'tiktok.com/@igrejaalva'},{t:'facebook',n:'Facebook',h:'Igreja Alva',u:'facebook.com/igrejaalva'}];
 /* 3. Quem somos */
 V.quemSomos=()=>sub('Quem somos','',`
   <div class="qs-hero gr-aurora"><p>Um lugar para encontrar Deus, crescer em comunidade e ser enviado.</p></div>
   <div class="stack g4"><p class="body" style="color:var(--ink)">A Igreja Alva nasceu em 2012 com um propósito simples: ser um lugar onde pessoas encontram Deus, crescem em comunidade e são enviadas para transformar o mundo ao redor.</p><p class="body">Desde então, vimos centenas de vidas transformadas pelo Evangelho em São Paulo e região.</p></div>
   <div class="stats">${[['2012','fundação'],['1.240','membros na Sede'],['3','igrejas'],['48','Casas ativas']].map(s=>`<div><b>${s[0]}</b><span>${s[1]}</span></div>`).join('')}</div>
   <section class="stack g3"><p class="eb2">Nossos valores</p><ol class="steps"><li>Presença de Deus</li><li>Comunidade autêntica</li><li>Discipulado intencional</li><li>Missão local e global</li></ol></section>
-  <section class="stack g3"><p class="eb2">Conecte-se</p><div class="socials">${[['Instagram','@igrejaalva','18,4 mil','instagram.com/igrejaalva'],['TikTok','@igrejaalva','6,2 mil','tiktok.com/@igrejaalva'],['Facebook','Igreja Alva','9,8 mil','facebook.com/igrejaalva']].map(r=>`<a class="soc" href="https://${r[3]}" target="_blank" rel="noopener" data-a="social" data-v="${r[0]}"><span class="sn">${r[0]}</span><span class="sh">${r[1]}</span><span class="sf">${r[2]} seguidores</span><span class="sa" aria-hidden="true">${ic('arrowR',16,2)}</span></a>`).join('')}</div></section>
+  ${SOCIAL.length?`<section class="stack g3"><p class="eb2">Conecte-se</p><div class="socials">${SOCIAL.map(r=>`<a class="soc" href="https://${esc(r.u)}" target="_blank" rel="noopener" data-a="social" data-v="${esc(r.n)}"><span class="sn">${esc(r.n)}</span><span class="sh">${esc(r.h||r.u)}</span><span class="sa" aria-hidden="true">${ic('arrowR',16,2)}</span></a>`).join('')}</div></section>`:''}
   <section class="stack g3"><p class="eb2">Onde estamos</p><div class="list">${CHURCHES.map(c=>`<div class="item" style="cursor:default"><span class="iconbox" style="${tone(c.tone)};font:800 17px/1 var(--font-display)">A</span><span class="grow stack" style="gap:2px"><span class="it-title">${c.name}</span><span class="it-sub">${c.city} · cultos aos domingos</span></span></div>`).join('')}</div></section>`);
 
 /* 4. Cuidado pastoral */
@@ -1061,6 +1105,21 @@ Object.assign(A,{
  mood:(v,el)=>{S.mood=S.mood===v?null:v;$$('#moods .moodt').forEach(c=>c.setAttribute('aria-checked',c.dataset.v===S.mood));const a=$('#moodAfter');a.innerHTML=moodAfter();a.classList.remove('swap');void a.offsetWidth;a.classList.add('swap');},
  inscr:()=>go('inscricoes'),
  meEdit:()=>{S.meEdit=true;softRender();},meCancel:()=>{S.meEdit=false;softRender();},
+  meTab:v=>{S.meTab=v;softRender();},
+  meOpt:(v,el)=>{const [id,o]=v.split('|');$('#'+id).value=o;$$('button',el.parentElement).forEach(b=>{const on=b===el;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on);});},
+  famOpen:v=>{const p=S.me.fam.find(x=>x.id===v);if(!p)return;sheet(`<div class="stack g5"><div class="row g4"><span class="avatar lg" style="${tone(p.tone||'ceu')}">${initials(p.n)}</span><div class="stack" style="gap:4px"><h3 class="t2">${esc(p.n)}</h3><span class="foot">${esc(p.rel)}${p.age?' · '+esc(p.age):''}</span></div></div>
+   <div class="kv">${meRow('Parentesco',p.rel)}${meRow('No app',p.kids?'Pelo seu cadastro (Kids)':p.pend?'Aguardando a secretaria':p.app?'Sim, tem conta própria':'Ainda não')}${p.kids?meRow('Check-in Kids','Você é responsável'):''}</div>
+   ${!p.app&&!p.kids&&!p.pend?`<button class="btn primary block" data-a="famInvite" data-v="${p.id}">Convidar para o app</button>`:''}
+   <button class="btn outline block" data-a="famDel" data-v="${p.id}">Pedir remoção do vínculo</button></div>`);},
+  famInvite:async(v,el)=>{await busy(el,800,null,'Convite enviado');closeSheet();toast('success','Convite enviado',S.me.fam.find(x=>x.id===v).n.split(' ')[0]+' recebe um link para baixar o app.');},
+  famDel:v=>{const p=S.me.fam.find(x=>x.id===v);sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Remover ${esc(p.n.split(' ')[0])} da sua família?</h3><p class="body">O pedido vai para a secretaria. Até ela confirmar, o vínculo continua aparecendo para a liderança.</p></div><div class="stack g3"><button class="btn dangerfill block" data-a="famDelOk" data-v="${p.id}">Pedir remoção</button><button class="btn outline block" data-a="closeSheet">Manter vínculo</button></div></div>`);},
+  famDelOk:async(v,el)=>{await busy(el,700,null,'Pedido enviado');const p=S.me.fam.find(x=>x.id===v);S.me.fam=S.me.fam.filter(x=>x.id!==v);closeSheet();softRender();toast('success','Pedido enviado','A secretaria vai confirmar a remoção de '+p.n.split(' ')[0]+'.');},
+  famAdd:()=>{sheet(`<form class="stack g5" data-submit="famReq" novalidate><div class="stack g2"><h3 class="t2">Vincular familiar</h3><p class="body">A secretaria confere e confirma o vínculo. Se a pessoa já tem cadastro na igreja, a gente encontra pelo nome.</p></div>
+   ${field({id:'fNome',label:'Nome completo',ac:'off'})}
+   <div class="stack g2" id="f-fRel"><span class="eb2">Parentesco</span><div class="chips2" role="radiogroup" aria-label="Parentesco">${['Cônjuge','Filho(a)','Pai','Mãe','Irmão(ã)','Outro'].map((o,i)=>`<button type="button" class="chip" role="radio" aria-pressed="${!i}" aria-checked="${!i}" data-a="meOpt" data-v="fRel|${o}">${o}</button>`).join('')}</div><input type="hidden" id="fRel" value="Cônjuge"></div>
+   ${field({id:'fNasc',label:'Data de nascimento',ph:'dd/mm/aaaa',im:'numeric',max:10,hint:'Para filhos, libera o check-in no Kids.'})}
+   <div class="stack g3"><button class="btn primary block" type="submit">Enviar para a secretaria</button><button type="button" class="tlink" data-a="closeSheet">Cancelar</button></div></form>`);},
+
  readAll:()=>{S.notifs.forEach(n=>n.unread=false);softRender();toast('success','Tudo lido','');},
  openNotif:v=>{const n=S.notifs.find(x=>x.id===v);n.unread=false;if(n.go==='escalas'){S.ag.tab='Escalas';A.tab('agenda');}else if(n.go){go(n.go);}else softRender();},
  urg:v=>{S.care.urg=v;const t=$('#cText');const keep=t?t.value:'';softRender();$('#cText').value=keep;},
@@ -1105,12 +1164,20 @@ Object.assign(A,{
   $('#delGo').addEventListener('click',async ev=>{if(val('delTxt').toUpperCase()!=='EXCLUIR'){setErr('delTxt','Digite EXCLUIR, em letras maiúsculas.');return;}await busy(ev.currentTarget,1000,null,'Solicitado');await closeSheet();toast('info','Pedido de exclusão registrado','A secretaria confirma por e-mail em até 15 dias.');});}
 });
 Object.assign(F,{
- async saveMe(f){let ok=true;const n=val('mNome'),e=val('mEmail'),t=val('mTel'),d=val('mNasc');
+ async saveMe(f){let ok=true;const n=val('mNome'),e=val('mEmail'),t=val('mTel'),d=val('mNasc'),cep=val('mCep'),uf=val('mUf').toUpperCase();
   if(n.split(' ').filter(Boolean).length<2){setErr('mNome','Informe nome e sobrenome.');ok=false;}
   if(!EMAIL_RE.test(e)){setErr('mEmail','Esse e-mail parece incompleto. Ex.: nome@email.com');ok=false;}
   if(t.replace(/\D/g,'').length<10){setErr('mTel','Use DDD + número.');ok=false;}
   if(d){const m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);const dt=m&&new Date(+m[3],+m[2]-1,+m[1]);if(!m||dt.getDate()!==+m[1]||dt>new Date(2026,8,29)||+m[3]<1900){setErr('mNasc','Data inválida. Use dd/mm/aaaa.');ok=false;}}
-  if(!ok)return;await busy($('button[type=submit]',f),900,null,'Salvo');Object.assign(S.me,{nome:n,email:e,tel:t,nasc:d,end:val('mEnd'),upd:'29/09/2026'});S.user={first:n.split(' ')[0],name:n};S.meEdit=false;softRender();toast('success','Dados atualizados','');},
+  if(cep&&cep.replace(/\D/g,'').length!==8){setErr('mCep','O CEP tem 8 números.');ok=false;}
+  if(uf&&!/^[A-Z]{2}$/.test(uf)){setErr('mUf','Use a sigla, ex.: SP');ok=false;}
+  if(!ok){const x=$('.field.invalid');x&&x.scrollIntoView({block:'center',behavior:'smooth'});return;}
+  await busy($('button[type=submit]',f),900,null,'Salvo');Object.assign(S.me,{nome:n,email:e,tel:t,nasc:d,gen:val('mGen'),civil:val('mCivil'),cep,rua:val('mRua'),num:val('mNum'),comp:val('mComp'),bairro:val('mBairro'),cid:val('mCid'),uf,upd:'29/09/2026'});S.me.end=ME_ADDR(S.me);S.user={first:n.split(' ')[0],name:n};S.meEdit=false;softRender();toast('success','Dados atualizados','');},
+ async famReq(f){const n=val('fNome'),r=val('fRel'),d=val('fNasc');let ok=true;
+  if(n.split(' ').filter(Boolean).length<2){setErr('fNome','Informe nome e sobrenome.');ok=false;}
+  if(d){const m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);const dt=m&&new Date(+m[3],+m[2]-1,+m[1]);if(!m||dt.getDate()!==+m[1]||dt>new Date(2026,8,29)){setErr('fNasc','Data inválida. Use dd/mm/aaaa.');ok=false;}}
+  if(!ok)return;await busy($('button[type=submit]',f),900,null,'Enviado');const g=r==='Cônjuge'?'sp':r==='Filho(a)'?'kid':r==='Pai'||r==='Mãe'?'par':'oth';
+  S.me.fam.push({id:'f'+Date.now(),n,rel:r,g,pend:true,tone:['ceu','menta','damasco','lima','salvia'][S.me.fam.length%5]});closeSheet();S.meTab='familia';softRender();toast('success','Pedido enviado','A secretaria confirma o vínculo com '+n.split(' ')[0]+'.');},
  async sendCare(f){const t=val('cText');if(t.length<10){setErr('cText',t?'Conte um pouco mais para o pastor entender.':'Escreva como podemos te ajudar.');return;}
   await busy($('button[type=submit]',f),1000,null,'Enviado');S.care.list.unshift({t:t.length>48?t.slice(0,46)+'…':t,d:'29/09/2026',who:'Equipe pastoral',st:S.care.urg==='Urgente'?'urgente':'novo'});S.care.urg='Normal';softRender();toast('success','Pedido enviado',S.care.list[0].st==='urgente'?'Um pastor fala com você ainda hoje.':'Um pastor entra em contato em até 3 dias.');},
  async sendPrayer(f){const t=val('prText');if(!t){setErr('prText','Escreva seu pedido para enviarmos à equipe.');return;}if(t.length<10){setErr('prText','Conte um pouco mais para a equipe saber como orar.');return;}

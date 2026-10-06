@@ -95,7 +95,7 @@ const CHURCHES=[{n:'Alva Sede',c:'Centro',i:'AS',city:'São Paulo, SP',m:1240,ro
 const chTile=()=>'';
 const NAV=[
  ['Geral',[['hoje','dawn','Dashboard'],['pessoas','users','Pessoas',[['membros','Membros'],['integracao','Integração de membros']]],['cuidado','heart','Cuidado',[['discipulado','Discipulado'],['acompanhamento','Acompanhamento'],['oracao','Pedidos de oração']]],['comunidade','home','Comunidade',[['casas','Casas de Apascentamento'],['redes','Redes de célula'],['ministerios','Ministérios']]],['kids','baby','Kids',[['kvis','Visão geral'],['ksalas','Salas'],['ktimes','Times'],['kturmas','Turmas']]]]],
- ['Operação',[['agenda','calendar','Agenda e serviço',[['cultos','Cultos'],['eventos','Eventos'],['calendario','Calendário'],['escalas','Escalas'],['bebes','Apresentações'],['ag-insc','Inscrições']]],['espacos','building','Espaços',[['reservas','Reservas'],['salas','Salas']]],['almox','box','Almoxarifado',[['aitens','Itens'],['acat','Categorias'],['aemp','Empréstimos'],['adev','Devoluções'],['adist','Distribuições'],['atrf','Transferências'],['aaj','Ajustes'],['amov','Movimentações'],['arel','Relatórios']]]]],
+ ['Operação',[['agenda','calendar','Agenda e serviço',[['cultos','Cultos'],['eventos','Eventos'],['calendario','Calendário'],['escalas','Escalas'],['bebes','Apresentações'],['ag-insc','Inscrições']]],['espacos','building','Espaços',[['salas','Salas'],['reservas','Reservas']]],['almox','box','Almoxarifado',[['aitens','Itens'],['acat','Categorias'],['aemp','Empréstimos'],['adev','Devoluções'],['adist','Distribuições'],['atrf','Transferências'],['aaj','Ajustes'],['amov','Movimentações'],['arel','Relatórios']]]]],
  ['Comunicação',[['conteudo','layers','Conteúdo',[['pregacoes','Pregações'],['musicas','Músicas'],['jornadas','Jornadas'],['cursos','Cursos'],['material','Material de apoio']]],['comunicacao','megaphone','Comunicação',[['noticias','Notícias'],['push','Push e e-mail'],['banners','Banners'],['transmissoes','Transmissões']]]]],
  ['Gestão',[['financeiro','wallet','Financeiro',[['fvis','Visão geral'],['flanc','Lançamentos'],['fpag','Contas a pagar'],['frec','Contas a receber'],['fapr','Aprovações'],['frel','Relatórios'],['fimp','Importar e exportar'],['fdoa','Doações']]],['admin','shield','Administração',[['usuarios','Usuários e permissões'],['multi','Multi-igreja'],['auditoria','Auditoria e LGPD']]]]],
 ];
@@ -258,12 +258,13 @@ function render(){
  if(S.auth){document.body.classList.add('authmode');$('#auth').innerHTML=authView();authAfter();return;}
  document.body.classList.remove('authmode');$('#auth').innerHTML='';
  $('#side').innerHTML=sidebar();$('#topbar').innerHTML=topbar();
- $('#main .wrap').innerHTML=S.active==='hoje'?home():S.active==='perfil'?perfilPage():S.active==='membros'?(S.member?profile():members()):S.active==='integracao'?(S.integ?integDetail():integList()):S.active==='discipulado'?(S.disc?discDetail():discList()):S.active==='acompanhamento'?(S.case?caseDetail():casesList()):S.active==='oracao'?prayerList():S.active==='casas'?(S.casa?casaDetail():casasList()):S.active==='redes'?redesList():S.active==='ministerios'?(S.mini?miniDetail():minisList()):S.active==='kvis'?kVis():S.active==='ksalas'?kSalas():S.active==='ktimes'?kTimes():S.active==='kturmas'?kTurmas():S.active==='usuarios'?(S.user?userDetail():usersList()):S.active==='multi'?multiList():S.active==='auditoria'?auditPage():S.active==='cultos'||S.active==='eventos'?(S.evt?evDetail():evList(S.active)):S.active==='calendario'?(S.evt?evDetail():calPage()):S.active==='ag-insc'?inscPage():S.active==='bebes'?bbPage():S.active==='escalas'?(S.esc?escDetail():escList()):S.active==='reservas'?rvPage():S.active==='salas'?slPage():S.active==='noticias'?ntPage():S.active==='push'?puPage():S.active==='banners'?bnPage():S.active==='transmissoes'?txPage():S.active==='pregacoes'?pgPage():S.active==='musicas'?sgPage():S.active==='jornadas'?joPage():S.active==='cursos'?csPage():S.active==='fvis'?fVis():S.active==='aitens'?axItems():S.active==='acat'?axCats():S.active==='aemp'?axLoans():S.active==='adev'?axRets():S.active==='adist'?axDists():S.active==='atrf'?axTrans():S.active==='aaj'?axAdj():S.active==='amov'?axMoves():S.active==='arel'?axRep():S.active==='flanc'?fLanc():S.active==='fpag'?fPag():S.active==='frec'?fRec():S.active==='fapr'?fApr():S.active==='frel'?fRel():S.active==='fimp'?fImp():S.active==='fdoa'?fDoa():S.active==='material'?mtPage():placeholder(S.active);
+ $('#main .wrap').innerHTML=S.active==='hoje'?home():S.active==='perfil'?perfilPage():S.active==='membros'?(S.member?profile():members()):S.active==='integracao'?(S.integ?integDetail():integList()):S.active==='discipulado'?(S.disc?discDetail():discList()):S.active==='acompanhamento'?(S.case?caseDetail():casesList()):S.active==='oracao'?prayerList():S.active==='casas'?(S.casa?casaDetail():casasList()):S.active==='redes'?redesList():S.active==='ministerios'?(S.mini?miniDetail():minisList()):S.active==='kvis'?kVis():S.active==='ksalas'?kSalas():S.active==='ktimes'?kTimes():S.active==='kturmas'?kTurmas():S.active==='usuarios'?(S.user?userDetail():usersList()):S.active==='multi'?(S.chp?chpPage():multiList()):S.active==='auditoria'?auditPage():S.active==='cultos'||S.active==='eventos'?(S.evt?evDetail():evList(S.active)):S.active==='calendario'?(S.evt?evDetail():calPage()):S.active==='ag-insc'?inscPage():S.active==='bebes'?bbPage():S.active==='escalas'?(S.esc?escDetail():escList()):S.active==='reservas'?rvPage():S.active==='salas'?(S.sala?slDetail():slPage()):S.active==='noticias'?ntPage():S.active==='push'?puPage():S.active==='banners'?bnPage():S.active==='transmissoes'?txPage():S.active==='pregacoes'?pgPage():S.active==='musicas'?sgPage():S.active==='jornadas'?joPage():S.active==='cursos'?csPage():S.active==='fvis'?fVis():S.active==='aitens'?axItems():S.active==='acat'?axCats():S.active==='aemp'?axLoans():S.active==='adev'?axRets():S.active==='adist'?axDists():S.active==='atrf'?axTrans():S.active==='aaj'?axAdj():S.active==='amov'?axMoves():S.active==='arel'?axRep():S.active==='flanc'?fLanc():S.active==='fpag'?fPag():S.active==='frec'?fRec():S.active==='fapr'?fApr():S.active==='frel'?fRel():S.active==='fimp'?fImp():S.active==='fdoa'?fDoa():S.active==='material'?mtPage():placeholder(S.active);
  if(['cultos','eventos','calendario','ag-insc'].includes(S.active))agAfter();
  if(S.active==='escalas')escAfter();
  if(S.active==='perfil')perfilAfter();
  if(S.active==='bebes')bbAfter();
  if(S.active==='reservas'||S.active==='salas')spAfter();
+ if(S.active==='salas'&&S.sala)slAfter();
  if(S.active==='flanc')fAfter();
  if(S.active==='aitens')axAfter();
  if(S.active==='fdoa'&&S.camp)requestAnimationFrame(tabInd);
@@ -1822,7 +1823,7 @@ function userDetail(){
 
 /* ---------- Multi-igreja ---------- */
 function multiList(){
- return `${admHead('Multi-igreja','Redes › igrejas › usuários e permissões',`<button class="btn sec" data-a="export" data-v="o CSV de redes e igrejas">Exportar CSV</button><button class="btn pri" data-a="nAdd">${ic('plus',15,2.2)}Nova rede</button>`)}
+ return `${admHead('Multi-igreja','Redes, igrejas e o perfil de cada uma no app',`<button class="btn sec" data-a="export" data-v="o CSV de redes e igrejas">Exportar CSV</button><button class="btn pri" data-a="nAdd">${ic('plus',15,2.2)}Nova rede</button>`)}
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Redes</span><span class="kv">${NETS.length}</span><span class="kd">agrupam igrejas</span></div>
   <div class="k4"><span class="kl">Igrejas</span><span class="kv">${IGREJAS.length}</span><span class="kd">${IGREJAS.filter(g=>!g.rede).length} sem rede</span></div>
@@ -1830,8 +1831,8 @@ function multiList(){
  </section>
  <div class="rgrid2 rise" style="--d:2">${NETS.map(n=>{const gs=IGREJAS.filter(g=>g.rede===n.id);return `<article class="card rc">
   <div class="rc1"><div><b>${esc(n.n)}</b><span>${gs.length} ${gs.length===1?'igreja':'igrejas'} · ${n.glob.length} com acesso global</span></div>
-   <div style="position:relative"><button class="ibtn sm" data-a="nMenu" data-v="${n.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="nPop-${n.id}" style="right:0;top:calc(100% + 4px)"><button class="pi" data-a="gAdd" data-v="${n.id}">${ic('plus',16)}Adicionar igreja</button><hr><button class="pi danger" data-a="nDel" data-v="${n.id}">${ic('x',16)}Excluir rede</button></div></div></div>
-  <div class="glist">${gs.map(g=>{const us=USERS.filter(u=>u.igs.includes(g.id));return `<div class="gi"><span class="dot" style="width:34px;height:34px;border-radius:10px;background:var(--brand-soft);color:var(--brand-text);display:grid;place-items:center">${ic('church',16)}</span><span class="dkt"><b>${esc(g.n)}</b><span>${us.length} usuários com acesso</span></span><span class="stack sm">${us.slice(0,4).map(u=>uAv(u)).join('')}</span></div>`;}).join('')||'<p class="who" style="margin:0">Nenhuma igreja nesta rede.</p>'}</div>
+   <div style="position:relative"><button class="ibtn sm" data-a="nMenu" data-v="${n.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="nPop-${n.id}" style="right:0;top:calc(100% + 4px)"><button class="pi" data-a="netRen" data-v="${n.id}">${ic('pen',16)}Renomear rede</button><button class="pi" data-a="gAdd" data-v="${n.id}">${ic('plus',16)}Adicionar igreja</button><hr><button class="pi danger" data-a="nDel" data-v="${n.id}">${ic('x',16)}Excluir rede</button></div></div></div>
+  <div class="glist">${gs.map(g=>{const us=USERS.filter(u=>u.igs.includes(g.id));return `<button class="gi gi-b" data-a="chpOpen" data-v="${g.id}"><span class="dot" style="width:34px;height:34px;border-radius:10px;background:var(--brand-soft);color:var(--brand-text);display:grid;place-items:center">${ic('church',16)}</span><span class="dkt"><b>${esc(g.n)}</b><span>${us.length} usuários · perfil no app ${chpPct(g.id)}%</span></span><span class="stack sm">${us.slice(0,4).map(u=>uAv(u)).join('')}</span><span class="gi-go">${ic('chevR',16)}</span></button>`;}).join('')||'<p class="who" style="margin:0">Nenhuma igreja nesta rede.</p>'}</div>
   <div class="gglob"><span class="fl">Acesso global</span><div class="kmem">${n.glob.map(id=>{const u=uById(id);return u?`<span class="kmc">${uAv(u)}${esc(u.n)}</span>`:'';}).join('')}<button class="kmc add" data-a="nGlob" data-v="${n.id}">${ic('plus',13,2.2)}Adicionar</button></div></div>
  </article>`;}).join('')}</div>`;
 }
@@ -1868,9 +1869,211 @@ function aLgpd(){
   <div class="tfoot"><span>A LGPD dá 15 dias para responder a cada pedido.</span></div></section>`;
 }
 
+
+/* ---------- Multi-igreja › perfil institucional da igreja ----------
+   O que cada igreja personaliza no app: Quem somos (frase, história, valores, números, redes) e Fale com a secretaria. */
+Object.assign(I,{
+ instagram:'<rect width="20" height="20" x="2" y="2" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
+ youtube:'<path d="M2.5 17a24.1 24.1 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.6 49.6 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.1 24.1 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.6 49.6 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/>',
+ facebook:'<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
+ tiktok:'<path d="M9 12a4 4 0 1 0 4 4V2a5 5 0 0 0 5 5"/>',
+ globe:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+});
+/* redes sociais: lista livre, igual ao Conecte-se do app (nome, perfil e link) */
+const SOCT={instagram:['Instagram','instagram.com/'],tiktok:['TikTok','tiktok.com/@'],facebook:['Facebook','facebook.com/'],youtube:['YouTube','youtube.com/@'],x:['X','x.com/'],spotify:['Spotify','open.spotify.com/'],site:['Site',''],outra:['Outra','']};
+const SOCI={site:'globe',outra:'link',x:'link',spotify:'music'};
+const socIc=t=>SOCI[t]||t;
+const SR=(t,n,h,u)=>({t,n,h,u});
+const CHP={
+ g1:{tagline:'Um lugar para encontrar Deus, crescer em comunidade e ser enviado.',story:'A Igreja Alva nasceu em 2012 com um propósito simples: ser um lugar onde pessoas encontram Deus, crescem em comunidade e são enviadas para transformar o mundo ao redor.\n\nDesde então, vimos centenas de vidas transformadas pelo Evangelho em São Paulo e região.',founded:'2012',stats:true,
+  values:['Presença de Deus','Comunidade autêntica','Discipulado intencional','Missão local e global'],
+  social:[SR('instagram','Instagram','@igrejaalva','instagram.com/igrejaalva'),SR('tiktok','TikTok','@igrejaalva','tiktok.com/@igrejaalva'),SR('facebook','Facebook','Igreja Alva','facebook.com/igrejaalva')],live:'youtube.com/@igrejaalva/live',
+  hours:'Segunda a sexta, das 9h às 18h',wa:'(11) 99123-4455',phone:'(11) 3456-7890',email:'secretaria@alvaigreja.com.br',
+  street:'Rua das Acácias, 500',district:'Jardins',city:'São Paulo, SP',cep:'01404-000',
+  requests:['Declaração de membro','Agendar batismo ou casamento','Atualizar cadastro da família','Segunda via de recibo'],
+  services:[{d:'Domingo',h:'10h',n:'Culto da família'},{d:'Domingo',h:'18h30',n:'Culto de celebração'},{d:'Quarta',h:'20h',n:'Culto de oração'}]},
+ g2:{tagline:'Uma família na Zona Norte, de portas abertas.',story:'',founded:'2019',stats:true,values:['Presença de Deus','Comunidade autêntica'],
+  social:[SR('instagram','Instagram Zona Norte','@alvazonanorte','instagram.com/alvazonanorte')],live:'',
+  hours:'Terça a sexta, das 14h às 19h',wa:'(11) 98877-1020',phone:'',email:'',
+  street:'Av. Cruzeiro do Sul, 1800',district:'Santana',city:'São Paulo, SP',cep:'02031-000',
+  requests:['Declaração de membro'],services:[{d:'Domingo',h:'10h',n:'Culto da família'}]},
+ g3:{tagline:'',story:'',founded:'',stats:false,values:[],social:[],live:'',
+  hours:'',wa:'',phone:'',email:'',street:'',district:'',city:'Campinas, SP',cep:'',requests:[],services:[]},
+};
+const CHP_MEM={g1:1240,g2:380,g3:210},CHP_CASAS={g1:48,g2:12,g3:6};
+const chpG=id=>IGREJAS.find(g=>g.id===id);
+/* o que conta para "perfil completo", com a aba onde se resolve */
+const CHP_CHECK=[['tagline','Frase de apresentação','quem','ap'],['story','História','quem','ap'],['values','Pelo menos 3 valores','quem','val'],['social','Uma rede social','redes','soc'],['contact','WhatsApp ou telefone','sec','at'],['email','E-mail da secretaria','sec','at'],['hours','Horário de atendimento','sec','at'],['street','Endereço','sec','end'],['services','Horário de culto','cultos','cul']];
+const chpHas=(c,k)=>k==='values'?c.values.length>=3:k==='social'?c.social.length>0:k==='contact'?!!(c.wa||c.phone):k==='services'?c.services.length>0:!!String(c[k]||'').trim();
+const chpMissing=id=>CHP_CHECK.filter(x=>!chpHas(CHP[id],x[0]));
+const chpPct=id=>Math.round((CHP_CHECK.length-chpMissing(id).length)/CHP_CHECK.length*100);
+const CHP_TABS=[['quem','Quem somos'],['sec','Secretaria'],['redes','Redes e transmissão'],['cultos','Cultos']];
+const CHP_DAYS=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const fmtTel=v=>{const d=String(v).replace(/\D/g,'').slice(0,11);if(d.length<3)return d;if(d.length<7)return `(${d.slice(0,2)}) ${d.slice(2)}`;return d.length===11?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;};
+const socUrl=(t,h)=>{h=String(h||'').trim();if(!h||!SOCT[t]||!SOCT[t][1])return '';return SOCT[t][1]+h.replace(/^@/,'');};
+
+function chpPage(){
+ const g=chpG(S.chp),c=CHP[S.chp];if(!g||!c){S.chp=null;return multiList();}
+ const net=NETS.find(n=>n.id===g.rede),miss=chpMissing(S.chp),pct=chpPct(S.chp),tab=S.chpTab||'quem';
+ const mt=t=>miss.filter(x=>x[2]===t).length;
+ return `<nav class="crumb rise" aria-label="Você está em"><span class="soft">Administração</span>${ic('chevR',13,2)}<button class="lnk back" data-a="chpBack">Multi-igreja</button>${ic('chevR',13,2)}<span>${esc(g.n)}</span></nav>
+ <header class="card prof cip-h rise" style="--d:1">
+  <div class="pid"><span class="cip-ic">${ic('church',22)}</span><div class="pn"><h1>${esc(g.n)}</h1><p>${net?esc(net.n)+' · ':''}${esc(c.city||'Cidade não informada')} · aparece no app para ${(CHP_MEM[S.chp]||0).toLocaleString('pt-BR')} membros</p></div></div>
+  <div class="pact cip-meter" title="${pct}% do perfil preenchido"><span class="cip-ring" style="--p:${pct}"><b>${pct}%</b></span><span class="cip-mt"><b>${pct===100?'Perfil completo':'Perfil no app'}</b><span>${pct===100?'Tudo o que o app mostra está preenchido':`Falta${miss.length>1?'m':''} ${miss.length} ${miss.length>1?'itens':'item'}`}</span></span></div>
+  ${miss.length?`<div class="cip-miss">${miss.map(x=>`<button class="chip" data-a="chpGo" data-v="${x[2]}|${x[3]}">${ic('plus',12,2.4)}${x[1]}</button>`).join('')}</div>`:''}
+  <div class="ptabs" role="tablist">${CHP_TABS.map(t=>`<button role="tab" class="${tab===t[0]?'on':''}" aria-selected="${tab===t[0]}" data-a="chpTab" data-v="${t[0]}">${t[1]}${mt(t[0])?`<small class="warn">${mt(t[0])}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
+ </header>
+ <div class="pgrid cip-grid rise" style="--d:2"><div class="col" id="chpBody">${chpBody()}</div>
+  <aside class="card cip-prev" aria-label="Como aparece no app"><div class="cip-stage"><div class="cip-fit" id="chpFit"><div class="mv-dev"><div class="mv-ph"><div class="mv-sb" aria-hidden="true"><span>18:40</span><span class="mv-sbi"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.5a9.5 9.5 0 0 1 13 0"/><path d="M4 7.2a5.6 5.6 0 0 1 8 0"/><circle cx="8" cy="10" r="1" fill="currentColor" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="currentColor" opacity=".45"/><rect x="2.5" y="2.5" width="17" height="7" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.5" height="4" rx=".75" fill="currentColor" opacity=".45"/></svg></span></div>
+    <div class="mv-scr" id="chpPrev">${chpPrev(c)}</div>
+    <nav class="mv-tabs" aria-hidden="true">${[['home','Início'],['calendar','Agenda'],['users','Grupos'],['book','Cursos'],['dots','Mais']].map((t,i)=>`<span class="${i===4?'on':''}">${ic(t[0],20,1.9)}<b>${t[1]}</b></span>`).join('')}</nav></div></div></div></div></aside></div>`;
+}
+const chpPvView=()=>(S.chpTab||'quem')==='sec'?'sec':'quem';
+
+/* seção com modo leitura e modo edição (mesmo padrão do perfil do membro) */
+function chpSec(k,title,sub,view,form){const ed=S.chpEd===k;
+ return `<section class="card pc sec cip-sec ${ed?'editing':''}" id="chs-${k}"><div class="sh"><div><h2>${title}</h2>${sub?`<p class="who" style="margin:4px 0 0">${sub}</p>`:''}</div>${ed?'':`<button class="btn sec sm" data-a="chpEdit" data-v="${k}">${ic('pen',14)}Editar</button>`}</div>
+  ${ed?`<form class="fgrid cip-f" data-chsec="${k}" novalidate>${form}<div class="dfoot"><button type="button" class="btn sec" data-a="chpCancel">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`:view}</section>`;}
+const kvv=(l,v,wide)=>`<div${wide?' class="wide"':''}><dt>${l}</dt><dd>${v?v:'<span class="soft">Não informado</span>'}</dd></div>`;
+const fIn=(name,label,val,o={})=>`<label class="fld${o.wide?' wide':''}"><span class="fl">${label}${o.opt?' <small>opcional</small>':''}</span>${o.pre?`<span class="cip-pre"><span>${o.pre}</span><input name="${name}" value="${esc(val||'')}" placeholder="${o.ph||''}" autocomplete="off" ${o.attr||''}></span>`:`<input name="${name}" value="${esc(val||'')}" placeholder="${o.ph||''}" autocomplete="off" ${o.attr||''}>`}${o.hint?`<span class="hint">${o.hint}</span>`:''}<span class="err"></span></label>`;
+const fTa=(name,label,val,max,o={})=>`<label class="fld wide"><span class="fl cip-cnt">${label}${o.opt?' <small>opcional</small>':''}<em data-for="${name}">${String(val||'').length}/${max}</em></span><textarea class="ta" name="${name}" maxlength="${max}" rows="${o.rows||3}" placeholder="${o.ph||''}">${esc(val||'')}</textarea>${o.hint?`<span class="hint">${o.hint}</span>`:''}<span class="err"></span></label>`;
+/* lista editável: linhas com subir, descer e remover */
+function fList(name,label,items,o){return `<div class="fld wide"><span class="fl">${label}${o.max?` <small>até ${o.max}</small>`:''}</span><ol class="cip-list" data-list="${name}" data-max="${o.max||99}">${items.map((v,i)=>fRow(name,v,o)).join('')}</ol><button type="button" class="btn sec sm cip-add" data-a="chpRowAdd" data-v="${name}" ${items.length>=(o.max||99)?'disabled':''}>${ic('plus',14,2.2)}${o.add}</button><span class="err"></span></div>`;}
+function fSocRow(v){v=v||SR('instagram','Instagram','','');const T=SOCT[v.t]||SOCT.outra;
+ return `<li class="cip-row cip-srow"><div class="cip-sg">
+  <label class="fld"><span class="fl">Rede</span><span class="selw"><select name="st">${Object.entries(SOCT).map(([k,x])=>`<option value="${k}" ${k===v.t?'selected':''}>${x[0]}</option>`).join('')}</select>${ic('chevD',14)}</span></label>
+  <label class="fld"><span class="fl">Nome no app</span><input name="sn" value="${esc(v.n||'')}" maxlength="28" placeholder="${T[0]}" autocomplete="off"><span class="err"></span></label>
+  <label class="fld"><span class="fl">Perfil</span><input name="sh" value="${esc(v.h||'')}" maxlength="40" placeholder="@suaigreja" autocomplete="off"><span class="err"></span></label>
+  <label class="fld"><span class="fl">Link</span><span class="cip-pre"><span>https://</span><input name="su" value="${esc(v.u||'')}" placeholder="${T[1]?T[1]+'suaigreja':'suaigreja.com.br'}" autocomplete="off"></span><span class="err"></span></label>
+ </div><span class="cip-ra"><button type="button" class="ibtn sm" data-a="chpRowMv" data-v="-1" aria-label="Subir">${ic('arrowUp',14,2)}</button><button type="button" class="ibtn sm" data-a="chpRowMv" data-v="1" aria-label="Descer">${ic('arrowDn',14,2)}</button><button type="button" class="ibtn sm cip-rm" data-a="chpRowRm" aria-label="Remover">${ic('x',14,2)}</button></span></li>`;}
+function fRow(name,v,o){if(name==='social')return fSocRow(v);o=o||CHP_LISTS[name];
+ const body=name==='services'?`<span class="selw cip-day"><select name="sd" aria-label="Dia">${CHP_DAYS.map(d=>`<option ${d===(v.d||'Domingo')?'selected':''}>${d}</option>`).join('')}</select>${ic('chevD',14)}</span><input name="sh" value="${esc(v.h||'')}" placeholder="19h30" aria-label="Horário" class="cip-hr"><input name="sn" value="${esc(v.n||'')}" placeholder="Nome do culto" aria-label="Nome do culto">`:`<input name="${name}" value="${esc(v||'')}" placeholder="${o.ph}" aria-label="${o.one}" maxlength="${o.len||60}">`;
+ return `<li class="cip-row">${name==='services'?'':'<span class="cip-n"></span>'}${body}<span class="cip-ra"><button type="button" class="ibtn sm" data-a="chpRowMv" data-v="-1" aria-label="Subir">${ic('arrowUp',14,2)}</button><button type="button" class="ibtn sm" data-a="chpRowMv" data-v="1" aria-label="Descer">${ic('arrowDn',14,2)}</button><button type="button" class="ibtn sm cip-rm" data-a="chpRowRm" aria-label="Remover">${ic('x',14,2)}</button></span></li>`;}
+const CHP_LISTS={values:{ph:'Ex.: Comunidade autêntica',one:'Valor',len:48,max:6,add:'Adicionar valor'},requests:{ph:'Ex.: Declaração de membro',one:'Pedido',len:60,max:8,add:'Adicionar pedido'},services:{max:10,add:'Adicionar culto'},social:{max:8,add:'Adicionar rede'}};
+
+function chpBody(){const c=CHP[S.chp],t=S.chpTab||'quem';
+ if(t==='quem')return chpSec('ap','Apresentação','Abre a tela Quem somos.',
+   `<dl class="kv grid">${kvv('Frase de apresentação',c.tagline?esc(c.tagline):'',1)}${kvv('História',c.story?esc(c.story).replace(/\n+/g,'<br><br>'):'',1)}</dl>`,
+   `${fTa('tagline','Frase de apresentação',c.tagline,120,{rows:2,ph:'Em uma frase, quem é a igreja',hint:'Aparece em destaque no topo da tela.'})}${fTa('story','História',c.story,900,{rows:6,opt:1,ph:'Como a igreja começou e o que vive hoje',hint:'Deixe uma linha em branco para separar parágrafos.'})}
+`)
+  +chpSec('num','Números','Os números da igreja que abrem a tela, logo abaixo da história.',
+   `<div class="cip-nums ${c.stats?'':'off'}">${chpStats(c).map(x=>`<div><b>${x[0]?esc(x[0]):'—'}</b><span>${x[1]}</span><small>${x[2]}</small></div>`).join('')}</div><p class="who cip-numst">${c.stats?ic('eye',14)+'Aparecem no app':ic('eyeOff',14)+'Ocultos no app'}</p>`,
+   `${fIn('founded','Ano de fundação',c.founded,{opt:1,ph:'2012',attr:'inputmode="numeric" maxlength="4"',hint:'Membros, igrejas e Casas vêm do sistema.'})}
+    <div class="fld"><span class="fl">No app</span><div class="yn" role="radiogroup" aria-label="Números no app"><label><input type="radio" name="stats" value="1" ${c.stats?'checked':''}><span>Mostrar</span></label><label><input type="radio" name="stats" value="0" ${!c.stats?'checked':''}><span>Ocultar</span></label></div></div>`)
+  +chpSec('val','Nossos valores','Lista numerada, na ordem definida aqui.',
+   c.values.length?`<ol class="cip-vals">${c.values.map(v=>`<li>${esc(v)}</li>`).join('')}</ol>`:'<div class="soft-empty"><p>Nenhum valor cadastrado.</p><span class="who">Sem valores, a seção não aparece no app.</span></div>',
+   fList('values','Valores',c.values,CHP_LISTS.values));
+ if(t==='sec')return chpSec('at','Atendimento','Tela Fale com a secretaria.',
+   `<dl class="kv grid">${kvv('Horário de atendimento',esc(c.hours),1)}${kvv('WhatsApp',esc(c.wa))}${kvv('Telefone',esc(c.phone))}${kvv('E-mail',esc(c.email),1)}</dl>`,
+   `${fIn('hours','Horário de atendimento',c.hours,{wide:1,ph:'Segunda a sexta, das 9h às 18h'})}${fIn('wa','WhatsApp',c.wa,{ph:'(11) 99999-9999',attr:'inputmode="tel" data-tel',hint:'Abre a conversa pelo botão do app.'})}${fIn('phone','Telefone',c.phone,{opt:1,ph:'(11) 3333-3333',attr:'inputmode="tel" data-tel'})}${fIn('email','E-mail',c.email,{wide:1,ph:'secretaria@suaigreja.com.br',attr:'type="email" inputmode="email"'})}`)
+  +chpSec('end','Endereço','Também aparece em Onde estamos.',
+   `<dl class="kv grid">${kvv('Rua e número',esc(c.street),1)}${kvv('Bairro',esc(c.district))}${kvv('CEP',esc(c.cep))}${kvv('Cidade',esc(c.city))}</dl>`,
+   `${fIn('street','Rua e número',c.street,{wide:1,ph:'Rua das Acácias, 500'})}${fIn('district','Bairro',c.district,{ph:'Jardins'})}${fIn('cep','CEP',c.cep,{opt:1,ph:'00000-000',attr:'inputmode="numeric" maxlength="9" data-cep'})}${fIn('city','Cidade',c.city,{wide:1,ph:'São Paulo, SP'})}`)
+  +chpSec('req','Pedidos mais comuns','Atalhos que o membro toca para pedir algo à secretaria.',
+   c.requests.length?`<ul class="cip-reqs">${c.requests.map(v=>`<li>${esc(v)}${ic('chevR',14,2)}</li>`).join('')}</ul>`:'<div class="soft-empty"><p>Nenhum pedido cadastrado.</p><span class="who">Sem pedidos, a lista não aparece no app.</span></div>',
+   fList('requests','Pedidos',c.requests,CHP_LISTS.requests));
+ if(t==='redes')return chpSec('soc','Redes sociais','Aparecem em Conecte-se, na ordem definida aqui. O nome é o que o membro vê no app; sem link, ele é montado a partir do perfil.',
+   c.social.length?`<div class="cip-socv">${c.social.map(x=>`<div><span class="cip-si">${ic(socIc(x.t),16)}</span><span><b>${esc(x.n)}</b><small>${esc(x.h||x.u)}</small></span></div>`).join('')}</div>`:'<div class="soft-empty"><p>Nenhuma rede cadastrada.</p><span class="who">Sem redes, a seção Conecte-se não aparece no app.</span></div>',
+   fList('social','Redes',c.social,CHP_LISTS.social))
+  +chpSec('live','Transmissão ao vivo','Link aberto pela tela Ao vivo do app.',
+   `<dl class="kv grid">${kvv('Link da transmissão',c.live?esc(c.live):'',1)}</dl>`,
+   fIn('live','Link da transmissão',c.live,{wide:1,opt:1,pre:'https://',ph:'youtube.com/@suaigreja/live',hint:'YouTube, Facebook ou outra plataforma.'}));
+ return chpSec('cul','Horários de culto','Aparecem em Onde estamos e na tela da igreja.',
+   c.services.length?`<ul class="cip-svc">${c.services.map(v=>`<li><b>${esc(v.d)}</b><span>${esc(v.h)}</span><small>${esc(v.n)}</small></li>`).join('')}</ul>`:'<div class="soft-empty"><p>Nenhum horário de culto.</p><span class="who">Cadastre ao menos um para o app mostrar quando a igreja se reúne.</span></div>',
+   fList('services','Cultos',c.services,CHP_LISTS.services));
+}
+
+/* ---------- prévia do app ---------- */
+const chpSvcLine=c=>{if(!c.services.length)return 'horários a definir';const by={};c.services.forEach(v=>(by[v.d]=by[v.d]||[]).push(v.h));return Object.entries(by).map(([d,h])=>`${d.toLowerCase()}s ${h.join(' e ')}`).join(' · ');};
+function chpStats(c){const g=chpG(S.chp),net=IGREJAS.filter(x=>x.rede===g.rede),rn=(NETS.find(n=>n.id===g.rede)||{}).n||'rede';
+ return [[c.founded,'fundação','Informado pela igreja'],[(CHP_MEM[S.chp]||0).toLocaleString('pt-BR'),'membros','Do cadastro de membros'],[String(net.length),net.length>1?'igrejas':'igreja','Igrejas da '+rn],[String(CHP_CASAS[S.chp]||0),'Casas ativas','Do módulo Casas']];}
+function chpPrev(c){const g=chpG(S.chp),ph=v=>`<span class="mv-ph-tx">${v}</span>`;
+ const head=(t,lede)=>`<header class="mv-sub"><span class="mv-ib">${ic('chevL',20,2.25)}</span><h1>${t}</h1>${lede?`<p class="mv-lede">${lede}</p>`:''}</header>`;
+ if(chpPvView()==='sec'){
+  const rows=[c.phone||c.wa?['Telefone',c.phone||c.wa,1]:null,c.email?['E-mail',c.email,1]:null].filter(Boolean);
+  return `${head('Fale com a secretaria',c.hours?'Atendimento: '+esc(c.hours).replace(/^./,m=>m.toLowerCase())+'.':ph('Horário de atendimento'))}<div class="mv-body">
+   ${c.wa?`<span class="mv-btn">Chamar no WhatsApp</span>`:''}
+   <div class="mv-kv">${rows.map(r=>`<div class="mv-kr"><span class="mv-kl"><small>${r[0]}</small><b>${esc(r[1])}</b></span><i>Copiar</i></div>`).join('')}<div class="mv-kr mv-st"><small>Endereço</small><b>${c.street?esc(c.street)+(c.district?' · '+esc(c.district):''):ph('Endereço')}</b>${c.city?`<span>${esc(c.city)}</span>`:''}</div></div>
+   ${c.requests.length?`<section class="mv-sec"><p class="mv-eb">Pedidos mais comuns</p><div class="mv-list">${c.requests.map(r=>`<div class="mv-it"><b class="mv-it-t" style="font-weight:500">${esc(r)}</b>${ic('chevR',18,2)}</div>`).join('')}</div></section>`:''}
+  </div>`;}
+ const net=IGREJAS.filter(x=>x.rede===g.rede);
+ const stats=chpStats(c).filter(x=>x[0]);
+ const paras=String(c.story||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+ return `${head('Quem somos')}<div class="mv-body">
+  <div class="mv-hero"><p>${c.tagline?esc(c.tagline):ph('Sua frase de apresentação aparece aqui.')}</p></div>
+  ${paras.length?`<div class="mv-story">${paras.map((p,i)=>`<p${i?'':' class="on"'}>${esc(p)}</p>`).join('')}</div>`:''}
+  ${c.stats&&stats.length?`<div class="mv-stats">${stats.map(x=>`<div><b>${esc(x[0])}</b><span>${x[1]}</span></div>`).join('')}</div>`:''}
+  ${c.values.length?`<section class="mv-sec"><p class="mv-eb">Nossos valores</p><ol class="mv-steps">${c.values.map(v=>`<li>${esc(v)}</li>`).join('')}</ol></section>`:''}
+  ${c.social.length?`<section class="mv-sec" data-pv="redes"><p class="mv-eb">Conecte-se</p><div class="mv-socs">${c.social.map(x=>`<div class="mv-soc"><span class="mv-sa">${ic('arrowR',16,2)}</span><b>${esc(x.n)}</b><span>${esc(x.h||x.u)}</span></div>`).join('')}</div></section>`:''}
+  <section class="mv-sec" data-pv="cultos"><p class="mv-eb">Onde estamos</p><div class="mv-list">${net.map(x=>{const cc=CHP[x.id];return `<div class="mv-it"><span class="mv-ibx">${ic('church',20,1.9)}</span><span class="mv-it-b"><b class="mv-it-t">${esc(x.n)}</b><span class="mv-it-s">${esc(cc.city||'')}${cc.city?' · ':''}${chpSvcLine(cc)}</span></span></div>`;}).join('')}</div></section>
+ </div>`;}
+/* encaixa o aparelho (406×860) na coluna e na altura da janela, sem distorcer as medidas do app */
+function chpFit(){const f=$('#chpFit');if(!f)return;const card=f.closest('.cip-prev'),grid=card.parentElement,cs=getComputedStyle(card),px=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),py=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom),wide=matchMedia('(min-width:1024px)').matches;
+ /* o aparelho aparece sempre inteiro: cabe na altura que sobra abaixo do topo do card (sem rolar) e a coluna acompanha a largura dele */
+ const top=wide?card.getBoundingClientRect().top+scrollY:0,h=innerHeight-(wide?top+24:96)-py,w=wide?380-px:card.clientWidth-px;
+ const k=Math.max(.4,Math.min(1,w/406,h/860));f.style.setProperty('--k',k.toFixed(4));grid.style.setProperty('--pcol',Math.round(406*k+px)+'px');}
+if(!window._chpFitOn){window._chpFitOn=1;addEventListener('resize',()=>chpFit());}
+/* lê o formulário aberto sem salvar (para a prévia ao vivo e para salvar) */
+function chpRead(f){const k=f.dataset.chsec,c=JSON.parse(JSON.stringify(CHP[S.chp])),v=n=>(f.querySelector(`[name="${n}"]`)?.value||'').trim();
+ if(k==='ap'){c.tagline=v('tagline');c.story=f.querySelector('[name=story]').value.trim();}
+ if(k==='num'){c.founded=v('founded');c.stats=f.querySelector('[name=stats]:checked')?.value==='1';}
+ if(k==='val'||k==='req'){const n=k==='val'?'values':'requests';c[n]=$$(`[name="${n}"]`,f).map(i=>i.value.trim()).filter(Boolean);}
+ if(k==='at'){c.hours=v('hours');c.wa=v('wa');c.phone=v('phone');c.email=v('email');}
+ if(k==='end'){c.street=v('street');c.district=v('district');c.cep=v('cep');c.city=v('city');}
+ if(k==='soc')c.social=$$('.cip-srow',f).map(r=>{const g=n=>r.querySelector(`[name=${n}]`).value.trim(),t=g('st');return SR(t,g('sn'),g('sh'),g('su').replace(/^https?:\/\//,'').replace(/\/+$/,'')||socUrl(t,g('sh')));}).filter(x=>x.n||x.h||x.u);
+ if(k==='live')c.live=v('live').replace(/^https?:\/\//,'');
+ if(k==='cul')c.services=$$('.cip-row',f).map(r=>({d:r.querySelector('[name=sd]').value,h:r.querySelector('[name=sh]').value.trim(),n:r.querySelector('[name=sn]').value.trim()})).filter(x=>x.h||x.n);
+ return c;}
+const chpPaint=c=>{const p=$('#chpPrev');if(p){const y=p.scrollTop;p.innerHTML=chpPrev(c||CHP[S.chp]);p.scrollTop=y;}};
+function chpRows(f){$$('.cip-list',f).forEach(l=>{const rows=$$('.cip-row',l),max=+l.dataset.max;rows.forEach((r,i)=>{const n=r.querySelector('.cip-n');if(n)n.textContent=i+1;r.querySelector('[data-v="-1"]').disabled=i===0;r.querySelector('[data-v="1"]').disabled=i===rows.length-1;});const add=l.parentElement.querySelector('.cip-add');if(add)add.disabled=rows.length>=max;});}
+function chpErr(f,name,msg){const i=f.querySelector(`[name="${name}"]`),fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=msg;i.focus();return false;}
+function chpValid(f){const k=f.dataset.chsec,v=n=>(f.querySelector(`[name="${n}"]`)?.value||'').trim();
+ if(k==='num'){if(v('founded')&&!(/^\d{4}$/.test(v('founded'))&&+v('founded')>=1800&&+v('founded')<=2026))return chpErr(f,'founded','Use um ano entre 1800 e 2026');}
+ if(k==='at'){const d=x=>x.replace(/\D/g,'').length;if(v('wa')&&d(v('wa'))<10)return chpErr(f,'wa','Informe DDD e número');if(v('phone')&&d(v('phone'))<10)return chpErr(f,'phone','Informe DDD e número');if(v('email')&&!/^\S+@\S+\.\S+$/.test(v('email')))return chpErr(f,'email','E-mail inválido');}
+ if(k==='end'){if(v('cep')&&v('cep').replace(/\D/g,'').length!==8)return chpErr(f,'cep','CEP tem 8 números');}
+ if(k==='live'){if(v('live')&&!/\.[a-z]{2,}/i.test(v('live')))return chpErr(f,'live','Cole o link completo da transmissão');}
+ if(k==='soc'){for(const r of $$('.cip-srow',f)){const g=n=>r.querySelector(`[name=${n}]`),t=g('st').value,has=['sn','sh','su'].some(n=>g(n).value.trim());if(!has)continue;const bad=(i,m)=>{const fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;i.focus();return false;};
+  if(!g('sn').value.trim())return bad(g('sn'),'Dê um nome para a rede');if(!g('sh').value.trim()&&!g('su').value.trim())return bad(g('sh'),'Informe o perfil ou o link');if(!g('su').value.trim()&&!SOCT[t][1])return bad(g('su'),'Cole o link');if(/\s/.test(g('su').value.trim()))return bad(g('su'),'O link não pode ter espaços');}}
+ if(k==='cul'){const r=$$('.cip-row',f).find(r=>{const h=r.querySelector('[name=sh]').value.trim(),n=r.querySelector('[name=sn]').value.trim();return (h||n)&&!h;});if(r){const i=r.querySelector('[name=sh]'),fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Informe o horário de cada culto';i.focus();return false;}}
+ return true;}
+function chpAfter(){
+ requestAnimationFrame(()=>typeof tabInd==='function'&&tabInd());
+ chpFit();const pv=$('#chpPrev'),an=pv&&pv.querySelector(`[data-pv="${S.chpTab||'quem'}"]`);if(pv)pv.scrollTop=an?Math.max(0,an.offsetTop-110):0;
+ const f=$('form[data-chsec]');if(!f)return;chpRows(f);
+ const sb=f.querySelector('[type=submit]'),orig=JSON.stringify(chpRead(f));
+ const upd=()=>{const c=chpRead(f);sb.disabled=JSON.stringify(c)===orig;chpPaint(c);};sb.disabled=true;
+ f.addEventListener('input',e=>{const t=e.target;t.closest('.fld')?.classList.remove('bad');
+  if(t.matches('[data-tel]')){const p=t.selectionStart===t.value.length;t.value=fmtTel(t.value);if(p)t.setSelectionRange(t.value.length,t.value.length);}
+  if(t.matches('[data-cep]')){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;}
+  if(t.matches('textarea[maxlength]')){const em=f.querySelector(`em[data-for="${t.name}"]`);if(em)em.textContent=t.value.length+'/'+t.maxLength;}
+  upd();});
+ f.addEventListener('change',e=>{const t=e.target;if(t.name==='st'){const r=t.closest('.cip-srow'),n=r.querySelector('[name=sn]'),T=SOCT[t.value],old=Object.values(SOCT).map(x=>x[0]);if(!n.value.trim()||old.includes(n.value.trim()))n.value=T[0];n.placeholder=T[0];r.querySelector('[name=su]').placeholder=T[1]?T[1]+'suaigreja':'suaigreja.com.br';}upd();});
+ f.addEventListener('cip-rows',upd);
+ f.addEventListener('submit',e=>{e.preventDefault();if(!chpValid(f))return;const c=chpRead(f),k=f.dataset.chsec;
+  busy(sb,700,'Salvo',()=>{CHP[S.chp]=c;S.chpEd=null;const y=window.scrollY;render();window.scrollTo(0,y);toast(({ap:'Apresentação atualizada no app',num:'Números atualizados no app',val:'Valores atualizados no app',at:'Atendimento atualizado no app',end:'Endereço atualizado no app',req:'Pedidos atualizados no app',soc:'Redes sociais atualizadas no app',live:'Transmissão atualizada no app',cul:'Horários de culto atualizados no app'})[k]);
+   const s=$('#chs-'+k);if(s)s.animate([{boxShadow:'0 0 0 2px var(--brand)'},{boxShadow:'var(--shadow-card)'}],{duration:1200,easing:'ease-out'});});});
+ const first=f.querySelector('input:not([type=radio]),textarea');if(first&&!S._chpNoFocus)setTimeout(()=>first.focus({preventScroll:true}),60);S._chpNoFocus=0;
+}
+const chpRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
+const CPA={
+ netRen:v=>{closePops();const n=NETS.find(x=>x.id===v);openDlg(`${dlgHead('Renomear rede','O nome aparece no seletor de igrejas e no painel.')}<form class="fgrid one" id="nrF" novalidate><label class="fld"><span class="fl">Nome da rede</span><input name="v" value="${esc(n.n)}" maxlength="40" autocomplete="off"><span class="err"></span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit" disabled>Salvar</button></div></form>`,'sm');
+  const f=$('#nrF'),i=f.querySelector('input'),sb=f.querySelector('[type=submit]');setTimeout(()=>i.select(),80);i.addEventListener('input',()=>{i.closest('.fld').classList.remove('bad');sb.disabled=i.value.trim()===n.n;});
+  f.addEventListener('submit',e=>{e.preventDefault();const x=i.value.trim();if(!x){i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent='Dê um nome para a rede';i.focus();return;}if(NETS.some(o=>o!==n&&norm(o.n)===norm(x))){i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent='Já existe uma rede com esse nome';i.focus();return;}const old=n.n;busy(sb,500,'Salvo',()=>{n.n=x;closeDlg();chpRe();toast(`Rede renomeada para ${x}`,()=>{n.n=old;chpRe();});});});},
+ chpOpen:v=>{S.chp=v;S.chpTab='quem';S.chpEd=null;render();window.scrollTo({top:0});},
+ chpBack:()=>{S.chp=null;S.chpEd=null;render();window.scrollTo({top:0});},
+ chpTab:v=>{S.chpTab=v;S.chpEd=null;S.chpPv=null;chpRe();},
+ chpGo:v=>{const [t,k]=v.split('|');S.chpTab=t;S.chpEd=k;S.chpPv=null;render();const s=$('#chs-'+k);if(s){const y=s.getBoundingClientRect().top+window.scrollY-90;window.scrollTo({top:y,behavior:'smooth'});}},
+ chpEdit:v=>{S.chpEd=v;chpRe();},
+ chpCancel:()=>{S.chpEd=null;chpRe();},
+ chpRowAdd:(v,b)=>{const l=b.parentElement.querySelector('.cip-list'),f=b.closest('form');if($$('.cip-row',l).length>=+l.dataset.max)return;l.insertAdjacentHTML('beforeend',fRow(v,v==='services'?{d:'Domingo',h:'',n:''}:v==='social'?null:''));chpRows(f);const r=l.lastElementChild;r.querySelector('input').focus();f.dispatchEvent(new Event('cip-rows'));},
+ chpRowMv:(v,b)=>{const r=b.closest('.cip-row'),f=b.closest('form');if(+v<0&&r.previousElementSibling)r.parentElement.insertBefore(r,r.previousElementSibling);else if(+v>0&&r.nextElementSibling)r.parentElement.insertBefore(r.nextElementSibling,r);chpRows(f);b.focus();f.dispatchEvent(new Event('cip-rows'));},
+ chpRowRm:(v,b)=>{const r=b.closest('.cip-row'),f=b.closest('form'),l=r.parentElement;r.remove();chpRows(f);(l.querySelector('.cip-row:last-child input')||f.querySelector('.cip-add'))?.focus();f.dispatchEvent(new Event('cip-rows'));},
+};
+
 const admRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
 const mxRe=()=>{const y=window.scrollY;const w=$('.mx-c');if(w){const t=document.createElement('div');t.innerHTML=matrixTab();w.replaceWith(t.querySelector('.mx-c'));}window.scrollTo(0,y);};
 function admAfter(){
+ if(S.active==='multi'&&S.chp)chpAfter();
  const uq=$('#uq');if(uq)uq.addEventListener('input',e=>{S.uq=e.target.value;const p=e.target.selectionStart;render();const n=$('#uq');n.focus();n.setSelectionRange(p,p);});
  const aq=$('#aq');if(aq)aq.addEventListener('input',e=>{S.aq=e.target.value;const p=e.target.selectionStart;$('#abody').innerHTML=aLog();admAfter();const n=$('#aq');n.focus();n.setSelectionRange(p,p);});
  $$('.pmc input').forEach(i=>i.addEventListener('change',()=>{const u=uById(S.user),a=i.dataset.area,x=i.dataset.act;let p=u.perm[a];
@@ -1938,11 +2141,14 @@ const AA={
 const AUDEMO=['rafael@alvasede.com.br','demo1234'];
 Object.assign(S,{auth:'login',authErr:0,authEmail:'',authUser:null,signStep:1,sign:{}});
 const RROLE={g1:'Administrador',g2:'Administrador',g3:'Administrador'};
-const brand=()=>`<aside class="au-brand">
- <div class="au-top">${logo(26,!S.auAnim)}${S.auth==='login'?`<button class="au-mcta" data-a="auGo" data-v="signup">Nova igreja?<b>Conhecer o Alva</b></button>`:''}</div>
- <div class="au-mid"><p class="au-line">O cuidado da sua igreja,<br>em <em>um só lugar</em>.</p><p class="au-sub">Pessoas, comunidade, cuidado e operação para quem lidera, em todas as igrejas da sua rede.</p></div>
- <div class="au-hz ${S.auAnim?'still':''}" aria-hidden="true"><span class="au-sun"></span><span class="au-line2"></span></div>
- <p class="au-foot">Alva Web · painel de gestão</p></aside>`;
+const brand=()=>{const words='O cuidado da sua igreja,|em <em>um só lugar</em>.'.split('|').flatMap((l,i)=>(i?['<br>']:[]).concat(l.split(/ (?![^<]*<\/em>)/).map(w=>w)));let k=0;
+ return `<aside class="au-brand au-sky ${S.auAnim?'still':''}">
+ <div class="au-skybg" aria-hidden="true"><i class="v1"></i><i class="v2"></i><i class="v3"></i><i class="hz"></i></div>
+ <div class="au-top">${S.auth==='login'?`<button class="au-mcta" data-a="auGo" data-v="signup">Nova igreja?<b>Conhecer o Alva</b></button>`:''}</div>
+ <div class="au-hero"><h1 class="au-wm" aria-label="alva"><span>alva</span></h1>
+  <p class="au-tl" aria-label="O cuidado da sua igreja, em um só lugar.">${words.map(w=>w==='<br>'?'<br>':`<span class="w" style="--w:${k++}">${w}</span>`).join(' ')}</p>
+  <p class="au-sub2">Pessoas, comunidade, cuidado e operação para quem lidera, em todas as igrejas da sua rede.</p></div>
+ <p class="au-foot2">Alva Web · painel de gestão</p></aside>`;};
 const eye=`<button type="button" class="au-eye" data-a="auEye" aria-label="Mostrar senha">${ic('eye',18)}</button>`;
 const back=(to,l)=>`<button class="lnk au-back" data-a="auGo" data-v="${to}">${ic('chevL',15,2)}${l}</button>`;
 function authView(){
@@ -1963,7 +2169,7 @@ function authView(){
    <button class="au-opt" data-a="auGo" data-v="signup">${ic('church',18)}<span><b>Conhecer o Alva para minha igreja</b><small>Planos e apresentação do produto</small></span>${ic('chevR',16)}</button></div>
   <p class="au-demo">Demonstração: qualquer e-mail entra. Senha <code>errada</code> mostra o erro. Um e-mail com <code>novo</code> não tem conta.</p>`;}
  else if(v==='codeEmail')body=`${back('login','Entrar com senha')}<div class="au-h"><h1>Entrar com código</h1><p>Receba um código no e-mail cadastrado pela sua igreja.</p></div><form id="codeEmailF" class="au-form"><label class="fld"><span class="fl">E-mail</span><input name="e" type="email" required autocomplete="email" placeholder="nome@suaigreja.com.br" value="${esc(S.authEmail)}"><span class="err"></span></label><button class="btn pri au-cta" type="submit">Enviar código</button></form>`;
- else if(v==='loginCode')body=`${back('codeEmail','Trocar e-mail')}<div class="au-h"><h1>Confira seu e-mail</h1><p>Se houver um acesso para <b>${esc(S.authEmail)}</b>, o código chegará em instantes. Confira também o spam.</p></div><form id="loginCodeF" class="au-form"><label class="fld"><span class="fl">Código de 6 dígitos</span><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required placeholder="000000" style="font-size:26px;letter-spacing:.35em;text-align:center"><span class="err"></span></label><p class="who">Válido por 15 minutos. Até 5 tentativas.</p><button class="btn pri au-cta" type="submit">Entrar</button><button type="button" class="btn sec au-cta" id="loginCodeResend">Reenviar código</button><p class="au-demo">Demonstração: use <code>123456</code>. Nenhum e-mail é enviado.</p></form>`;
+ else if(v==='loginCode')body=`${back('codeEmail','Trocar e-mail')}<div class="au-h"><h1>Confira seu e-mail</h1><p>Se houver um acesso para <b>${esc(S.authEmail)}</b>, o código chegará em instantes. Confira também o spam.</p></div><form id="loginCodeF" class="au-form" novalidate><div class="fld"><span class="fl">Código de 6 dígitos</span><div class="au-otp" id="otpL" role="group" aria-label="Código de 6 dígitos">${Array.from({length:6},(_,i)=>`<input inputmode="numeric" maxlength="1" aria-label="Dígito ${i+1} de 6" autocomplete="${i?'off':'one-time-code'}">`).join('')}</div><span class="err au-otperr"></span></div><p class="who">Válido por 15 minutos. Até 5 tentativas.</p><button class="btn pri au-cta" type="submit">Entrar</button><button type="button" class="btn sec au-cta" id="loginCodeResend">Reenviar código</button><p class="au-demo">Demonstração: use <code>123456</code>. Nenhum e-mail é enviado.</p></form>`;
  else if(v==='forgot')body=`${back('login','Voltar para entrar')}<div class="au-h"><h1>Redefinir senha</h1><p>Enviamos um link para criar uma nova senha. Ele vale por 1 hora.</p></div>
   <form id="fgF" class="au-form" novalidate><label class="fld"><span class="fl">E-mail</span><input name="e" type="email" autocomplete="email" placeholder="nome@suaigreja.com.br" value="${esc(S.authEmail)}"><span class="err"></span></label><button class="btn pri au-cta" type="submit">Enviar link</button></form>`;
  else if(v==='sent')body=`<div class="au-done"><span class="au-ic">${ic('mail',24)}</span><h1>Confira seu e-mail</h1><p>Se <b>${esc(S.authEmail||'seu e-mail')}</b> tiver uma conta, o link chega em instantes. Olhe também o spam.</p>
@@ -2019,7 +2225,18 @@ function authAfter(){
  const cf=$('#codeEmailF');if(cf)cf.addEventListener('submit',e=>{e.preventDefault();S.authEmail=cf.elements.e.value.trim();S.codeAttempts=0;S.codeIssued=Date.now();S.codeResendAt=Date.now()+60000;S.auth='loginCode';render();});
  const oc=$('#loginCodeF');if(oc){const resend=$('#loginCodeResend');const refresh=()=>{const seconds=Math.max(0,Math.ceil((S.codeResendAt-Date.now())/1000));resend.disabled=seconds>0;resend.textContent=seconds?'Reenviar em '+seconds+'s':'Reenviar código';};refresh();const timer=setInterval(()=>{if(!resend.isConnected){clearInterval(timer);return;}refresh();},1000);
  resend.addEventListener('click',()=>{S.codeAttempts=0;S.codeIssued=Date.now();S.codeResendAt=Date.now()+60000;render();toast('Novo código simulado. Use 123456.');});
- oc.addEventListener('submit',e=>{e.preventDefault();if(S.codeAttempts>=5){fBad(oc,'code','Limite de tentativas. Solicite um novo código.').focus();return;}if(Date.now()-S.codeIssued>=900000){fBad(oc,'code','Código expirado. Solicite um novo código.').focus();return;}if(oc.elements.code.value!=='123456'){S.codeAttempts++;fBad(oc,'code','Código inválido. '+(5-S.codeAttempts)+' tentativas restantes.').focus();return;}S.authErr=0;S.authUser=USERS[0];S.auth='church';render();});}
+ const ob=$$('#otpL input'),ow=$('#otpL'),oe=oc.querySelector('.au-otperr'),oBad=m=>{ow.classList.add('bad');oe.textContent=m;oe.style.display='block';};const oClr=()=>{ow.classList.remove('bad');oe.textContent='';oe.style.display='';};
+ ob.forEach((i,k)=>{i.addEventListener('input',()=>{i.value=i.value.replace(/\D/g,'').slice(-1);i.classList.toggle('filled',!!i.value);oClr();if(i.value&&ob[k+1])ob[k+1].focus();if(ob.every(x=>x.value))oc.requestSubmit();});
+  i.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!i.value&&ob[k-1]){ob[k-1].focus();ob[k-1].value='';ob[k-1].classList.remove('filled');}if(e.key==='ArrowLeft'&&ob[k-1])ob[k-1].focus();if(e.key==='ArrowRight'&&ob[k+1])ob[k+1].focus();});
+  i.addEventListener('paste',e=>{const d=(e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,6);if(!d.length)return;e.preventDefault();d.split('').forEach((c,j)=>{if(ob[j]){ob[j].value=c;ob[j].classList.add('filled');}});oClr();ob[Math.min(d.length,5)].focus();if(d.length===6)oc.requestSubmit();});});
+ setTimeout(()=>ob[0].focus(),80);
+ oc.addEventListener('submit',e=>{e.preventDefault();const code=ob.map(x=>x.value).join(''),reset=()=>{ob.forEach(x=>{x.value='';x.classList.remove('filled');});ob[0].focus();};
+  if(code.length<6){oBad('Digite os 6 dígitos');ob[code.length].focus();return;}
+  if(S.codeAttempts>=5){oBad('Limite de tentativas. Solicite um novo código.');return;}
+  if(Date.now()-S.codeIssued>=900000){oBad('Código expirado. Solicite um novo código.');return;}
+  const b=oc.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{b.classList.remove('busy');
+   if(code!=='123456'){S.codeAttempts++;oBad('Código inválido. '+(5-S.codeAttempts)+(5-S.codeAttempts===1?' tentativa restante.':' tentativas restantes.'));reset();return;}
+   S.authErr=0;S.authUser=USERS[0];S.auth='church';render();},700);});}
 
  if(!S.auAnim)setTimeout(()=>S.auAnim=true,50);
  const all=$$('#auth form');all.forEach(f=>{f.addEventListener('input',e=>{e.target.closest('.fld')?.classList.remove('bad');});bindPw(f);});
@@ -2951,6 +3168,14 @@ const ESPS=[
  {id:'s5',n:'Espaço Multiuso',cap:60,loc:'2º andar',desc:'',act:true,rec:['som','cad','inst'],tone:'rosado',icon:'layers',fixed:[]},
  {id:'s6',n:'Sala de Oração',cap:15,loc:'Térreo',desc:'Em reforma até novembro.',act:false,rec:[],tone:'lima',icon:'hands',fixed:[]},
 ];
+/* uso fixo: regras com vigência e recorrência (dia fixo, semanal, quinzenal, mensal, anual) */
+let _uid2=0;const UF=(l,f,t,rec,o={})=>({id:'u'+(++_uid2),l,f,t,rec,days:o.days||[],mode:o.mode||'semana',date:o.date||'',from:o.from||'2026-01-01',to:o.to||''});
+ESPS.forEach(s=>{s.uso=s.fixed.map(x=>UF(x[3],x[1],x[2],'semanal',{days:[x[0]]}));delete s.fixed;s.custom=[];});
+ESPS[0].custom=[{k:'c1',n:'Teclado fixo'}];ESPS[0].rec.push('c1');
+ESPS[1].uso.push(UF('Conselho pastoral','08:00','09:30','quinzenal',{days:[1],from:'2026-09-07'}));
+ESPS[4].uso.push(UF('Reunião de diáconos','19:30','21:00','mensal',{mode:'semana',date:'2026-10-06',from:'2026-01-06'}));
+ESPS[4].custom=[{k:'c2',n:'Bebedouro'}];ESPS[4].rec.push('c2');
+ESPS[0].uso.push(UF('Culto de Natal','19:00','22:00','anual',{mode:'dia',date:'2026-12-24'}));
 let _rvid=0;
 const RV=(s,d,f,t,p,who,why,st='confirmada',reason='')=>({id:'rv'+(++_rvid),s,d,f,t,p,who,why,st,reason});
 const RESERVAS=[
@@ -2970,6 +3195,34 @@ const RESERVAS=[
 const NOWD='2026-10-01',NOWM=15*60+20,H0=7,H1=23;
 Object.assign(S,{rvDay:NOWD,rvWk:NOWD,rvq:'',rvf:'prox',rvSala:null,slq:''});
 const slById=id=>ESPS.find(s=>s.id===id);
+const DOWN=['domingo','segunda','terça','quarta','quinta','sexta','sábado'],DOWS=['dom','seg','ter','qua','qui','sex','sáb'];
+const REC_L=[['unico','Dia fixo'],['semanal','Semanal'],['quinzenal','Quinzenal'],['mensal','Mensal'],['anual','Anual']];
+const nthOf=d=>Math.ceil(+d.slice(8)/7),ORD=n=>n>=5?'última':n+'ª';
+const dDiff=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5);
+function ruleOn(u,d){if(u.from&&d<u.from)return false;if(u.to&&d>u.to)return false;const a=u.date||u.from,w=dow(d);
+ if(u.rec==='unico')return d===u.date;
+ if(u.rec==='semanal')return u.days.includes(w);
+ if(u.rec==='quinzenal'){if(!u.days.includes(w))return false;const s0=addD(u.from,-dow(u.from));return Math.floor(dDiff(s0,d)/7)%2===0;}
+ if(u.rec==='mensal')return u.mode==='dia'?+d.slice(8)===+a.slice(8):w===dow(a)&&nthOf(d)===nthOf(a);
+ if(u.rec==='anual'){if(d.slice(5,7)!==a.slice(5,7))return false;return u.mode==='dia'?d.slice(8)===a.slice(8):w===dow(a)&&nthOf(d)===nthOf(a);}
+ return false;}
+const dayNm=w=>(w===0||w===6?'todo ':'toda ')+DOWN[w];
+const plural=w=>DOWN[w].replace(/(a|o)$/,'$1s').replace('terça','terças').replace('sábado','sábados');
+function ruleTxt(u){const a=u.date||u.from,dt=x=>`${+x.slice(8)} de ${MONTHS[+x.slice(5,7)-1]}`;let t='';
+ if(u.rec==='unico')t=u.date?`Somente em ${fmtDate(u.date)}`:'Escolha a data';
+ else if(u.rec==='semanal')t=u.days.length===1?dayNm(u.days[0]):u.days.length?'Toda semana: '+u.days.map(w=>DOWS[w]).join(', '):'Escolha os dias';
+ else if(u.rec==='quinzenal')t=u.days.length?'A cada 15 dias, às '+u.days.map(plural).join(' e '):'Escolha os dias';
+ else if(u.rec==='mensal')t=!a?'Escolha a data de referência':u.mode==='dia'?`Todo dia ${+a.slice(8)} do mês`:`${ORD(nthOf(a))} ${DOWN[dow(a)]} de cada mês`;
+ else if(u.rec==='anual')t=!a?'Escolha a data de referência':u.mode==='dia'?`Todo ano em ${dt(a)}`:`${ORD(nthOf(a))} ${DOWN[dow(a)]} de ${MONTHS[+a.slice(5,7)-1]}, todo ano`;
+ return t.charAt(0).toUpperCase()+t.slice(1);}
+const dNx=d=>`${wd(d)} ${+d.slice(8)}/${d.slice(5,7)}${d.slice(0,4)!==NOWD.slice(0,4)?'/'+d.slice(2,4):''}`;
+const dShort=x=>`${+x.slice(8)} ${MONTHS[+x.slice(5,7)-1].slice(0,3)} ${x.slice(0,4)}`;
+const vigTxt=u=>u.to?`De ${dShort(u.from)} a ${dShort(u.to)}`:`Desde ${dShort(u.from)} · sem data final`;
+function ruleNext(u,n=4){const out=[];let d=u.from>NOWD?u.from:NOWD;for(let i=0;i<800&&out.length<n;i++){if(u.to&&d>u.to)break;if(ruleOn(u,d))out.push(d);d=addD(d,1);}return out;}
+const recOf=(s,k)=>{const r=RECS.find(x=>x[0]===k);if(r)return r;const c=(s.custom||[]).find(x=>x.k===k);return c?[c.k,c.n,'tag']:null;};
+/* disponibilidade de um item do almoxarifado numa data (empréstimos que cobrem o dia, atrasados contam como fora) */
+const avOn=(it,d,skipRv)=>Math.max(0,it.total-LOANS.filter(l=>l.item===it.id&&l.rv!==skipRv&&lnOpen(l)>0&&l.from<=d&&(l.due>=d||l.due<NOWD)).reduce((a,l)=>a+lnOpen(l),0));
+const rvItems=id=>LOANS.filter(l=>l.rv===id);
 const mm=t=>{const [h,m]=t.split(':').map(Number);return h*60+m;};
 const hm=t=>{const [h,m]=t.split(':');return `${+h}h${m!=='00'?m:''}`;};
 const tt=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
@@ -2979,7 +3232,7 @@ const avN=n=>`<span class="av" style="background:var(--tone-${TONES[n.length%6]}
 const rvPast=r=>r.d<NOWD||(r.d===NOWD&&mm(r.t)<NOWM);
 /* everything occupying a room on a date: reservations + fixed uses */
 function busyOn(sid,d,skip){const s=slById(sid);
- return [...RESERVAS.filter(r=>r.s===sid&&r.d===d&&r.st==='confirmada'&&r.id!==skip).map(r=>({f:mm(r.f),t:mm(r.t),l:r.why,r})),...s.fixed.filter(x=>x[0]===dow(d)).map(x=>({f:mm(x[1]),t:mm(x[2]),l:x[3],fix:1}))].sort((a,b)=>a.f-b.f);}
+ return [...RESERVAS.filter(r=>r.s===sid&&r.d===d&&r.st==='confirmada'&&r.id!==skip).map(r=>({f:mm(r.f),t:mm(r.t),l:r.why,r})),...s.uso.filter(u=>ruleOn(u,d)).map(u=>({f:mm(u.f),t:mm(u.t),l:u.l,fix:1,u}))].sort((a,b)=>a.f-b.f);}
 function conflict(sid,d,f,t,skip){return busyOn(sid,d,skip).find(b=>f<b.t&&t>b.f);}
 function nextFree(sid,d,f,t,skip){const dur=t-f;let s=f;for(let i=0;i<60;i++){const c=busyOn(sid,d,skip).find(b=>s<b.t&&s+dur>b.f);if(!c)return s+dur<=H1*60?s:null;s=c.t;}return null;}
 const hrs=(sid,d)=>busyOn(sid,d).reduce((a,b)=>a+(b.t-b.f),0)/60;
@@ -3030,13 +3283,15 @@ function rvDlg(rid){const r=RESERVAS.find(x=>x.id===rid),s=slById(r.s),pastR=rvP
   <dl class="rvd-kv"><div><dt>Finalidade</dt><dd>${esc(r.why||'—')}</dd></div><div><dt>Solicitante</dt><dd class="rvw">${avN(r.who)}${esc(r.who)}</dd></div>
    <div><dt>Pessoas</dt><dd><span class="rvp"><span class="tr"><i style="width:${Math.min(100,r.p/s.cap*100)}%"></i></span><span><b>${r.p}</b> de ${s.cap}</span></span></dd></div>
    ${r.st==='cancelada'?`<div><dt>Motivo do cancelamento</dt><dd>${esc(r.reason||'Não informado')}</dd></div>`:''}</dl>
+  ${rvItems(r.id).length?`<div class="rvr-i"><div class="sh"><h3>Itens do almoxarifado</h3><span class="who">empréstimo para o dia</span></div><ul>${rvItems(r.id).map(l=>{const it=itm(l.item);return `<li>${kTile(icat(it.cat),30)}<span>${esc(it.n)}</span><b>${l.qty}×</b></li>`;}).join('')}</ul></div>`:''}
   <div class="dfoot" style="justify-content:space-between">${r.st==='confirmada'&&!pastR?`<button class="btn ghostd" data-a="rvCancel" data-v="${r.id}">Cancelar reserva</button><span class="row2"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="rvEdit" data-v="${r.id}">${ic('clock',15)}Remarcar</button></span>`:r.st==='cancelada'&&!pastR?`<span></span><span class="row2"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="rvRestore" data-v="${r.id}">Reativar reserva</button></span>`:'<span></span><button class="btn sec" data-a="closeDlg">Fechar</button>'}</div>`,'sm');}
 
 function rvForm(o={}){
  const edit=o.id?RESERVAS.find(x=>x.id===o.id):null,d0=o.d||(S.rvDay<NOWD?NOWD:S.rvDay),s0=o.s||'s2';let f0=o.f,t0=o.t;if(!f0){const nf=nextFree(s0,d0,19*60,20*60);f0=tt(nf!=null?nf:19*60);t0=tt((nf!=null?nf:19*60)+60);}
- const v=edit?{...edit}:{s:s0,d:d0,f:f0,t:t0,p:'',who:'',why:''};
- openDlg(`${dlgHead(edit?'Remarcar reserva':'Nova reserva',edit?'Mude a sala, o dia ou o horário. Avisamos o solicitante.':'Escolha a sala e o horário. A disponibilidade aparece na hora.')}
-  <form id="rvF" class="fgrid" novalidate>
+ const v=edit?{...edit}:{s:s0,d:d0,f:f0,t:t0,p:'',who:'',why:''};const pick={};if(edit)rvItems(edit.id).forEach(l=>pick[l.item]=(pick[l.item]||0)+lnOpen(l));let step=1;
+ openDlg(`${dlgHead(edit?'Remarcar reserva':'Nova reserva',edit?'Mude a sala, o dia, o horário ou os itens. Avisamos o solicitante.':'Sala, horário e, se precisar, itens do almoxarifado.')}
+  <ol class="rvw-steps" id="rvSteps">${['Sala e horário','Itens do almoxarifado','Revisão'].map((x,i)=>`<li class="${i?'':'on'}"><i>${i+1}</i><span>${x}</span></li>`).join('')}</ol>
+  <form id="rvF" novalidate><div class="fgrid rvw-p" data-p="1">
    <div class="fld wide"><span class="fl">Sala</span><div class="sp-pick">${ESPS.filter(s=>s.act).map(s=>`<label><input type="radio" name="s" value="${s.id}" ${v.s===s.id?'checked':''}><span class="htile" style="--s:30px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,15)}</span><span><b>${esc(s.n)}</b><small>${s.cap} lugares · ${esc(s.loc)}</small></span></label>`).join('')}</div></div>
    <label class="fld wide"><span class="fl">Data</span><input type="date" name="d" value="${v.d}" min="${NOWD}"></label>
    <label class="fld"><span class="fl">Início</span><input type="time" name="f" value="${v.f}" step="900"></label>
@@ -3045,7 +3300,9 @@ function rvForm(o={}){
    <label class="fld"><span class="fl">Quantidade de pessoas</span><input type="number" name="p" min="1" inputmode="numeric" value="${v.p}" placeholder="0"><span class="sp-cap" id="rvCap"></span></label>
    <label class="fld"><span class="fl">Solicitante</span><span class="selw"><select name="who"><option value="">Escolha…</option>${MEMBERS.filter((m,i,a)=>a.findIndex(x=>x.n===m.n)===i).map(m=>`<option ${m.n===v.who?'selected':''}>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></label>
    <label class="fld wide"><span class="fl">Finalidade <small>opcional</small></span><input name="why" value="${esc(v.why)}" placeholder="Ex.: Reunião de liderança" autocomplete="off"></label>
-   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="rvOk">${edit?'Salvar novo horário':'Confirmar reserva'}</button></div></form>`,'lg');
+   </div>
+   <div class="rvw-p" data-p="2" hidden></div><div class="rvw-p" data-p="3" hidden></div>
+   <div class="dfoot rvw-ft"><button type="button" class="btn sec" id="rvBack">Cancelar</button><span class="rvw-cnt" id="rvCnt"></span><button type="submit" class="btn pri" id="rvOk">Continuar</button></div></form>`,'lg');
  const f=$('#rvF'),ok=$('#rvOk'),span=(H1-H0)*60;
  const chk=()=>{const sid=f.s.value,s=slById(sid),d=f.d.value,a=f.f.value?mm(f.f.value):0,b=f.t.value?mm(f.t.value):0,p=+f.p.value||0;
   let msg='',bad=false;const c=d&&a<b&&conflict(sid,d,a,b,edit&&edit.id);
@@ -3069,10 +3326,33 @@ function rvForm(o={}){
   const sg=$('#rvSug');if(sg)sg.onclick=()=>{f.f.value=sg.dataset.f;f.t.value=sg.dataset.t;chk();};
   const cp=$('#rvCap');if(p>s.cap){cp.innerHTML=`<span class="tr bad"><i style="width:100%"></i></span><span class="sp-bad">Passa ${p-s.cap} da capacidade (${s.cap})</span>`;bad=true;}else cp.innerHTML=`<span class="tr"><i style="width:${p/s.cap*100}%"></i></span><span>${p?`${p} de ${s.cap} lugares`:`Capacidade: ${s.cap} lugares`}</span>`;
   if(!p||!f.who.value)bad=true;ok.disabled=bad;};
- f.addEventListener('input',chk);f.addEventListener('change',chk);chk();
- f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{const o2={s:f.s.value,d:f.d.value,f:f.f.value,t:f.t.value,p:+f.p.value,who:f.who.value,why:f.why.value.trim()};
-  if(edit){Object.assign(edit,o2);}else RESERVAS.push(RV(o2.s,o2.d,o2.f,o2.t,o2.p,o2.who,o2.why));
-  S.rvDay=o2.d;if(o2.d<S.rvWk||o2.d>addD(S.rvWk,6))S.rvWk=o2.d;closeDlg();render();toast(edit?`Reserva remarcada · ${o2.who.split(' ')[0]} foi avisado(a)`:`Reserva confirmada · ${slById(o2.s).n}, ${hm(o2.f)}–${hm(o2.t)}`);},650);});
+ const sumHTML=()=>{const s=slById(f.s.value),n=Object.values(pick).reduce((a,b)=>a+b,0);return n?`${n} ${n>1?'itens':'item'}`:'';};
+ const items2=()=>{const d=f.d.value,q=norm(S.rvIq||''),k=S.rvIk||'';const its=ITEMS.filter(i=>i.tipo==='emp'&&(!k||i.cat===k)&&(!q||norm(i.n+' '+(i.sku||'')).includes(q)));
+  return `<div class="rvi-top"><label class="sbox">${ic('search',16)}<input id="rvIq" placeholder="Buscar item do almoxarifado" value="${esc(S.rvIq||'')}" autocomplete="off"></label>
+   <div class="chips">${[['','Todos'],...ICATS.filter(c=>ITEMS.some(i=>i.tipo==='emp'&&i.cat===c.id)).map(c=>[c.id,c.n])].map(c=>`<button type="button" class="chipf ${k===c[0]?'on':''}" data-rvk="${c[0]}">${c[1]}</button>`).join('')}</div></div>
+   <p class="who rvi-note">${ic('box',14)}<span>Os itens saem como empréstimo em nome de <b>${esc(f.who.value||'quem reserva')}</b> para ${wd(d)}, ${+d.slice(8)}/${d.slice(5,7)}, e voltam ao almoxarifado depois do uso.</span></p>
+   <div class="rvi-list">${its.length?its.map(it=>{const av=avOn(it,d,edit&&edit.id),q=pick[it.id]||0,c=icat(it.cat);return `<div class="rvi ${q?'on':''} ${av===0&&!q?'out':''}">${kTile(c,36)}<span class="dkt"><b>${esc(it.n)}</b><span>${av===0?'Indisponível nessa data':`${av} de ${it.total} disponíveis nessa data`}</span></span>
+    <span class="rvi-q"><button type="button" class="ibtn sm" data-q="-1" data-it="${it.id}" ${q?'':'disabled'} aria-label="Menos">${ic('minus',14,2.2)}</button><b>${q}</b><button type="button" class="ibtn sm" data-q="1" data-it="${it.id}" ${q>=av?'disabled':''} aria-label="Mais">${ic('plus',14,2.2)}</button></span></div>`;}).join(''):'<div class="mempty"><p>Nada encontrado.</p><span>Tente outra busca.</span></div>'}</div>`;};
+ const review=()=>{const s=slById(f.s.value),its=Object.entries(pick).filter(x=>x[1]>0);
+  return `<div class="rvr"><div class="rvr-c"><span class="htile" style="--s:42px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,20)}</span><div><b>${esc(s.n)}</b><span>${wd(f.d.value)}, ${fmtDate(f.d.value)} · ${hm(f.f.value)}–${hm(f.t.value)}</span></div><button type="button" class="lnk" data-go="1">Alterar</button></div>
+   <dl class="rvd-kv"><div><dt>Solicitante</dt><dd class="rvw">${avN(f.who.value)}${esc(f.who.value)}</dd></div><div><dt>Pessoas</dt><dd>${f.p.value} de ${s.cap}</dd></div><div><dt>Finalidade</dt><dd>${esc(f.why.value.trim()||'—')}</dd></div></dl>
+   <div class="rvr-i"><div class="sh"><h3>Itens do almoxarifado</h3><button type="button" class="lnk" data-go="2">${its.length?'Alterar':'Adicionar'}</button></div>${its.length?`<ul>${its.map(([id,q])=>{const it=itm(id);return `<li>${kTile(icat(it.cat),30)}<span>${esc(it.n)}</span><b>${q}×</b></li>`;}).join('')}</ul><p class="hint">Empréstimo de ${+f.d.value.slice(8)}/${f.d.value.slice(5,7)}, devolução no mesmo dia.</p>`:'<p class="who" style="margin:0">Nenhum item. A reserva é só da sala.</p>'}</div></div>`;};
+ const go=n=>{step=n;$$('.rvw-p',f).forEach(p=>p.hidden=+p.dataset.p!==n);$$('#rvSteps li').forEach((li,i)=>{li.classList.toggle('on',i+1===n);li.classList.toggle('done',i+1<n);});
+  if(n===2){$('.rvw-p[data-p="2"]',f).innerHTML=items2();bind2();}if(n===3)$('.rvw-p[data-p="3"]',f).innerHTML=review();
+  $('#rvBack').textContent=n===1?'Cancelar':'Voltar';ok.textContent=n===3?(edit?'Salvar alterações':'Confirmar reserva'):'Continuar';
+  $('#rvCnt').textContent=n===2?(sumHTML()||'Itens são opcionais'):'';if(n===1)chk();else ok.disabled=false;$('.dlg').scrollTop=0;};
+ const bind2=()=>{const p=$('.rvw-p[data-p="2"]',f),q=$('#rvIq');q.addEventListener('input',e=>{S.rvIq=e.target.value;const c=e.target.selectionStart;p.innerHTML=items2();bind2();const n=$('#rvIq');n.focus();n.setSelectionRange(c,c);});};
+ f.addEventListener('click',e=>{const b=e.target.closest('[data-q],[data-rvk],[data-go]');if(!b)return;
+  if(b.dataset.go){go(+b.dataset.go);return;}
+  if(b.dataset.rvk!==undefined){S.rvIk=b.dataset.rvk;$('.rvw-p[data-p="2"]',f).innerHTML=items2();bind2();return;}
+  const id=b.dataset.it,it=itm(id),av=avOn(it,f.d.value,edit&&edit.id);pick[id]=Math.max(0,Math.min(av,(pick[id]||0)+ +b.dataset.q));$('.rvw-p[data-p="2"]',f).innerHTML=items2();bind2();$('#rvCnt').textContent=sumHTML()||'Itens são opcionais';});
+ $('#rvBack').addEventListener('click',()=>{if(step===1)closeDlg();else go(step-1);});
+ S.rvIq='';S.rvIk='';
+ f.addEventListener('input',e=>{if(step===1)chk();});f.addEventListener('change',e=>{if(step===1){chk();Object.keys(pick).forEach(k=>{const av=avOn(itm(k),f.d.value,edit&&edit.id);if(pick[k]>av)pick[k]=av;});}});chk();
+ f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;if(step<3){go(step+1);return;}ok.classList.add('busy');setTimeout(()=>{const o2={s:f.s.value,d:f.d.value,f:f.f.value,t:f.t.value,p:+f.p.value,who:f.who.value,why:f.why.value.trim()};
+  let rv;if(edit){Object.assign(edit,o2);rv=edit;for(let i=LOANS.length-1;i>=0;i--)if(LOANS[i].rv===edit.id)LOANS.splice(i,1);}else{rv=RV(o2.s,o2.d,o2.f,o2.t,o2.p,o2.who,o2.why);RESERVAS.push(rv);}
+  Object.entries(pick).filter(x=>x[1]>0).forEach(([id,q])=>{const l=LN(id,q,o2.who,o2.d,o2.d);l.rv=rv.id;l.note='Reserva · '+slById(o2.s).n;LOANS.unshift(l);});
+  S.rvDay=o2.d;if(o2.d<S.rvWk||o2.d>addD(S.rvWk,6))S.rvWk=o2.d;closeDlg();render();const ni=Object.values(pick).reduce((a,b)=>a+b,0);toast(edit?`Reserva atualizada · ${o2.who.split(' ')[0]} foi avisado(a)`:`Reserva confirmada · ${slById(o2.s).n}, ${hm(o2.f)}–${hm(o2.t)}${ni?` · ${ni} ${ni>1?'itens':'item'} do almoxarifado`:''}`);},650);});
 }
 
 /* ---------- Salas ---------- */
@@ -3089,31 +3369,119 @@ function slPage(){
 }
 function slCard(s,wk){
  const nx=RESERVAS.filter(r=>r.s===s.id&&r.st==='confirmada'&&!rvPast(r)).sort((a,b)=>a.d+a.f<b.d+b.f?-1:1)[0];
- const fx=s.fixed.length?[...new Set(s.fixed.map(x=>x[3]))].join(', '):'';
- return `<article class="card sp-c"><header><span class="htile" style="--s:42px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,20)}</span><div class="dkt"><b>${esc(s.n)}</b><span>${ic('pin',12)}${esc(s.loc)}</span></div>
-  <div style="position:relative"><button class="ibtn sm" data-a="slMenu" data-v="${s.id}" aria-label="Ações">${ic('dots',16)}</button><div class="pop" id="slPop-${s.id}" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="slEdit" data-v="${s.id}">${ic('sliders',16)}Editar sala</button><button class="pi" data-a="slRes" data-v="${s.id}">${ic('calendar',16)}Ver reservas</button><hr><button class="pi danger" data-a="slOff" data-v="${s.id}">${ic('x',16)}Desativar</button></div></div></header>
+ const fx=s.uso.length?[...new Set(s.uso.map(u=>u.l))].join(', '):'';
+ return `<article class="card sp-c"><header><span class="htile" style="--s:42px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,20)}</span><button class="dkt sp-open" data-a="slOpen" data-v="${s.id}"><b>${esc(s.n)}</b><span>${ic('pin',12)}${esc(s.loc)}</span></button>
+  <div style="position:relative"><button class="ibtn sm" data-a="slMenu" data-v="${s.id}" aria-label="Ações">${ic('dots',16)}</button><div class="pop" id="slPop-${s.id}" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="slEdit" data-v="${s.id}">${ic('sliders',16)}Editar sala</button><button class="pi" data-a="slFix" data-v="${s.id}">${ic('lock',16)}Uso fixo</button><button class="pi" data-a="slRes" data-v="${s.id}">${ic('calendar',16)}Ver reservas</button><hr><button class="pi danger" data-a="slOff" data-v="${s.id}">${ic('x',16)}Desativar</button></div></div></header>
   <div class="sp-cap2"><b>${s.cap}</b><span>lugares</span></div>
   ${s.desc?`<p class="sp-desc">${esc(s.desc)}</p>`:''}
-  ${s.rec.length?`<div class="sp-recs">${s.rec.map(k=>{const r=RECS.find(x=>x[0]===k);return `<span title="${r[1]}">${ic(r[2],13)}${r[1]}</span>`;}).join('')}</div>`:''}
+  ${s.rec.length?`<div class="sp-recs">${s.rec.map(k=>{const r=recOf(s,k);return r?`<span title="${esc(r[1])}">${ic(r[2],13)}${esc(r[1])}</span>`:'';}).join('')}</div>`:''}
   <div class="sp-wkb"><p class="fl">Próximos 7 dias <b>${(()=>{const h=wk.reduce((a,d)=>a+hrs(s.id,d),0);return h?(Math.round(h*10)/10).toString().replace('.',',')+'h em uso':'livre a semana toda';})()}</b></p><div>${wk.map(d=>{const h=hrs(s.id,d);return `<span title="${wd(d)} ${+d.slice(8)} · ${h?String(Math.round(h*10)/10).replace('.',',')+'h em uso':'livre'}"><i style="height:${h?Math.max(10,Math.min(1,h/6)*100):4}%" class="${h>=3?'hi':''} ${h?'':'z'}"></i><small>${wd(d)}</small></span>`;}).join('')}</div>${fx?`<span class="hint">${ic('lock',11)}Uso fixo: ${esc(fx)}</span>`:''}</div>
   <footer>${nx?`<span class="sp-nx"><small>Próxima</small>${wd(nx.d)} ${+nx.d.slice(8)} · ${hm(nx.f)} · ${esc(nx.why)}</span>`:'<span class="sp-nx"><small>Próxima</small>Nenhuma reserva</span>'}<button class="btn sec sm" data-a="slBook" data-v="${s.id}">Reservar</button></footer></article>`;
 }
-function slForm(id){
- const s=id?slById(id):null,v=s||{n:'',cap:'',loc:'',desc:'',rec:[]};
- openDlg(`${dlgHead(s?'Editar sala':'Adicionar sala',s?'':'A sala fica disponível para reserva assim que você salvar.')}
-  <form id="slF" class="fgrid" novalidate>
-   <label class="fld wide"><span class="fl">Nome</span><input name="n" value="${esc(v.n)}" placeholder="Ex.: Sala de Reuniões A" autocomplete="off"><span class="err"></span></label>
-   <label class="fld"><span class="fl">Capacidade</span><span class="sp-unit"><input type="number" name="cap" min="1" inputmode="numeric" value="${v.cap}" placeholder="0"><em>pessoas</em></span></label>
-   <label class="fld"><span class="fl">Localização <small>opcional</small></span><input name="loc" value="${esc(v.loc)}" placeholder="Ex.: 1º andar" autocomplete="off"></label>
-   <div class="fld wide"><span class="fl">Recursos <small>opcional</small></span><div class="sp-rpick">${RECS.map(r=>`<label><input type="checkbox" name="rec" value="${r[0]}" ${v.rec.includes(r[0])?'checked':''}><span>${ic(r[2],14)}${r[1]}</span></label>`).join('')}</div></div>
-   <label class="fld wide"><span class="fl">Descrição <small>opcional</small></span><textarea class="ta" name="desc" rows="2" placeholder="Regras de uso, observações…">${esc(v.desc)}</textarea></label>
-   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="slOk">${s?'Salvar':'Adicionar sala'}</button></div></form>`);
- const f=$('#slF'),ok=$('#slOk'),chk=()=>{ok.disabled=!f.n.value.trim()||!(+f.cap.value>0);};f.addEventListener('input',chk);chk();
- f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;const n=f.n.value.trim();if(ESPS.some(x=>x!==s&&norm(x.n)===norm(n))){f.n.closest('.fld').classList.add('bad');f.n.nextElementSibling.textContent='Já existe uma sala com esse nome';return;}
-  ok.classList.add('busy');setTimeout(()=>{const o={n,cap:+f.cap.value,loc:f.loc.value.trim()||'—',desc:f.desc.value.trim(),rec:[...f.querySelectorAll('[name=rec]:checked')].map(x=>x.value)};
-   if(s)Object.assign(s,o);else ESPS.push({id:'s'+Date.now(),act:true,tone:TONES[ESPS.length%6],icon:'building',fixed:[],...o});closeDlg();render();toast(s?'Sala atualizada':`${n} adicionada`);},600);});
-}
+/* ---------- Sala: página própria (Dados · Uso fixo · Reservas) ---------- */
+const SL_TABS=[['dados','Dados'],['uso','Uso fixo'],['res','Reservas']];
+function slDetail(){const isNew=S.sala==='new',s=isNew?null:slById(S.sala);if(!isNew&&!s){S.sala=null;return slPage();}
+ const t=isNew?'dados':(S.slTab||'dados'),fut=s?RESERVAS.filter(r=>r.s===s.id&&r.st==='confirmada'&&!rvPast(r)).length:0;
+ return `<nav class="crumb rise" aria-label="Você está em"><span class="soft">Espaços</span>${ic('chevR',13,2)}<button class="lnk back" data-a="slBack">Salas</button>${ic('chevR',13,2)}<span>${isNew?'Nova sala':esc(s.n)}</span></nav>
+ <header class="card prof rise" style="--d:1">
+  <div class="pid">${isNew?`<span class="htile" style="--s:56px;background:var(--brand-soft);color:var(--brand-text)">${ic('building',24)}</span>`:`<span class="htile" style="--s:56px;background:var(--tone-${s.tone});color:var(--tone-${s.tone}-ink)">${ic(s.icon,24)}</span>`}
+   <div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${isNew?'Nova sala':esc(s.n)}</h1>${s?(s.act?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Disponível</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Desativada</span>'):''}</div>
+   <p>${isNew?'Preencha os dados. Depois você define o uso fixo e acompanha as reservas.':`${s.cap} lugares${s.loc&&s.loc!=='—'?' · '+esc(s.loc):''} · ${s.uso.length} uso${s.uso.length===1?'':'s'} fixo${s.uso.length===1?'':'s'} · ${fut} reserva${fut===1?'':'s'} futura${fut===1?'':'s'}`}</p></div></div>
+  ${s?`<div class="pact"><button class="btn sec" data-a="slBook" data-v="${s.id}">${ic('calendar',15)}Reservar</button><div style="position:relative"><button class="ibtn" data-a="slDMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="slDPop" style="right:0;top:calc(100% + 6px)">${s.act?`<button class="pi danger" data-a="slOff" data-v="${s.id}">${ic('x',17)}Desativar sala</button>`:`<button class="pi" data-a="slOn" data-v="${s.id}">${ic('check',17)}Reativar sala</button>`}</div></div></div>`:''}
+  <div class="ptabs" role="tablist">${SL_TABS.map(x=>`<button role="tab" class="${t===x[0]?'on':''}" aria-selected="${t===x[0]}" ${isNew&&x[0]!=='dados'?'disabled title="Salve a sala primeiro"':''} data-a="slTab" data-v="${x[0]}">${x[1]}${s&&x[0]==='uso'&&s.uso.length?`<small>${s.uso.length}</small>`:''}${s&&x[0]==='res'&&fut?`<small>${fut}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
+ </header>
+ <div class="rise" style="--d:2">${t==='uso'?slUso(s):t==='res'?slCal(s):slDados(s)}</div>`;}
 
+function slDados(s){const v=s||{n:'',cap:'',loc:'',desc:'',rec:[],custom:[]},cust=(S.slCust||v.custom||[]);
+ return `<form id="slF" class="sl-form" novalidate>
+  <section class="card pc"><div class="sh"><div><h2>Informações</h2><p class="who" style="margin:4px 0 0">O que aparece para quem reserva.</p></div></div>
+   <div class="fgrid sl-g">
+    <label class="fld wide"><span class="fl">Nome</span><input name="n" value="${esc(v.n)}" placeholder="Ex.: Sala de Reuniões A" autocomplete="off"><span class="err"></span></label>
+    <label class="fld"><span class="fl">Capacidade</span><span class="sp-unit"><input type="number" name="cap" min="1" inputmode="numeric" value="${v.cap}" placeholder="0"><em>pessoas</em></span><span class="err"></span></label>
+    <label class="fld"><span class="fl">Localização <small>opcional</small></span><input name="loc" value="${esc(v.loc==='—'?'':v.loc)}" placeholder="Ex.: 1º andar" autocomplete="off"></label>
+    <label class="fld wide"><span class="fl">Descrição <small>opcional</small></span><textarea class="ta" name="desc" rows="3" placeholder="Regras de uso, observações…">${esc(v.desc)}</textarea></label>
+   </div></section>
+  <section class="card pc"><div class="sh"><div><h2>Recursos</h2><p class="who" style="margin:4px 0 0">Marque o que a sala tem. Se faltar algum, crie um recurso só desta sala.</p></div></div>
+   <div class="sp-rpick sl-recs">${RECS.map(r=>`<label><input type="checkbox" name="rec" value="${r[0]}" ${v.rec.includes(r[0])?'checked':''}><span>${ic(r[2],14)}${r[1]}</span></label>`).join('')}${cust.map(c=>`<label class="cust"><input type="checkbox" name="rec" value="${c.k}" ${v.rec.includes(c.k)||c.fresh?'checked':''}><span>${ic('tag',14)}${esc(c.n)}<button type="button" class="sl-cx" data-a="slCustRm" data-v="${c.k}" aria-label="Remover ${esc(c.n)}">${ic('x',11,2.4)}</button></span></label>`).join('')}</div>
+   <div class="sl-cadd"><label class="sbox"><span class="sl-plus">${ic('plus',15,2.2)}</span><input id="slCustN" placeholder="Novo recurso, ex.: Bebedouro" maxlength="28" autocomplete="off"></label><button type="button" class="btn sec" data-a="slCustAdd">Adicionar recurso</button></div>
+   <span class="err" id="slCustErr"></span></section>
+  <div class="sl-bar"><span class="who" id="slSt">${s?'Nenhuma alteração':'Preencha nome e capacidade'}</span><span class="row2">${s?'':`<button type="button" class="btn sec" data-a="slBack">Cancelar</button>`}<button type="submit" class="btn pri" id="slOk" disabled>${s?'Salvar alterações':'Criar sala'}</button></span></div>
+ </form>`;}
+
+/* Uso fixo */
+function ufForm(u){const v=u||{l:'',f:'19:30',t:'21:30',rec:'semanal',days:[3],mode:'semana',date:NOWD,from:NOWD,to:''},show=x=>x?'':'hidden';
+ return `<section class="card pc sec editing uf-ed" id="ufEd"><div class="sh"><h2>${u?'Editar uso fixo':'Novo uso fixo'}</h2></div>
+  <form id="ufF" class="fgrid uf-g" novalidate>
+   <label class="fld wide"><span class="fl">Nome do uso</span><input name="l" value="${esc(v.l)}" placeholder="Ex.: Culto de quarta" maxlength="40" autocomplete="off"><span class="err"></span></label>
+   <label class="fld"><span class="fl">Início</span><input type="time" name="f" value="${v.f}" step="900"></label>
+   <label class="fld"><span class="fl">Término</span><input type="time" name="t" value="${v.t}" step="900"><span class="err"></span></label>
+   <div class="fld wide"><span class="fl">Recorrência</span><div class="sp-why">${REC_L.map(r=>`<label><input type="radio" name="rec" value="${r[0]}" ${v.rec===r[0]?'checked':''}><span>${r[1]}</span></label>`).join('')}</div></div>
+   <div class="fld wide" data-show="dias" ${show(['semanal','quinzenal'].includes(v.rec))}><span class="fl">Dias da semana</span><div class="sp-rpick uf-days">${DOWS.map((d,i)=>`<label><input type="checkbox" name="days" value="${i}" ${v.days.includes(i)?'checked':''}><span>${d}</span></label>`).join('')}</div><span class="err"></span></div>
+   <label class="fld" data-show="date" ${show(['unico','mensal','anual'].includes(v.rec))}><span class="fl" id="ufDateL">${v.rec==='unico'?'Data':'Data de referência'}</span><input type="date" name="date" value="${v.date||NOWD}"><span class="hint" id="ufDateH">${v.rec==='unico'?'O dia em que a sala fica ocupada.':'A primeira ocorrência. Dela saem o dia do mês e o dia da semana.'}</span></label>
+   <div class="fld" data-show="mode" ${show(['mensal','anual'].includes(v.rec))}><span class="fl">Repetir pelo</span><div class="yn uf-mode"><label><input type="radio" name="mode" value="dia" ${v.mode==='dia'?'checked':''}><span id="ufModeD">Dia fixo</span></label><label><input type="radio" name="mode" value="semana" ${v.mode!=='dia'?'checked':''}><span id="ufModeS">Dia da semana</span></label></div></div>
+   <div class="fld wide uf-vig"><span class="fl">Vigência</span><div class="uf-vg"><label class="fld"><span class="fl">Começa em</span><input type="date" name="from" value="${v.from}"></label><label class="fld"><span class="fl">Termina em</span><input type="date" name="to" value="${v.to}" ${v.to?'':'disabled'}><span class="err"></span></label><label class="tog uf-noend"><input type="checkbox" name="noend" ${v.to?'':'checked'}><span class="sw"></span><span>Sem data final</span></label></div></div>
+   <div class="wide uf-prev" id="ufPrev"></div>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="ufCancel">Cancelar</button><button type="submit" class="btn pri" id="ufOk">${u?'Salvar uso fixo':'Adicionar uso fixo'}</button></div>
+  </form></section>`;}
+function slUso(s){const ed=S.uEd,list=s.uso.slice().sort((a,b)=>(ruleNext(a,1)[0]||'9')<(ruleNext(b,1)[0]||'9')?-1:1);
+ return `<div class="uf-wrap">
+  <div class="uf-head"><p class="who" style="margin:0">Horários em que a sala fica bloqueada para reserva, como cultos e encontros recorrentes. Valem dentro da vigência de cada um.</p>${ed||!list.length?'':`<button class="btn pri" data-a="ufNew">${ic('plus',15,2.2)}Adicionar uso fixo</button>`}</div>
+  ${ed==='new'?ufForm():''}
+  ${list.length?list.map(u=>ed===u.id?ufForm(u):ufCard(u)).join(''):ed?'':`<section class="card pc"><div class="soft-empty"><p>Nenhum uso fixo.</p><span class="who">A sala fica livre para reserva em qualquer horário.</span><button class="btn pri" data-a="ufNew">${ic('plus',15,2.2)}Adicionar uso fixo</button></div></section>`}
+ </div>`;}
+function ufCard(u){const nx=ruleNext(u,4),ended=u.to&&u.to<NOWD;
+ return `<article class="card pc uf-c ${ended?'off':''}"><div class="uf-l"><span class="uf-time"><b>${hm(u.f)}</b><small>${hm(u.t)}</small></span><div class="uf-b"><b>${esc(u.l)}</b><span>${ruleTxt(u)}</span><span class="uf-meta"><span class="uf-tag">${REC_L.find(r=>r[0]===u.rec)[1]}</span>${ic('calendar',12)}${vigTxt(u)}</span></div></div>
+  <div class="uf-r"><div class="uf-nx">${ended?'<span class="soft">Vigência encerrada</span>':nx.length?`<small>Próximas</small>${nx.map(d=>`<span>${dNx(d)}</span>`).join('')}`:'<span class="soft">Sem próximas datas</span>'}</div>
+   <div class="row2"><button class="btn sec sm" data-a="ufEdit" data-v="${u.id}">${ic('pen',14)}Editar</button><button class="ibtn sm uf-del" data-a="ufDel" data-v="${u.id}" aria-label="Excluir uso fixo">${ic('x',14,2)}</button></div></div></article>`;}
+function ufRead(f){const g=n=>f.querySelector(`[name=${n}]`);return {l:g('l').value.trim(),f:g('f').value,t:g('t').value,rec:f.querySelector('[name=rec]:checked').value,days:[...f.querySelectorAll('[name=days]:checked')].map(x=>+x.value),mode:(f.querySelector('[name=mode]:checked')||{}).value||'semana',date:g('date').value,from:g('from').value||NOWD,to:g('noend').checked?'':g('to').value};}
+
+/* Reservas da sala: calendário do mês */
+function slCal(s){const ym=S.slM||NOWD.slice(0,7),[y,m]=ym.split('-').map(Number),days=new Date(y,m,0).getDate(),off=new Date(y,m-1,1).getDay();
+ const iso=d=>`${ym}-${String(d).padStart(2,'0')}`,sel=S.slSel&&S.slSel.startsWith(ym)?S.slSel:null;
+ const resOn=d=>RESERVAS.filter(r=>r.s===s.id&&r.d===d&&r.st==='confirmada'),fixOn=d=>s.uso.filter(u=>ruleOn(u,d));
+ const cells=[];for(let i=0;i<off;i++)cells.push('<span class="cd0"></span>');
+ for(let d=1;d<=days;d++){const k=iso(d),rs=resOn(k),fx=fixOn(k),all=[...fx.map(u=>({t:u.l,f:1,h:u.f})),...rs.map(r=>({t:r.why||'Reserva',h:r.f}))].sort((a,b)=>a.h<b.h?-1:1);
+  cells.push(`<button class="cdy ${k===NOWD?'today':''} ${sel===k?'sel':''} ${k<NOWD?'past':''}" data-a="slDay" data-v="${k}"><span class="cn">${d}</span>${all.slice(0,2).map(e=>`<span class="cev ${e.f?'fx':''}" style="--t:var(--tone-${e.f?'salvia':'ceu'});--ti:var(--tone-${e.f?'salvia':'ceu'}-ink)">${esc(e.t)}</span>`).join('')}${all.length>2?`<span class="cmore">+${all.length-2}</span>`:''}</button>`);}
+ const d0=sel||null,items=d0?[...fixOn(d0).map(u=>({h:u.f,e:u.t,t:u.l,sub:'Uso fixo · '+ruleTxt(u),fx:1})),...resOn(d0).map(r=>({h:r.f,e:r.t,t:r.why||'Reserva',sub:`${r.who} · ${r.p} pessoas`,id:r.id}))].sort((a,b)=>a.h<b.h?-1:1)
+  :RESERVAS.filter(r=>r.s===s.id&&r.st==='confirmada'&&r.d.startsWith(ym)).sort((a,b)=>a.d+a.f<b.d+b.f?-1:1).map(r=>({d:r.d,h:r.f,e:r.t,t:r.why||'Reserva',sub:`${r.who} · ${r.p} pessoas`,id:r.id}));
+ return `<div class="calw"><section class="card pc cal"><div class="sh"><h2>${MONTHS[m-1][0].toUpperCase()+MONTHS[m-1].slice(1)} ${y}</h2><div class="row2"><button class="ibtn sm" data-a="slM" data-v="-1" aria-label="Mês anterior">${ic('chevL',15,2)}</button><button class="btn sec sm" data-a="slM" data-v="0">Hoje</button><button class="ibtn sm" data-a="slM" data-v="1" aria-label="Próximo mês">${ic('chevR',15,2)}</button></div></div>
+  <div class="cgrid">${DOWS.map(x=>`<span class="cwd">${x}</span>`).join('')}${cells.join('')}</div>
+  <div class="cleg"><span><i class="lt" style="background:var(--tone-ceu)"></i>Reserva</span><span><i class="lt" style="background:var(--tone-salvia)"></i>Uso fixo</span></div></section>
+  <section class="card pc"><div class="sh"><h2>${d0?`${wd(d0)}, ${fmtD(d0)}`:'Reservas no mês'}</h2>${d0?'<button class="lnk" data-a="slDay" data-v="">Ver o mês</button>':''}</div>
+   ${items.length?`<div class="clist">${items.map(x=>`<${x.id?'button':'div'} class="dk sl-dk ${x.fx?'fx':''}" ${x.id?`data-a="rvView" data-v="${x.id}"`:''}>${x.d?dTile({d:x.d}):`<span class="sl-h"><b>${hm(x.h)}</b><small>${hm(x.e)}</small></span>`}<span class="dkt"><b>${esc(x.t)}</b><span>${x.d?`${hm(x.h)}–${hm(x.e)} · `:''}${esc(x.sub)}</span></span>${x.fx?`<span class="uf-tag">${ic('lock',11)}Fixo</span>`:''}</${x.id?'button':'div'}>`).join('')}</div>`:`<p class="who" style="margin:0">${d0?'Sala livre o dia todo.':'Nenhuma reserva neste mês.'}</p>`}
+   ${s.act&&(!d0||d0>=NOWD)?`<button class="btn pri sl-book" data-a="slBookDay" data-v="${d0||''}">${ic('plus',15,2.2)}${d0?'Reservar neste dia':'Nova reserva'}</button>`:''}</section></div>`;}
+
+function slAfter(){requestAnimationFrame(()=>typeof tabInd==='function'&&tabInd());
+ const f=$('#slF');if(f){const s=S.sala==='new'?null:slById(S.sala),ok=$('#slOk'),st=$('#slSt');
+  const snap=()=>JSON.stringify([f.n.value.trim(),f.cap.value,f.loc.value.trim(),f.desc.value.trim(),[...f.querySelectorAll('[name=rec]:checked')].map(x=>x.value).sort(),(S.slCust||[]).map(c=>c.n)]),orig=s?JSON.stringify([s.n,String(s.cap),s.loc==='—'?'':s.loc,s.desc,s.rec.slice().sort(),(s.custom||[]).map(c=>c.n)]):'';
+  const upd=()=>{const valid=f.n.value.trim()&&+f.cap.value>0,dirty=!s||snap()!==orig;ok.disabled=!valid||!dirty;st.textContent=!valid?'Preencha nome e capacidade':dirty?(s?'Alterações não salvas':'Pronto para criar'):'Nenhuma alteração';st.classList.toggle('warn',!!s&&dirty);};
+  f.addEventListener('input',e=>{e.target.closest('.fld')?.classList.remove('bad');upd();});f.addEventListener('change',upd);upd();
+  const ci=$('#slCustN');ci.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();A.slCustAdd();}});
+  f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;const n=f.n.value.trim();if(ESPS.some(x=>x!==s&&norm(x.n)===norm(n))){f.n.closest('.fld').classList.add('bad');f.n.parentElement.querySelector('.err').textContent='Já existe uma sala com esse nome';f.n.focus();return;}
+   busy(ok,600,s?'Salvo':'Criada',()=>{const o={n,cap:+f.cap.value,loc:f.loc.value.trim()||'—',desc:f.desc.value.trim(),rec:[...f.querySelectorAll('[name=rec]:checked')].map(x=>x.value),custom:(S.slCust||[]).map(c=>({k:c.k,n:c.n}))};
+    if(s){Object.assign(s,o);S.slCust=null;slRe();toast('Sala atualizada');}
+    else{const nw={id:'s'+Date.now(),act:true,tone:TONES[ESPS.length%6],icon:'building',uso:[],...o};ESPS.push(nw);S.sala=nw.id;S.slTab='uso';S.slCust=null;render();window.scrollTo({top:0});toast(`${n} criada · agora defina o uso fixo, se houver`);}});});
+  if(!s)setTimeout(()=>f.n.focus(),80);}
+ const uf=$('#ufF');if(uf){const s=slById(S.sala),edU=S.uEd==='new'?null:s.uso.find(x=>x.id===S.uEd);
+  const paint=()=>{const v=ufRead(uf),show=(k,on)=>{const el=uf.querySelector(`[data-show=${k}]`);if(el)el.hidden=!on;};
+   show('dias',['semanal','quinzenal'].includes(v.rec));show('date',['unico','mensal','anual'].includes(v.rec));show('mode',['mensal','anual'].includes(v.rec));
+   $('#ufDateL').textContent=v.rec==='unico'?'Data':'Data de referência';$('#ufDateH').textContent=v.rec==='unico'?'O dia em que a sala fica ocupada.':'A primeira ocorrência. Dela saem o dia do mês e o dia da semana.';
+   if(v.date){$('#ufModeD').textContent=`Dia fixo · ${+v.date.slice(8)}${v.rec==='anual'?'/'+v.date.slice(5,7):''}`;$('#ufModeS').textContent=`Dia da semana · ${ORD(nthOf(v.date))} ${DOWS[dow(v.date)]}`;}
+   uf.to.disabled=uf.noend.checked;uf.querySelector('.uf-vig').hidden=v.rec==='unico';
+   const tmp={...v,from:v.rec==='unico'?(v.date||NOWD):v.from,to:v.rec==='unico'?(v.date||''):v.to},nx=ruleNext(tmp,6);
+   const cf=[];nx.forEach(d=>RESERVAS.filter(r=>r.s===s.id&&r.d===d&&r.st==='confirmada'&&v.f&&v.t&&mm(r.f)<mm(v.t)&&mm(r.t)>mm(v.f)).forEach(r=>cf.push(r)));
+   $('#ufPrev').innerHTML=`<div class="uf-sum"><span class="uf-ic">${ic('lock',16)}</span><div><b>${v.l?esc(v.l)+' · ':''}${ruleTxt(tmp)}${v.f&&v.t?`, das ${hm(v.f)} às ${hm(v.t)}`:''}</b><span>${v.rec==='unico'?'Bloqueio de um dia só':vigTxt(tmp)}</span></div></div>
+    ${nx.length?`<div class="uf-nx"><small>Próximas datas bloqueadas</small>${nx.map(d=>`<span>${dNx(d)}</span>`).join('')}</div>`:'<p class="who" style="margin:0">Nenhuma data dentro da vigência.</p>'}
+    ${cf.length?`<p class="uf-warn">${ic('alert',14,2)}Já existe${cf.length>1?'m':''} ${cf.length} reserva${cf.length>1?'s':''} nesses horários (${cf.slice(0,2).map(r=>`${wd(r.d)} ${+r.d.slice(8)}, ${esc(r.why||r.who)}`).join('; ')}). Elas continuam valendo; avise os solicitantes se precisar remarcar.</p>`:''}`;};
+  uf.addEventListener('input',e=>{e.target.closest('.fld')?.classList.remove('bad');paint();});uf.addEventListener('change',paint);paint();setTimeout(()=>uf.l.focus(),60);
+  uf.addEventListener('submit',e=>{e.preventDefault();const v=ufRead(uf),bad=(el,m)=>{const fl=el.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;el.focus&&el.focus();return false;};
+   if(!v.l)return bad(uf.l,'Dê um nome, ex.: Culto de quarta');if(!v.f||!v.t||mm(v.t)<=mm(v.f))return bad(uf.t,'O término precisa ser depois do início');
+   if(['semanal','quinzenal'].includes(v.rec)&&!v.days.length)return bad(uf.querySelector('[name=days]'),'Escolha pelo menos um dia');
+   if(v.rec!=='unico'&&v.to&&v.to<v.from)return bad(uf.to,'Termina antes de começar');
+   if(v.rec==='unico'){v.from=v.date;v.to=v.date;}else if(!['mensal','anual'].includes(v.rec))v.date='';
+   busy($('#ufOk'),600,'Salvo',()=>{if(edU)Object.assign(edU,v);else s.uso.push(UF(v.l,v.f,v.t,v.rec,v));S.uEd=null;slRe();toast(edU?'Uso fixo atualizado':`${v.l} adicionado ao uso fixo`);});});}
+}
+const slRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
 function spAfter(){
  const q=$('#rvq');if(q)q.addEventListener('input',e=>{S.rvq=e.target.value;const p=e.target.selectionStart;const y=window.scrollY;render();window.scrollTo(0,y);const n=$('#rvq');n.focus();n.setSelectionRange(p,p);});
  $$('.sp-trk').forEach(t=>t.addEventListener('click',e=>{if(e.target.closest('.sp-blk'))return;const r=t.getBoundingClientRect(),m=H0*60+Math.floor((e.clientX-r.left)/r.width*(H1-H0)*2)*30,sid=t.dataset.sala;
@@ -3133,12 +3501,30 @@ const SPA={
   openDlg(`<div class="cdel"><span class="cdi">${ic('alert',20,2)}</span>${dlgHead('Cancelar esta reserva?',`${esc(s.n)} · ${wd(r.d)} ${+r.d.slice(8)}, ${hm(r.f)}–${hm(r.t)}. ${esc(r.who.split(' ')[0])} recebe um aviso.`)}</div>
    <div class="fld"><span class="fl">Motivo</span><div class="sp-why">${['Remarcado pelo solicitante','Sala indisponível','Evento cancelado','Outro'].map((m,i)=>`<label><input type="radio" name="cw" value="${m}" ${i?'':'checked'}><span>${m}</span></label>`).join('')}</div></div>
    <div class="dfoot"><button class="btn sec" data-a="closeDlg">Voltar</button><button class="btn dang" id="cwOk">Cancelar reserva</button></div>`,'sm del');
-  $('#cwOk').addEventListener('click',e=>{const why=$('[name=cw]:checked').value;e.target.classList.add('busy');setTimeout(()=>{r.st='cancelada';r.reason=why;closeDlg();spRe();toast('Reserva cancelada',()=>{r.st='confirmada';r.reason='';spRe();});},600);});},
+  $('#cwOk').addEventListener('click',e=>{const why=$('[name=cw]:checked').value;e.target.classList.add('busy');setTimeout(()=>{const ls=LOANS.filter(l=>l.rv===r.id);ls.forEach(l=>LOANS.splice(LOANS.indexOf(l),1));r.st='cancelada';r.reason=why;closeDlg();spRe();toast(ls.length?'Reserva cancelada · itens liberados no almoxarifado':'Reserva cancelada',()=>{r.st='confirmada';r.reason='';LOANS.unshift(...ls);spRe();});},600);});},
  rvRestore:v=>{const r=RESERVAS.find(x=>x.id===v),c=conflict(r.s,r.d,mm(r.f),mm(r.t),r.id);if(c){toast(`Não dá: o horário agora está com ${c.l}`);return;}r.st='confirmada';r.reason='';closeDlg();spRe();toast('Reserva reativada');},
- slNew:()=>slForm(),
- slEdit:v=>{closePops();slForm(v);},
+ slNew:()=>{S.sala='new';S.slTab='dados';S.slCust=[];render();window.scrollTo({top:0});},
+ slEdit:v=>{closePops();S.sala=v;S.slTab='dados';S.slCust=(slById(v).custom||[]).map(c=>({...c}));render();window.scrollTo({top:0});},
+ slOpen:v=>A.slEdit(v),
+ slFix:v=>{closePops();A.slEdit(v);S.slTab='uso';render();},
+ slBack:()=>{S.sala=null;S.uEd=null;S.slCust=null;render();window.scrollTo({top:0});},
+ slTab:v=>{if(S.sala==='new')return;S.slTab=v;S.uEd=null;if(v==='dados')S.slCust=(slById(S.sala).custom||[]).map(c=>({...c}));slRe();},
+ slDMenu:()=>{const p=$('#slDPop');closePops(p);p.classList.toggle('open');},
+ slCustAdd:()=>{const i=$('#slCustN'),n=i.value.trim(),er=$('#slCustErr');er.style.display='';if(!n){i.focus();return;}
+  const all=[...RECS.map(r=>r[1]),...(S.slCust||[]).map(c=>c.n)];if(all.some(x=>norm(x)===norm(n))){er.textContent='Esse recurso já existe na lista';er.style.display='block';i.focus();return;}
+  const f=$('#slF'),keep=[...f.querySelectorAll('[name=rec]:checked')].map(x=>x.value),vals={n:f.n.value,cap:f.cap.value,loc:f.loc.value,desc:f.desc.value};
+  S.slCust=[...(S.slCust||[]),{k:'c'+Date.now(),n,fresh:1}];slRe();const g=$('#slF');Object.entries(vals).forEach(([k,v])=>g[k].value=v);g.querySelectorAll('[name=rec]').forEach(x=>{if(keep.includes(x.value))x.checked=true;});g.dispatchEvent(new Event('change'));$('#slCustN').focus();},
+ slCustRm:(v,b,e)=>{e&&e.preventDefault();const f=$('#slF'),keep=[...f.querySelectorAll('[name=rec]:checked')].map(x=>x.value).filter(x=>x!==v),vals={n:f.n.value,cap:f.cap.value,loc:f.loc.value,desc:f.desc.value},c=S.slCust.find(x=>x.k===v);
+  S.slCust=S.slCust.filter(x=>x.k!==v);slRe();const g=$('#slF');Object.entries(vals).forEach(([k,x])=>g[k].value=x);g.querySelectorAll('[name=rec]').forEach(x=>{x.checked=keep.includes(x.value);});g.dispatchEvent(new Event('change'));toast(`${c.n} removido · salve para confirmar`);},
+ ufNew:()=>{S.uEd='new';slRe();},
+ ufEdit:v=>{S.uEd=v;slRe();},
+ ufCancel:()=>{S.uEd=null;slRe();},
+ ufDel:v=>{const s=slById(S.sala),u=s.uso.find(x=>x.id===v);confirmDel({title:`Excluir “${u.l}”?`,body:`${ruleTxt(u)}, das ${hm(u.f)} às ${hm(u.t)}. A sala volta a ficar livre para reserva nesses horários.`,label:'Excluir uso fixo',onConfirm:()=>{const i=s.uso.indexOf(u);s.uso.splice(i,1);slRe();toast('Uso fixo excluído',()=>{s.uso.splice(i,0,u);slRe();});}});},
+ slM:v=>{const [y,m]=(S.slM||NOWD.slice(0,7)).split('-').map(Number),d=new Date(y,m-1+ +v,1);S.slM=+v===0?NOWD.slice(0,7):`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;S.slSel=+v===0?NOWD:null;slRe();},
+ slDay:v=>{S.slSel=v||null;slRe();},
+ slBookDay:v=>{const d=v&&v>=NOWD?v:NOWD;rvForm({s:S.sala,d});},
  slMenu:v=>{const p=$('#slPop-'+v);closePops(p);p.classList.toggle('open');},
- slRes:v=>{closePops();S.rvSala=v;S.rvf='prox';A.nav('reservas');S.rvSala=v;render();},
+ slRes:v=>{closePops();A.slEdit(v);S.slTab='res';render();},
  slBook:v=>rvForm({s:v,d:NOWD}),
  slOff:v=>{closePops();const s=slById(v),fut=RESERVAS.filter(r=>r.s===v&&r.st==='confirmada'&&!rvPast(r));
   confirmDel({title:`Desativar ${s.n}?`,body:fut.length?`Ela sai da lista de reservas. ${fut.length} reserva${fut.length===1?' futura será cancelada':'s futuras serão canceladas'} e os solicitantes recebem aviso.`:'Ela sai da lista de reservas. Você pode reativar quando quiser.',label:'Desativar',typed:fut.length?s.n:null,
@@ -4490,7 +4876,7 @@ function setDone(id,v){const t=TASKS.find(x=>x.id===id);t.done=v;const el=$('#'+
  const n=openCount(),c=$('#cnt');c.textContent=n;c.style.visibility=n?'':'hidden';c.animate([{transform:'scale(1.3)'},{transform:'none'}],{duration:320,easing:'cubic-bezier(.2,.8,.2,1)'});
  $('#undoAll').style.display=n<3&&n>0?'':'none';$('#lede').innerHTML=lede(n);softSide();}
 const A={
- nav:v=>{S.active=v;S.navOpen={};S.case=null;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
+ nav:v=>{S.active=v;S.navOpen={};S.sala=null;S.slTab='dados';S.uEd=null;S.chp=null;S.chpEd=null;S.case=null;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
  churchMenu:(v,b)=>{const p=$('#churchPop');closePops(p);p.classList.toggle('open');b.setAttribute('aria-expanded',p.classList.contains('open'));},
  setChurch:v=>{S.church=+v;softSide();toast(`Agora em ${CHURCHES[S.church].n}`);},
  meMenu:()=>{const p=$('#mePop');closePops(p);p.classList.toggle('open');},
@@ -4528,5 +4914,5 @@ $('#q').addEventListener('input',e=>cmdList(e.target.value));
 $('#res').addEventListener('click',e=>{const b=e.target.closest('.ri');if(b)cmdPick(+b.dataset.i);});
 $('#res').addEventListener('mousemove',e=>{const b=e.target.closest('.ri');if(b&&+b.dataset.i!==sel){sel=+b.dataset.i;$$('.ri').forEach(x=>x.classList.toggle('sel',x===b));}});
 $('#scrim').addEventListener('click',e=>{if(e.target.id==='scrim')cmdClose();});
-Object.assign(A,PA,IA,DA,CA,HA,RA,KA,AA,AU,GA,EA,LMA,CKA,BBA,PFA,SPA,CMA,CTA,FIA,AXA,BKA);
+Object.assign(A,CPA,PA,IA,DA,CA,HA,RA,KA,AA,AU,GA,EA,LMA,CKA,BBA,PFA,SPA,CMA,CTA,FIA,AXA,BKA);
 render();
