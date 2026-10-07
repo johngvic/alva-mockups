@@ -14,5 +14,12 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "main": "vite.config.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
