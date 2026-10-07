@@ -1,5 +1,5 @@
 /* Layout: página branca e fluida, hero centrado com sol nascendo, faixas em movimento, seção fixa com celular que troca de tela, planos e dúvidas.
-   Tokens = @alva/theme (light), com fundo branco. Página de cor única por escolha (marca em tema claro). */
+   Tokens do design system (tema Dia), com fundo branco. Página de cor única por escolha (marca em tema claro). */
 :root{
   --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
   --font-text:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif;

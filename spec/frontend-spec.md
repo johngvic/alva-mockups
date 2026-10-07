@@ -1,23 +1,34 @@
 # Alva — Especificação de Frontend
 
-Versão viva: https://claude.ai/code/artifact/972b6370-a924-4656-ab04-08a5f2e1a3c2 · atualizado em 2026-10-02
+Atualizado em 2026-10-07. Detalha, para os fronts do Alva, as decisões de `doc_alva/technical/frontend-architecture.md` (revisão aprovada em 04/10/2026). Em caso de conflito, vale o documento de arquitetura; regras de negócio e navegação de produto continuam nos documentos de produto.
 
 ## Visão geral e princípios
 
-O Alva tem dois fronts TypeScript, cada um no seu repositório e servidos pelo mesmo backend (alva-api): **Alva Web** (painel de gestão, Next.js) e **Alva Mobile** (app do membro, Expo), com design system, tipos, regras e camada de dados compartilhados por pacotes privados versionados. Esta especificação substitui a ideia anterior de Angular no painel web.
+O Alva tem quatro fronts TypeScript, cada um no seu repositório, consumindo APIs .NET:
 
-**Convenção de idioma:** todo código é escrito em inglês: variáveis, funções, hooks, tipos, tokens, rotas, query keys, permissões, nomes de arquivos, branches e commits. Os textos que o usuário vê ficam em pt-BR, no pacote de i18n. Esta especificação e os comentários de documentação podem ficar em português.
+| Front | O que é | Base |
+| --- | --- | --- |
+| **Alva Web** | Painel de gestão das igrejas | SPA React + Vite |
+| **Alva Mobile** | App do membro e do líder | React Native + Expo |
+| **Landing** | Site público do Alva e cadastro de novas igrejas | Site estático React + Vite |
+| **Assinaturas** | Painel de administração multiproduto (planos, clientes, cobranças) | SPA React + Vite; sem app mobile |
 
-**Escopo inicial:** as funcionalidades já prototipadas nos dois artifacts (Alva Web e Alva Mobile), mapeadas na seção "Mapa de funcionalidades".
+Alva Web, Alva Mobile e Landing falam com a API do Alva. Assinaturas é outro sistema, com API, banco e domínios próprios; segue o mesmo padrão técnico, mas não compartilha API com o Alva.
 
-**Princípios que guiam todas as decisões:**
+**Não há pacote compartilhado.** Cada repositório declara seus próprios tokens de tema, gera seu próprio cliente da API a partir do OpenAPI e mantém sua configuração de lint e TypeScript. A consistência visual vem de uma referência única (`ux_alva/docs/design-system.md` e `ux_alva/docs/tokens.ts`) copiada para cada repositório, não de uma dependência publicada.
 
-1. **O servidor é a fonte da verdade.** O cliente guarda cópias em cache; nunca uma segunda verdade.
-2. **Real-time invalida ou corrige o cache; não é um estado paralelo.** Um evento recebido sempre termina dentro do cache de dados do servidor.
-3. **Toda escrita é idempotente e reversível no cliente.** Ações otimistas têm rollback e nunca deixam a tela num estado impossível.
-4. **Falha de uma área não derruba o app.** Cada rota e cada widget tem seu limite de erro e seu estado de vazio, carregando e erro.
-5. **Mobile primeiro, também no painel.** Admins usam o painel no celular; toda tela web funciona a partir de 360px.
-6. **Mesma identidade nas duas plataformas.** Tokens únicos; componentes com a mesma API e o mesmo comportamento, inclusive a animação dos botões assíncronos.
+**Convenção de idioma:** código e identificadores em inglês (variáveis, funções, hooks, tipos, tokens, rotas, query keys, permissões, arquivos, branches, commits). Textos de interface em pt-BR, com mensagens centralizadas por repositório.
+
+**Escopo inicial:** as funcionalidades prototipadas em `ux_alva` (web, mobile, site e subscriptions), mapeadas em "Mapa de funcionalidades". Os protótipos definem identidade e fluxos; seus dados simulados não são regra.
+
+**Princípios:**
+
+1. **O servidor é a fonte da verdade.** O cliente guarda cópias em cache, nunca uma segunda verdade. Limites, autorização, valores e concorrência são validados na API.
+2. **Sem tempo real na tela.** Nada de sockets, canais, replay ou assinaturas. Dados ficam frescos por revalidação (ao montar, ao voltar o foco, após escrever) e por push que leva o usuário à tela certa.
+3. **Escrever é esperar o servidor.** Sucesso só aparece depois da confirmação da API. Atualização otimista só em casos explicitamente aprovados e reversíveis. Sem fila offline.
+4. **Falha de uma área não derruba o app.** Cada rota e widget crítico tem limite de erro e estados de vazio, carregando, erro, sucesso e desabilitado.
+5. **Mobile primeiro, também no painel.** Toda tela web funciona a partir de 360px.
+6. **Mesma identidade em todos os fronts.** Os mesmos tokens semânticos e os mesmos comportamentos (como a animação do botão assíncrono), com implementação própria em cada plataforma.
 
 **Metas de robustez (medidas em produção):**
 
@@ -25,649 +36,372 @@ O Alva tem dois fronts TypeScript, cada um no seu repositório e servidos pelo m
 | --- | --- |
 | Sessões sem crash (mobile) | ≥ 99,8% |
 | Erros JS não tratados (web) | < 0,1% das sessões |
-| Tempo até um evento real-time aparecer na tela | p95 < 1,5 s |
-| Recuperação após reconexão (dados conferidos) | < 3 s |
 | Interação no web (INP) | p75 < 200 ms |
-| Abertura a frio do app (até a primeira tela útil) | < 2,5 s em aparelho médio |
+| Primeira tela útil no web (LCP) | p75 < 2,5 s |
+| Abertura a frio do app | < 2,5 s em aparelho médio |
 
-## Stack e arquitetura dos repositórios
-
-**Decisão:** o Alva tem **quatro repositórios**. Um deles, o `alva-kit`, é **um único repositório com quatro bibliotecas dentro**. Cada biblioteca é publicada como um pacote separado no GitHub Packages, e os apps instalam esses pacotes como qualquer dependência.
+## Repositórios
 
 ```
-alva-api            backend (outra linguagem): dados, regras, especificação dos contratos
-alva-kit            um repositório, quatro bibliotecas
-  packages/theme      → @alva/theme       como o Alva parece
-  packages/contracts  → @alva/contracts   como o Alva conversa com a API
-  packages/core       → @alva/core        como o Alva se comporta no cliente
-  packages/config     → @alva/config      como o código do Alva é escrito
-alva-web            portal admin (Next.js): telas, rotas e componentes do web
-alva-app            app mobile (Expo): telas, rotas e componentes do mobile
+alva-api            .NET (ASP.NET Core, EF Core, PostgreSQL): dados, regras, openapi.yaml
+alva-web            painel de gestão (React + Vite)
+alva-app            app mobile (Expo)
+alva-site           landing (React + Vite, build estático)
+assinaturas-api     .NET, sistema próprio de Assinaturas
+assinaturas-web     painel de Assinaturas (React + Vite)
 ```
 
-| Repositório | Responsabilidade | Publica | Consome |
+| Repositório | Responsabilidade | Consome |
+| --- | --- | --- |
+| `alva-api` | Dono dos dados e das regras do Alva. Publica `openapi.yaml` a cada release | — |
+| `alva-web` | Telas, rotas, componentes e adaptadores do painel | OpenAPI do `alva-api` |
+| `alva-app` | Telas, rotas, componentes e adaptadores do app | OpenAPI do `alva-api` |
+| `alva-site` | Páginas públicas, planos e cadastro de igreja | Endpoints públicos do `alva-api` |
+| `assinaturas-web` | Telas do painel multiproduto | OpenAPI do `assinaturas-api` |
+
+Os nomes dos repositórios acima são propostas; o que importa é a separação. Cada repositório é autossuficiente.
+
+## Stack
+
+As versões exatas saem de uma única matriz homologada no bootstrap (.NET/EF/Npgsql, PostgreSQL, Node/React/Vite/TypeScript, Expo SDK/React Native). O Expo determina as compatibilidades de React no mobile; nada de dependência em preview.
+
+| Camada | Web (alva-web, assinaturas-web) | Landing (alva-site) | Mobile (alva-app) |
 | --- | --- | --- | --- |
-| `alva-api` | Dono dos dados e das regras de negócio. Mantém `openapi.yaml`, `asyncapi.yaml` e as fixtures de regras | A especificação dos contratos, a cada release | — |
-| `alva-kit` | Tudo que web e mobile compartilham | `@alva/theme`, `@alva/contracts`, `@alva/core`, `@alva/config` | A especificação do `alva-api` |
-| `alva-web` | Telas, rotas, componentes e adaptadores do web | — | Os quatro pacotes |
-| `alva-app` | Telas, rotas, componentes e adaptadores do mobile | — | Os quatro pacotes |
+| Linguagem | TypeScript `strict` | TypeScript `strict` | TypeScript `strict` |
+| Base | React + Vite + React Router | React + Vite, saída estática (pré-renderização das páginas públicas) | React Native + Expo + Expo Router |
+| UI | shadcn/ui + Tailwind | Tailwind | Componentes nativos próprios |
+| Dados do servidor | TanStack Query | TanStack Query só onde houver chamada (planos, cadastro) | TanStack Query |
+| Sessão e contexto | Zustand | — | Zustand |
+| Estado de tela | `useState` / `useReducer` | `useState` / `useReducer` | `useState` / `useReducer` |
+| Formulários | React Hook Form + Zod | React Hook Form + Zod | React Hook Form + Zod |
+| Cliente da API | Gerado do OpenAPI | Gerado do OpenAPI | Gerado do OpenAPI |
+| Persistência de catálogo | IndexedDB (teto de 7 dias) | — | Adaptador local (teto de 7 dias) |
+| Testes | Vitest + Testing Library + MSW, Playwright | Vitest, Playwright | Jest + React Native Testing Library, Maestro |
+| Catálogo de componentes | Storybook | — | Storybook |
 
-**Por que assim:** web e app usam o mesmo tema, os mesmos contratos e a mesma lógica de dados. Se isso morasse dentro de um dos apps, o outro dependeria dele; se fosse copiado, os dois divergiriam. No `alva-kit`, existe uma versão só, testada uma vez, e cada app decide quando atualizar. As quatro bibliotecas ficam no mesmo repositório porque mudam juntas com frequência (um contrato novo quase sempre pede um ajuste no core), e assim a mudança entra num PR só, com um CI e um processo de publicação.
+A animação usa a biblioteca de cada plataforma (CSS/Motion no web, Reanimated no mobile), sempre com as curvas e durações dos tokens. Listas longas usam virtualização (TanStack Virtual no web, FlashList no mobile).
 
-**Organização no GitHub:** os quatro repositórios ficam numa organização "alva", para que o escopo `@alva/*` seja válido no GitHub Packages.
+## Estrutura de um repositório
 
-**Dependências:** `@alva/theme` e `@alva/contracts` não dependem de nada do Alva nem de React. `@alva/core` depende de `@alva/contracts`. Os apps dependem dos quatro. O backend não depende de nenhum; ele só fornece a especificação.
-
-**Estrutura do alva-kit:**
+Uma SPA (ou app) por produto, com rotas carregadas sob demanda por domínio:
 
 ```
-alva-kit/
-  packages/
-    theme/
-    contracts/
-      spec/          openapi.yaml + asyncapi.yaml + fixtures/ (cópias sincronizadas do alva-api)
-      src/generated/ código gerado (nunca editado à mão)
-    core/
-    config/
-  apps/
-    playground/      Storybook do tema e dos hooks com dados simulados
-  .changeset/
-  .github/workflows/ ci.yml · release.yml · sync-contracts.yml
+src/
+  app/                composição: Router, providers, QueryClient, injeção das implementações
+  theme/              tokens do repositório (ver "Tokens e tema")
+  shared/
+    ui/               componentes sem regra de negócio (Button, Field, Dialog, AsyncButton…)
+    platform/         storage, autenticação, rede, foco, geolocalização (adaptadores da plataforma)
+    api/              cliente gerado do OpenAPI (nunca editado à mão) e wrapper de erros
+    i18n/             mensagens pt-BR, inclusive textos de erro por error.code
+  features/
+    schedules/
+      domain/         tipos e funções puras (formatação, agrupamento, avisos antecipados)
+      application/    casos de uso e portas (interfaces que a feature precisa)
+      data-access/    queryOptions, query keys, mutations, chamadas HTTP
+      presentation/   telas e componentes da feature, que só usam os hooks públicos dela
+      index.ts        API pública da feature
 ```
 
-### @alva/theme — como o Alva parece
+**Regras de dependência:**
 
-**A ideia:** o design system é dado, não código de tela. Cores, tipografia, espaçamentos, raios, sombras, gradientes, curvas de animação e a geometria do logo são descritos uma vez num objeto TypeScript, e o pacote traduz isso para o formato que cada plataforma entende: variáveis CSS e Tailwind no web, NativeWind e estilos nativos no app. Como não depende de React, serve também para gerar o PDF do certificado, e-mails e gráficos.
+- `presentation` → hooks públicos da própria feature → `application` → `domain`. `data-access` implementa as portas de `application`.
+- Uma feature não importa a implementação interna de outra; só o `index.ts` dela.
+- Telas não chamam o cliente da API nem montam query keys.
+- `app/` é o único lugar que liga portas a implementações (por exemplo, o `StorageAdapter` do web usa IndexedDB; o do mobile, o armazenamento local do Expo).
 
-| Export | Conteúdo |
-| --- | --- |
-| `@alva/theme` | Tokens tipados: `palette`, `themes` (light/dark), `tones`, `type`, `space`, `radius`, `layout`, `breakpoints`, `gradients`, `motion`, `zIndex`; funções `toCssVars()` e `toCss()` |
-| `@alva/theme/theme.css` | Variáveis dos dois temas, bloco `@theme` do Tailwind v4 e aliases do shadcn |
-| `@alva/theme/preset` | Preset do Tailwind em JS para o NativeWind |
-| `@alva/theme/native` | `textStyle()`, `shadow()`, `easing` (Reanimated) e `colors(theme)` para React Native |
-| `@alva/theme/brand` | Geometria do sol, ícones próprios (chupeta) e roteiro de tempos da splash |
+Essas regras são verificadas por lint (ESLint com regras de import por camada), não só por revisão.
 
-**Exemplos reais:**
+## Tokens e tema
 
-No web, o tema entra por uma linha de CSS, e os componentes do shadcn já saem com a cara do Alva:
+**Cada repositório declara seus tokens.** A referência é `ux_alva/docs/tokens.ts` (valores) e `ux_alva/docs/design-system.md` (uso). Cada repositório copia o que precisa para `src/theme/` e gera a saída da sua plataforma:
 
-```css
-/* alva-web/app/globals.css */
-@import "tailwindcss";
-@import "@alva/theme/theme.css";
-```
-
-```tsx
-// alva-web/components/ui/status-pill.tsx
-const tone = { confirmed: 'bg-success-bg text-success', pending: 'bg-warning-bg text-warning', declined: 'bg-danger-bg text-danger' };
-export const StatusPill = ({ status, children }) => (
-  <span className={`rounded-full px-2.5 py-1.5 text-xs font-semibold ${tone[status]}`}>{children}</span>
-);
-```
-
-No app, as mesmas classes funcionam via NativeWind, e a animação do botão assíncrono usa as mesmas curvas e durações do web:
-
-```tsx
-// alva-app/components/ui/async-button.tsx
-import { motion } from '@alva/theme';
-import { easing } from '@alva/theme/native';
-
-scale.value = withSequence(
-  withTiming(0.97, { duration: motion.duration.instant }),
-  withTiming(1, { duration: motion.duration.pop, easing: easing.spring }),
-);
-```
-
-No certificado de apresentação (gerado em PDF pelo web), a moldura usa `gradients.certificate` e a fonte serifada de `type.h1Accent`, sem duplicar valores.
-
-**Caso do dia a dia:** a igreja pede um azul de marca um pouco mais escuro. Alguém altera `themes.light.brand` no `alva-kit`, confere no playground, publica `@alva/theme 1.3.0`, e o Renovate abre PRs no web e no app. Nenhuma tela é editada.
-
-### @alva/contracts — como o Alva conversa com a API
-
-**A ideia:** o contrato entre front e back é escrito uma vez pelo time da API (`openapi.yaml` para REST, `asyncapi.yaml` para eventos) e o TypeScript é gerado a partir dele. Ninguém digita tipos de resposta à mão, ninguém inventa nome de campo, e qualquer mudança na API aparece como erro de compilação no front antes de virar bug em produção. O pacote não tem React nem TanStack: só tipos, validação e chamadas HTTP.
-
-| Export | Conteúdo |
-| --- | --- |
-| Tipos de entidade | `Schedule`, `ScheduleAssignment`, `Event`, `Member`, `Church`, `CareCase`, `CareMeeting`, `BabyDedication`, `DedicationDate`, `CheckIn`, `Notification`, `ServiceLimit`…, incluindo os campos calculados pela API (`checkInWindow`, `limitUsage`, `availableSlots`) |
-| Schemas Zod | Um por entidade, por corpo de requisição e por resposta |
-| Cliente HTTP | Uma função por endpoint, criado com `createApiClient({ baseUrl, getToken, onUnauthorized, appVersion })`. Usa `fetch`, funciona no web e no React Native |
-| Eventos real-time | `RealtimeEvent`, união discriminada por `type`, com o schema de cada payload |
-| Erros | `ProblemDetails` com todos os `code` possíveis |
-| Constantes | Enums de status, lista tipada de permissões, versão da API |
-| Fixtures | Casos de teste das regras que existem nos dois lados |
-
-**Exemplos reais:**
-
-Chamada tipada de ponta a ponta. Se a API renomear um campo, este código para de compilar:
-
-```ts
-import { createApiClient, type Schedule } from '@alva/contracts';
-
-const api = createApiClient({ baseUrl: env.API_URL, getToken: session.getToken });
-const schedules: Schedule[] = await api.schedules.list({ churchId, month: '2026-10' });
-schedules[0].checkInWindow.state; // 'upcoming' | 'open' | 'closed'
-```
-
-Eventos real-time com tipo estreitado por `type`, sem `any`:
-
-```ts
-function handle(event: RealtimeEvent) {
-  switch (event.type) {
-    case 'checkin.created':      // event.payload: CheckIn
-    case 'schedule.assignment.updated': // event.payload: ScheduleAssignment
-  }
-}
-```
-
-Erros com código estável, traduzidos no front:
-
-```ts
-// resposta da API: { type: '...', code: 'checkin.outside_radius', status: 422 }
-messages['checkin.outside_radius'] = 'Você está fora do raio do local do culto.';
-```
-
-Fixture compartilhada, rodada pelos testes do backend e do core:
-
-```json
-{ "rule": "checkInWindow", "case": "30 min antes do culto das 19h",
-  "input": { "startsAt": "2026-10-04T19:00", "now": "2026-10-04T18:30", "windowHours": 2 },
-  "expected": { "state": "open" } }
-```
-
-**Como ele é gerado:**
-
-1. O time da API altera `openapi.yaml` ou `asyncapi.yaml`. O CI do alva-api valida e roda `oasdiff` para detectar quebra de contrato.
-2. No merge, o alva-api publica a especificação como artefato da release e dispara um `repository_dispatch` para o alva-kit.
-3. O workflow `sync-contracts` baixa a especificação, gera o código (Hey API para REST, script próprio para AsyncAPI → Zod), **compila o `@alva/core` contra os tipos novos** e abre um PR com changeset.
-4. Sem quebra, o PR é mesclado sozinho e a versão é publicada. Com quebra, o PR mostra exatamente o que o core precisa ajustar.
-5. O Renovate abre PRs agrupados com as novas versões de `@alva/*` no web e no app.
-
-**Caso do dia a dia:** a API passa a mandar `limitUsage` em cada membro da escala. O `@alva/contracts` ganha o campo automaticamente; o hook `useServiceLimits` no core passa a ler esse campo em vez de calcular; web e app exibem o mesmo número que o servidor usa para decidir.
-
-### @alva/core — como o Alva se comporta no cliente
-
-**A ideia:** tudo que um app faz com dados, e que não é desenhar a tela, é igual no web e no mobile: buscar e guardar em cache, atualizar de forma otimista, receber eventos real-time, saber quem está logado e em qual igreja, formatar datas, validar formulários. O core concentra isso em hooks. As telas de cada app só chamam hooks e desenham; as diferenças de plataforma (onde salvar dados, como detectar rede, como pegar a localização) entram por adaptadores na inicialização. Depende de `@alva/contracts` e tem `react`, `@tanstack/react-query` e `zustand` como peer dependencies; não importa nada de DOM nem de React Native.
-
-| Submódulo | Oferece |
-| --- | --- |
-| `/platform` | Interfaces de adaptador (`StorageAdapter`, `NetworkAdapter`, `FocusAdapter`, `LocationAdapter`, `RealtimeTransport`), `createAlvaCore()` e `<AlvaProvider>` |
-| `/domain` | Funções puras de interface: formatação pt-BR, ordenação, agrupamento, schemas de formulário, avisos antecipados, `can(permissions, p)` |
-| `/query` | Fábrica de chaves `qk.*` por igreja, `queryOptions`, fábricas de mutation com otimista e rollback, `createQueryClient()` |
-| `/realtime` | Cliente real-time com transporte plugável, validação, deduplicação, ordem por versão, lote de 50 ms, handlers `type → patch/invalidate`, resync |
-| `/stores` | Sessão (usuário, igreja ativa, papel, permissões, tema), estado da conexão, barramento de UI |
-| `/hooks` | Hooks de domínio (`useSchedules`, `useCheckIn`, `useCareCase`, `useBabyDedications`, `useChurchSwitch`…) e de interface (`useAsyncAction`, `useConfirm`, `useDebouncedSearch`) |
-| `/i18n` | Textos pt-BR compartilhados: erros por `code`, status, rótulos de domínio |
-| `/testing` | Handlers MSW gerados dos contratos, fábricas de dados falsos, servidor real-time simulado, `renderWithAlva()` |
-
-**Exemplos reais:**
-
-Cada app monta o core uma vez, com os seus adaptadores. É o único lugar onde web e app diferem:
-
-```tsx
-// alva-web/app/providers.tsx
-const core = createAlvaCore({
-  api: { baseUrl: env.API_URL },
-  storage: indexedDbStorage(), network: browserNetwork(), focus: windowFocus(),
-  location: browserLocation(), realtime: websocketTransport(env.WS_URL),
-});
-
-// alva-app/app/_layout.tsx
-const core = createAlvaCore({
-  api: { baseUrl: env.API_URL },
-  storage: mmkvStorage(), network: netInfoNetwork(), focus: appStateFocus(),
-  location: expoLocation(), realtime: websocketTransport(env.WS_URL),
-});
-
-<AlvaProvider core={core}>{children}</AlvaProvider>
-```
-
-A mesma lógica de "confirmar escala" nos dois apps; só o JSX muda:
-
-```tsx
-const { data: schedule } = useSchedule(id);
-const confirm = useConfirmSchedule();
-const action = useAsyncAction(() => confirm.mutateAsync(id));
-
-// web:    <AsyncButton state={action.state} onClick={action.run}>Confirmar</AsyncButton>
-// mobile: <AsyncButton state={action.state} onPress={action.run}>Confirmar</AsyncButton>
-```
-
-Por trás desse hook, sem nenhuma linha nas telas: a lista e o detalhe mudam na hora (otimista), o contador de limite atualiza, se a API recusar tudo volta ao estado anterior com um toast, e sem rede a confirmação entra na fila e é enviada quando a conexão voltar.
-
-Check-in ao vivo: um voluntário faz check-in pelo celular → a API emite `checkin.created` → o handler em `@alva/core/realtime` atualiza o cache da equipe do culto → a tela do líder no web (e no app de outro líder) mostra a presença. Nenhuma tela assina socket.
-
-Testes iguais nos dois apps:
-
-```tsx
-import { renderWithAlva, factories } from '@alva/core/testing';
-
-renderWithAlva(<ScheduleScreen id="s1" />, {
-  data: { schedules: [factories.schedule({ id: 's1', status: 'invited' })] },
-});
-```
-
-**Caso do dia a dia:** trocar o provedor de real-time (por exemplo, de Socket.IO para Ably) é escrever um novo `RealtimeTransport` no core e trocar uma linha na inicialização de cada app. Telas e hooks não mudam.
-
-**Regra de dependência:** telas → `@alva/core/hooks` → `/query`, `/realtime`, `/stores` → `/domain` + `@alva/contracts`. Telas nunca chamam `@alva/contracts` direto.
-
-**Quem decide as regras de negócio:** o alva-api é a única autoridade. Para as duas linguagens não divergirem:
-
-1. **Regras críticas chegam calculadas pela API.** Janela de check-in, limite de escalas, vagas de apresentação e permissões vêm prontas nas respostas (`checkInWindow`, `limitUsage`, `availableSlots`, `permissions`). O front só exibe.
-2. **`@alva/core/domain` fica com regras de interface:** validação de formulário, aviso antecipado, formatação, ordenação e agrupamento. Se o front errar, o servidor recusa e o rollback corrige a tela.
-3. **Regra que precisa existir nos dois lados ganha fixtures compartilhadas**, mantidas no alva-api e distribuídas em `@alva/contracts`.
-
-### @alva/config — como o código do Alva é escrito
-
-**A ideia:** as regras da spec ("tela não chama a API direto", "nada de hex em componente", "TypeScript strict") só se sustentam se forem verificadas por máquina. O `@alva/config` guarda a configuração de ESLint, TypeScript e Prettier usada pelos dois apps e pelo próprio kit. Uma regra nova é escrita uma vez e passa a valer em todo lugar na próxima atualização.
-
-| Export | Conteúdo |
-| --- | --- |
-| `@alva/config/eslint` | Presets `base`, `react`, `next` e `expo`, com `react-hooks`, `@tanstack/query` e as regras de arquitetura do Alva |
-| `@alva/config/tsconfig` | `base.json` (strict), `next.json`, `expo.json`, `library.json` |
-| `@alva/config/prettier` | Formatação única |
-
-**Exemplos reais:**
-
-```js
-// alva-web/eslint.config.js
-import alva from '@alva/config/eslint';
-export default [...alva.react, ...alva.next];
-
-// alva-app/eslint.config.js
-import alva from '@alva/config/eslint';
-export default [...alva.react, ...alva.expo];
-```
-
-```json
-// alva-app/tsconfig.json
-{ "extends": "@alva/config/tsconfig/expo.json" }
-```
-
-Regras de arquitetura que o preset traz:
-
-| Regra | O que impede |
-| --- | --- |
-| Sem import de `@alva/contracts` ou `@alva/core/query` em `features/**` | Tela chamando a API ou montando query key à mão |
-| Sem cor hex ou `rgb()` em `className` e `style` | Cor fora do tema |
-| Sem `useEffect` que só copia `data` de uma query para estado local | Dado do servidor duplicado |
-| `@tanstack/query/exhaustive-deps` | Query key que não muda quando o filtro muda |
-| Sem import entre `features` diferentes | Telas acopladas entre módulos |
-
-**Caso do dia a dia:** o time decide proibir `console.log` em produção. A regra entra no `@alva/config`, sai na próxima versão, e os dois apps passam a respeitá-la sem ninguém copiar configuração.
-
-### Exemplo de ponta a ponta: uma feature nova
-
-A igreja quer que o membro possa **trocar de escala com outro voluntário**. O caminho pelos quatro repositórios:
-
-| Passo | Repositório | O que acontece |
+| Repositório | Arquivos | Saída |
 | --- | --- | --- |
-| 1 | `alva-api` | Cria `POST /churches/{id}/schedules/{id}/swap-requests` e o evento `schedule.swap.requested` na especificação; implementa a regra no servidor |
-| 2 | `alva-kit` | O sync gera `api.schedules.requestSwap()` e o tipo do evento em `@alva/contracts`. No core: hook `useRequestSwap()`, handler real-time que avisa o colega e atualiza as listas, texto pt-BR do erro `swap.not_allowed`. Publica |
-| 3 | `alva-app` | Botão "Pedir troca" na escala e tela de aceitar/recusar, usando os hooks novos |
-| 4 | `alva-web` | Coluna "troca pendente" na escala do líder, usando os mesmos hooks |
+| `alva-web` | `src/theme/tokens.ts`, `src/theme/theme.css` | Variáveis CSS dos temas Dia e Noite, bloco `@theme` do Tailwind, aliases do shadcn (`--background`, `--primary`…) |
+| `alva-app` | `src/theme/tokens.ts`, `src/theme/native.ts` | Constantes para StyleSheet, `textStyle()`, `shadow()`, curvas para o Reanimated, `colors(theme)` |
+| `alva-site` | `src/theme/tokens.ts`, `src/theme/theme.css` | Só o tema Dia, com fundo branco; inclui o gradiente do rodapé "Alvorada" |
+| `assinaturas-web` | `src/theme/tokens.ts`, `src/theme/theme.css` | Temas Dia e Noite; marca neutra "Assinaturas" e selos de produto, conforme seção 16 do design system |
 
-A regra de negócio foi escrita uma vez (no backend), a lógica de cliente uma vez (no core), e cada app só desenhou a sua interface.
+**Como manter alinhado sem pacote:**
 
-### O que fica em cada app
+1. Toda mudança de token começa na referência (`ux_alva/docs/tokens.ts` e `design-system.md`), num PR no `alva-docs`.
+2. Cada repositório afetado recebe um PR com a mesma mudança, citando o PR da referência. O checklist de PR de UI tem o item "tokens conferidos com a referência".
+3. Nomes de tokens são fixos em todos os repositórios (`--ink`, `--brand`, `--success-bg`…). Um repositório pode ter tokens a mais (como `authSky` no app ou os selos de produto em Assinaturas), nunca o mesmo nome com outro significado.
+4. Componentes usam só tokens semânticos; cor em hex ou `rgb()` em componente é bloqueada por lint.
 
-| alva-web | alva-app |
-| --- | --- |
-| Rotas do App Router, layouts, Server Components da casca | Rotas do Expo Router, tabs, deep links |
-| `components/ui` (shadcn tematizado) | `components/ui` (NativeWind, mesma API) |
-| `features/*`: telas por módulo | `features/*`: telas por módulo |
-| Adaptadores: IndexedDB, `navigator.onLine`, foco da janela, geolocalização do navegador | Adaptadores: MMKV, NetInfo, AppState, expo-location, push |
-| `nuqs` para estado na URL, middleware de permissão | Params do Expo Router, guardas no layout |
-
-### Stack
-
-| Camada | Escolha | Por quê |
-| --- | --- | --- |
-| Linguagem (fronts e kit) | TypeScript `strict` | Contratos gerados garantem o mesmo tipo em todo lugar |
-| Web | Next.js 15 (App Router) + React 19 | SSR no primeiro carregamento, rotas aninhadas para lista/detalhe |
-| Mobile | Expo SDK atual + Expo Router + React Native (New Architecture) | Rotas por arquivo, OTA updates, EAS Build |
-| Estilo web | Tailwind CSS v4 + shadcn/ui (Radix) | Componentes no repositório, tematizados por `@alva/theme` |
-| Estilo mobile | NativeWind v4 + react-native-reusables como base | Mesmas classes e tokens do web |
-| Dados do servidor | TanStack Query v5 | Cache, deduplicação, retry, otimista, persistência |
-| Estado do cliente | Zustand | Sem provider, seletores finos, igual nas duas plataformas |
-| Formulários | React Hook Form + Zod (schemas de `@alva/contracts`) | Mesma validação que a API declara |
-| Real-time | WebSocket gerenciado via `@alva/core/realtime` | Um canal por sessão, eventos tipados pelo AsyncAPI |
-| Animação | Motion (web) + Reanimated 3 (mobile) | Curvas e durações de `@alva/theme` |
-| Listas longas | TanStack Virtual (web) + FlashList (mobile) | Escalas, membros e lançamentos passam de milhares de linhas |
-| Armazenamento local | MMKV (mobile), IndexedDB via idb-keyval (web) | Cache persistido e fila offline |
-| Observabilidade | Sentry + PostHog | Erros com contexto e funis de uso |
-
-### Versionamento e dia a dia
-
-- **Versões independentes por pacote**, com Changesets. Quebra de contrato ou de API pública do core = versão major.
-- **Mudar o tema:** editar `packages/theme`, abrir PR com changeset, conferir no playground (Storybook) e mesclar; a versão é publicada e o Renovate atualiza os apps.
-- **Desenvolver core e app juntos:** `pnpm link` ou `yalc` apontando o app para o kit local. No CI dos apps, sempre a versão publicada.
-- **Compatibilidade:** versões antigas do app continuam nas lojas, então o alva-api mantém contratos antigos por no mínimo 90 dias depois de uma major.
+**Temas:** `light` (rótulo "Dia") e `dark` ("Noite"), ativados por `data-theme="dark"` no web e por contexto de tema no mobile. Preferência `theme: 'light' | 'dark' | 'system'`, guardada nas preferências do Zustand.
 
 ## Design system
 
-O design system vive em `alva-kit/packages/theme` e é publicado como `@alva/theme` (referência completa em `design-system/design-system.md` na pasta da prototipação). Um único objeto TypeScript gera as variáveis CSS, o preset do Tailwind (web e NativeWind) e as constantes para React Native e Reanimated. Nenhum componente usa cor em hex direto.
+Referência completa em `ux_alva/docs/design-system.md`. Resumo do que todo front segue:
 
-**Temas:** `light` (rótulo "Dia" na interface, padrão do web) e `dark` ("Noite", padrão do mobile), ativados por `data-theme="dark"`. A preferência fica salva como `theme: 'light' | 'dark' | 'system'`.
+**Paleta base:** `ocean` `#07486e` (marca), `navy`, `abyss`, `night`, `teal`, `deepTeal`, `sky` `#a9c8da` (marca no tema Noite), `mint`, `sage`, `lime`, `olive`, `amber`, `orange`, `wine`, `blush`, `ember`, `coral`, `apricot`, `stone`. Só alimenta os tokens semânticos.
 
-**Paleta base (`palette.*`):** `ocean` `#07486e` (marca), `navy` `#002236`, `abyss` `#010f12`, `night` `#122529`, `teal` / `deepTeal`, `sky` `#a9c8da` (marca no dark), `mint`, `sage`, `lime`, `olive`, `amber`, `orange`, `wine`, `blush`, `ember`, `coral`, `apricot`, `stone`. Só alimenta os tokens semânticos; componentes não usam a paleta direto.
-
-**Tokens semânticos** (o que os componentes usam):
+**Tokens semânticos:**
 
 | Grupo | Tokens |
 | --- | --- |
-| Superfícies | `bg`, `surface`, `surface-2`, `glass` |
+| Superfícies | `bg`, `surface`, `surface-2`, `surface-3`, `glass` |
 | Texto | `ink`, `ink-muted`, `ink-soft` |
 | Linhas | `line`, `line-strong` |
 | Marca | `brand`, `on-brand`, `brand-text`, `brand-soft`, `focus`, `signal`, `positive` |
 | Status | `success`, `info`, `warning`, `danger`, cada um com `-bg` |
 | Categorias | `tone-sky`, `tone-mint`, `tone-apricot`, `tone-blush`, `tone-lime`, `tone-sage`, cada um com `-ink` |
 | Gráficos | `chart-1` a `chart-4`, `chart-warm` |
-| Ambiente e logo | `ambient-1`, `ambient-2`, `sun-1`, `sun-2`, `sun-3`, `sun-ray` |
+| Ambiente e logo | `ambient-1`, `ambient-2`, `sun-1`, `sun-2`, `sun-3`, `sun-ray`; céu das telas de acesso em `authSky` |
 | Elevação | `shadow-card`, `shadow-pop`, `scrim` |
-| Aliases shadcn | `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`, `radius` |
+| Aliases shadcn (web) | `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`, `radius` |
 
-**Tipografia:** SF Pro Display (títulos e números) e SF Pro Text (corpo), com Inter como fallback; Instrument Serif itálico para a palavra de destaque do título, citações e certificado. Estilos nomeados: `hero`, `h1`, `h1Accent`, `kpi`, `title`, `dialog`, `h2`, `lede`, `itemTitle`, `body`, `bodyStrong`, `input`, `bodySm`, `button`, `label`, `caption`, `badge`, `eyebrow`, `overline`, `logo`. Números com `tabular-nums`.
+**Tipografia:** SF Pro Display (títulos e números) e SF Pro Text (corpo), Inter como fallback; Instrument Serif itálico para a palavra de destaque, citações e certificado. Estilos: `hero`, `h1`, `h1Accent`, `kpi`, `title`, `dialog`, `h2`, `lede`, `itemTitle`, `body`, `bodyStrong`, `input`, `bodySm`, `button`, `label`, `caption`, `badge`, `eyebrow`, `overline`, `logo`. Números com `tabular-nums`.
 
-**Forma e espaço:** espaçamento em passos de 4 (escala do Tailwind); raios `xs 6 · sm 10 · field 12 · md 14 · lg 20 · lgMobile 24 · dialog 22 · sheet 24 · xl 32 · full 999`; gutter de 16px no celular.
+**Forma e espaço:** passos de 4; raios `xs 6 · sm 10 · field 12 · md 14 · lg 20 · lgMobile 24 · dialog 22 · sheet 24 · xl 32 · full 999`; gutter de 16px no celular.
 
-**Motion:** curvas `standard cubic-bezier(.2,.8,.2,1)`, `spring cubic-bezier(.2,1.4,.4,1)`, `emphasized cubic-bezier(.65,0,.35,1)`; durações `fast 150 · base 200 · medium 250 · slow 320 · pop 450 · entrance 700` ms; stagger de 70 ms; tudo desligado com *reduzir movimento*.
+**Motion:** curvas `standard`, `spring`, `emphasized`; durações `fast 150 · base 200 · medium 250 · slow 320 · pop 450 · entrance 700` ms e ciclos lentos `autoAdvance 6000 · sheenLoop 9000 · glowSpin 14000` ms; stagger de 70 ms; tudo desligado com *reduzir movimento*.
 
-**Regras visuais fixas** (decididas na prototipação):
+**Regras visuais fixas:**
 
-- Proibido faixa colorida fina na borda esquerda de cards; destaque por gradiente suave ou fundo.
-- Toda exclusão abre modal de confirmação; remoções leves oferecem *desfazer* no toast.
-- Busca e filtros ficam dentro do container da lista.
-- Telas de detalhe têm botão *Voltar* ao lado do breadcrumb.
+- Sem faixa colorida fina na borda esquerda; destaque por gradiente suave ou fundo.
+- Toda exclusão abre modal de confirmação; remoções leves oferecem *desfazer* no toast (desfazer chama a API; não é rollback local).
+- Busca e filtros dentro do container da lista.
+- Telas de detalhe com botão *Voltar* ao lado do breadcrumb.
 - Igrejas e pessoas sem blocos coloridos com sigla.
-- Cards de evento minimalistas: data discreta em texto, nome, horário e local.
+- Cards de evento minimalistas.
 - Brilhos sempre suaves.
+- Menu lateral nunca rola; em telas baixas entra a versão compacta.
+- Sem avisos de protótipo ou demonstração.
+- Toda tabela principal é paginada; selects são o componente próprio.
+- Filtro que reduz a tela mostra um chip com saída (×).
+- Hachura só para dado (dia bloqueado), nunca decoração.
 
-**Componentes:** mesma API nos dois repositórios (`alva-web/components/ui` e `alva-app/components/ui`), para que telas de domínio sejam quase idênticas.
+**Componentes:** mesma API (props e comportamento) entre web e mobile, implementação própria em cada um. shadcn/ui é a base no web; o mobile tem componentes nativos.
 
 | Grupo | Componentes |
 | --- | --- |
-| Ação | `Button` (variantes `primary`, `secondary`, `ghost`, `danger`), `AsyncButton`, `IconButton`, `Toggle`, `SegmentedControl` |
-| Entrada | `Field`, `TextArea`, `Select`, `DatePicker`, `MonthPicker`, `Stepper`, `OtpInput`, `SearchBox`, `FilterChips`, `ColorPicker` |
-| Exibição | `Card`, `StatusPill`, `Tag`, `Avatar`, `KpiRow`, `DateNumber`, `EmptyState`, `Skeleton`, `ProgressBar`, `Ring` |
-| Sobreposição | `Dialog` (web) / `Sheet` (mobile) sobre o mesmo `Overlay`, `ConfirmDialog`, `Toast` com desfazer, `Popover` / `Menu` |
-| Navegação | `Sidebar` com acordeão (web), `TabBar` (mobile), `Breadcrumb` + `BackButton`, `Tabs`, `StepFlow` |
-| Marca | `Logo` (sol + "alva"), `SunMark` animado, `Splash` |
+| Ação | `Button` (`primary`, `secondary`, `ghost`, `danger`, `glass`, `glow`), `AsyncButton`, `IconButton`, `Toggle`, `SegmentedControl` |
+| Entrada | `Field`, `TextArea`, `Select`, `DatePicker`, `MonthPicker`, `Stepper`, `OtpInput` (seis caixas), `SearchBox`, `FilterChips`, `ColorPicker` |
+| Exibição | `Card`, `StatusPill`, `Tag`, `Avatar`, `KpiRow`, `DateNumber`, `EmptyState`, `Skeleton`, `ProgressBar`, `Ring`, `Pagination`, `ChartTooltip`, `ProductBadge` |
+| Sobreposição | `Dialog` (web) / `Sheet` (mobile), `ConfirmDialog`, `Toast` com desfazer, `Popover` / `Menu`, `CommandPalette` (Cmd/Ctrl+K, web) |
+| Navegação | `Sidebar` com acordeão e modo compacto (web), `TabBar` (mobile), `Breadcrumb` + `BackButton`, `Tabs`, `StepFlow` |
+| Marca | `Logo` (completo, só o sol, só a palavra), `SunMark`, `Splash`, `AuthSky` |
 
-O **botão assíncrono** é um contrato único: recebe uma `Promise`, mostra o texto de progresso ("Salvando", "Enviando"), bloqueia duplo clique e termina com o check verde. Web e mobile usam o mesmo hook `useAsyncAction`.
+**Botão assíncrono:** recebe uma `Promise`, mostra o texto de progresso ("Salvando", "Enviando"), bloqueia duplo envio e só mostra o check verde quando a API confirma. Mesmo contrato (`useAsyncAction`) e mesma animação no web e no mobile, cada um com sua implementação.
 
-## Estratégia de estado
+## Contrato HTTP
 
-Todo dado do app pertence a exatamente uma de cinco camadas, e cada camada tem uma ferramenta só. A maior parte dos bugs de apps real-time vem de guardar o mesmo dado em dois lugares; esta regra elimina isso.
+- **Cliente gerado do OpenAPI** em cada repositório (`src/shared/api`), nunca editado à mão. O servidor é dono do contrato; DTOs do backend não viram entidades expostas no front.
+- **Validação Zod** só na fronteira, onde necessário (formulários e respostas críticas).
+- **Coleções:** `{ items, page, pageSize, totalCount, totalPages }`. Filtros, ordenação e paginação seguem o QuerySpec/OData-lite do backend.
+- **Erros:** `{ error: { code, message, details } }`. O front traduz por `error.code` nas mensagens pt-BR e leva `details` para o campo certo do formulário.
+- **Concorrência e repetição:** `If-Match` em edições concorrentes; `Idempotency-Key` nos comandos repetíveis que o endpoint aceitar. Reenvio de comando nunca é automático sem contrato de idempotência.
+- **Autenticação:** por adaptador em `shared/platform`. No web, sessão em cookie HttpOnly/Secure com CSRF; nenhum token em Zustand, IndexedDB ou localStorage. No mobile, armazenamento seguro do sistema. `401` (sessão) é tratado separado de `403` (permissão).
+- **Invalidação:** depois de uma escrita, invalidar só as queries afetadas, incluindo agregados (totais, contadores).
+- **Quebra de contrato:** o CI de cada front gera o cliente a partir do OpenAPI publicado e falha se algo deixar de compilar, antes de qualquer atualização chegar aos usuários.
 
-| Camada | O que guarda | Ferramenta | Exemplos no Alva |
+## Estado, consulta e cache
+
+| Camada | O que guarda | Ferramenta | Exemplos |
 | --- | --- | --- | --- |
-| 1. Servidor | Qualquer dado que existe no backend | TanStack Query | Escalas, membros, casos, eventos, lançamentos, notificações |
-| 2. Tempo real | Nada próprio: só aplica eventos na camada 1 | `@alva/core/realtime` → `queryClient` | Check-in feito, convite aceito, novo pedido de oração |
-| 3. Sessão e app | Dado do cliente que vale para o app inteiro | Zustand (persistido) | Usuário, igreja ativa, papel, tema, preferências, status da conexão |
-| 4. Tela | Estado efêmero de UI | `useState` / `useReducer` local, Zustand só se compartilhado entre irmãos distantes | Aba aberta, item selecionado, modal aberto, rascunho de busca |
-| 5. URL | O que precisa sobreviver a reload e ser compartilhável | `nuqs` (web) / params do Expo Router | Filtros, busca, mês do relatório, aba do detalhe, id do item |
-| (formulários) | Valores em edição | React Hook Form + Zod | Adicionar caso, nova escala, regras de limite |
+| Servidor | Qualquer dado que existe no backend | TanStack Query (única cópia) | Escalas, membros, casos, eventos, lançamentos, notificações |
+| Sessão e contexto | Sessão mínima, igreja ativa, preferências, flags de interface | Zustand | Usuário, igreja ativa, papel, tema |
+| Tela | Estado efêmero | `useState` / `useReducer` | Aba, modal, seleção |
+| URL | Rotas e filtros compartilháveis (sem dado sensível) | React Router / Expo Router | Filtros, busca, mês, aba do detalhe |
+| Formulários | Valores em edição | React Hook Form + Zod | Novo caso, nova escala, regras de limite |
 
-**Regras de ouro:**
+**Regras:**
 
-1. **Nunca copiar dado do servidor para `useState` ou Zustand.** Se precisar derivar (contagens, ordenação, "quem está no limite"), usar `select` do Query ou `useMemo` sobre o resultado.
-2. **Query keys são uma fábrica tipada por igreja**: `qk.schedules.list(churchId, filters)`, `qk.schedules.detail(churchId, id)`. Trocar de igreja muda a chave inteira, nunca mistura dados de igrejas.
-3. **Toda leitura passa por `queryOptions`** definidos em `@alva/core/query`; telas não escrevem `useQuery({ queryKey: [...] })` à mão.
-4. **Escritas só por `useMutation`** com `mutationKey`, `onMutate` otimista, `onError` com rollback e `onSettled` invalidando as chaves afetadas.
-5. **Zustand com seletores sempre** (`useSession(s => s.churchId)`), nunca o store inteiro, para não re-renderizar o app a cada mudança.
-6. **Formulário não é estado global.** Rascunhos que precisam sobreviver (mensagem longa, pedido de oração) são salvos no armazenamento local por chave, com limpeza ao enviar.
+1. Nunca copiar dado do servidor para `useState` ou Zustand; derivar com `select` ou `useMemo`.
+2. **Query keys** incluem sistema, usuário, contexto ativo (igreja), recurso, id e filtros: `['alva', userId, churchId, 'schedules', 'list', filters]`. Fábrica tipada por feature; telas não montam chaves.
+3. Toda leitura passa por `queryOptions` da feature; escritas só por `useMutation` que espera o servidor e invalida as chaves afetadas.
+4. Zustand sempre com seletores (`useSession(s => s.churchId)`).
+5. Rascunho de formulário não vai para o store global.
 
-**Configuração padrão do QueryClient:**
+**Cache e persistência:**
+
+- **Operacional só em memória.** Membros, transações, casos, escalas e cobranças nunca são persistidos em disco.
+- **Catálogo pequeno** (por exemplo, categorias, tipos, ministérios, salas) pode ser persistido: IndexedDB no web, adaptador local no mobile, com `fetchedAt`, versão do schema, limite de espaço e idade máxima de 7 dias. O persister e a leitura verificam idade e versão (`gcTime` sozinho não é política de expiração). Login e troca de contexto forçam revalidação; catálogo expirado não é servido.
+- **Revalidação:** ao montar a tela e ao voltar o foco, conforme a necessidade de cada dado. `staleTime` infinito nunca é garantia de atualização.
+- **Logout, troca de identidade ou perda de permissão:** cancelar requisições, remover dados do usuário e invalidar a persistência.
+- **Troca de igreja:** cancelar consultas em voo e descartar respostas antigas; como a chave inclui a igreja, dados de igrejas diferentes nunca se misturam. Cache nunca autoriza acesso.
+
+**Configuração padrão do QueryClient (ponto de partida):**
 
 | Opção | Valor | Motivo |
 | --- | --- | --- |
-| `staleTime` | 30 s (listas), 5 min (cadastros estáveis), `Infinity` (dados só alterados via real-time, ex.: presença do dia) | Real-time mantém fresco; evita refetch em cascata |
-| `gcTime` | 24 h | Necessário para o cache persistido funcionar offline |
-| `retry` | 3 com backoff exponencial, 0 para erros 4xx | Não insistir em erro de validação ou permissão |
+| `staleTime` | 30 s (listas operacionais), 5 min (catálogo) | Evita refetch em cascata sem esconder mudanças |
+| `retry` | 2 com backoff para leituras; 0 para 4xx; mutations sem retry automático | Não insistir em erro de validação ou permissão; não repetir comandos |
 | `refetchOnWindowFocus` | true (web), via `focusManager` + AppState (mobile) | Conferência ao voltar para o app |
-| `networkMode` | `offlineFirst` | Mostra cache sem rede; mutations entram em fila |
-| `structuralSharing` | true | Eventos que não mudam nada não re-renderizam |
+| `networkMode` | `online` | Sem rede, ações ficam desabilitadas com explicação; sem fila |
 
-**Persistência:** `persistQueryClient` com MMKV (mobile) e IndexedDB (web), só para chaves marcadas `meta: { persist: true }` (agenda, minhas escalas, notificações, perfil). Dados sensíveis de cuidado pastoral e financeiro **nunca** são persistidos. O cache persistido tem `buster` com a versão do schema: muda o schema, o cache antigo é descartado.
+## Atualização de dados sem tempo real
 
-## Real-time
+O documento de arquitetura proíbe sockets e polling global. Telas que antes dependeriam de tempo real usam:
 
-O real-time do Alva tem uma única porta de entrada (`@alva/core/realtime`) e um único destino (o cache do TanStack Query). Telas nunca assinam canais diretamente; elas só leem queries, e as queries ficam frescas sozinhas.
-
-**Fluxo de um evento:**
-
-1. **Conexão** — um `RealtimeClient` por sessão (WebSocket; Supabase Realtime, Ably ou Socket.IO servem, ver decisões em aberto). Autentica com o token da sessão e entra no canal `church:{churchId}` e no canal pessoal `user:{userId}`.
-2. **Envelope** — todo evento chega no formato `{ id, type, churchId, entity, entityId, version, at, payload }`, validado por Zod. Evento inválido é descartado e reportado ao Sentry, nunca derruba o app.
-3. **Deduplicação** — um LRU com os últimos 500 `id`s ignora repetições (reconexão reenvia eventos).
-4. **Ordem** — cada entidade tem `version` crescente. Evento com versão menor ou igual à do cache é ignorado; isso resolve corrida entre a resposta da mutation e o eco do socket.
-5. **Roteador** — uma tabela `type → handler` em `@alva/core/realtime/handlers`. Cada handler decide entre **patch** (aplica `payload` com `setQueryData` nas chaves conhecidas) ou **invalidate** (marca as chaves como velhas e o Query refaz só as que estão na tela).
-6. **Lote** — eventos são agrupados em janelas de 50 ms antes de aplicar (`notifyManager.batch`). Um domingo com 300 check-ins em 2 minutos vira poucos renders, não 300.
-7. **Efeitos colaterais** — handlers podem disparar toast, badge ou haptic via um barramento de UI separado, nunca mexendo em estado de tela.
-
-**Quando usar patch e quando invalidar:**
-
-| Situação | Estratégia | Exemplo |
-| --- | --- | --- |
-| Payload completo, entidade pequena | Patch | Check-in confirmado, status de convite da escala, presença no Kids |
-| Afeta agregados ou várias listas | Invalidate | Lançamento financeiro (totais, gráficos), mudança de limite de serviço |
-| Item novo em lista paginada | Patch no topo da primeira página + invalidate das contagens | Novo pedido de oração, nova notificação |
-| Remoção | Patch removendo + invalidate do detalhe | Escala excluída, caso arquivado |
-| Payload ausente ou parcial | Invalidate | Qualquer evento "algo mudou em X" |
-
-**Ciclo de vida da conexão:**
-
-| Estado | Gatilho | Comportamento |
-| --- | --- | --- |
-| `connecting` | login, troca de igreja, volta do background | Indicador discreto só após 2 s |
-| `live` | handshake ok | Nada visível |
-| `reconnecting` | queda de rede, socket fechado | Backoff exponencial com jitter (1 s → 30 s). Banner "Reconectando…" após 5 s |
-| `resync` | reconectou | Pede eventos desde o último cursor; se o servidor não tiver o histórico, invalida tudo que está montado |
-| `paused` | app em background no mobile por mais de 30 s | Fecha o socket para poupar bateria; ao voltar, `resync` |
-| `offline` | `NetInfo` / `navigator.onLine` falso | Banner offline, mutations em fila |
-
-**Presença e telas ao vivo:** telas como o painel de check-in do líder ou o Kids assinam um sub-canal (`church:{id}:service:{eventId}`) via `useLiveChannel(key)`, com contagem de referências: o canal abre quando a primeira tela monta e fecha quando a última desmonta.
-
-**Push no mobile:** Expo Notifications entrega o aviso com o app fechado; ao abrir pela notificação, o deep link leva à tela e a query correspondente é invalidada. O push nunca carrega dados que o app grava, só o aviso.
+| Situação | Estratégia |
+| --- | --- |
+| Voltar para a tela ou para o app | Revalidação por foco |
+| Depois de uma escrita | Invalidação das queries afetadas |
+| Push no mobile | Leva à tela pelo deep link e invalida a query correspondente; o push nunca carrega dados que o app grava |
+| Painéis acompanhados ao vivo (check-in do culto, Kids) | Botão "Atualizar" com horário da última atualização e revalidação por foco. Recarga periódica restrita a essa tela é decisão em aberto (ver final) |
 
 ## Hooks
 
-Os hooks são a API pública entre telas e dados. Ficam em `@alva/core/hooks` (compartilhados web + mobile) e seguem três níveis; uma tela só importa do nível de domínio ou de UI.
+Os hooks públicos de cada feature são a API entre telas e dados. Ficam em `features/<domínio>/` e são exportados pelo `index.ts`. Não existe biblioteca de hooks compartilhada entre repositórios: web e mobile implementam os hooks equivalentes com o mesmo nome e a mesma assinatura sempre que a feature existir nos dois.
 
-| Nível | Onde | Responsabilidade | Exemplos |
-| --- | --- | --- | --- |
-| Infra | `@alva/core/query`, `@alva/core/realtime` | Fetch, auth, socket, cache. Nunca usados direto por telas | `apiClient`, `qk`, `scheduleQueries`, `useRealtimeStatus` |
-| Domínio | `@alva/core/hooks/<feature>` | Uma query ou mutation com regra de negócio embutida | `useSchedules`, `useConfirmSchedule`, `useCheckIn`, `useCareCase`, `useBabyDedications` |
-| UI | `@alva/core/hooks/ui` | Comportamento visual reutilizável | `useAsyncAction`, `useConfirm`, `useDebouncedSearch`, `useListState` |
-
-**Hooks de domínio da primeira versão:**
-
-| Hook | Retorna / faz | Notas |
+| Nível | Onde | Exemplos |
 | --- | --- | --- |
-| `useSession()` | usuário, igreja ativa, papel, `can(perm)` | Seletor fino sobre o store de sessão |
-| `useSchedules(filters)` / `useSchedule(id)` | lista e detalhe | `select` deriva mine, pending, atLimit |
-| `useConfirmSchedule()` / `useDeclineSchedule()` | mutations otimistas | Atualiza lista, detalhe e contador de limite juntos |
-| `useServiceLimits(memberId)` | uso vs. limite por mês e exceções | Lê limitUsage da API; usado no card de limite e no aviso ao escalar |
-| `useCheckInWindow(eventId)` | `{ state: 'upcoming' \| 'open' \| 'closed', opensAt, closesAt }` | Estado vem pronto da API (checkInWindow); o cliente só atualiza a contagem regressiva, por minuto, com o relógio do servidor + offset |
-| `useCheckIn(eventId)` | `checkIn()` com geolocalização | Valida raio no cliente para feedback, servidor decide |
-| `useServiceRoster(eventId)` | equipe com presença ao vivo | Assina o sub-canal do culto; líder marca quem esqueceu |
-| `useCareCases(filters)` / `useCareCase(id)` / `useScheduleCareMeeting()` | acompanhamento pastoral | Nunca persistido em disco |
-| `useBabyDedications()` / `useRequestBabyDedication()` | datas, vagas, solicitações | Bloqueia data cheia de forma otimista |
-| `useEvents(month)` | eventos do mês | Prefetch do mês seguinte |
-| `useNotifications()` | lista infinita + `unreadCount` | Patch via real-time |
-| `useChurchSwitch()` | troca a igreja ativa | Cancela queries, limpa cache da igreja anterior, reconecta canais |
+| Infra | `shared/api`, `shared/platform`, `data-access` | cliente HTTP, `qk`, `scheduleQueries` |
+| Domínio | `features/<domínio>` (públicos) | `useSchedules`, `useConfirmSchedule`, `useCheckIn`, `useCareCase` |
+| UI | `shared/ui` | `useAsyncAction`, `useConfirm`, `useDebouncedSearch` |
 
-**Contrato de toda mutation de domínio:**
+**Hooks de domínio da primeira versão (Alva):**
+
+| Hook | Faz | Notas |
+| --- | --- | --- |
+| `useSession()` | usuário, igreja ativa, papel, `can(perm)` | Seletor fino; `can` só controla apresentação |
+| `useSchedules(filters)` / `useSchedule(id)` | lista e detalhe | `select` deriva minhas, pendentes, no limite |
+| `useConfirmSchedule()` / `useDeclineSchedule()` | mutations | Esperam a API e invalidam lista, detalhe e contador de limite |
+| `useServiceLimits(memberId)` | uso vs. limite e exceções | Lê `limitUsage` calculado pela API |
+| `useCheckInWindow(eventId)` | `{ state, opensAt, closesAt }` | Estado vem da API; o cliente só atualiza a contagem com o relógio do servidor |
+| `useCheckIn(eventId)` | `checkIn()` com geolocalização | Feedback de raio no cliente; servidor decide |
+| `useServiceRoster(eventId)` | equipe do culto com presença | Revalida ao focar e por "Atualizar" |
+| `useCareCases()` / `useCareCase(id)` / `useScheduleCareMeeting()` | acompanhamento pastoral | Só em memória |
+| `useBabyDedications()` / `useRequestBabyDedication()` | datas, vagas, solicitações | Vagas confirmadas pela API |
+| `useEvents(month)` | eventos do mês | Prefetch do mês seguinte |
+| `useNotifications()` | lista paginada + não lidas | Invalidada por push e por foco |
+| `useChurchSwitch()` | troca a igreja ativa | Cancela consultas, limpa dados da igreja anterior, navega para o Início |
+
+**Contrato de toda mutation de domínio (padrão, sem otimista):**
 
 ```ts
 export function useConfirmSchedule() {
   const qc = useQueryClient();
-  const { churchId } = useSession();
+  const { userId, churchId } = useSession(s => ({ userId: s.userId, churchId: s.churchId }));
   return useMutation({
     mutationKey: ['schedule', 'confirm'],
-    mutationFn: (id: string) => api.schedules.confirm(churchId, id),
-    onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: qk.schedules.all(churchId) });
-      const snapshot = snapshotQueries(qc, qk.schedules.all(churchId));
-      patchSchedule(qc, churchId, id, { status: 'confirmed' });
-      return { snapshot };
-    },
-    onError: (_e, _id, ctx) => restoreQueries(qc, ctx?.snapshot),
-    onSettled: () => qc.invalidateQueries({ queryKey: qk.schedules.all(churchId) }),
+    mutationFn: (id: string) => api.schedules.confirm({ churchId, id }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.schedules.all(userId, churchId) }),
   });
 }
 ```
 
-**`useAsyncAction` (contrato visual do botão assíncrono):** envolve qualquer `mutateAsync` e devolve `{ run, state }` com `idle → loading → success → idle` (ou `error`). O componente `<AsyncButton>` de web e mobile consome o mesmo estado e o mesmo token de motion, garantindo a animação idêntica nas duas plataformas. Clique duplo durante `loading` é ignorado.
+Otimista só quando aprovado caso a caso e reversível, documentado no hook. Pagamento, aprovação, exclusão e ações concorrentes nunca mostram sucesso antes da confirmação.
 
-**Regras para escrever hooks:**
-
-- Um hook, uma responsabilidade. Hooks que combinam outros hooks são permitidos só no nível de domínio.
-- Sem `useEffect` para sincronizar dados. Se está escrevendo `useEffect(() => setX(data))`, use `select` ou `useMemo`.
-- `useEffect` só para efeitos externos (assinar canal, foco, AppState) e sempre com limpeza.
-- Retornos estáveis: callbacks com `useCallback`, objetos com `useMemo` quando passados para listas virtualizadas.
-- Todo hook de domínio tem teste com MSW + `renderHook`.
+**Regras para escrever hooks:** uma responsabilidade por hook; sem `useEffect` para sincronizar dados; `useEffect` só para efeitos externos, sempre com limpeza; retornos estáveis; todo hook de domínio com teste (MSW + `renderHook` no web, Jest + RNTL no mobile).
 
 ## Resiliência
 
-O objetivo é que nenhuma falha isolada (um evento malformado, uma tela com bug, rede ruim no culto) derrube o app inteiro. Cada camada tem sua proteção.
-
-| Risco | Proteção | Comportamento para o usuário |
+| Risco | Proteção | Para o usuário |
 | --- | --- | --- |
-| Erro de render em uma tela | Error Boundary por rota (layout do Next / Expo Router) + por widget em dashboards | Só aquela área mostra "Algo deu errado · Tentar de novo"; menu e navegação continuam |
-| Erro de query | `throwOnError` só para 5xx em telas críticas; demais mostram estado de erro inline | Lista mostra mensagem e botão de recarregar, dados em cache continuam visíveis |
-| Mutation falhou | Rollback do `onMutate` + toast com "Desfazer" / "Tentar de novo" | A UI volta ao estado anterior sem piscar |
-| Sem rede | `onlineManager` + fila de mutations persistida (`resumePausedMutations`) | Banner offline; ações seguras (confirmar escala, pedido de oração) entram na fila; ações que exigem servidor (check-in, pagamento) ficam desabilitadas com explicação |
-| Evento real-time inválido ou fora de ordem | Zod + versão + dedupe (seção Real-time) | Invisível |
-| Rajada de eventos | Lote de 50 ms + `structuralSharing` + listas virtualizadas | App continua fluido |
-| Token expirado | Interceptor faz refresh único (mutex) e repete as requisições em espera | Invisível; se o refresh falhar, volta ao login preservando a rota |
-| Troca de igreja no meio de uma requisição | `AbortController` por `churchId` + chaves com `churchId` | Respostas antigas são descartadas, nunca aparecem na igreja errada |
-| Versão do app desatualizada | Header `x-app-version`; servidor responde 426 | Tela "Atualize o Alva" (mobile) ou recarga suave (web) |
-| Memória no mobile | `gcTime` + limite de páginas em `useInfiniteQuery` (`maxPages: 5`) + FlashList | Sem crescimento ilimitado em sessões longas |
-| Bateria / background | Socket pausado após 30 s em background, sem polling | Ao voltar, resync rápido |
+| Erro de render | Error boundary por rota e por widget crítico | Só aquela área mostra "Algo deu errado · Tentar de novo" |
+| Erro de rede ou de query | Erro inline, dados em cache continuam visíveis | Mensagem e botão de recarregar |
+| Mutation falhou | Formulário preservado; erro no campo ou toast com "Tentar de novo" | Nada some; a pessoa corrige e reenvia |
+| Sem rede | Ações que escrevem ficam desabilitadas com explicação | Banner offline; leitura do que já está em memória |
+| Sessão expirada | Adaptador de autenticação renova a sessão uma vez; se falhar, volta ao login preservando a rota | Invisível na maioria dos casos |
+| Troca de igreja no meio de uma requisição | Cancelamento por contexto + chave com igreja | Respostas antigas nunca aparecem na igreja errada |
+| Resposta tardia | Chaves por contexto e cancelamento ao desmontar | Sem dado "pulando" na tela |
+| Versão do app desatualizada | Janela de suporte definida no contrato de release | Tela "Atualize o Alva" no mobile |
+| Memória no mobile | Paginação com limite de páginas + FlashList | Sem crescimento ilimitado |
 
-**Relógio do servidor:** check-in, janelas de escala e prazos usam `serverNow()` = `Date.now() + offset`, com offset medido no login e a cada reconexão. Nunca confiar no relógio do aparelho para regras.
+**Relógio do servidor:** janelas de check-in e prazos usam a hora do servidor (offset medido no login); nunca o relógio do aparelho para regras.
 
-**Feature flags e kill switch:** flags remotas (PostHog) por igreja permitem desligar uma feature com problema sem publicar versão. O módulo de real-time tem flag própria: desligado, o app cai para `refetchInterval` de 60 s nas telas ao vivo.
-
-**Observabilidade:** Sentry com breadcrumbs de navegação, mutations e estado da conexão; tag `churchId` e `role` (nunca dados pessoais). Métricas de real-time (latência evento→tela, reconexões por sessão, eventos descartados) vão para o PostHog.
+**Observabilidade:** erros com contexto de rota, igreja e papel, sem dados pessoais. Ferramenta a definir no bootstrap.
 
 ## Mapa de funcionalidades
 
-O que já foi prototipado, onde vive em cada plataforma e o que precisa de real-time.
-
-| Feature | Web (admin) | Mobile (membro / líder) | Real-time | Persistir offline |
+| Feature | Web (admin) | Mobile (membro / líder) | Atualização | Persistir em disco |
 | --- | --- | --- | --- | --- |
-| Login, primeiro acesso (OTP), esqueci a senha, seleção de igreja | Sim | Sim + splash | — | Sessão |
-| Dashboard / Início | KPIs, pendências | Próximos eventos e escalas | Invalidate | Sim |
-| Agenda e eventos | CRUD, calendário | Aba Eventos (cards minimalistas) | Patch | Sim |
-| Escalas | Montagem, conteúdo por tipo (seleção múltipla), limites e exceções, carga | Minhas escalas, Disponibilidade, card de limite | Patch (convites, status) | Sim |
-| Check-in de serviço | Aba Check-in na escala, líder marca presença | Check-in por geolocalização (janela de 2 h, raio), tela da equipe para o líder | Patch ao vivo (sub-canal do culto) | Não (exige servidor) |
-| Conteúdo / aulas | Biblioteca, formatos vídeo / arquivo / ambos, upload | Consumo | Invalidate | Sim (metadados) |
-| Acompanhamento pastoral | Lista, detalhe do caso, registro, agendar (2 passos) | Aba Acompanhamento (membro), Mais (admin) | Patch | **Não** (sensível) |
-| Discipulado | Grupos e encontros | Aba Discipulado | Invalidate | Sim |
-| Kids | Salas, check-in / check-out | Responsáveis | Patch ao vivo | Não |
-| Apresentação de bebês | Datas abertas pela igreja, aprovação, regras (idade máx.), certificado | Solicitação pelos pais membros, acompanhamento | Patch (vagas, status) | Sim |
-| Financeiro / reservas | Lançamentos, relatórios, reservas | — | Invalidate | **Não** |
-| Notificações | Sino | Lista + push | Patch | Sim |
-| Meu perfil | Dados, acesso, segurança, preferências (tema) | Perfil | — | Sim |
-| Visitante | — | Boas-vindas e acesso restrito | — | Sim |
+| Login, primeiro acesso (OTP), esqueci a senha, seleção de igreja | Sim | Sim + splash; entrar com senha, código por e-mail, criar conta | — | Só preferências |
+| Dashboard / Início | KPIs, pendências | Próximos eventos e escalas | Foco + após escrita | Não |
+| Agenda e eventos | CRUD, calendário | Eventos | Foco + após escrita | Não |
+| Escalas | Montagem, limites e exceções | Minhas escalas, disponibilidade, limite | Foco + push | Não |
+| Check-in de serviço | Aba Check-in, líder marca presença | Check-in por geolocalização, equipe do culto | Foco + "Atualizar" | Não |
+| Conteúdo / aulas | Biblioteca, upload | Consumo | Foco | Não (categorias como catálogo) |
+| Acompanhamento pastoral | Casos, registro, agendar | Acompanhamento | Foco + push | **Nunca** |
+| Discipulado | Grupos e encontros | Discipulado | Foco | Não |
+| Kids | Salas, check-in / check-out | Responsáveis | Foco + "Atualizar" | Não |
+| Apresentação de bebês | Datas, aprovação, certificado | Solicitação e acompanhamento | Foco + push | Não |
+| Espaços e almoxarifado | Salas (uso fixo, calendário), reservas em etapas, empréstimos com aprovação | — | Foco + após escrita | Não (salas e categorias como catálogo) |
+| Cafeteria e Restaurante | Itens, categorias, vendas e caixa diário vindos do sistema de vendas, ajustes de estoque, receitas no Financeiro | — | Foco + após escrita | Não (categorias como catálogo) |
+| Financeiro | Lançamentos, relatórios | — | Foco | **Nunca** |
+| Multi-igreja | Redes, igrejas, perfil institucional de cada igreja | Quem somos, secretaria, redes | Foco | Não |
+| Notificações | Sino | Lista + push | Push + foco | Não |
+| Meu perfil / Meus dados | Dados, acesso, preferências | Dados, família, caminhada | Após escrita | Só preferências |
+| Visitante | — | Boas-vindas e acesso restrito | — | — |
 
-**Ordem sugerida de construção:** fundação (auth, sessão, design system, query client, real-time) → Agenda → Escalas → Check-in → Notificações → Acompanhamento e Discipulado → Kids → Apresentações → Conteúdo → Financeiro. Escalas + Check-in são o primeiro teste real da arquitetura de real-time, por isso vêm cedo.
+**Assinaturas:** visão geral, clientes, assinaturas, planos, cobranças e pagamentos, vouchers, avisos aos produtos, auditoria, com Cmd+K e OTP de seis caixas; mesmas regras de estado e cache (cobranças e pagamentos nunca persistidos).
+
+**Landing:** páginas públicas pré-renderizadas, planos e cadastro de igreja em etapas; sem sessão de usuário.
+
+**Ordem sugerida de construção (Alva):** fundação (auth, sessão, tema, QueryClient, cliente gerado) → Agenda → Escalas → Check-in → Notificações → Acompanhamento e Discipulado → Kids → Apresentações → Conteúdo → Espaços e almoxarifado → Financeiro.
 
 ## Navegação, permissões e multi-igreja
 
-**Rotas web (Next.js App Router):**
+**Rotas web (React Router, rotas lazy por domínio):**
 
-- `/(auth)/login`, `/(auth)/first-access`, `/(auth)/forgot-password`, `/(auth)/churches`
-- `/[churchSlug]/(app)/...` com o menu lateral em acordeão (grupo "Geral" primeiro) e busca no menu. Cada módulo é um segmento em inglês: `schedules`, `schedules/[id]?tab=check-in`, `care/[caseId]`, `baby-dedications`, `profile`. Os rótulos visíveis continuam em português ("Escalas", "Acompanhamento").
-- Telas de detalhe sempre com botão **Voltar** ao lado do breadcrumb.
-- Server Components só para a casca (layout, menu, permissões); conteúdo de dados é Client Component com Query, hidratado via `HydrationBoundary` quando houver prefetch.
+- `/login`, `/first-access`, `/forgot-password`, `/churches`.
+- `/:churchSlug/...` com menu lateral em acordeão. Segmentos em inglês (`schedules`, `schedules/:id?tab=check-in`, `care/:caseId`, `spaces/rooms/:id`), rótulos em português.
+- Detalhes sempre com *Voltar* ao lado do breadcrumb.
+- Guards de rota são experiência, não segurança: o servidor revalida toda operação.
 
-**Rotas mobile (Expo Router):**
+**Rotas mobile (Expo Router):** `(auth)` → `(tabs)` com `home`, `calendar` (eventos · escalas · discipulado · acompanhamento), `notifications` e `more`; abas calculadas por papel; deep links `alva://schedule/{id}`, `alva://checkin/{eventId}` usados pelo push.
 
-- `(auth)` stack → `(tabs)` com as rotas `home`, `calendar` (sub-abas `events` · `schedules` · `discipleship` · `care`), `notifications` e `more`. Rótulos: Início, Agenda (Eventos · Escalas · Discipulado · Acompanhamento), Notificações, Mais.
-- Abas visíveis calculadas por `tabsFor(role)`; visitante vê a versão restrita.
-- Deep links `alva://schedule/{id}`, `alva://checkin/{eventId}` usados por push.
-
-**Permissões:**
+**Permissões:** vêm do servidor por igreja e por área (`schedules:edit`, `care:read`, `loans:approve`…). O cliente usa `can(perm)` e `<Can>` só para apresentação. Quem decide é o servidor.
 
 | Papel | Web | Mobile |
 | --- | --- | --- |
 | Admin / pastor | Tudo | Tudo + Acompanhamento em Mais |
-| Líder de ministério | Escalas e check-in do seu ministério | Equipe do culto, marcar presença |
-| Membro | — | Agenda, escalas, acompanhamento próprio, apresentações |
-| Visitante | — | Boas-vindas, eventos públicos, convite para tornar-se membro |
+| Líder de ministério | Escalas e check-in do seu ministério; aprovar empréstimos se tiver a permissão | Equipe do culto, marcar presença |
+| Membro | — | Agenda, escalas, acompanhamento próprio, apresentações, meus dados |
+| Visitante | — | Boas-vindas, eventos públicos |
 
-- Permissões vêm do servidor como lista (`schedules:edit`, `care:read`…); o cliente só usa `can(perm)` para esconder UI. **Quem decide é o servidor.**
-- Componente `<Can perm>` e guarda de rota (`middleware.ts` na web, redirect no layout do Expo Router).
-
-**Multi-igreja:**
-
-1. Igreja ativa vive no store de sessão e na URL (web: `churchSlug`).
-2. `useChurchSwitch()` cancela queries em voo, remove do cache tudo que tem a chave da igreja anterior (dados sensíveis) ou mantém em memória (dados públicos, para voltar rápido), troca canais de real-time e navega para o Início.
-3. Seletor de igreja sem blocos coloridos de sigla, só nome e local.
+**Multi-igreja:** igreja ativa no Zustand e na URL (web: `churchSlug`). `useChurchSwitch()` cancela consultas, remove do cache os dados da igreja anterior e navega para o Início. Seletor de igreja sem blocos coloridos de sigla.
 
 ## Qualidade
 
-| Tipo | Ferramenta | O que cobre | Meta |
+| Tipo | Web / Landing | Mobile | Meta |
 | --- | --- | --- | --- |
-| Tipos | TypeScript `strict` + tipos de @alva/contracts (gerados do OpenAPI) | Contrato com o backend | Zero `any` em `@alva/core` |
-| Unitário | Vitest | `@alva/core/domain` (regras de limite, janela de check-in, idade máxima) | 90% em domain |
-| Hooks | Vitest + `renderHook` + MSW | Queries, mutations otimistas, rollback | Todo hook de domínio |
-| Real-time | Vitest com socket simulado | Dedupe, ordem por versão, lote, resync | Todos os handlers |
-| Componentes | Testing Library (web) / RNTL (mobile) + Storybook | Design system e estados (vazio, carregando, erro) | Todo componente de `components/ui` |
-| E2E web | Playwright | Login, escalar, check-in do líder, aprovar apresentação | Fluxos críticos no CI |
-| E2E mobile | Maestro | Login, confirmar escala, check-in por geolocalização simulada | Fluxos críticos antes de cada release |
-| Visual | Chromatic sobre o Storybook | Regressão visual do DS, temas light e dark | Aprovação em PR |
-| Acessibilidade | axe (web), labels obrigatórios (lint) | Contraste, foco, leitores de tela | Sem violações sérias |
-| Performance | Lighthouse CI, React Profiler, Flashlight (mobile) | LCP, renders por evento, FPS em listas | LCP < 2,5 s; 60 fps em listas |
+| Tipos | TypeScript `strict` + cliente gerado | TypeScript `strict` + cliente gerado | Zero `any` em `domain` e `data-access` |
+| Unitário e hooks | Vitest + Testing Library + MSW | Jest + RNTL | Por risco; sem percentual como garantia |
+| Componentes | Storybook + Testing Library | Storybook + RNTL | Todo componente de `shared/ui` com estados vazio, carregando, erro, sucesso, desabilitado |
+| E2E | Playwright (fluxos críticos e regressão visual) | Maestro | Fluxos críticos no CI / antes de cada release |
+| Acessibilidade | Verificação automática + revisão manual | Labels obrigatórios + revisão manual | Sem violações sérias |
 
-**Teste de carga do real-time:** antes do primeiro domingo em produção, simular 500 eventos/min no sub-canal de um culto e medir renders, memória e latência nas duas plataformas.
+Cenários obrigatórios de teste: troca de contexto, sessão expirada, resposta tardia, erro de validação, concorrência (`If-Match`) e isolamento de cache entre usuários e igrejas.
 
-**CI (GitHub Actions + um pipeline por repositório):** lint → typecheck → testes → build → Playwright → preview na Vercel. Mobile com EAS Build e EAS Update (canais `preview` e `production`), OTA só para mudanças de JS. No alva-api, o CI valida OpenAPI e AsyncAPI, detecta mudanças que quebram contrato (oasdiff) e publica @alva/contracts; no alva-kit, o workflow sync-contracts gera @alva/contracts a partir da especificação e o Changesets publica @alva/theme, @alva/contracts, @alva/core e @alva/config.
-
-**Convenções:** ESLint com `react-hooks`, `@tanstack/query` e regra proibindo import de `@alva/contracts` em telas; Prettier; commits convencionais; PR pequeno com Storybook do componente novo.
+**CI por repositório:** lint → TypeScript strict → testes → build (Vite / EAS) → E2E. Geração do cliente a partir do OpenAPI publicado detecta quebra de contrato. Publicação de pacotes e automerge não são necessários.
 
 ## Requisitos para o alva-api
 
-A robustez do front depende de garantias que só o backend pode dar. Estes pontos precisam ser combinados com o time da API antes da fase 1.
-
 | Requisito | Detalhe | Por que o front precisa |
 | --- | --- | --- |
-| Contratos versionados | `openapi.yaml` e `asyncapi.yaml` no repo; CI valida, roda `oasdiff` e avisa o alva-kit, que gera e publica `@alva/contracts`. Quebra de contrato = versão major + janela de compatibilidade de no mínimo 90 dias | Versões antigas do app continuam instaladas nos celulares |
-| Versão por registro | Toda entidade tem `version` (inteiro crescente) e `updatedAt`, nas respostas e nos eventos | Descartar eventos fora de ordem e resolver corrida entre mutation e socket |
-| Envelope de evento | `{ id, type, churchId, entity, entityId, version, at, payload }`, com `id` único; payload completo quando a entidade é pequena | Deduplicação e decisão entre patch e invalidate |
-| Histórico e cursor | Eventos guardados por 24 h; ao reconectar, o cliente envia o último cursor e recebe o que perdeu. Fora da janela, responde `resync_required` | Reconexão sem perder atualizações |
-| Idempotência | Toda escrita aceita o header `Idempotency-Key`; repetir a chave devolve o mesmo resultado | Fila offline e retries não duplicam check-ins nem pedidos |
-| Campos derivados | `checkInWindow`, `limitUsage`, `availableSlots`, `permissions` calculados no servidor | Uma única implementação das regras críticas |
-| Hora do servidor | Header `Date` (ou `x-server-time`) em toda resposta | Calcular o offset do relógio do aparelho |
-| Erros padronizados | `application/problem+json` (RFC 9457) com `code` estável e `fields` para validação | Mensagens traduzidas no front e erro no campo certo |
-| Autenticação | Access token curto + refresh token com rotação; `401` (sessão) diferente de `403` (permissão) | Refresh automático sem deslogar quem só não tem acesso |
-| Versão mínima do app | Lê `x-app-version` e responde `426` abaixo do mínimo | Tela "Atualize o Alva" em vez de erros estranhos |
-| Escopo por igreja | Rotas em `/churches/{churchId}/...`; permissões avaliadas por igreja; canais `church:{churchId}` | Multi-igreja sem vazamento de dados |
-| Paginação por cursor | Listas que recebem itens em tempo real usam cursor, não offset | Itens novos não duplicam nem pulam páginas |
-| Dados sensíveis | Eventos e push de acompanhamento pastoral e financeiro levam só ids, nunca conteúdo | O front invalida e busca com autorização; nada sensível fica em notificações |
-| Fixtures de regras | Casos de teste em JSON para regras que existem nos dois lados, publicados em `@alva/contracts` | Garantir que front e back calculam igual |
+| OpenAPI versionado | `openapi.yaml` publicado a cada release; CI detecta mudanças que quebram contrato | Clientes gerados em cada front |
+| Coleções e erros padronizados | `items/page/pageSize/totalCount/totalPages` e `error.code/message/details` | Paginação e mensagens uniformes |
+| Concorrência e idempotência | `If-Match`/ETag nas edições; `Idempotency-Key` nos comandos repetíveis | Evitar sobrescrever edição alheia e duplicar comandos |
+| Campos derivados | `checkInWindow`, `limitUsage`, `availableSlots`, `permissions` calculados no servidor | Regras críticas com uma única implementação |
+| Hora do servidor | Header `Date` em toda resposta | Offset do relógio do aparelho |
+| Autenticação | Cookie HttpOnly/Secure com CSRF no web; tokens para o mobile; `401` diferente de `403` | Renovação de sessão sem deslogar quem só não tem acesso |
+| Escopo por igreja | Rotas e permissões avaliadas por igreja e por área | Multi-igreja sem vazamento |
+| Push sem conteúdo sensível | Push de acompanhamento pastoral e financeiro leva só ids | O app busca com autorização |
+| Contrato de release do mobile | Versão mínima suportada e janela de compatibilidade | Apps antigos continuam nas lojas |
 
 ## Roadmap e decisões em aberto
 
-| Fase | Duração estimada | Entregas |
-| --- | --- | --- |
-| 0. Fundação | 2–3 semanas | Repositório alva-kit com @alva/theme, @alva/contracts, @alva/core e @alva/config publicados, sync de contratos com o alva-api, CI dos quatro repositórios, tokens e componentes base (web + native), auth e sessão, QueryClient, cliente real-time com roteador e testes, Sentry, CI |
-| 1. Núcleo do culto | 4–5 semanas | Agenda, Escalas (montagem, convites, limites), Check-in com geolocalização e painel do líder, notificações e push |
-| 2. Cuidado | 3–4 semanas | Acompanhamento pastoral, Discipulado, Kids |
-| 3. Vida da igreja | 3 semanas | Apresentação de bebês com certificado, Conteúdo / aulas, Meu perfil completo |
-| 4. Gestão | 3 semanas | Financeiro, reservas, relatórios |
-| 5. Endurecimento | contínuo | Offline avançado, teste de carga, acessibilidade, performance |
+| Fase | Entregas |
+| --- | --- |
+| 0. Fundação | Matriz de versões homologada; repositórios com estrutura de pastas, tema próprio, lint de camadas, cliente gerado, autenticação, sessão, QueryClient, Storybook e CI |
+| 1. Núcleo do culto | Agenda, Escalas, Check-in, notificações e push |
+| 2. Cuidado | Acompanhamento pastoral, Discipulado, Kids |
+| 3. Vida da igreja | Apresentações, Conteúdo, Meu perfil, Multi-igreja |
+| 4. Gestão | Espaços e almoxarifado, Cafeteria e Restaurante, Financeiro, relatórios |
+| Paralelo | Landing (antes do lançamento) e Assinaturas (com o `assinaturas-api`) |
 
 **Decisões em aberto:**
 
 | Decisão | Opções | Recomendação |
 | --- | --- | --- |
-| Provedor de real-time | Supabase Realtime · Ably · Socket.IO próprio · Pusher | Depende do backend: Supabase se o banco for Postgres no Supabase; Ably se quiser histórico e garantia de entrega sem operar servidor |
-| Contrato de API | Gerador do cliente: Hey API · Orval · openapi-zod-client | REST + OpenAPI já decidido (API não é TypeScript). Hey API: gera tipos, Zod e queryOptions do TanStack Query |
-| Cursor de resync | Servidor guarda histórico de eventos · sempre invalidar ao reconectar | Histórico curto (24 h) no servidor, invalidação como fallback |
-| Offline no mobile | Só leitura · fila de mutations | Fila apenas para ações seguras (lista na seção Resiliência) |
-| Componentes compartilhados | Duas bibliotecas (shadcn + NativeWind) · Tamagui / gluestack universal | Duas bibliotecas sobre os mesmos tokens: aproveita shadcn na web e mantém o nativo leve |
-| Web do membro | Só admin na web · também versão membro | Começar só admin; Expo Web pode servir o membro depois |
-| Geolocalização do check-in | Raio fixo · geofence por igreja · QR code como alternativa | Raio configurável por igreja, com QR do líder como plano B para GPS ruim |
+| Painéis ao vivo (check-in do culto, Kids) | Só foco + "Atualizar" · recarga periódica só nessa tela | Começar só com foco + "Atualizar"; recarga periódica local exige aprovação, pois o documento de arquitetura veda polling global |
+| Gerador do cliente OpenAPI | Hey API · Orval · openapi-typescript + fetch | Escolher um só para os quatro fronts |
+| Componentes do mobile | Próprios do zero · base de componentes nativos | Próprios sobre os tokens, com API igual à do web |
+| Web do membro | Só admin na web · versão membro | Começar só admin |
+| Geolocalização do check-in | Raio fixo · raio por igreja · QR como alternativa | Raio por igreja, QR do líder como plano B |

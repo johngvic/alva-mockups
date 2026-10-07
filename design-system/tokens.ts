@@ -1,10 +1,12 @@
 /**
  * Alva Design System — tokens
- * Fonte única para @alva/theme (alva-kit/packages/theme). Extraído dos protótipos Alva Web (v71) e Alva Mobile (v62).
+ * Referência de valores para os temas de cada repositório (web, mobile, landing e Assinaturas).
+ * Não é um pacote: cada repositório copia o que precisa para src/theme/. Extraído dos protótipos em ux_alva:
+ * Alva Web (web/), Alva Mobile (mobile/), Landing (site/) e Painel de Assinaturas (subscriptions/).
  *
  * Gera:
  *  - variáveis CSS (web)            → toCssVars()
- *  - preset Tailwind / NativeWind   → tailwindPreset
+ *  - preset Tailwind (web)          → tailwindPreset
  *  - constantes para Reanimated     → importar `motion`, `radius`, `space` direto
  *
  * Temas: "light" (claro, padrão do web) e "dark" (escuro, padrão do mobile).
@@ -54,6 +56,7 @@ const light = {
   bg: '#eef0ea',
   surface: '#ffffff',
   surface2: '#f5f6f2',
+  surface3: '#eceee8', // trilhos, células de destaque, terceiro nível
   glass: 'rgba(255,255,255,.72)',
   // texto
   ink: '#010f12',
@@ -97,6 +100,7 @@ const dark: Record<keyof typeof light, string> = {
   bg: '#010f12',
   surface: '#13292d',
   surface2: '#0c2024',
+  surface3: '#1a3337',
   glass: 'rgba(18,37,41,.72)',
   ink: '#ffffff',
   inkMuted: '#b5b8ad',
@@ -209,13 +213,15 @@ export const radius = {
 } as const;
 
 export const layout = {
+  sidebarCompactBelowHeight: 760, // menu nunca rola: abaixo desta altura entra a versão compacta
   contentMax: 1240,   // .wrap
   sidebar: 248,       // menu lateral desktop
   drawer: 284,        // menu lateral mobile (off-canvas)
   topbar: 58,
   gutterMobile: 16,
   dialog: { sm: 440, md: 480, lg: 720 },
-  control: { sm: 32, md: 36, lg: 42, icon: 38 }, // alturas
+  control: { sm: 32, md: 36, lg: 42, icon: 38, glass: 54, otp: 58 }, // alturas
+  productBadge: { sm: 28, md: 40, lg: 64 }, // selo de produto (Painel de Assinaturas)
   avatar: { xs: 24, sm: 30, md: 36, lg: 44 },
 } as const;
 
@@ -248,10 +254,30 @@ export const gradients = {
   sheen: 'linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent)',
   /** Fade de borda para listas roláveis (mask-image). */
   scrollFade: 'linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 16px), transparent)',
-  /** Hachura para dias bloqueados / segmentos vazios. */
+  /** Hachura: só em dados (dias bloqueados, segmentos vazios). Nunca decoração nem peças de marca. */
   hatch: 'repeating-linear-gradient(135deg, var(--line-strong) 0 1.5px, transparent 1.5px 5px)',
   /** Certificado de apresentação (moldura). */
   certificate: 'linear-gradient(135deg, #e9dcc0, #f7f0df 40%, #e4d3b0)',
+  /** Céu de alvorada (telas de acesso do app): base; os véus e o horizonte vêm de `authSky`. */
+  authSkyBase: 'radial-gradient(140% 70% at 50% 0%, var(--sky-2), var(--sky-1) 70%)',
+  /** Palavra "alva" grande na boas-vindas (background-clip: text). */
+  wordmarkDark: 'linear-gradient(180deg, #ffffff 20%, #c7ebea 70%, #a9c8da)',
+  wordmarkLight: 'linear-gradient(180deg, #010f12 25%, #07486e)',
+  /** Brilho que passa sobre a palavra a cada 9 s. */
+  wordmarkSheenDark: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,.55) 50%, transparent 60%)',
+  wordmarkSheenLight: 'linear-gradient(105deg, transparent 42%, rgba(169,200,218,.65) 50%, transparent 58%)',
+  /** Borda de luz do botão principal (border-box de 1.5px; --ang anima de 0 a 360deg). */
+  glowBorderDark: 'conic-gradient(from var(--ang), rgba(199,235,234,.25), rgba(169,200,218,.9) 25%, rgba(199,235,234,.25) 50%, #ffd6aa 75%, rgba(199,235,234,.25))',
+  glowBorderLight: 'conic-gradient(from var(--ang), rgba(169,200,218,.4), #a9c8da 25%, rgba(169,200,218,.4) 50%, #ffcd9c 75%, rgba(169,200,218,.4))',
+  glowFillDark: 'linear-gradient(180deg, #0b3a52, #062a3d)',
+  glowFillLight: 'linear-gradient(180deg, #0a5a85, #07486e)',
+} as const;
+
+/** Céu de alvorada: valores por tema. Três véus radiais desfocados (48px) que derivam devagar + brilho de horizonte. Sem partículas. */
+export const authSky = {
+  dark: { sky1: '#010f12', sky2: '#03202e', veil1: 'rgba(7,72,110,.55)', veil2: 'rgba(0,133,130,.30)', veil3: 'rgba(169,200,218,.16)', horizon: 'rgba(255,214,170,.16)' },
+  light: { sky1: '#eef0ea', sky2: '#e3edf1', veil1: 'rgba(169,200,218,.55)', veil2: 'rgba(199,235,234,.6)', veil3: 'rgba(7,72,110,.10)', horizon: 'rgba(255,205,156,.28)' },
+  blur: 48,
 } as const;
 
 /* ───────────────────────── 6. Motion ───────────────────────── */
@@ -272,7 +298,11 @@ export const motion = {
     slow: 320,    // drawer, sheet, modal
     pop: 450,     // sucesso do botão
     entrance: 700,// .rise
-    splash: 2600, // splash completo (2–3 s)
+    splash: 2600, // splash completo (2–3 s); termina com fade, sem levar o sol à tela seguinte
+    autoAdvance: 6000, // abas e carrosséis com avanço automático
+    sheenLoop: 9000,   // brilho do título da marca
+    glowSpin: 14000,   // uma volta da borda de luz
+    skyDrift: [38000, 46000, 52000], // véus do céu de alvorada
   },
   stagger: 70, // ms entre itens na entrada (.rise)
   press: 0.97, // scale no :active
@@ -292,7 +322,7 @@ const kebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/(
 
 /** Nomes das variáveis CSS em kebab-case (ex.: --ink-muted, --success-bg, --ambient-1, --sun-ray). */
 const cssName: Partial<Record<ThemeToken, string>> = {
-  ambient1: 'ambient-1', ambient2: 'ambient-2', surface2: 'surface-2',
+  ambient1: 'ambient-1', ambient2: 'ambient-2', surface2: 'surface-2', surface3: 'surface-3',
   chart1: 'chart-1', chart2: 'chart-2', chart3: 'chart-3', chart4: 'chart-4',
   sun1: 'sun-1', sun2: 'sun-2', sun3: 'sun-3',
 };
@@ -341,7 +371,7 @@ const v = (name: string) => `var(--${name})`;
 const px = (o: Record<string | number, number>) =>
   Object.fromEntries(Object.entries(o).map(([k, n]) => [k, `${n}px`]));
 
-/** Preset para tailwind.config (web) e NativeWind (mobile). */
+/** Preset para tailwind.config (web, landing e Assinaturas). O mobile usa as constantes direto (componentes nativos). */
 export const tailwindPreset = {
   theme: {
     screens: px(breakpoints),
@@ -349,7 +379,7 @@ export const tailwindPreset = {
       transparent: 'transparent',
       current: 'currentColor',
       bg: v('bg'),
-      surface: { DEFAULT: v('surface'), 2: v('surface-2'), glass: v('glass') },
+      surface: { DEFAULT: v('surface'), 2: v('surface-2'), 3: v('surface-3'), glass: v('glass') },
       ink: { DEFAULT: v('ink'), muted: v('ink-muted'), soft: v('ink-soft') },
       line: { DEFAULT: v('line'), strong: v('line-strong') },
       brand: { DEFAULT: v('brand'), on: v('on-brand'), text: v('brand-text'), soft: v('brand-soft') },
@@ -390,7 +420,9 @@ export const tailwindPreset = {
     boxShadow: { card: v('shadow-card'), pop: v('shadow-pop'), none: 'none' },
     backgroundImage: gradients,
     transitionTimingFunction: motion.easing,
-    transitionDuration: Object.fromEntries(Object.entries(motion.duration).map(([k, n]) => [k, `${n}ms`])),
+    transitionDuration: Object.fromEntries(
+      Object.entries(motion.duration).filter(([, n]) => typeof n === 'number').map(([k, n]) => [k, `${n}ms`]),
+    ),
     zIndex: Object.fromEntries(Object.entries(zIndex).map(([k, n]) => [k, String(n)])),
     extend: {
       maxWidth: { content: `${layout.contentMax}px` },
