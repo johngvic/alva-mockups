@@ -1301,7 +1301,7 @@ h1 em{font:italic 400 33px/34px var(--font-serif);letter-spacing:-.01em;color:va
 .trow.lg .hma{grid-area:hma}
 @media (min-width:1024px){.trow.lg{grid-template-columns:minmax(0,1.2fr) minmax(0,1.1fr) 170px 140px 150px;grid-template-areas:"tn lty ts ldt hma";align-items:center}.lty,.ldt{padding:0}
  .trow.lg.thead>span:nth-child(2){grid-area:lty}.trow.lg.thead>span:nth-child(3){grid-area:ts}.trow.lg.thead>span:nth-child(4){grid-area:ldt}}
-.prof:not(:has(.ptabs)){padding-bottom:20px}@media (min-width:768px){.prof:not(:has(.ptabs)){padding-bottom:24px}}
+.prof:not(:has(.ptabs)){padding-bottom:20px;overflow:visible;position:relative;z-index:5}@media (min-width:768px){.prof:not(:has(.ptabs)){padding-bottom:24px}}
 /* usuários e permissões v2 */
 .up-tabs{align-self:flex-start;display:inline-flex;margin:0}
 .up-tabs button{height:36px;padding:0 14px}
