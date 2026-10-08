@@ -2263,7 +2263,8 @@ const EVTS=[
  EV({t:'Convergir 2027',type:'Conferência',st:'previsao',prev:'Fev/2027',d:''}),
  EV({t:'Congresso de Mulheres 2027',type:'Conferência',st:'previsao',prev:'Mar/2027',d:''}),
  EV({t:'12 Horas de Oração',type:'Evento especial',d:'2026-10-24',time:'05h às 17h',min:'Intercessão',regs:[R('Renata Campos','2026-09-25','—',0),R('Elisa Moura','2026-09-26','—',0)]}),
- EV({t:'Ensaio do Louvor',type:'Ensaio',d:'2026-09-30',time:'20h',min:'Louvor',place:'Templo principal'})
+ EV({t:'Ensaio do Louvor',type:'Ensaio',d:'2026-09-30',time:'20h',min:'Louvor',place:'Auditório'}),
+ EV({kind:'culto',t:'Culto de Quarta',type:'Culto',d:'2026-09-30',time:'19h30',min:'Louvor',rep:'semanal'})
 ];
 const MYESC=[{t:'Louvor · Culto de Celebração',min:'Louvor',d:'2026-10-04',role:'Vocal'},{t:'Louvor · Culto de Celebração',min:'Louvor',d:'2026-10-18',role:'Vocal'},{t:'Recepção · Conferência Missões',min:'Recepção',d:'2026-10-09',role:'Porta principal'}].sort((a,b)=>a.d<b.d?-1:1);
 const BLOCKS=[{id:'b1',from:'2026-10-24',to:'2026-10-26',why:'Viagem em família'}];
@@ -2318,17 +2319,16 @@ function evDetail(){
  </header>
  <div id="etb" class="rise" style="--d:2">${({det:evDet,ins:evIns,vch:evVch,quad:e=>bdTab('evt',e.id)})[S.etab](e)}</div>`;
 }
+function evInfoRows(e){const rooms=(e.rooms||[]).map(slById).filter(Boolean),rec=e.rep&&e.rep!=='none'?(e.recTxt?e.recTxt.split(',')[0]:'Toda '+DOWF(dow(e.d))):'';
+ const row=(step,icn,tone,l,main,sub)=>`<button class="evi-r" data-a="evEditAt" data-v="${step}" title="Editar ${l.toLowerCase()}"><span class="htile" style="--s:38px;background:var(--tone-${tone});color:var(--tone-${tone}-ink)">${ic(icn,17)}</span><span class="dkt"><span class="evi-l">${l}</span><b>${main}</b>${sub?`<span>${sub}</span>`:''}</span><span class="evi-e">${ic('pen',13)}</span></button>`;
+ return [e.st==='previsao'?row('prev','calendar','ceu','Quando',`Previsto para ${esc(e.prev)}`,'Data ainda não definida'):row('when','calendar','ceu','Quando',`${DOWF(dow(e.d)).replace(/^./,c=>c.toUpperCase())}, ${dBR(e.d)}`,`${e.time}${e.end?' – '+hm(e.end):''} · ${rec?esc(rec.toLowerCase()):'data única'}${e.exc?' · alterado só nesta data':''}`),
+  e.st==='previsao'?row('about','pin','menta','Onde','A definir','Escolhido ao confirmar a data'):row('where','pin','menta','Onde',esc(e.place||'—'),rooms.length?`${rooms.reduce((a,x)=>a+x.cap,0)} lugares · reservado em Espaços`:'Sem sala de Espaços vinculada'),
+  row('about','ticket','damasco','Tipo',esc(e.type),e.kind==='culto'?'Culto da igreja':'Evento especial'),
+  row('about','users','lima','Ministério',e.min?'Ministério de '+esc(e.min):'Evento geral da igreja',e.min?'Responsável pela organização':'Sem ministério responsável')].join('');}
 function evDet(e){
  const ed=S.eedit;
  return `<div class="pgrid"><div class="col">
-  <section class="card pc sec ${ed?'editing':''}"><div class="sh"><h2>Informações</h2>${ed?'':`<button class="btn sec sm" data-a="evEdit">${ic('pen',14)}Editar</button>`}</div>
-  ${ed?`<form class="fgrid" id="eiF" novalidate style="grid-template-columns:1fr 1fr">
-   <label class="fld wide"><span class="fl">Título</span><input name="t" value="${esc(e.t)}"><span class="err"></span></label>
-   ${e.st==='previsao'?`<label class="fld"><span class="fl">Previsto para</span><input name="prev" value="${esc(e.prev)}" placeholder="Fev/2027"><span class="err"></span></label>`:`<label class="fld"><span class="fl">Data</span><input name="d" type="date" value="${e.d}"><span class="err"></span></label><label class="fld"><span class="fl">Horário</span><input name="time" value="${esc(e.time)}"></label><label class="fld"><span class="fl">Local</span><input name="place" value="${esc(e.place)}"></label>`}
-   ${e.kind==='evento'?`<label class="fld"><span class="fl">Tipo</span><span class="selw"><select name="type">${ETYPES.slice(1).map(t=>`<option ${t===e.type?'selected':''}>${t}</option>`).join('')}</select>${ic('updown',14)}</span></label>`:''}
-   <label class="fld wide"><span class="fl">Ministério responsável <small>opcional</small></span><span class="selw"><select name="min">${minOpts(e.min)}</select>${ic('updown',14)}</span><span class="hint">Diz quem organiza. Um culto do Ministério de Jovens continua sendo do tipo Culto, mas fica identificado como voltado aos jovens.</span></label>
-   <div class="dfoot"><button type="button" class="btn sec" data-a="evCancel">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
-  :`<dl class="kv grid2"><div><dt>Data</dt><dd>${e.st==='previsao'?`<span class="soft">Previsto para ${e.prev}</span>`:`${wd(e.d)}, ${dBR(e.d)} · ${e.time}`}</dd></div><div><dt>Local</dt><dd>${esc(e.place)}</dd></div><div><dt>Tipo</dt><dd>${e.type}${e.rep!=='none'?' · repete toda semana':''}</dd></div><div><dt>Ministério</dt><dd>${e.min?'Ministério de '+esc(e.min):'<span class="soft">Evento geral da igreja</span>'}</dd></div></dl>`}</section>
+  <section class="card pc evi"><div class="sh"><h2>Informações</h2><button class="btn sec sm" data-a="evEdit">${ic('pen',14)}Editar</button></div><div class="evi-g">${evInfoRows(e)}</div></section>
   ${e.st==='previsao'?`<section class="card pc"><div class="soft-empty"><p>Ainda é uma previsão.</p><span class="who">Inscrições, pagamento e check-in ficam disponíveis quando a data for confirmada.</span><button class="btn pri" data-a="evConfirm" data-v="${e.id}">Confirmar data</button></div></section>`:`
   <section class="card pc"><div class="sh"><h2>Inscrição</h2></div>
    <div class="yn" style="max-width:280px" id="payG"><label><input type="radio" name="pay" value="0" ${!e.paid?'checked':''}><span>Gratuita</span></label><label><input type="radio" name="pay" value="1" ${e.paid?'checked':''}><span>Paga</span></label></div>
@@ -2460,32 +2460,151 @@ function agAfter(){
  const it=$('#itF');if(it)it.addEventListener('submit',x=>{x.preventDefault();const fd=new FormData(it),n=fd.get('n').trim(),p=+fd.get('p');if(!n){it.n.focus();return;}if(!(p>0)){it.p.focus();toast('Informe o preço do item');return;}e.items.push({n,price:p,p:fd.get('per')||''});rerEv();toast(`${n} adicionado`);});
 }
 function rerEv(){const y=window.scrollY;render();window.scrollTo(0,y);}
+/* locais do evento = salas de Espaços; disponibilidade calculada com reservas e uso fixo */
+function evOcc(d,rep){if(!d)return [];if(rep==='semanal')return Array.from({length:8},(_,i)=>addD(d,i*7));if(rep==='mensal'){const out=[d];let x=d;for(let i=0;i<60&&out.length<6;i++){x=addD(x,7);if(dow(x)===dow(d)&&nthOf(x)===nthOf(d)&&x.slice(5,7)!==out[out.length-1].slice(5,7))out.push(x);}return out;}return [d];}
+function evRoomSt(sp,d,f,t,rep){if(!sp.act)return {k:'off',txt:sp.desc||'Indisponível'};if(!d||!f||!t||mm(t)<=mm(f))return {k:'idle',txt:`${sp.cap} lugares · ${sp.loc}`};
+ const occ=evOcc(d,rep),hits=occ.map(x=>({x,c:conflict(sp.id,x,mm(f),mm(t))})).filter(z=>z.c);
+ if(!hits.length)return {k:'ok',txt:occ.length>1?`Livre nas próximas ${occ.length} datas`:'Livre nesse horário'};
+ const c=hits[0].c,when=`${tt(c.f).replace(':00','h').replace(':','h')}–${tt(c.t).replace(':00','h').replace(':','h')}`;
+ return {k:'bad',txt:occ.length>1?`Ocupada em ${hits.length} de ${occ.length} datas · ${c.l}`:`Ocupada ${when} · ${c.l}`};}
+const DOWF=w=>DOWN[w]+(w>0&&w<6?'-feira':'');
+const EVTODAY='2026-10-08';
+/* datas geradas pela programação (mesma regra do uso fixo das salas) */
+function evRule(F){return UF(F.t||'Evento',F.f,F.to,F.freq,{days:F.days,mode:F.mmode,date:F.start,from:F.start,to:F.endK==='data'?F.endD:''});}
+function evOccs(F,limit=26){if(!F.start)return [];if(F.freq==='none')return [F.start];if((F.freq==='semanal'||F.freq==='quinzenal')&&!F.days.length)return [];
+ const u=evRule(F),max=F.endK==='vezes'?Math.min(F.endN||1,limit):limit,out=[];let d=F.start;for(let i=0;i<800&&out.length<max;i++){if(u.to&&d>u.to)break;if(ruleOn(u,d))out.push(d);d=addD(d,1);}return out;}
+function evRecTxt(F,withEnd=true){if(!F.start&&F.freq==='none')return 'Escolha a data';const h=F.f&&F.to?`, das ${hm(F.f)} às ${hm(F.to)}`:'';let t='';
+ if(F.freq==='none')t=`Uma vez, ${wd(F.start)} ${dBR(F.start)}`;
+ else if(F.freq==='semanal')t=!F.days.length?'Escolha os dias da semana':F.days.length===1?(F.days[0]===0||F.days[0]===6?'Todo ':'Toda ')+DOWF(F.days[0]):'Toda semana: '+F.days.slice().sort().map(w=>DOWS[w]).join(', ');
+ else if(F.freq==='quinzenal')t=!F.days.length?'Escolha os dias da semana':'A cada 2 semanas, '+F.days.slice().sort().map(w=>DOWF(w)).join(' e ');
+ else if(F.freq==='mensal')t=!F.start?'Escolha a primeira data':F.mmode==='dia'?`Todo dia ${+F.start.slice(8)} do mês`:`${ORD(nthOf(F.start)).replace(/^./,c=>c.toUpperCase())} ${DOWF(dow(F.start))} de cada mês`;
+ const end=F.freq==='none'||!withEnd?'':F.endK==='data'&&F.endD?` · até ${dBR(F.endD)}`:F.endK==='vezes'?` · ${F.endN} vezes`:' · sem data final';
+ return t+h+end;}
+function evConf(sid,d,f,t,own){return busyOn(sid,d).find(b=>f<b.t&&t>b.f&&!(own&&((b.r&&own.ids.includes(b.r.ev))||(b.u&&(own.ids.includes(b.u.ev)||norm(b.u.l)===norm(own.t))))));}
+function evRoomSt2(sp,F){if(!sp.act)return {k:'off',txt:sp.desc||'Indisponível'};const occ=evOccs(F,8);if(!occ.length||!F.f||!F.to||mm(F.to)<=mm(F.f))return {k:'idle',txt:`${sp.cap} lugares · ${sp.loc}`};
+ const hits=occ.map(x=>({x,c:evConf(sp.id,x,mm(F.f),mm(F.to),F.own)})).filter(z=>z.c);if(!hits.length)return {k:'ok',txt:occ.length>1?`Livre nas próximas ${occ.length} datas`:'Livre nesse horário'};
+ const c=hits[0].c;return {k:'bad',txt:occ.length>1?`Ocupada em ${hits.length} de ${occ.length} datas · ${c.l}`:`Ocupada ${hm(tt(c.f))}–${hm(tt(c.t))} · ${c.l}`,hits};}
 function evForm(kind,pre){
- const isC=kind==='culto',st=pre?.st||'confirmado';
- openDlg(`${dlgHead(pre?.confirm?`Confirmar ${esc(pre.t)}`:isC?'Novo culto':'Novo evento',pre?.confirm?`Previsto para ${pre.prev}. Defina a data para abrir inscrições.`:'')}
- <form class="fgrid" id="evF" novalidate style="grid-template-columns:1fr 1fr">
-  ${pre?.confirm?'':`<div class="fld wide"><span class="fl">Situação</span><div class="vis two" id="stG"><label><input type="radio" name="st" value="confirmado" ${st==='confirmado'?'checked':''}><span><b>Confirmado</b><small>Data fechada. Abre inscrições e pagamento.</small></span></label><label><input type="radio" name="st" value="previsao" ${st==='previsao'?'checked':''}><span><b>Previsão</b><small>Sem data. Só reserva o mês no planejamento.</small></span></label></div></div>`}
-  <label class="fld wide"><span class="fl">Título</span><input name="t" value="${esc(pre?.t||'')}" placeholder="${isC?'Ex.: Culto de Celebração':'Ex.: Retiro de Casais'}" autocomplete="off"><span class="err"></span></label>
-  <label class="fld cf"><span class="fl">Data</span><input name="d" type="date" min="2026-10-01"><span class="err"></span></label>
-  <label class="fld cf"><span class="fl">Horário</span><input name="time" type="time" value="${isC?'10:00':'19:30'}"></label>
-  <label class="fld pf wide"><span class="fl">Previsto para</span><input name="prev" placeholder="Ex.: Fev/2027"><span class="err"></span></label>
-  ${isC?`<div class="fld cf wide"><span class="fl">Repetição</span><div class="yn"><label><input type="radio" name="rep" value="none"><span>Não repete</span></label><label><input type="radio" name="rep" value="semanal" checked><span>Toda semana</span></label><label><input type="radio" name="rep" value="mensal"><span>Todo mês</span></label></div></div>`
-   :`<label class="fld"><span class="fl">Tipo</span><span class="selw"><select name="type">${ETYPES.slice(1).map(t=>`<option ${pre?.type===t?'selected':''}>${t}</option>`).join('')}</select>${ic('updown',14)}</span></label>`}
-  <label class="fld ${isC?'wide':''}"><span class="fl">Ministério <small>opcional</small></span><span class="selw"><select name="min">${minOpts(pre?.min||'')}</select>${ic('updown',14)}</span></label>
-  <div class="fld cf wide"><span class="fl">Inscrição</span><div class="yn" id="fpG" style="max-width:280px"><label><input type="radio" name="pay" value="0" checked><span>Gratuita</span></label><label><input type="radio" name="pay" value="1"><span>Paga</span></label></div></div>
-  <label class="fld cf pay" hidden><span class="fl">Valor</span><span class="mpre"><em>R$</em><input name="price" type="number" min="1" inputmode="decimal"></span><span class="err"></span></label>
-  <label class="fld cf"><span class="fl">Vagas <small>opcional</small></span><input name="cap" type="number" min="1" placeholder="Sem limite" inputmode="numeric"></label>
-  <p class="hint wide cf pay" hidden style="margin:-6px 0 0">O link de pagamento do Asaas pode ser gerado na página do evento.</p>
-  <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${pre?.confirm?'Confirmar data':'Criar'}</button></div></form>`);
- const f=$('#evF'),sync=()=>{const prev=(f.st&&f.st.value)==='previsao',paid=f.querySelector('[name=pay]:checked').value==='1';f.querySelectorAll('.cf').forEach(x=>x.hidden=prev);f.querySelectorAll('.pf').forEach(x=>x.hidden=!prev);f.querySelectorAll('.pay').forEach(x=>x.hidden=prev||!paid);};
- f.addEventListener('change',sync);f.addEventListener('input',x=>x.target.closest('.fld')?.classList.remove('bad'));sync();
- f.addEventListener('submit',x=>{x.preventDefault();const fd=new FormData(f),prev=fd.get('st')==='previsao';let ok=true;const bad=(n,m)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;if(ok)i.focus();ok=false;};
-  const t=fd.get('t').trim();if(!t)bad('t','Informe o título');
-  if(prev){if(!/^[A-Za-zç]{3}\/\d{4}$/.test(fd.get('prev').trim()))bad('prev','Use mês/ano, ex.: Fev/2027');}else{if(!fd.get('d'))bad('d','Escolha a data');if(fd.get('pay')==='1'&&!(+fd.get('price')>0))bad('price','Informe o valor');}
-  if(!ok)return;f.querySelector('[type=submit]').classList.add('busy');
-  setTimeout(()=>{const tm=(fd.get('time')||'').replace(':00','h').replace(/^0/,'').replace(':','h');const data={t,type:isC?'Culto':fd.get('type'),min:fd.get('min'),st:prev?'previsao':'confirmado',prev:prev?fd.get('prev').trim():'',d:prev?'':fd.get('d'),time:tm||'19h',paid:!prev&&fd.get('pay')==='1',price:+fd.get('price')||0,cap:+fd.get('cap')||0,rep:fd.get('rep')||'none'};
-   let e;if(pre?.confirm){e=eById(pre.id);Object.assign(e,data,{t:e.t,type:e.type,st:'confirmado',prev:''});}else{e=EV({kind,...data});EVTS.push(e);}
-   closeDlg();S.evt=e.id;S.etab='det';S.active='calendario';render();window.scrollTo({top:0});toast(pre?.confirm?`${e.t} confirmado para ${dBR(e.d)}`:`${t} criado`);},700);});
+ const isC=kind==='culto',conf=!!pre?.confirm;
+ const F={st:pre?.st||'confirmado',t:pre?.t||'',type:pre?.type||'Retiro',min:pre?.min||'',freq:isC?'semanal':'none',days:isC?[0]:[],mmode:'semana',start:'',f:isC?'10:00':'19:30',to:isC?'12:00':'21:30',endK:'nunca',endD:'',endN:8,rooms:isC?['s1']:[],other:false,addr:'',pay:false,price:'',cap:'',prev:''};
+ const ed=pre?.edit?eById(pre.edit):null;let series=[],scope='one';
+ if(ed){series=(ed.ser?EVTS.filter(x=>x.ser===ed.ser):ed.rep&&ed.rep!=='none'?EVTS.filter(x=>x.kind===ed.kind&&x.t===ed.t&&x.rep===ed.rep&&x.d):[ed]).filter(x=>x===ed||(x.d&&ed.d&&x.d>ed.d)).sort((a,b)=>a===ed?-1:b===ed?1:a.d<b.d?-1:1);if(!series.includes(ed))series.unshift(ed);
+  const tm0=ckMin(ed.time),linked=(ed.rooms||[]).filter(id=>slById(id)),guess=linked.length?linked:ESPS.filter(sp=>norm(sp.n)===norm(ed.place||'')).map(sp=>sp.id),rr=guess.length?guess:/templo|auditório/i.test(ed.place||'')?['s1']:[];
+  Object.assign(F,{st:ed.st,t:ed.t,type:ed.type,min:ed.min||'',prev:ed.prev||'',start:ed.d||'',f:tt(tm0),to:ed.end||tt(Math.min(1439,tm0+120)),freq:'none',days:ed.d?[dow(ed.d)]:[],rooms:rr,other:!rr.length&&!!ed.place&&ed.place!=='A definir',addr:!rr.length&&ed.place!=='A definir'?(ed.place||''):'',pay:ed.paid,price:ed.price||'',cap:ed.cap||''});
+  F.serFreq=['semanal','quinzenal','mensal'].includes(ed.rep)?ed.rep:'semanal';scope=series.length>1?'next':'one';if(scope==='next')F.freq=F.serFreq;
+  F.own={ids:series.map(x=>x.id),t:ed.t};}
+ const nextOn=days=>{let d=EVTODAY;for(let i=0;i<14;i++){if(days.includes(dow(d)))return d;d=addD(d,1);}return EVTODAY;};
+ if(isC&&!ed)F.start=nextOn(F.days);
+ let cur=0,reach=ed?9:0;
+ const steps=()=>ed?(F.st==='previsao'?[['about','Sobre'],['prev','Quando']]:[['about','Sobre'],['when','Quando'],['where','Local']]):conf?[['when','Programação'],['where','Local'],['sub','Inscrição']]:F.st==='previsao'?[['about','Sobre'],['prev','Quando'],['rev','Revisão']]:[['about','Sobre'],['when','Programação'],['where','Local'],['sub','Inscrição']];
+ const freqs=[['none','Uma vez','Data única'],['semanal','Toda semana','Em dias da semana'],['quinzenal','A cada 2 semanas','Semana sim, semana não'],['mensal','Todo mês','Uma vez por mês']];
+ if(ed&&pre.step){const i=steps().findIndex(x=>x[0]===pre.step);if(i>0)cur=i;}
+ const scopeUI=()=>ed&&series.length>1?`<div class="fld"><span class="fl">Aplicar alterações a</span><div class="evq">${[['one','Só esta data',`${wd(ed.d)} ${dBR(ed.d).slice(0,5)}`],['next','Esta e as próximas',`${series.length} datas da série`]].map(([v,l,sm])=>`<button type="button" class="evq-o ${scope===v?'on':''}" data-scope="${v}"><b>${l}</b><small>${sm}</small></button>`).join('')}</div></div>`:'';
+ const durTxt=()=>{if(!F.f||!F.to)return '';const m=mm(F.to)-mm(F.f);return m<=0?'termina antes de começar':`${Math.floor(m/60)?Math.floor(m/60)+'h':''}${m%60?String(m%60).padStart(Math.floor(m/60)?2:1,'0')+(Math.floor(m/60)?'':'min'):''}`;};
+ const preview=()=>{const occ=evOccs(F,F.endK==='vezes'?F.endN:26),show=occ.slice(0,6);
+  return `<div class="evp-h">${ic('calendar',15,2)}<b>${esc(evRecTxt(F))}</b></div>
+   ${show.length?`<div class="evp-l">${show.map((d,i)=>`<span class="evp-d ${i===0?'first':''}"><small>${wd(d)}</small><b>${+d.slice(8)}</b><small>${MONTHS[+d.slice(5,7)-1].slice(0,3)}</small></span>`).join('')}${occ.length>6?`<span class="evp-more">+${occ.length-6}${F.endK==='nunca'?'…':''}</span>`:''}</div>
+   <p class="evp-f">${F.freq==='none'?'Entra no calendário nesse dia.':F.endK==='nunca'?`As próximas ${occ.length} datas já entram no calendário; as seguintes são geradas automaticamente.`:`${occ.length} ${occ.length===1?'data entra':'datas entram'} no calendário.`}</p>`:`<p class="evp-f">As datas aparecem aqui conforme você preenche.</p>`}`;};
+ const body=k=>{
+  if(k==='about')return `<div class="evs-g">
+   ${ed?'':`<div class="fld wide"><span class="fl">Situação</span><div class="vis two"><label><input type="radio" name="st" value="confirmado" ${F.st==='confirmado'?'checked':''}><span><b>Confirmado</b><small>Data definida. Reserva o local e abre inscrições.</small></span></label><label><input type="radio" name="st" value="previsao" ${F.st==='previsao'?'checked':''}><span><b>Previsão</b><small>Ainda sem data. Só marca o mês no planejamento.</small></span></label></div></div>`}
+   <label class="fld wide"><span class="fl">Título</span><input data-k="t" value="${esc(F.t)}" placeholder="${isC?'Ex.: Culto de Quarta':'Ex.: Retiro de Casais'}" autocomplete="off"><span class="err"></span></label>
+   ${isC?'':`<label class="fld"><span class="fl">Tipo</span><span class="selw"><select data-k="type">${ETYPES.slice(1).map(t=>`<option ${F.type===t?'selected':''}>${t}</option>`).join('')}</select>${ic('updown',14)}</span></label>`}
+   <label class="fld ${isC?'wide':''}"><span class="fl">Ministério responsável <small>opcional</small></span><span class="selw"><select data-k="min">${minOpts(F.min)}</select>${ic('updown',14)}</span></label></div>`;
+  if(k==='prev')return `<div class="evs-g"><label class="fld wide"><span class="fl">Previsto para</span><input data-k="prev" value="${esc(F.prev)}" placeholder="Ex.: Fev/2027" autocomplete="off"><span class="err"></span></label><p class="hint wide">Quando a data for definida, use “Confirmar data” no evento para escolher programação e local.</p></div>`;
+  if(k==='when'){const rec=F.freq!=='none';return `<div class="evs-2"><div class="evs-g one">
+   ${scopeUI()}${ed&&scope==='one'?'':`<div class="fld"><span class="fl">Com que frequência?</span><div class="evq">${freqs.map(([v,l,sm])=>`<button type="button" class="evq-o ${F.freq===v?'on':''}" data-set="freq|${v}"><b>${l}</b><small>${sm}</small></button>`).join('')}</div></div>`}
+   ${F.freq==='semanal'||F.freq==='quinzenal'?`<div class="fld"><span class="fl">Em quais dias?</span><div class="evw">${[1,2,3,4,5,6,0].map(w=>`<button type="button" class="evw-d ${F.days.includes(w)?'on':''}" data-day="${w}" title="${DOWF(w)}">${DOWS[w]}</button>`).join('')}</div><span class="err" id="evDaysErr"></span></div>`:''}
+   <div class="evs-row"><label class="fld"><span class="fl">${rec?'Começa em':'Data'}</span><input type="date" data-k="start" value="${F.start}" min="${EVTODAY}"><span class="err"></span></label>
+    ${F.freq==='mensal'&&F.start?`<div class="fld"><span class="fl">Repete</span><div class="yn"><label><input type="radio" name="mmode" value="semana" ${F.mmode==='semana'?'checked':''}><span>${ORD(nthOf(F.start))} ${DOWS[dow(F.start)]}</span></label><label><input type="radio" name="mmode" value="dia" ${F.mmode==='dia'?'checked':''}><span>Dia ${+F.start.slice(8)}</span></label></div></div>`:''}</div>
+   <div class="evs-row t"><label class="fld"><span class="fl">Início</span><input type="time" data-k="f" value="${F.f}"></label><label class="fld"><span class="fl">Término</span><input type="time" data-k="to" value="${F.to}"><span class="err"></span></label><span class="evs-dur ${F.f&&F.to&&mm(F.to)<=mm(F.f)?'bad':''}">${durTxt()}</span></div>
+   ${rec?`<div class="fld"><span class="fl">Até quando?</span><div class="evq e3">${[['nunca','Sem data final'],['data','Até uma data'],['vezes','Número de vezes']].map(([v,l])=>`<button type="button" class="evq-o sm ${F.endK===v?'on':''}" data-set="endK|${v}"><b>${l}</b></button>`).join('')}</div>
+    ${F.endK==='data'?`<label class="fld" style="margin-top:10px"><input type="date" data-k="endD" value="${F.endD}" min="${F.start||EVTODAY}" aria-label="Última data"><span class="err"></span></label>`:F.endK==='vezes'?`<span class="ax-step evs-n"><button type="button" data-n="-1">${ic('minus',14,2.4)}</button><input data-k="endN" type="number" min="1" max="52" value="${F.endN}"><button type="button" data-n="1">${ic('plus',14,2.4)}</button></span>`:''}</div>`:''}
+   </div><aside class="evp" id="evPrev">${preview()}</aside></div>`;}
+  if(k==='where'){const occ=evOccs(F,8);return `<p class="evs-ctx">${ic('calendar',14,2)}${esc(evRecTxt(F,false))}${occ.length>1?` · disponibilidade nas próximas ${occ.length} datas`:''}</p>
+   <div class="evf-rooms">${ESPS.map(sp=>{const r=evRoomSt2(sp,F);return `<label class="evr ${sp.act?'':'off'}" data-k="${r.k}"><input type="checkbox" data-room="${sp.id}" ${F.rooms.includes(sp.id)?'checked':''} ${sp.act?'':'disabled'}><span class="htile" style="--s:36px;background:var(--tone-${sp.tone});color:var(--tone-${sp.tone}-ink)">${ic(sp.icon,16)}</span><span class="dkt"><b>${esc(sp.n)}</b><span class="evr-st">${esc(r.txt)}</span></span><i class="evr-ck">${ic('check',12,2.6)}</i></label>`;}).join('')}
+    <label class="evr other"><input type="checkbox" data-other ${F.other?'checked':''}><span class="htile" style="--s:36px;background:var(--surface-2);color:var(--ink-muted)">${ic('pin',16)}</span><span class="dkt"><b>Outro endereço</b><span>Fora da igreja</span></span><i class="evr-ck">${ic('check',12,2.6)}</i></label></div>
+   ${F.other?`<label class="fld" style="margin-top:10px"><input data-k="addr" value="${esc(F.addr)}" placeholder="Ex.: Chácara Alva, Estrada do Sol, 120 — Mairiporã" autocomplete="off"><span class="err"></span></label>`:''}
+   <div id="evSum2">${whereSum()}</div>`;}
+  if(k==='sub'||k==='rev'){const capT=F.rooms.reduce((a,id)=>a+slById(id).cap,0),place=evPlace();return `${k==='sub'?`<div class="evs-g evs-sub">
+   <div class="fld"><span class="fl">Inscrição</span><div class="yn"><label><input type="radio" name="pay" value="0" ${F.pay?'':'checked'}><span>Gratuita</span></label><label><input type="radio" name="pay" value="1" ${F.pay?'checked':''}><span>Paga</span></label></div></div>
+   ${F.pay?`<label class="fld"><span class="fl">Valor</span><span class="mpre"><em>R$</em><input data-k="price" type="number" min="1" inputmode="decimal" value="${esc(F.price)}"></span><span class="err"></span></label>`:''}
+   <label class="fld"><span class="fl">Vagas <small>opcional</small></span><input data-k="cap" type="number" min="1" inputmode="numeric" value="${esc(F.cap)}" placeholder="${capT?`Até ${capT} lugares`:'Sem limite'}"></label>
+   <p class="evf-cap wide" id="evCap" ${F.cap&&capT&&+F.cap>capT?'':'hidden'}>${ic('alert',13,2)}${F.cap} vagas é mais do que cabe no local (${capT} lugares).</p></div>`:''}
+   <div class="evrv"><p class="fl">Revisão</p>
+    ${[[ 'Título',esc(F.t||pre?.t||'—'),conf?null:'about'],F.st==='previsao'?['Quando','Previsto para '+esc(F.prev),'prev']:['Programação',esc(evRecTxt(F)),'when'],F.st==='previsao'?null:['Local',esc(place||'—'),'where'],F.st==='previsao'?null:['Inscrição',F.pay?`Paga · R$ ${esc(F.price||'—')}`:'Gratuita'+(F.cap?` · ${F.cap} vagas`:''),null]].filter(Boolean).map(([l,v,go])=>`<div class="evrv-r"><span>${l}</span><b>${v}</b>${go?`<button type="button" class="lnk" data-jump="${go}">Editar</button>`:''}</div>`).join('')}
+    ${F.st!=='previsao'&&F.rooms.length?`<p class="evrv-n">${ic('check',13,2.4)}${F.freq==='none'?'A reserva das salas é criada em Espaços.':'As salas recebem um uso fixo com essa programação em Espaços.'}</p>`:''}</div>`;}
+  return '';};
+ const evPlace=()=>[...F.rooms.map(id=>slById(id).n),...(F.other?[F.addr.trim()||'Outro endereço']:[])].join(' + ');
+ const whereSum=()=>{const bad=F.rooms.map(id=>slById(id)).filter(sp=>evRoomSt2(sp,F).k==='bad');const place=evPlace();
+  if(!place)return `<div class="evf-sum idle">${ic('pin',15,2)}<span><b>Onde vai ser?</b><small>Escolha uma ou mais salas, ou um endereço fora da igreja.</small></span></div>`;
+  if(bad.length){const o=evOccs(F,1)[0],nf=F.freq==='none'&&o?nextFree(bad[0].id,o,mm(F.f),mm(F.to)):null;return `<div class="evf-sum bad">${ic('alert',15,2)}<span><b>${esc(bad.map(x=>x.n).join(' e '))} ${bad.length>1?'estão ocupadas':'está ocupada'}</b><small>${nf!=null?`Fica livre a partir de ${hm(tt(nf))}. `:''}Volte e mude o horário, ou escolha outra sala.</small></span></div>`;}
+  return `<div class="evf-sum ok">${ic('check',15,2)}<span><b>${esc(place)}</b><small>${F.rooms.length?(F.freq==='none'?'A sala fica reservada para o evento.':'A sala fica reservada em todas as datas da programação.'):'Fora da igreja: nenhuma sala é reservada.'}</small></span></div>`;};
+ openDlg(`<div id="evsW"></div>`,'lg evs');
+ const W=$('#evsW');
+ const draw=()=>{const st=steps();cur=Math.min(cur,st.length-1);const k=st[cur][0],last=cur===st.length-1;
+  const HINT={about:'Nome e quem organiza',prev:'Mês em que deve acontecer',rev:'Confira antes de salvar',when:'Quando acontece e se repete',where:'Onde acontece, com a disponibilidade das salas',sub:'Inscrição e revisão final'};
+  W.innerHTML=`${dlgHead(ed?(isC?'Editar culto':'Editar evento'):conf?`Confirmar ${esc(pre.t)}`:isC?'Novo culto':'Novo evento',ed?(ed.d?`${esc(ed.t)} · ${wd(ed.d)} ${dBR(ed.d)}`:esc(ed.t)):HINT[k])}
+   <div class="evs-steps">${st.map(([,l],i)=>`<button type="button" class="evs-st ${i<cur?'done':''} ${i===cur?'on':''}" data-go="${i}" ${i>reach?'disabled':''}><span>${i<cur?ic('check',11,3):i+1}</span><em>${l}</em></button>`).join('<i class="evs-ln"></i>')}</div>
+   <div class="evs-body">${body(k)}</div>
+   <div class="dfoot evs-foot"><button type="button" class="btn sec" ${cur?'data-back':'data-a="closeDlg"'}>${cur?ic('chevL',14,2)+'Voltar':'Cancelar'}</button>${ed&&!last?`<span class="evs-fr"><button type="button" class="btn sec" data-next>Próximo${ic('arrowR',14,2)}</button><button type="button" class="btn pri" data-save>Salvar alterações</button></span>`:''}<button type="button" class="btn pri" data-next ${ed&&!last?'hidden':''}>${last?(ed?'Salvar alterações':conf?'Confirmar data':isC?'Criar culto':'Criar evento'):'Continuar'+ic('arrowR',14,2)}</button></div>`;};
+ const err=(sel,m)=>{const i=W.querySelector(sel);if(!i)return;const fl=i.closest('.fld');fl.classList.add('bad');const e=fl.querySelector('.err');if(e)e.textContent=m;i.focus&&i.focus();};
+ const valid0=k=>{if(k==='about')return !!F.t.trim();if(k==='prev')return /^[A-Za-zç]{3}\/\d{4}$/.test(F.prev.trim());if(k==='when')return !!F.start&&!!F.f&&!!F.to&&mm(F.to)>mm(F.f)&&evOccs(F).length>0;if(k==='where')return (F.rooms.length||F.other&&F.addr.trim())&&!F.rooms.some(id=>evRoomSt2(slById(id),F).k==='bad');return true;};
+ const valid=k=>{if(k==='about'){if(!F.t.trim()){err('[data-k=t]','Informe o título');return false;}}
+  if(k==='prev'){if(!/^[A-Za-zç]{3}\/\d{4}$/.test(F.prev.trim())){err('[data-k=prev]','Use mês/ano, ex.: Fev/2027');return false;}}
+  if(k==='when'){if((F.freq==='semanal'||F.freq==='quinzenal')&&!F.days.length){$('#evDaysErr').textContent='Escolha pelo menos um dia';return false;}
+   if(!F.start){err('[data-k=start]','Escolha a data');return false;}if(!F.f||!F.to||mm(F.to)<=mm(F.f)){err('[data-k=to]','Termina antes de começar');return false;}
+   if(F.freq!=='none'&&F.endK==='data'&&(!F.endD||F.endD<F.start)){err('[data-k=endD]','Escolha uma data depois do início');return false;}
+   if(!evOccs(F).length){err('[data-k=start]','Nenhuma data cai nessa programação');return false;}}
+  if(k==='where'){if(!F.rooms.length&&!F.other){toast('Escolha onde vai ser');return false;}if(F.other&&!F.addr.trim()){err('[data-k=addr]','Informe o endereço');return false;}
+   if(F.rooms.some(id=>evRoomSt2(slById(id),F).k==='bad')){const sm=W.querySelector('.evf-sum');sm.classList.remove('shk');void sm.offsetWidth;sm.classList.add('shk');return false;}}
+  if(k==='sub'){if(F.pay&&!(+F.price>0)){err('[data-k=price]','Informe o valor');return false;}}
+  return true;};
+ const evSaveEdit=()=>{const prev=F.st==='previsao',place=prev?'A definir':evPlace(),about={t:F.t.trim(),type:isC?'Culto':F.type,min:F.min};let msg='Alterações salvas',first=ed;
+  if(prev){Object.assign(ed,about,{st:'previsao',prev:F.prev.trim()});}
+  else if(scope==='one'&&F.freq==='none'){Object.assign(ed,about,{st:'confirmado',prev:'',d:F.start,time:hm(F.f),end:F.to,place,rooms:F.rooms.slice()});
+   for(let i=RESERVAS.length-1;i>=0;i--)if(RESERVAS[i].ev===ed.id)RESERVAS.splice(i,1);
+   if(series.length<=1)ESPS.forEach(sp=>{sp.uso=sp.uso.filter(u=>u.ev!==ed.id);});
+   F.rooms.forEach(id=>RESERVAS.push(Object.assign(RV(id,F.start,F.f,F.to,ed.cap||0,'Evento · '+(F.min||'Igreja'),about.t),{ev:ed.id})));
+   if(series.length>1){ed.exc=true;msg=`Alterado só em ${dBR(F.start)}`;}}
+  else{const occ=evOccs(F,F.endK==='vezes'?F.endN:26),ser=ed.ser||'sr'+Date.now(),recTxt=evRecTxt(F),ids=series.map(x=>x.id),pool=series.slice(),used=[];
+   ESPS.forEach(sp=>{sp.uso=sp.uso.filter(u=>!ids.includes(u.ev));});for(let i=RESERVAS.length-1;i>=0;i--)if(ids.includes(RESERVAS[i].ev))RESERVAS.splice(i,1);
+   occ.forEach(d=>{let x=pool.shift();if(!x){x=EV({kind:ed.kind,type:ed.type,paid:ed.paid,price:ed.price,cap:ed.cap});EVTS.push(x);}Object.assign(x,about,{st:'confirmado',prev:'',d,time:hm(F.f),end:F.to,place,rooms:F.rooms.slice(),rep:F.freq,recTxt:F.freq==='none'?'':recTxt,ser:F.freq==='none'?'':ser,exc:false});used.push(x);});
+   pool.forEach(x=>{if(!ESCALAS.some(es=>es.dates.some(dt=>dt.ev===x.id))){const i=EVTS.indexOf(x);if(i>=0)EVTS.splice(i,1);}});
+   F.rooms.forEach(id=>{const sp=slById(id);if(F.freq==='none')RESERVAS.push(Object.assign(RV(id,occ[0],F.f,F.to,ed.cap||0,'Evento · '+(F.min||'Igreja'),about.t),{ev:used[0].id}));else sp.uso.push(Object.assign(UF(about.t,F.f,F.to,F.freq,{days:F.days,mode:F.mmode,date:F.start,from:F.start,to:F.endK==='data'?F.endD:F.endK==='vezes'?occ[occ.length-1]:''}),{ev:used[0].id}));});
+   first=used[0];msg=F.freq==='none'?'Alterações salvas':`${occ.length} datas atualizadas · ${recTxt.split(',')[0].toLowerCase()}`;}
+  closeDlg();S.evt=first.id;S.eedit=false;render();toast(msg);};
+ const save=bt=>{bt.classList.add('busy');setTimeout(()=>{if(ed)return evSaveEdit();const prev=F.st==='previsao',occ=prev?[]:evOccs(F,F.endK==='vezes'?F.endN:26),tm=hm(F.f),ser='sr'+Date.now(),recTxt=prev?'':evRecTxt(F),place=prev?'A definir':evPlace(),rep=F.freq;
+   const base={t:F.t.trim()||pre?.t,type:isC?'Culto':F.type,min:F.min,st:prev?'previsao':'confirmado',prev:prev?F.prev.trim():'',time:tm,end:F.to,place,rooms:prev?[]:F.rooms.slice(),paid:!prev&&F.pay,price:+F.price||0,cap:+F.cap||0,rep,recTxt,ser:rep!=='none'?ser:''};
+   let e;if(conf){e=eById(pre.id);Object.assign(e,base,{t:e.t,type:e.type,d:occ[0],st:'confirmado',prev:''});occ.slice(1).forEach(d=>EVTS.push(EV({kind,...base,t:e.t,type:e.type,d})));}
+   else if(prev){e=EV({kind,...base,d:''});EVTS.push(e);}
+   else{occ.forEach((d,i)=>{const x=EV({kind,...base,d});EVTS.push(x);if(!i)e=x;});}
+   if(!prev)F.rooms.forEach(id=>{const sp=slById(id);if(rep==='none')RESERVAS.push(Object.assign(RV(id,occ[0],F.f,F.to,base.cap||0,'Evento · '+(F.min||'Igreja'),base.t),{ev:e.id}));else sp.uso.push(Object.assign(UF(base.t,F.f,F.to,rep,{days:F.days,mode:F.mmode,date:F.start,from:F.start,to:F.endK==='data'?F.endD:F.endK==='vezes'?occ[occ.length-1]:''}),{ev:e.id}));});
+   closeDlg();S.evt=e.id;S.etab='det';S.active='calendario';render();window.scrollTo({top:0});
+   toast(prev?`${base.t} salvo como previsão`:rep==='none'?`${base.t} criado${F.rooms.length?' · sala reservada':''}`:`${base.t} criado · ${occ.length} datas no calendário${F.endK==='nunca'?', a partir de '+dBR(occ[0]):''}`);},700);};
+ W.addEventListener('click',e=>{const t=e.target.closest('button,[data-room],[data-other]');if(!t)return;
+  if(t.dataset.set){const [k,v]=t.dataset.set.split('|');F[k]=v;if(k==='freq'){if((v==='semanal'||v==='quinzenal')&&!F.days.length&&F.start)F.days=[dow(F.start)];if((v==='semanal'||v==='quinzenal')&&F.days.length&&!F.start)F.start=nextOn(F.days);}draw();return;}
+  if(t.dataset.day!=null){const w=+t.dataset.day;F.days=F.days.includes(w)?F.days.filter(x=>x!==w):[...F.days,w];if(F.days.length&&(!F.start||!F.days.includes(dow(F.start))))F.start=nextOn(F.days);draw();return;}
+  if(t.dataset.n){F.endN=Math.max(1,Math.min(52,(+F.endN||1)+ +t.dataset.n));draw();return;}
+  if(t.dataset.scope){scope=t.dataset.scope;F.freq=scope==='one'?'none':F.serFreq;if(scope==='one'&&series[0])F.start=series[0].d;if(scope==='next'&&!F.days.length&&F.start)F.days=[dow(F.start)];draw();return;}
+  if(t.dataset.go!=null){cur=+t.dataset.go;draw();return;}
+  if(t.dataset.jump){cur=steps().findIndex(x=>x[0]===t.dataset.jump);draw();return;}
+  if(t.hasAttribute('data-back')){cur--;draw();return;}
+  if(t.hasAttribute('data-save')){const st=steps();if(!valid(st[cur][0]))return;for(const k of st.map(x=>x[0])){if(k===st[cur][0])continue;if(!valid0(k)){cur=st.findIndex(x=>x[0]===k);draw();valid(k);return;}}return save(t);}
+  if(t.hasAttribute('data-next')){const st=steps();if(!valid(st[cur][0]))return;if(cur===st.length-1)return save(t);cur++;reach=Math.max(reach,cur);draw();W.closest('.dlg').scrollTop=0;return;}});
+ W.addEventListener('change',e=>{const t=e.target;
+  if(t.name==='st'){F.st=t.value;reach=0;draw();return;}
+  if(t.name==='mmode'){F.mmode=t.value;draw();return;}
+  if(t.name==='pay'){F.pay=t.value==='1';draw();return;}
+  if(t.dataset.room){F.rooms=t.checked?[...F.rooms,t.dataset.room]:F.rooms.filter(x=>x!==t.dataset.room);draw();return;}
+  if(t.hasAttribute('data-other')){F.other=t.checked;draw();return;}
+  if(t.dataset.k){const k=t.dataset.k;if(k==='f'&&F.f&&F.to){const dur=mm(F.to)-mm(F.f);F.f=t.value;if(dur>0&&t.value)F.to=tt(Math.min(1439,mm(t.value)+dur));}else F[k]=t.value;
+   if(k==='start'&&t.value&&(F.freq==='semanal'||F.freq==='quinzenal')&&!F.days.includes(dow(t.value)))F.days=[...F.days,dow(t.value)];
+   if(['start','f','to','endD','endN','type','min'].includes(k))draw();}});
+ W.addEventListener('input',e=>{const t=e.target;if(!t.dataset.k)return;F[t.dataset.k]=t.value;t.closest('.fld')?.classList.remove('bad');
+  if(t.dataset.k==='addr'){const s2=$('#evSum2');if(s2)s2.innerHTML=whereSum();}
+  if(t.dataset.k==='cap'){const capT=F.rooms.reduce((a,id)=>a+slById(id).cap,0),cp=$('#evCap');if(cp){cp.hidden=!(+F.cap&&capT&&+F.cap>capT);cp.innerHTML=`${ic('alert',13,2)}${F.cap} vagas é mais do que cabe no local (${capT} lugares).`;}}});
+ draw();setTimeout(()=>W.querySelector('[data-k=t]')?.focus(),80);
 }
 const GA={
  gexpMenu:()=>{const p=$('#gexpPop');closePops(p);p.classList.toggle('open');},
@@ -2501,7 +2620,8 @@ const GA={
  evOpenIns:v=>{const [eid,rid]=v.split('|');GA.evOpen(eid);S.etab='ins';S.rgHi=rid||null;render();if(rid)setTimeout(()=>{const el=document.getElementById('rg-'+rid);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus({preventScroll:true});}setTimeout(()=>{S.rgHi=null;el&&el.classList.remove('hi');},2600);},80);},
  evBack:()=>{S.evt=null;S.active='calendario';render();window.scrollTo({top:0});},
  evTab:v=>{S.etab=v;S.eedit=false;render();},
- evEdit:()=>{S.eedit=true;rerEv();$('#eiF [name=t]')?.focus();},
+ evEdit:()=>{const e=eById(S.evt);evForm(e.kind,{edit:e.id});},
+ evEditAt:v=>{const e=eById(S.evt);evForm(e.kind,{edit:e.id,step:v});},
  evCancel:()=>{S.eedit=false;rerEv();},
  evAdd:v=>evForm(v),
  evConfirm:(v,b,x)=>{x&&x.stopPropagation();const e=eById(v);
@@ -2591,6 +2711,16 @@ const ESCALAS=[
  {id:'es4',n:'Escala Retiro de Jovens',min:'Jovens e Adolescentes',desc:'Equipe de apoio do retiro.',st:'criacao',dates:[DT('ev5',[BK('Sábado',[['Thiago Barros','Coordenação','rascunho']]),BK('Domingo')])]},
  {id:'es5',n:'Escala Louvor — Novembro',min:'Louvor',desc:'',st:'criacao',dates:[]},
 ];
+/* culto de hoje: cada ministério tem a sua escala; o check-in agrupa por evento */
+(()=>{const ev=EVTS.find(e=>e.t==='Culto de Quarta').id;
+ const mk=(id,min,ppl,marks)=>{const x={id,n:`Escala ${min} — Culto de Quarta`,min,desc:'',st:'aprovada',dates:[DT(ev,[BK('Culto inteiro',ppl)])]};x.dates[0].blocks[0].members.forEach((m,i)=>{const k=marks[i];if(k==='ok'){m.ck={at:'19h0'+(i%9),dist:20+i*7};m.pr='ok';m.by='Líder';}else if(k==='ck')m.ck={at:'19h'+(20+i),dist:30+i*5};});ESCALAS.push(x);};
+ mk('esq1','Louvor',[['Ana Clara Lima','Vocal'],['Daniela Rocha','Vocal'],['Bruno Reis','Violão'],['Helena Duarte','Teclado'],['Diego Faria','Bateria'],['Igor Santana','Baixo']],['ok','ok','ok','ok','ok','ck']);
+ mk('esq2','Kids',[['Marina Costa','Coordenação'],['Mônica Souza','Berçário'],['Cláudia Ferraz','Maternal'],['Renan Ferreira','Maternal'],['Paula Siqueira','Juniores'],['Júlia Prado','Juniores'],['Otávio Lins','Apoio']],['ok','ok','ok','ck','','','']);
+ mk('esq3','Mídia',[['Diego Faria','Transmissão'],['Lucas Mendes','Câmera'],['Rafa Toledo','Projeção'],['Sofia Barros','Redes sociais']],['ok','ok','ok','ok']);
+ mk('esq4','Recepção',[['Felipe Andrade','Porta principal'],['Carla Nogueira','Porta principal'],['Tiago Ramos','Estacionamento'],['Beatriz Luz','Boas-vindas'],['Henrique Pires','Boas-vindas']],['ok','ok','ck','ok','']);
+ mk('esq5','Cozinha',[['Mônica Souza','Restaurante'],['Sérgio Dantas','Restaurante'],['Lívia Campos','Cafeteria'],['Nádia Reis','Cafeteria'],['Paulo Vieira','Caixa'],['Vera Lúcia','Restaurante'],['Caio Teles','Apoio']],['ok','ok','ok','ck','','','']);
+ mk('esq6','Intercessão',[['Renata Campos','Sala de oração'],['Elisa Moura','Sala de oração'],['Marcos Teixeira','Altar']],['ok','ok','ok']);
+})();
 (()=>{const m=ESCALAS[0].dates[0].blocks[0].members;Object.assign(m[0],{ck:{at:'19h12',dist:40},pr:'ok',by:'Você'});m[1].ck={at:'20h02',dist:12};m[2].ck={at:'19h58',dist:85};})();
 Object.assign(S,{esc:null,estab:'datas',esview:'blocos',esq:'',esf:'todos',esM:null,esSel:null,esCol:{}});
 const esById=id=>ESCALAS.find(x=>x.id===id);
@@ -2613,7 +2743,7 @@ function escList(){
   <div class="k4"><span class="kl">Aguardando aceite</span><span class="kv" style="color:var(--st-sol)">${c('aguardando')}</span><span class="kd">${ESCALAS.filter(x=>x.st==='aguardando').reduce((a,x)=>a+esMembers(x).filter(m=>m.st==='aguardando').length,0)} pessoas sem resposta</span></div>
   <div class="k4"><span class="kl">Em criação</span><span class="kv">${c('criacao')}</span><span class="kd">ainda não enviadas</span></div>
  </section>
- ${ckStrip()}${lmCard()}
+ ${ckStrip()}
  <section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="esq" placeholder="Buscar escala ou ministério" value="${esc(S.esq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todas',ESCALAS.length],['aprovada','Aprovadas',c('aprovada')],['aguardando','Aguardando aceite',c('aguardando')],['criacao','Em criação',c('criacao')]].map(x=>`<button class="chipf ${S.esf===x[0]?'on':''}" data-a="esF" data-v="${x[0]}">${x[0]!=='todos'?`<i style="background:${EST[x[0]][1]}"></i>`:''}${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
   ${l.length?`<div class="trow es thead"><span>Escala</span><span>Datas</span><span>Confirmações</span><span>Status</span><span></span></div>${l.map(x=>{const ms=esMembers(x),ok=ms.filter(m=>m.st==='confirmado').length,ds=esSorted(x);return `<div class="trow es" tabindex="0" data-a="esOpen" data-v="${x.id}">
@@ -2678,7 +2808,7 @@ function esBlock(x,d,b){
  return `<div class="esb"><div class="esbh"><input class="esbl-in" value="${esc(b.label)}" data-ref="${r}" aria-label="Nome do bloco">${d.blocks.length>1?`<button class="ibtn sm" data-a="esDelBlock" data-v="${r}" aria-label="Remover bloco" title="Remover bloco">${ic('x',14)}</button>`:''}</div>
   <div class="esbc"><div><p class="fl">Time e pessoas</p>
    ${b.team?`<span class="esteam">${ic('users',13)}${esc(b.team)}<button data-a="esTeamClr" data-v="${r}" aria-label="Tirar time">${ic('x',11,2.4)}</button></span>`:''}
-   ${b.members.length?`<div class="esms">${b.members.map((m,i)=>`<div class="esm"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${m.over&&m.st!=='recusado'?` <em class="lm-x" title="Escalado(a) acima do limite mensal">${ic('alert',10,2.6)}Exceção ao limite</em>`:''}</span></span>${m.st!=='recusado'&&['over','full','pause'].includes(lmUse(m.n,ym).st)?lmPill(m.n,ym):''}${msPill(m,x.st==='aguardando'&&m.st==='aguardando',r+'|'+i)}<button class="ibtn sm" data-a="esDelM" data-v="${r}|${i}" aria-label="Remover ${esc(m.n)}">${ic('x',13)}</button></div>`).join('')}</div>`:`<p class="esempty">${ic('alert',13,2)}Ninguém escalado neste bloco.</p>`}
+   ${b.members.length?`<div class="esms">${b.members.map((m,i)=>`<div class="esm"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${m.over&&m.st!=='recusado'?` <em class="lm-x" title="Escalado(a) acima do limite mensal">${ic('alert',10,2.6)}Exceção ao limite</em>`:''}${m.sub?` <em class="es-sub" title="${esc(m.sub.why)}">${ic('swap',10,2.4)}no lugar de ${esc(m.sub.from.split(' ')[0])}</em>`:''}</span></span>${m.st!=='recusado'&&['over','full','pause'].includes(lmUse(m.n,ym).st)?lmPill(m.n,ym):''}${msPill(m,x.st==='aguardando'&&m.st==='aguardando',r+'|'+i)}<button class="ibtn sm" data-a="esSwap" data-v="${r}|${i}" aria-label="Substituir ${esc(m.n)}" title="Substituir">${ic('swap',13)}</button><button class="ibtn sm" data-a="esDelM" data-v="${r}|${i}" aria-label="Remover ${esc(m.n)}" title="Remover">${ic('x',13)}</button></div>`).join('')}</div>`:`<p class="esempty">${ic('alert',13,2)}Ninguém escalado neste bloco.</p>`}
    <div class="row2" style="margin-top:8px">${b.team?'':`<button class="btn sec sm" data-a="esTeam" data-v="${r}">${ic('users',13)}Selecionar time</button>`}<button class="btn sec sm" data-a="esAddM" data-v="${r}">${ic('plus',13,2.2)}Pessoa</button>${x.st!=='criacao'?`<button class="btn sec sm" data-a="esNotify" data-v="${r}" ${pend?'':'disabled'}>${ic('bell',13)}Notificar</button>`:''}</div></div>
   <div><p class="fl">Conteúdo <small>repertório, material de apoio…</small></p>
    ${b.content.length?`<div class="escs">${b.content.map((c,i)=>`<div class="escc"><span class="cti ec-k ${c.k||'outro'}" style="width:28px;height:28px;border-radius:8px">${ic(ECT[c.k||'outro'][2],13)}</span><span class="dkt"><b>${esc(c.t)}</b><span>${ECT[c.k||'outro'][0]}${c.d?' · '+esc(c.d):''}</span></span><button class="ibtn sm" data-a="esDelC" data-v="${r}|${i}" aria-label="Remover">${ic('x',13)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0 0 4px">Nada ainda.</p>'}
@@ -2755,6 +2885,30 @@ const EA={
   if(ov&&!(ack&&ack.checked)){const l=ack.closest('.lm-ack');l.classList.remove('shk');void l.offsetWidth;l.classList.add('shk','bad');return;}
   bt.classList.add('busy');setTimeout(()=>{b.members.push({n,role:r.value.trim(),st:sentSt(x),over:ov||undefined});if(ov)LOG.unshift({u:'Rafael Pereira',a:'Escalou acima do limite',e:'Escala',x:n,det:`${u.c+1}/${u.lim} em ${lmMon(ym)} · ${x.n}`,d:'2026-10-01',t:new Date().toTimeString().slice(0,5)});closeDlg();esRe();const f=n.split(' ')[0];toast(ov?`${f} escalado(a) como exceção: ${u.c+1} de ${u.lim} em ${lmMon(ym)}${x.st!=='criacao'?'. O convite avisa que pode recusar':''}`:u.c+1===u.lim&&LMR.on?`${f} adicionado(a) · fechou o limite de ${lmMon(ym)} (${u.lim}/${u.lim})`:x.st==='criacao'?`${f} adicionado(a)`:`${f} adicionado(a) e avisado(a)`);},400);},
  esDelM:v=>{const {x,b,mi}=refB(v),m=b.members[mi];const go=()=>{b.members.splice(mi,1);esRe();toast(`${m.n.split(' ')[0]} removido(a)`,()=>{b.members.splice(mi,0,m);esRe();});};if(x.st==='criacao')return go();confirmDel({title:`Tirar ${m.n.split(' ')[0]} deste bloco?`,body:`${m.n} ${m.st==='confirmado'?'já tinha confirmado e ':''}será avisado(a) de que não precisa mais servir em “${esc(b.label)}”.`,label:'Tirar da escala',onConfirm:go});},
+ esSwap:v=>{const {x,d,b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0],ym=lmYmOf(d),cand=MEMBERS.filter(z=>z.n!==m.n&&!b.members.some(y=>y.n===z.n)),ev=eById(d.ev);
+  const WHY=[['Imprevisto pessoal','alert'],['Saúde','heart'],['Viagem','car'],['Trabalho','clipboard'],['Troca combinada','swap'],['Outro','dots']];
+  openDlg(`${dlgHead('Substituir '+esc(f),`${esc(b.label)} · ${esc(ev.t)} · ${dBR(ev.d)}`)}<div class="esw">
+   <div class="esw-pair"><div class="esw-p out"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)} · sai</span></span></div><span class="esw-ar">${ic('arrowR',16,2)}</span><div class="esw-p in" id="eswIn"><span class="av esw-q">?</span><span class="dkt"><b>Quem entra</b><span>Escolha abaixo</span></span></div></div>
+   <p class="fl">Quem entra no lugar</p><label class="sbox" style="margin-bottom:8px">${ic('search',16)}<input id="emq" placeholder="Buscar membro" autocomplete="off"></label><div class="pick" id="emp" style="max-height:184px">${lmCand(cand,'',ym)}</div><div id="eml"></div>
+   <label class="fld" style="margin-top:12px"><span class="fl">Responsabilidade</span><input id="emr" value="${esc(m.role)}" autocomplete="off"><span class="err"></span></label>
+   <p class="fl" style="margin:14px 0 8px">Motivo da substituição</p><div class="ckwhy esw-why" id="eswWhy">${WHY.map(([w,i])=>`<button type="button" class="chipf" data-w="${w}"><span>${ic(i,15,2)}</span>${w}</button>`).join('')}</div>
+   <label class="fld" id="eswObsF" hidden><span class="fl">Conte o motivo</span><input id="eswObs" placeholder="Ex.: Mudou de turno no trabalho" autocomplete="off"><span class="err"></span></label>
+   <p class="eswarn" id="eswE" hidden>${ic('alert',13,2)}Escolha um motivo. Fica registrado no histórico da escala.</p>
+   ${x.st!=='criacao'?`<p class="esw-note">${ic('bell',13,2)}${esc(f)} é avisado(a) de que não precisa mais servir, e quem entra recebe o convite${m.st==='confirmado'?' para confirmar':''}.</p>`:''}</div>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="esDoSwap" data-v="${v}" id="eswOk">Substituir</button></div>`);
+  const sync=()=>{const sel=$('input[name=pm]:checked'),box=$('#eswIn');$('#eml').innerHTML=sel?lmWarn(byId(sel.value).n,ym):'';if(sel){const p=byId(sel.value);box.classList.add('on');box.innerHTML=`${mav(p)}<span class="dkt"><b>${esc(p.n)}</b><span>${esc($('#emr').value||m.role)} · entra</span></span>`;}};
+  $('#emp').addEventListener('change',sync);$('#emq').addEventListener('input',e=>{$('#emp').innerHTML=lmCand(cand,e.target.value,ym);sync();});$('#emr').addEventListener('input',sync);
+  $('#eswWhy').addEventListener('click',e=>{const t=e.target.closest('[data-w]');if(!t)return;$$('#eswWhy .chipf').forEach(z=>z.classList.toggle('on',z===t));$('#eswE').hidden=true;const o=t.dataset.w==='Outro';$('#eswObsF').hidden=!o;if(o)$('#eswObs').focus();});},
+ esDoSwap:(v,bt)=>{const {x,d,b,mi}=refB(v),m=b.members[mi],sel=$('input[name=pm]:checked'),r=$('#emr'),w=$('#eswWhy .chipf.on'),obs=$('#eswObs');
+  if(!sel){const p=$('#emp');p.classList.remove('shk');void p.offsetWidth;p.classList.add('shk');toast('Escolha quem entra no lugar');return;}
+  if(!r.value.trim()){r.closest('.fld').classList.add('bad');r.nextElementSibling.textContent='Diga o que a pessoa vai fazer';return;}
+  if(!w){$('#eswE').hidden=false;return;}
+  if(w.dataset.w==='Outro'&&!obs.value.trim()){obs.closest('.fld').classList.add('bad');obs.nextElementSibling.textContent='Conte em poucas palavras';obs.focus();return;}
+  const n=byId(sel.value).n,ym=lmYmOf(d),u=lmUse(n,ym),ov=u.c>=u.lim,ack=$('#emack');
+  if(ov&&!(ack&&ack.checked)){const l=ack.closest('.lm-ack');l.classList.remove('shk');void l.offsetWidth;l.classList.add('shk','bad');return;}
+  const why=w.dataset.w==='Outro'?obs.value.trim():w.dataset.w+(obs.value.trim()?' · '+obs.value.trim():''),nw={n,role:r.value.trim(),st:sentSt(x),over:ov||undefined,sub:{from:m.n,why,at:'08/10'}};
+  bt.classList.add('busy');setTimeout(()=>{b.members.splice(mi,1,nw);LOG.unshift({u:'Rafael Pereira',a:'Substituiu na escala',e:'Escala',x:`${m.n} → ${n}`,det:`${why} · ${b.label} · ${x.n}`,d:'2026-10-08',t:new Date().toTimeString().slice(0,5)});closeDlg();esRe();
+   toast(`${n.split(' ')[0]} entrou no lugar de ${m.n.split(' ')[0]}${x.st!=='criacao'?' · os dois foram avisados':''}`,()=>{b.members.splice(mi,1,m);esRe();});},450);},
  esMst:v=>{const {x,b,mi}=refB(v),m=b.members[mi];m.st='confirmado';esRe();toast(`${m.n.split(' ')[0]} marcado(a) como confirmado`,()=>{m.st='aguardando';esRe();});},
  esNotify:(v,bt)=>{const {b}=refB(v),p=b.members.filter(m=>m.st==='aguardando'||m.st==='rascunho');busy(bt,800,'Avisado',()=>{p.forEach(m=>m.st='aguardando');toast(`${p.map(m=>m.n.split(' ')[0]).join(', ')} ${p.length>1?'foram avisados':'foi avisado(a)'}`);setTimeout(esRe,900);});},
  esAddC:v=>{const {x,b}=refB(v);window._ecS={v,k:x.min==='Louvor'?'musica':x.min==='Kids'?'material':'musica',sel:{video:{ids:[],cfg:{}},musica:{ids:[],cfg:{}},material:{ids:[],cfg:{}},pregacao:{ids:[],cfg:{}}},out:{t:'',d:''},q:''};
@@ -2984,7 +3138,7 @@ const CKA={
  ckOk:(v,bt)=>{const {b,mi}=refB(v),m=b.members[mi];busy(bt,500,'Confirmado',()=>{m.pr='ok';m.by='Você';setTimeout(()=>{esRe();toast(`Presença de ${m.n.split(' ')[0]} confirmada`,()=>{delete m.pr;esRe();});},250);});},
  ckAll:(v,bt)=>{const x=esById(S.esc),d=x.dates.find(z=>z.id===v),l=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'&&ckOf(m)==='ck');busy(bt,700,'Confirmados',()=>{l.forEach(m=>{m.pr='ok';m.by='Você';});setTimeout(()=>{esRe();toast(`${l.length} presença${l.length===1?'':'s'} confirmada${l.length===1?'':'s'}: ${l.map(m=>m.n.split(' ')[0]).join(', ')}`,()=>{l.forEach(m=>delete m.pr);esRe();});},250);});},
  ckMan:v=>{const {b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0];
-  openDlg(`${dlgHead(`Marcar ${esc(f)} como presente?`,`Use quando a pessoa está no local mas não conseguiu fazer check-in.`)}<div class="ckwhy" id="ckWhy">${['Esqueceu o celular','Sem internet','Localização bloqueada','Chegou depois','Outro'].map(w=>`<button type="button" class="chipf" data-w="${w}">${w}</button>`).join('')}</div><p class="eswarn" id="ckE" hidden>${ic('alert',13,2)}Escolha um motivo. Fica registrado no histórico.</p>
+  openDlg(`${dlgHead(`Marcar ${esc(f)} como presente?`,`Use quando a pessoa está no local mas não conseguiu fazer check-in.`)}<p class="fl ckwhy-l">Motivo</p><div class="ckwhy" id="ckWhy">${[['Esqueceu o celular','phone'],['Sem internet','radio'],['Localização bloqueada','pin'],['Chegou depois','clock'],['Outro','dots']].map(([w,i])=>`<button type="button" class="chipf" data-w="${w}"><span>${ic(i,15,2)}</span>${w}</button>`).join('')}</div><p class="eswarn" id="ckE" hidden>${ic('alert',13,2)}Escolha um motivo. Fica registrado no histórico.</p>
    <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="ckDoMan" data-v="${v}">Marcar presente</button></div>`,'sm');
   $('#ckWhy').addEventListener('click',e=>{const t=e.target.closest('[data-w]');if(!t)return;$$('#ckWhy .chipf').forEach(z=>z.classList.toggle('on',z===t));$('#ckE').hidden=true;});},
  ckDoMan:(v,bt)=>{const w=$('#ckWhy .chipf.on');if(!w){$('#ckE').hidden=false;return;}const {b,mi}=refB(v),m=b.members[mi];bt.classList.add('busy');setTimeout(()=>{Object.assign(m,{pr:'ok',manual:true,why:w.dataset.w,by:'Você'});LOG.unshift({u:'Rafael Pereira',a:'Marcou presença',e:'Escala',x:m.n,det:`Manual · ${w.dataset.w}`,d:CKDAY,t:ckHM(CKNOW)});closeDlg();esRe();toast(`${m.n.split(' ')[0]} marcado(a) como presente`,()=>{delete m.pr;delete m.manual;delete m.why;esRe();});},400);},
@@ -3009,11 +3163,27 @@ function esCk(x){const d=ckToday(x),ds=esSorted(x),fut=ds.filter(z=>{const e=eBy
   ${d.blocks.flatMap(b=>b.members).some(m=>m.st!=='confirmado'&&m.st!=='recusado')?`<p class="eswarn" style="margin-top:12px">${ic('alert',13,2)}Quem não confirmou a escala não aparece no check-in.</p>`:''}
  </section>`;}
 
-function ckStrip(){const it=ESCALAS.map(x=>({x,d:ckToday(x)})).filter(z=>z.d);if(!it.length)return '';
- return it.map(({x,d})=>{const e=eById(d.ev),st=ckState(e),w=ckWin(e),ms=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'),c=k=>ms.filter(m=>ckOf(m)===k).length;
-  return `<section class="cktoday-strip rise" style="--d:1"><span class="ckb-i">${ic('pin',16,2)}</span><div class="dkt"><b>Hoje · ${esc(e.t)} · ${st==='aberto'?`check-in aberto até ${ckHM(w.close)}`:st==='antes'?`check-in abre às ${ckHM(w.open)}`:'check-in encerrado'}</b><span>${esc(x.n)} · ${e.time} · ${esc(e.place)}</span></div>
-   <div class="ckt-n"><span><b>${c('ok')}</b>presentes</span><span><b>${c('ck')}</b>a confirmar</span><span><b>${c('pend')}</b>sem check-in</span></div><button class="btn sm" data-a="ckGo" data-v="${x.id}">Abrir check-in${ic('arrowR',14,2)}</button></section>`;}).join('');}
-CKA.ckGo=v=>{S.esc=v;S.estab='ck';S.esview='blocos';render();window.scrollTo({top:0});};
+function ckGroups(){const g={};ESCALAS.forEach(x=>{const d=ckToday(x);if(!d)return;const e=eById(d.ev);(g[e.id]=g[e.id]||{e,list:[]}).list.push({x,d});});
+ return Object.values(g).map(G=>{G.list.forEach(z=>{const ms=z.d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado');z.tot=ms.length;z.ok=ms.filter(m=>ckOf(m)==='ok').length;z.ck=ms.filter(m=>ckOf(m)==='ck').length;z.pend=ms.filter(m=>ckOf(m)==='pend').length;z.mn=MINIS.find(m=>m.n===z.x.min)||{icon:'users',lead:''};});
+  G.list.sort((a,b)=>b.pend-a.pend||b.ck-a.ck||a.x.min.localeCompare(b.x.min));['tot','ok','ck','pend'].forEach(k=>G[k]=G.list.reduce((n,z)=>n+z[k],0));return G;}).sort((a,b)=>b.list.length-a.list.length||b.tot-a.tot);}
+const ckStTxt=e=>{const st=ckState(e),w=ckWin(e);return st==='aberto'?`check-in aberto até ${ckHM(w.close)}`:st==='antes'?`check-in abre às ${ckHM(w.open)}`:'check-in encerrado';};
+function ckLane(z){const done=!z.pend&&!z.ck,arr=z.ok+z.ck;return `<button class="ckl ${z.pend?'pend':done?'done':'wait'}" data-a="ckGo" data-v="${z.x.id}" title="${esc(z.x.n)}"><span class="ckl-i">${ic(done?'check':z.mn.icon,13,2)}</span><span class="ckl-t"><b>${esc(z.x.min)}</b><span class="ckl-b"><i style="width:${arr/Math.max(1,z.tot)*100}%"></i></span></span><span class="ckl-n">${arr}/${z.tot}</span></button>`;}
+function ckEvent(G,compact){const e=G.e,arr=G.ok+G.ck,MAX=5,more=G.list.length-MAX;
+ const head=`<span class="ckb-i">${ic('pin',16,2)}</span><div class="dkt"><b>Hoje · ${esc(e.t)} · ${ckStTxt(e)}</b><span>${e.time} · ${esc(e.place)} · ${G.list.length>1?G.list.length+' ministérios':esc(G.list[0].x.min)}</span></div>`;
+ const sum=`<div class="ckt-n"><span><b>${G.ok}</b>presentes</span><span><b>${G.ck}</b>a confirmar</span><span class="${G.pend?'warn':''}"><b>${G.pend}</b>sem check-in</span></div>`;
+ const btn=`<button class="btn sm" data-a="${G.list.length>1?'ckEv':'ckGo'}" data-v="${G.list.length>1?e.id:G.list[0].x.id}">Abrir check-in${ic('arrowR',14,2)}</button>`;
+ if(compact||G.list.length===1)return `<section class="cktoday-strip ${compact?'cmp':''}">${head}${sum}${btn}</section>`;
+ return `<section class="cktoday-strip ckev"><div class="ckev-h">${head}<div class="ckev-p"><span><b>${arr}</b> de ${G.tot} já chegaram</span><span class="ckev-bar"><i style="width:${G.ok/Math.max(1,G.tot)*100}%"></i><em style="width:${G.ck/Math.max(1,G.tot)*100}%"></em></span></div>${btn}</div>
+  <div class="ckev-l">${G.list.slice(0,more>0?MAX:G.list.length).map(ckLane).join('')}${more>0?`<button class="ckl more" data-a="ckEv" data-v="${e.id}"><b>+${more}</b> ministério${more>1?'s':''}</button>`:''}</div>
+  <div class="ckev-f"><span><i class="d ok"></i>${G.ok} presentes</span><span><i class="d ck"></i>${G.ck} a confirmar</span><span><i class="d pend"></i>${G.pend} sem check-in</span></div></section>`;}
+function ckStrip(){const gs=ckGroups();if(!gs.length)return '';const open=S.ckMore,rest=gs.slice(1);
+ return `<div class="ckstack rise" style="--d:1">${ckEvent(gs[0])}</div>`;}
+CKA.ckMore=()=>{S.ckMore=!S.ckMore;render();};
+CKA.ckEv=v=>{const G=ckGroups().find(g=>g.e.id===v);if(!G)return;
+ openDlg(`${dlgHead('Check-in · '+G.e.t,`Hoje, ${G.e.time} · ${ckStTxt(G.e)}`)}<div class="ckd"><div class="ckd-s"><span><b>${G.ok}</b>presentes</span><span><b>${G.ck}</b>a confirmar</span><span class="${G.pend?'warn':''}"><b>${G.pend}</b>sem check-in</span></div>
+  <div class="ckd-l">${G.list.map(z=>{const arr=z.ok+z.ck,done=!z.pend&&!z.ck;return `<button class="ckd-r" data-a="ckGo" data-v="${z.x.id}"><span class="htile" style="--s:36px;background:var(--tone-${z.mn.tone||'ceu'});color:var(--tone-${z.mn.tone||'ceu'}-ink)">${ic(z.mn.icon,16)}</span><span class="dkt"><b>${esc(z.x.min)}</b><span>${z.mn.lead?esc(z.mn.lead)+' · ':''}${z.tot} na escala</span></span><span class="ckd-p"><span class="ckev-bar sm"><i style="width:${z.ok/Math.max(1,z.tot)*100}%"></i><em style="width:${z.ck/Math.max(1,z.tot)*100}%"></em></span><small>${arr}/${z.tot}${z.pend?` · <b>${z.pend} sem check-in</b>`:done?' · completo':` · ${z.ck} a confirmar`}</small></span>${ic('chevR',15,2)}</button>`;}).join('')}</div></div>
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`);};
+CKA.ckGo=v=>{closeDlg();S.esc=v;S.estab='ck';S.esview='blocos';render();window.scrollTo({top:0});};
 
 /* ================= Agenda e serviço › Apresentação de Bebês ao Senhor ================= */
 const BBR={maxM:24,vagas:6,prazo:7};
@@ -3136,7 +3306,7 @@ Object.assign(I,{
 });
 const RECS=[['som','Som','mic'],['proj','Projetor','monitor'],['tv','TV','tv'],['ar','Ar-condicionado','snow'],['wifi','Wi-Fi','wifi']];
 const ESPS=[
- {id:'s1',n:'Auditório Principal',cap:300,loc:'Térreo',desc:'',act:true,rec:['som','proj','ar','wifi'],tone:'ceu',icon:'church',fixed:[[0,'09:00','12:30','Culto da manhã'],[0,'18:00','20:30','Culto da noite'],[3,'19:30','21:30','Culto de quarta']]},
+ {id:'s1',n:'Auditório Principal',cap:300,loc:'Térreo',desc:'',act:true,rec:['som','proj','ar','wifi'],tone:'ceu',icon:'church',fixed:[[0,'09:00','12:30','Culto de Celebração'],[0,'18:00','20:30','Culto da noite'],[3,'19:30','21:30','Culto de quarta']]},
  {id:'s2',n:'Sala de Reuniões A',cap:12,loc:'1º andar',desc:'',act:true,rec:['tv','ar','wifi'],tone:'menta',icon:'users',fixed:[]},
  {id:'s3',n:'Sala de Reuniões B',cap:8,loc:'1º andar',desc:'Ideal para aconselhamento.',act:true,rec:['ar'],tone:'salvia',icon:'message',fixed:[]},
  {id:'s4',n:'Sala Kids',cap:25,loc:'Anexo',desc:'Já usada pelo Zelo Kids nos cultos — fora do horário de culto fica livre pra reserva.',act:true,rec:['tv','ar'],tone:'damasco',icon:'baby',fixed:[[0,'09:00','12:30','Zelo Kids'],[0,'18:00','20:30','Zelo Kids']]},
@@ -3497,7 +3667,7 @@ const SPA={
  rvSalaClr:()=>{S.rvSala=null;spRe();},
  rvView:v=>rvDlg(v),
  rvEdit:v=>rvForm({id:v}),
- rvCancel:v=>{const r=RESERVAS.find(x=>x.id===v),s=slById(r.s);
+ rvCancel:v=>{const r=RESERVAS.find(x=>x.id===v),s=slById(r.s);if(r.ev){const e=eById(r.ev);toast(`Essa reserva é do evento ${e?e.t:''}. Para liberar a sala, mude o local no evento.`);return;}
   openDlg(`<div class="cdel"><span class="cdi">${ic('alert',20,2)}</span>${dlgHead('Cancelar esta reserva?',`${esc(s.n)} · ${wd(r.d)} ${+r.d.slice(8)}, ${hm(r.f)}–${hm(r.t)}. ${esc(r.who.split(' ')[0])} recebe um aviso.`)}</div>
    <div class="fld"><span class="fl">Motivo</span><div class="sp-why">${['Remarcado pelo solicitante','Sala indisponível','Evento cancelado','Outro'].map((m,i)=>`<label><input type="radio" name="cw" value="${m}" ${i?'':'checked'}><span>${m}</span></label>`).join('')}</div></div>
    <div class="dfoot"><button class="btn sec" data-a="closeDlg">Voltar</button><button class="btn dang" id="cwOk">Cancelar reserva</button></div>`,'sm del');
