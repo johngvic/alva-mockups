@@ -3597,3 +3597,75 @@ div.sl-dk{display:flex;align-items:center;gap:12px;padding:10px;border-radius:14
 .record-body{padding:0 24px 20px}.record-field{margin:0 0 22px}.record-field h3,.record-body h3{font:600 14px var(--font-text);margin:16px 0 8px}.record-field p{font:400 14px/1.7 var(--font-text);white-space:pre-wrap;overflow-wrap:anywhere;margin:0;color:var(--ink-muted)}.record-title{text-align:left;white-space:normal;font-weight:600}.record-attendance>div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}.record-attendance small{display:block;color:var(--ink-muted);margin-top:4px}.care-details{display:grid;grid-template-columns:1fr 1fr;gap:20px}.care-meeting{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding:16px 0}.care-meeting-open{flex:1;min-width:0;border:0;background:none;text-align:left;color:var(--ink);cursor:pointer;font:inherit;padding:0}.care-meeting-open b,.care-meeting-open span{display:block;overflow-wrap:anywhere}.care-meeting-open span{font:400 13px/1.6 var(--font-text);color:var(--ink-muted);margin-top:5px}.hd2 small{display:block;margin-top:5px}.care-meeting-open:focus-visible{outline:2px solid var(--focus);outline-offset:4px}@media(max-width:700px){.care-details{grid-template-columns:1fr}.care-meeting{align-items:flex-start;flex-direction:column}.record-body{padding:0 16px 16px}}
 
 .care-history .htl .hb{display:block;width:auto;text-align:left;align-items:flex-start}.care-history .htl .hb>span{display:block}.care-history .htl .hb .lnk{margin-top:7px}.care-history .htl li{align-items:start}
+
+/* Identity review: reuse cards, controls and typography. */
+.id-table-scroll{overflow:auto}.id-table{width:100%;border-collapse:collapse;text-align:left;font:400 13px/1.5 var(--font-text);min-width:650px}.id-table th{font-weight:600;color:var(--ink-muted)}.id-table td,.id-table th{padding:16px 20px;border-bottom:1px solid var(--line)}.id-table .dk{border:0;background:none;padding:0;min-width:230px}.id-area-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--line);font-size:13px}.id-area-row small{display:block}.id-role-tools{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:16px 0;flex-wrap:wrap}.id-history .hb{display:block;width:auto;text-align:left}.id-history .hb>span{display:block;margin-top:5px}.id-history .htl li{align-items:start;grid-template-columns:90px 20px minmax(0,1fr)}.id-history .htl li:not(:last-child)::after{left:109px}.id-history .hd2{width:90px}.id-history .hd2 small{display:block}@media(max-width:650px){.id-area-row{flex-wrap:wrap}.id-table td,.id-table th{padding:12px}.id-history .htl{padding-left:0}}
+
+/* Keep user actions visible beyond the profile header. */
+.prof:has(#uPop){overflow:visible;z-index:5}
+
+/* Content publication: shared fields within the editor, never catalog actions. */
+.nx-content-form{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.nx-publication-title{padding-top:16px;border-top:1px solid var(--line);gap:4px}
+.nx-publication-help{margin:0}
+.nx-publication-card{margin-top:20px}
+.nx-publication-card .nx-publication-title{padding-top:0;border-top:0}
+.nx-file-pick{position:relative;margin:0;min-height:74px}
+.nx-file-pick input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.nx-file-pick:focus-within{outline:2px solid var(--brand);outline-offset:2px}
+@media(max-width:639px){.nx-content-form{grid-template-columns:1fr!important}}
+
+/* Marcador padronizado de visibilidade (Público, Interno, Restrito) no canto superior direito dos cartões de conteúdo */
+.ct-pc,.ct-jc,.mt-c{position:relative}
+.nx-vis-c{position:absolute;top:10px;right:10px;z-index:3;display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 7px;border-radius:999px;font:600 11.5px/1 var(--font-text);background:rgba(255,255,255,.94);box-shadow:0 1px 3px rgba(0,0,0,.18);color:var(--ink);pointer-events:none}
+.nx-vis-c svg{flex:none}
+.nx-v-pub{color:var(--st-int)}.nx-v-int{color:var(--brand-text)}.nx-v-res{color:var(--st-sol)}
+.nx-vis-c.row{position:static;margin-left:auto;box-shadow:none;border:1px solid var(--line);background:var(--surface-2)}
+.ct-jh{position:relative}
+.ct-jc .ct-jh .stp{position:absolute;right:12px;bottom:10px}
+.ct-jd{margin:0;font:400 13px/1.45 var(--font-text);color:var(--ink-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.elist li.cancel{opacity:.62}
+/* Multi-igreja: igreja como linha clicável com ação de mover; barra do supervisor */
+.gi.g2{padding:0 10px 0 0;transition:background .15s}.gi.g2:hover{background:var(--brand-soft)}
+.gi-open{appearance:none;border:0;background:none;flex:1;min-width:0;display:flex;align-items:center;gap:12px;text-align:left;font:inherit;color:inherit;cursor:pointer;padding:10px 12px;border-radius:14px}
+.gi-open:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}.gi-open .dkt{flex:1;min-width:0}
+.gi-open:hover .gi-go{color:var(--brand-text);transform:translateX(2px)}
+.rsupbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+/* botões de Modalidade iguais em todos os formulários de Agendar */
+#cschF .yn span,#nxHouseF .yn span,#seF .yn span{display:flex;align-items:center;justify-content:center}
+/* Trilha da Jornada e da Série: botão de desvincular, ícone da série */
+.ct-tl .ct-cc:not(.add){grid-template-columns:auto minmax(0,1fr) auto auto auto auto}
+.ct-cc .ibtn{opacity:.55}.ct-cc:hover .ibtn,.ct-cc .ibtn:focus-visible{opacity:1}
+@media (max-width:719px){.ct-tl .ct-cc:not(.add){grid-template-columns:auto minmax(0,1fr) auto auto}}
+.nx-sh{display:inline-flex;align-items:center;gap:12px}
+.nx-si{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff;flex:none}
+.nx-serpick{max-height:180px;overflow:auto}
+/* Quadros de tarefas */
+.bd-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:14px}
+.bd-c{padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;outline:none;transition:box-shadow .15s}
+.bd-c:hover,.bd-c:focus-visible{box-shadow:inset 0 0 0 1.5px var(--brand)}
+.bd-ct{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.bd-ct b{font:600 15px/1.3 var(--font-text)}
+.bd-bar{display:block;height:5px;border-radius:99px;background:var(--brand-soft);overflow:hidden}.bd-bar i{display:block;height:100%;background:var(--brand);border-radius:inherit}
+.bd-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.bd-tt{display:flex;flex-direction:column;gap:2px;min-width:0}.bd-tt h2{margin:0}
+.bd-top .pact{margin-left:auto;display:flex;align-items:center;gap:8px}
+.bd-note{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--surface-2);font:400 13px/1.4 var(--font-text);color:var(--ink-muted)}
+.bd-cols{display:flex;gap:14px;align-items:flex-start;overflow-x:auto;padding-bottom:8px}
+.bd-col{flex:0 0 288px;display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:16px;background:var(--surface-2);transition:box-shadow .15s}
+.bd-col.over{box-shadow:inset 0 0 0 2px var(--brand);background:var(--brand-soft)}
+.bd-ch{display:flex;align-items:center;gap:8px;padding:2px 4px}.bd-ch b{font:600 13.5px/1 var(--font-text)}.bd-ch small{font:500 12px/1 var(--font-text);color:var(--ink-soft)}
+.bd-list{display:flex;flex-direction:column;gap:8px;min-height:24px}
+.bd-t{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);cursor:grab;outline:none}
+.bd-t:hover,.bd-t:focus-visible{box-shadow:inset 0 0 0 1.5px var(--brand)}
+.bd-t b{font:600 13.5px/1.35 var(--font-text)}.bd-t.done b{color:var(--ink-muted);text-decoration:line-through}
+.bd-t.drag{opacity:.4}
+.bd-t.lock{cursor:not-allowed;opacity:.55;background:repeating-linear-gradient(135deg,var(--surface),var(--surface) 8px,var(--surface-2) 8px,var(--surface-2) 16px)}.bd-t.lock:hover{box-shadow:inset 0 0 0 1px var(--line)}
+.bd-lt{display:flex;align-items:flex-start;gap:6px;color:var(--ink-muted)}.bd-lt svg{flex:none;margin-top:2px}
+.bd-m{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bd-mn,.bd-who,.bd-due{display:inline-flex;align-items:center;gap:5px;font:500 11.5px/1 var(--font-text);color:var(--ink-muted)}
+.bd-who .av{width:18px;height:18px;font-size:8px}.bd-who i{font-style:normal}
+.bd-due.late{color:var(--st-rec)}
+.bd-empty{margin:0;padding:8px 4px;font:400 12.5px/1.3 var(--font-text);color:var(--ink-soft)}
+.bd-add,.bd-colnew{appearance:none;border:0;background:none;display:flex;align-items:center;gap:6px;padding:8px;border-radius:10px;font:500 13px/1 var(--font-text);color:var(--brand-text);cursor:pointer;text-align:left}
+.bd-add:hover,.bd-colnew:hover{background:var(--brand-soft)}
+.bd-colnew{flex:0 0 200px;box-shadow:inset 0 0 0 1.5px var(--line-strong);border-radius:16px;padding:14px;justify-content:center}
+.ax-lc.done{opacity:.6}
