@@ -1328,3 +1328,19 @@ article.lim-ov{background:linear-gradient(165deg,color-mix(in srgb,var(--danger-
 .lj-qr i{display:block}.lj-qr i.on{background:#010f12}
 .lj-cardv{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
 .lj-cardv b{font:600 15.5px/20px var(--font-text)}.lj-cardv small{font:400 13px/17px var(--font-text);color:var(--ink-muted)}
+
+/* inscrições: ingresso, compras adicionais e QR por código */
+.rg-pay button{align-items:center}.rg-pay button:disabled{opacity:.55;cursor:default}
+.rg-pay .rg-pr{flex:none;font:600 15px/20px var(--font-text);font-variant-numeric:tabular-nums}
+.rg-pay .rg-inc{color:var(--brand-text);font-weight:500}
+.rg-ck{width:22px;height:22px;border-radius:7px;flex:none;display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line-strong);color:transparent;transition:background .15s,box-shadow .15s}
+.rg-pay button[aria-checked="true"] .rg-ck{background:var(--brand);box-shadow:none;color:#fff}
+.rg-pay button[role="checkbox"][aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--brand),var(--shadow-card)}
+.rg-opt{font:400 12px/1 var(--font-text);letter-spacing:0;text-transform:none;color:var(--ink-muted);margin-left:6px}
+.rg-vcf{display:flex;gap:8px}.rg-vcf input{flex:1;min-width:0;height:48px;border:0;border-radius:var(--r-md);padding:0 14px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-strong);font:500 16px/1 var(--font-text);color:var(--ink);text-transform:uppercase;outline:none}
+.rg-vcf input:focus{box-shadow:inset 0 0 0 2px var(--brand)}
+.rg-code{padding:16px 18px 18px;border-radius:var(--r-lg);display:flex;flex-direction:column;gap:12px}
+.rg-code .qr{align-self:center}.rg-code .qr.rgq svg{width:180px;height:180px}
+.rg-code.used .qr{opacity:.28;filter:grayscale(1)}
+.rg-code.locked .qr{display:grid;place-items:center;width:204px;height:204px;background:var(--surface-raised,#f2f2f5)}
+.rg-lock{display:grid;place-items:center;color:var(--ink-muted)}

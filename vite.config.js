@@ -15,6 +15,8 @@ export default defineConfig({
         mobile: page('./mobile/index.html'),
         site: page('./site/index.html'),
         subscriptions: page('./subscriptions/index.html'),
+        registrationsWeb: page('./registrations/web/index.html'),
+        registrationsMobile: page('./registrations/mobile/index.html'),
       },
     },
   },

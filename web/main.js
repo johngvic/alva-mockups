@@ -103,7 +103,7 @@ const P=(n,t)=>({n,t,i:n.split(' ').map(w=>w[0]).slice(0,2).join('')});
 const WAITING=[P('Carlos Mendes','ceu'),P('Luana Souza','damasco'),P('Paulo Alves','menta')];
 const PENDING=[P('Bruno Reis','rosado'),P('Clara Nunes','lima'),P('Diego Faria','ceu'),P('Elisa Moura','salvia')];
 const DRAFTS=[['Louvor',75],['Recepção',40],['Kids',20]];
-const TASKS=[{id:'t1',area:'integracao'},{id:'t2',area:'escalas'},{id:'t3',area:'escalas'}];
+const TASKS=[{id:'t1',area:'integracao'},{id:'t2',area:'escalas'}];
 const WEEK=[['seg',28,null],['ter',29,null],['qua',30,'Ensaio do louvor · 20h'],['qui',1,'Reunião de líderes · 20h'],['sex',2,null],['sáb',3,'Montagem do culto · 16h'],['dom',4,'Culto de Celebração · 10h']];
 const TEAMS=[['Louvor',5,5],['Recepção',3,5],['Kids',4,6]];
 const NEXT=[
@@ -151,12 +151,12 @@ function sidebar(){
 }
 const greet=()=>{const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';};
 const today=()=>new Date(2026,8,30).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
-const openCount=()=>TASKS.filter(t=>!t.done).length;
+const openCount=()=>TASKS.filter(t=>!t.done).length+(myUrgent().length?1:0);
 function lede(n){return n?`<b>${n} ${n>1?'assuntos pedem':'assunto pede'}</b> sua atenção. O próximo culto é domingo, às 10h.`:'Tudo em dia. O próximo culto é domingo, às 10h.';}
 function dayNote(){const w=WEEK[S.day];return w[2]?`<b>${w[0]==='qua'?'Hoje':w[0][0].toUpperCase()+w[0].slice(1)+', '+w[1]}</b>${esc(w[2])}`.replace('</b>','</b> · '):`<b>${w[0][0].toUpperCase()+w[0].slice(1)}, ${w[1]}</b> · Nada na agenda`;}
 
 function actCards(){
- const [t1,t2,t3]=TASKS;
+ const [t1,t2]=TASKS;
  return `<div class="acts" id="acts">
   <article class="card act ${t1.done?'gone':''}" id="t1" style="${t1.done?'display:none':''}">
    <div class="top"><span class="tg" style="background:var(--warm)"></span>Acolhimento<button class="x" data-a="done" data-v="t1" aria-label="Marcar como resolvido" title="Marcar como resolvido">${ic('check',16,2.25)}</button></div>
@@ -165,17 +165,13 @@ function actCards(){
    <div class="foot"><button class="btn pri" data-a="goTask" data-v="t1">Acolher agora</button></div>
   </article>
   <article class="card act ${t2.done?'gone':''}" id="t2" style="${t2.done?'display:none':''}">
-   <div class="top"><span class="tg" style="background:var(--seq3)"></span>Escala de domingo<button class="x" data-a="done" data-v="t2" aria-label="Marcar como resolvido" title="Marcar como resolvido">${ic('check',16,2.25)}</button></div>
-   <div class="hero"><span class="n">${PENDING.length}</span><span class="u">ainda sem resposta para o culto</span></div>
+   <div class="top"><span class="tg" style="background:var(--seq3)"></span>Escalas<button class="x" data-a="done" data-v="t2" aria-label="Marcar como resolvido" title="Marcar como resolvido">${ic('check',16,2.25)}</button></div>
+   <div class="hero"><span class="n">${PENDING.length}</span><span class="u">ainda sem resposta para o culto de domingo</span></div>
    <div class="viz"><div class="segl"><span><b>12</b>/16 confirmados</span><span class="stack sm">${PENDING.map(p=>av(p)).join('')}</span></div><div class="segs" aria-label="12 de 16 confirmados">${Array.from({length:16},(_,i)=>`<i class="${i<12?'':'off'}"></i>`).join('')}</div></div>
-   <div class="foot"><button class="btn pri" data-a="remind">Lembrar os 4</button><button class="lnk" data-a="goTask" data-v="t2" style="margin-left:4px">Ver escala</button></div>
+   <div class="act-sub"><p class="act-sh">Escalas de outubro<span>${DRAFTS.length} em rascunho · fecham dia 10</span></p><div class="drafts">${DRAFTS.map(d=>`<div class="dr"><span>${d[0]}</span><span class="tr"><i data-w="${d[1]}%"></i></span><b>${d[1]}%</b></div>`).join('')}</div></div>
+   <div class="foot"><button class="btn pri" data-a="remind">Lembrar os ${PENDING.length}</button><button class="lnk" data-a="goTask" data-v="t2" style="margin-left:4px">Abrir escalas</button></div>
   </article>
-  <article class="card act ${t3.done?'gone':''}" id="t3" style="${t3.done?'display:none':''}">
-   <div class="top"><span class="tg" style="background:var(--seq2)"></span>Escalas de outubro<button class="x" data-a="done" data-v="t3" aria-label="Marcar como resolvido" title="Marcar como resolvido">${ic('check',16,2.25)}</button></div>
-   <div class="hero"><span class="n">${DRAFTS.length}</span><span class="u">em rascunho, fecham dia 10</span></div>
-   <div class="viz drafts">${DRAFTS.map(d=>`<div class="dr"><span>${d[0]}</span><span class="tr"><i data-w="${d[1]}%"></i></span><b>${d[1]}%</b></div>`).join('')}</div>
-   <div class="foot"><button class="btn sec" data-a="goTask" data-v="t3">Continuar montagem</button></div>
-  </article>
+  ${myTasksAct()}
   <article class="card act alldone" id="allDone" style="${openCount()?'display:none':''}">${logo(18,false)}<p>Tudo em dia por aqui.</p><span class="who">Nada pendente agora. Que tal olhar a escala de domingo com calma?</span><button class="lnk" data-a="undoAll">Restaurar pendências</button></article>
  </div>`;
 }
@@ -1512,11 +1508,11 @@ function miniDetail(){
  <header class="card prof rise" style="--d:1">
   <div class="pid">${mTile(m,64)}<div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>Ministério de ${esc(m.n)}</h1>${m.active?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Ativo</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Inativo</span>'}</div><p>Líder: ${esc(m.lead)} · ${mnPpl(m).length} membros · ${tCount(m)} ${tCount(m)===1?'time':'times'}</p></div></div>
   <div class="pact"><div style="position:relative"><button class="ibtn" data-a="mnMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="mnPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="mnToggle">${ic(m.active?'pause':'check',17)}${m.active?'Inativar ministério':'Reativar ministério'}</button><hr><button class="pi danger" data-a="mnDel">${ic('x',17)}Excluir ministério</button></div></div></div>
-  <div class="ptabs" role="tablist">${[['det','Detalhes'],['mem','Membros',mnPpl(m).length],['times','Times',m.teams.length],['resp','Responsabilidades',m.resp.length],['cont','Conteúdo',m.content.length],['quad','Quadros',nxBdCount('min',m.id)]].map(t=>`<button role="tab" class="${S.mtab===t[0]?'on':''}" data-a="mnTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
+  <div class="ptabs" role="tablist">${[['det','Detalhes'],['mem','Membros',mnPpl(m).length],['times','Times',m.teams.length],['resp','Responsabilidades',m.resp.length],['cont','Conteúdo',m.content.length],['quad','Quadros',nxBdCount('min',m.id)],['cx','Caixas',cxCount('min',m.id)]].map(t=>`<button role="tab" class="${S.mtab===t[0]?'on':''}" data-a="mnTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
  <div id="mntb" class="rise" style="--d:2">${mnTabBody(m)}</div>`;
 }
-function mnTabBody(m){return ({det:mnDet,mem:mnMembers,times:mnTimes,resp:mnResp,cont:mnCont,quad:m=>bdTab('min',m.id)})[S.mtab](m);}
+function mnTabBody(m){return ({det:mnDet,mem:mnMembers,times:mnTimes,resp:mnResp,cont:mnCont,quad:m=>bdTab('min',m.id),cx:m=>cxTab('min',m.id)})[S.mtab](m);}
 function mnDet(m){const ed=S.mnedit;
  return `<div class="pgrid"><div class="col"><section class="card pc sec ${ed?'editing':''}"><div class="sh"><h2>Informações</h2>${ed?'':`<button class="btn sec sm" data-a="mnEdit">${ic('pen',14)}Editar</button>`}</div>
   ${ed?`<form class="fgrid" id="mnF" novalidate style="grid-template-columns:1fr 1fr">
@@ -2249,17 +2245,17 @@ const ETYPES=['Culto','Retiro','Batismo','Conferência','Evento especial'];
 const ETONE={Ensaio:'salvia',Culto:'ceu',Retiro:'lima',Batismo:'menta',Conferência:'damasco','Evento especial':'rosado'};
 let _eid=0;
 const R=(n,d,pay,val,vch)=>({id:'rg'+Math.random().toString(36).slice(2,8),n,d,pay,val,vch:vch||''});
-const EV=(o)=>Object.assign({id:'ev'+(++_eid),kind:'evento',st:'confirmado',time:'19h',place:'Templo principal',min:'',paid:false,price:0,cap:0,regs:[],vouchers:[],checkin:'off',periods:[],items:[],link:'',rep:'none',prev:''},o);
+const EV=(o)=>Object.assign({id:'ev'+(++_eid),kind:'evento',st:'confirmado',time:'19h',place:'Templo principal',min:'',paid:false,price:0,cap:0,regs:[],vouchers:[],checkin:'off',periods:[],items:[],tickets:[],rep:'none',prev:''},o);
 const EVTS=[
  EV({kind:'culto',t:'Culto de Celebração',type:'Culto',d:'2026-09-27',time:'10h',min:'Louvor',rep:'semanal'}),
  EV({kind:'culto',t:'Culto de Celebração',type:'Culto',d:'2026-10-04',time:'10h',min:'Louvor',rep:'semanal'}),
  EV({kind:'culto',t:'Culto de Celebração',type:'Culto',d:'2026-10-11',time:'10h',min:'Louvor',rep:'semanal'}),
  EV({kind:'culto',t:'Culto de Jovens',type:'Culto',d:'2026-10-03',time:'19h30',min:'Jovens e Adolescentes',rep:'semanal',place:'Auditório'}),
- EV({t:'Retiro de Jovens 2026',type:'Retiro',d:'2026-10-17',time:'08h',place:'Chácara Alva',min:'Jovens e Adolescentes',paid:true,price:120,cap:100,checkin:'periodo',periods:['Sábado','Domingo'],items:[{n:'Almoço',price:25,p:'Sábado'},{n:'Almoço',price:25,p:'Domingo'}],link:'https://asaas.com/c/retiro-jovens-2026',
+ EV({t:'Retiro de Jovens 2026',type:'Retiro',d:'2026-10-17',time:'08h',place:'Chácara Alva',min:'Jovens e Adolescentes',paid:true,price:120,cap:100,checkin:'periodo',periods:['Sábado','Domingo'],items:[{n:'Almoço',price:25,p:'Sábado'},{n:'Almoço',price:25,p:'Domingo'}],
   regs:[R('Giovanna Martins','2026-09-10','pago',120),R('Renan Ferreira','2026-09-11','pendente',120),R('Camila Sousa','2026-09-12','pago',120),R('Thiago Mendes','2026-09-13','pendente',100,'RETIRO10'),R('Larissa Pinto Rocha','2026-09-14','pago',0,'BOLSA-INTEGRAL-LARISSA')],
   vouchers:[{code:'RETIRO10',disc:20,exp:'2026-09-30',mode:'liberado',email:'',uses:4},{code:'BOASVINDAS-GIOVANNA',disc:30,exp:'',mode:'especifico',email:'giovanna.martins@email.com',uses:0},{code:'BOLSA-INTEGRAL-LARISSA',disc:120,exp:'',mode:'especifico',email:'larissa.pr@email.com',uses:1}]}),
  EV({t:'Culto + Batismo',type:'Batismo',d:'2026-10-18',time:'16h',place:'Chácara Alva',regs:[R('Ana Lima','2026-09-20','—',0)]}),
- EV({t:'Conferência Missões',type:'Conferência',d:'2026-10-09',time:'19h30',place:'Auditório',paid:true,price:60,cap:150,checkin:'inteiro',link:'https://asaas.com/c/conferencia-missoes',regs:[R('Felipe Andrade','2026-09-18','pago',60),R('Diego Faria','2026-09-22','pendente',60)]}),
+ EV({t:'Conferência Missões',type:'Conferência',d:'2026-10-09',time:'19h30',place:'Auditório',paid:true,price:60,cap:150,checkin:'inteiro',regs:[R('Felipe Andrade','2026-09-18','pago',60),R('Diego Faria','2026-09-22','pendente',60)]}),
  EV({t:'Convergir 2027',type:'Conferência',st:'previsao',prev:'Fev/2027',d:''}),
  EV({t:'Congresso de Mulheres 2027',type:'Conferência',st:'previsao',prev:'Mar/2027',d:''}),
  EV({t:'12 Horas de Oração',type:'Evento especial',d:'2026-10-24',time:'05h às 17h',min:'Intercessão',regs:[R('Renata Campos','2026-09-25','—',0),R('Elisa Moura','2026-09-26','—',0)]}),
@@ -2271,7 +2267,7 @@ const BLOCKS=[{id:'b1',from:'2026-10-24',to:'2026-10-26',why:'Viagem em família
 Object.assign(S,{evt:null,etab:'det',eq:'',ef:'todos',etype:'todos',calM:'2026-10',calSel:null,caltab:'igreja',iqf:'todos',iq:''});
 const eById=id=>EVTS.find(e=>e.id===id);
 const brl=v=>v?`R$ ${(+v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2})}`:'Gratuito';
-const raised=e=>e.regs.filter(r=>r.pay==='pago').reduce((a,r)=>a+(+r.val||0),0);
+const raised=e=>e.regs.filter(r=>r.pay==='pago').reduce((a,r)=>a+regTot(e,r),0);
 const past=e=>e.d&&inDays(e.d)<0;
 const tTag=t=>`<span class="stp" style="--c:var(--tone-${ETONE[t]}-ink);--b:color-mix(in srgb,var(--tone-${ETONE[t]}) 55%,transparent)"><i></i>${t}</span>`;
 const sPill=e=>e.st==='previsao'?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Previsão</span>':past(e)?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Realizado</span>':'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Confirmado</span>';
@@ -2301,7 +2297,7 @@ function evRows(all){
  return `<div class="trow ev thead"><span>Evento</span><span>Tipo</span><span>Status</span><span>Inscrições</span><span></span></div>${l.map(e=>`<div class="trow ev ${past(e)?'off':''}" tabindex="0" data-a="evOpen" data-v="${e.id}">
   <span class="tn">${dTile(e)}<span class="hn"><b>${esc(e.t)}</b><span>${e.st==='previsao'?`Previsto para ${e.prev}`:`${e.time} · ${esc(e.place)}`}${e.min?` · ${esc(e.min)}`:''}${e.rep!=='none'?` · ${ic('swap',11,2)} semanal`:''}</span></span></span>
   <span class="ety">${tTag(e.type)}</span><span class="ts">${sPill(e)}</span>
-  <span class="ein">${e.st==='previsao'?`<button class="btn sec sm" data-a="evConfirm" data-v="${e.id}">Confirmar data</button>`:`<span class="eib"><b>${e.regs.length}${e.cap?`<span class="soft">/${e.cap}</span>`:''}</b> ${e.regs.length===1?'inscrito':'inscritos'}${e.cap?`<span class="tr"><i style="width:${Math.min(100,e.regs.length/e.cap*100)}%"></i></span>`:''}</span><span class="eip">${e.paid?brl(e.price):'Gratuito'}</span>`}</span>
+  <span class="ein">${e.st==='previsao'?`<button class="btn sec sm" data-a="evConfirm" data-v="${e.id}">Confirmar data</button>`:`<span class="eib"><b>${e.regs.length}${e.cap?`<span class="soft">/${e.cap}</span>`:''}</b> ${e.regs.length===1?'inscrito':'inscritos'}${e.cap?`<span class="tr"><i style="width:${Math.min(100,e.regs.length/e.cap*100)}%"></i></span>`:''}</span><span class="eip">${e.paid?evFromTxt(e):'Gratuito'}</span>`}</span>
   <span class="tc">${ic('chevR',16)}</span></div>`).join('')}<div class="tfoot"><span>${l.length} ${l.length===1?'item':'itens'}</span></div>`;
 }
 
@@ -2309,15 +2305,15 @@ function evRows(all){
 function evDetail(){
  const e=eById(S.evt);if(!e){S.evt=null;return calPage();}
  const pg=e.paid,cnt=e.regs.length,pd=e.regs.filter(r=>r.pay==='pago').length;
- const tabs=[['det','Detalhes'],['ins','Inscrições',cnt],...(pg?[['vch','Vouchers',e.vouchers.length]]:[]),['quad','Quadros',nxBdCount('evt',e.id)]];
+ const tabs=[['det','Detalhes'],['ins','Inscrições',cnt],...(e.checkin!=='off'&&e.st==='confirmado'?[['eic','Check-in',eiDone(e)]]:[]),...(e.st==='confirmado'&&evMoney(e)?[['fin','Financeiro']]:[]),...(pg?[['vch','Vouchers',e.vouchers.length]]:[]),['quad','Quadros',nxBdCount('evt',e.id)],['cx','Caixas',cxCount('evt',e.id)]];
  if(!tabs.some(t=>t[0]===S.etab))S.etab='det';
  return `<nav class="crumb rise"><span class="soft">Agenda e serviço</span>${ic('chevR',13,2)}<button class="lnk back" data-a="evBack">Calendário</button>${ic('chevR',13,2)}<span>${esc(e.t)}</span></nav>
- <header class="card prof rise" style="--d:1"><div class="pid">${dTile(e)}<div class="pn"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h1>${esc(e.t)}</h1>${tTag(e.type)}${sPill(e)}</div><p>${e.st==='previsao'?`Previsto para ${e.prev}`:`${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}`}${e.min?` · Ministério de ${esc(e.min)}`:''}</p></div></div>
+ <header class="card prof rise" style="--d:1"><div class="pid">${dTile(e)}<div class="pn"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h1>${esc(e.t)}</h1>${tTag(e.type)}${sPill(e)}${vemPill(e)}</div><p>${e.st==='previsao'?`Previsto para ${e.prev}`:`${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}`}${e.min?` · Ministério de ${esc(e.min)}`:''}</p></div></div>
   <div class="pact">${e.st==='previsao'?`<button class="btn pri" data-a="evConfirm" data-v="${e.id}">Confirmar data</button>`:`<button class="btn sec" data-a="copy" data-v="https://alva.app/e/${e.id}">${ic('share',15)}Copiar link</button>`}<div style="position:relative"><button class="ibtn" data-a="evMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="evPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="evDup" data-v="${e.id}">${ic('layers',17)}Duplicar</button><hr><button class="pi danger" data-a="evDel" data-v="${e.id}">${ic('x',17)}Excluir ${e.kind==='culto'?'culto':'evento'}</button></div></div></div>
-  ${e.st==='previsao'?'':`<div class="ikpi hk"><div><b>${cnt}${e.cap?`<small class="kof">/${e.cap}</small>`:''}</b><span>Inscritos</span></div>${pg?`<div><b>R$ ${raised(e).toLocaleString('pt-BR')}</b><span>Arrecadado · ${pd} pagos</span></div><div><b>${cnt-pd}</b><span>Pagamentos pendentes</span></div>`:`<div><b>Gratuito</b><span>Inscrição</span></div>`}<div><b>${{off:'Sem check-in',inteiro:'1 código',periodo:e.periods.length+' códigos'}[e.checkin]}</b><span>Check-in</span></div></div>`}
+  ${e.st==='previsao'?'':`<div class="ikpi hk"><div><b>${cnt}${e.cap?`<small class="kof">/${e.cap}</small>`:''}</b><span>Inscritos</span></div>${evMoney(e)?`<div><b>R$ ${raised(e).toLocaleString('pt-BR')}</b><span>Arrecadado · ${pd} pagos</span></div><div><b>${cnt-pd}</b><span>Pagamentos pendentes</span></div>`:`<div><b>Gratuito</b><span>Inscrição</span></div>`}<div><b>${{off:'Sem check-in',inteiro:'1 código',periodo:e.periods.length+' códigos'}[e.checkin]}</b><span>Check-in</span></div></div>`}
   <div class="ptabs" role="tablist">${tabs.map(t=>`<button role="tab" class="${S.etab===t[0]?'on':''}" data-a="evTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
- <div id="etb" class="rise" style="--d:2">${({det:evDet,ins:evIns,vch:evVch,quad:e=>bdTab('evt',e.id)})[S.etab](e)}</div>`;
+ <div id="etb" class="rise" style="--d:2">${({det:evDet,ins:evIns,eic:eiTab,fin:efTab,vch:evVch,quad:e=>bdTab('evt',e.id),cx:e=>cxTab('evt',e.id)})[S.etab](e)}</div>`;
 }
 function evInfoRows(e){const rooms=(e.rooms||[]).map(slById).filter(Boolean),rec=e.rep&&e.rep!=='none'?(e.recTxt?e.recTxt.split(',')[0]:'Toda '+DOWF(dow(e.d))):'';
  const row=(step,icn,tone,l,main,sub)=>`<button class="evi-r" data-a="evEditAt" data-v="${step}" title="Editar ${l.toLowerCase()}"><span class="htile" style="--s:38px;background:var(--tone-${tone});color:var(--tone-${tone}-ink)">${ic(icn,17)}</span><span class="dkt"><span class="evi-l">${l}</span><b>${main}</b>${sub?`<span>${sub}</span>`:''}</span><span class="evi-e">${ic('pen',13)}</span></button>`;
@@ -2325,29 +2321,7 @@ function evInfoRows(e){const rooms=(e.rooms||[]).map(slById).filter(Boolean),rec
   e.st==='previsao'?row('about','pin','menta','Onde','A definir','Escolhido ao confirmar a data'):row('where','pin','menta','Onde',esc(e.place||'—'),rooms.length?`${rooms.reduce((a,x)=>a+x.cap,0)} lugares · reservado em Espaços`:'Sem sala de Espaços vinculada'),
   row('about','ticket','damasco','Tipo',esc(e.type),e.kind==='culto'?'Culto da igreja':'Evento especial'),
   row('about','users','lima','Ministério',e.min?'Ministério de '+esc(e.min):'Evento geral da igreja',e.min?'Responsável pela organização':'Sem ministério responsável')].join('');}
-function evDet(e){
- const ed=S.eedit;
- return `<div class="pgrid"><div class="col">
-  <section class="card pc evi"><div class="sh"><h2>Informações</h2><button class="btn sec sm" data-a="evEdit">${ic('pen',14)}Editar</button></div><div class="evi-g">${evInfoRows(e)}</div></section>
-  ${e.st==='previsao'?`<section class="card pc"><div class="soft-empty"><p>Ainda é uma previsão.</p><span class="who">Inscrições, pagamento e check-in ficam disponíveis quando a data for confirmada.</span><button class="btn pri" data-a="evConfirm" data-v="${e.id}">Confirmar data</button></div></section>`:`
-  <section class="card pc"><div class="sh"><h2>Inscrição</h2></div>
-   <div class="yn" style="max-width:280px" id="payG"><label><input type="radio" name="pay" value="0" ${!e.paid?'checked':''}><span>Gratuita</span></label><label><input type="radio" name="pay" value="1" ${e.paid?'checked':''}><span>Paga</span></label></div>
-
-   ${e.paid?`<div class="fld" style="margin-top:16px"><span class="fl">Link de pagamento</span><div class="asaas">${e.link?`<span class="mono">${esc(e.link.replace('https://',''))}</span><button class="btn sec sm" data-a="copy" data-v="${esc(e.link)}">Copiar</button>`:`<span class="soft">Ainda não gerado</span><button class="btn pri sm" data-a="evAsaas">Gerar no Asaas</button>`}</div><span class="hint">Pagamento, PIX, cartão e reembolso são processados pelo Asaas. O Alva só mostra o status.</span></div>`:''}
-  </section>`}
- </div><div class="col">${e.st==='previsao'?'':`
-  <section class="card pc"><div class="sh"><h2>Check-in</h2></div><p class="who" style="margin:-6px 0 12px">Escolha de quem monta o evento, independe de ser gratuito ou pago.</p>
-   <div class="vis" id="ckG">${[['off','Desabilitado','Sem controle de entrada.'],['inteiro','Evento inteiro','Um código vale para o evento todo.'],['periodo','Por período','Um código por dia ou turno.']].map(o=>`<label><input type="radio" name="ck" value="${o[0]}" ${e.checkin===o[0]?'checked':''}><span><b>${o[1]}</b><small>${o[2]}</small></span></label>`).join('')}</div>
-   ${e.checkin==='inteiro'?`<div class="fld ckc"><span class="fl">Código de acesso</span><div class="ccode"><span class="mono">${codeOf(e,'*')}</span><button class="btn sec sm" data-a="copy" data-v="${codeOf(e,'*')}">Copiar</button><button class="ibtn sm" data-a="ckRegen" data-v="*" aria-label="Gerar novo código" title="Gerar novo código">${ic('swap',14)}</button></div><span class="hint">Vale do início ao fim do evento. Use no totem ou no app de check-in.</span></div>`:''}
-   ${e.checkin==='periodo'?`<div class="fld ckc"><span class="fl">Períodos <small>cada um gera seu próprio código</small></span>
-    ${e.periods.length?`<div class="pers">${e.periods.map((p,i)=>`<div class="per"><span class="pn">${esc(p)}</span><span class="mono">${codeOf(e,p)}</span><button class="ibtn sm" data-a="copy" data-v="${codeOf(e,p)}" aria-label="Copiar código de ${esc(p)}" title="Copiar">${ic('clipboard',14)}</button><button class="ibtn sm" data-a="evPerDel" data-v="${i}" aria-label="Remover ${esc(p)}" title="Remover">${ic('x',14)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0">Nenhum período ainda. Adicione o primeiro, ex.: Sábado.</p>'}
-    <form class="perF" id="perF"><input placeholder="Ex.: Sábado" aria-label="Novo período" autocomplete="off"><button class="btn sec sm" type="submit">${ic('plus',13,2.2)}Adicionar período</button></form></div>`:''}
-  </section>
-  ${e.checkin==='off'?'':`<section class="card pc"><div class="sh"><h2>Itens adicionais</h2><span class="who">almoço, lanche, camiseta…</span></div>
-   ${e.items.length?`<div class="eitems">${e.items.map((it,i)=>`<div class="eit"><span><b>${esc(it.n)}</b><small>${it.p||'Evento inteiro'}</small></span><b class="mono">${brl(it.price)}</b><button class="ibtn sm" data-a="evItemDel" data-v="${i}" aria-label="Remover">${ic('x',14)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0 0 12px">Nenhum item ainda. Itens são compras opcionais feitas junto com a inscrição.</p>'}
-   <form class="itF ${e.checkin==='periodo'&&e.periods.length?'wp':''}" id="itF"><input name="n" placeholder="Ex.: Almoço" aria-label="Item"><span class="mpre sm"><em>R$</em><input name="p" type="number" min="1" placeholder="0" aria-label="Preço"></span>${e.checkin==='periodo'&&e.periods.length?`<span class="selw"><select name="per" aria-label="Vale para"><option value="">Evento inteiro</option>${e.periods.map(p=>`<option>${esc(p)}</option>`).join('')}</select>${ic('updown',13)}</span>`:''}<button class="btn sec sm" type="submit">${ic('plus',13,2.2)}Adicionar item</button></form></section>`}`}
- </div></div>`;
-}
+function evDet(e){return '';}/* substituída por evDet no fim do arquivo */
 function evIns(e){
  const pd=e.regs.filter(r=>r.pay==='pago').length;
  return `<section class="card mtab"><div class="tbar"><span class="who" style="margin-right:auto"><b style="color:var(--ink)">${e.regs.length}</b>${e.cap?` de ${e.cap} vagas`:' inscritos'}${e.paid?` · ${pd} pagos · ${brl(raised(e))}`:''}</span><button class="btn pri sm" data-a="evReg">${ic('plus',14,2.2)}Adicionar inscrição</button></div>
@@ -2416,8 +2390,8 @@ function myAgenda(){
 
 /* ---------- inscrições (todas) ---------- */
 function insSum(rows,pend){
- const v=r=>+r.val||0,rec=rows.filter(r=>r.pay==='pago').reduce((a,r)=>a+v(r),0),aR=pend.reduce((a,r)=>a+v(r),0),tot=rec+aR,pct=tot?Math.round(rec/tot*100):0,paid=rows.filter(r=>r.pay==='pago'),tk=paid.filter(r=>v(r)>0);
- const evs=EVTS.filter(e=>e.paid&&e.regs.length).map(e=>({e,r:e.regs.filter(x=>x.pay==='pago').reduce((a,x)=>a+v(x),0),p:e.regs.filter(x=>x.pay==='pendente').reduce((a,x)=>a+v(x),0)})).sort((a,b)=>(b.r+b.p)-(a.r+a.p)),mx=Math.max(1,...evs.map(x=>x.r+x.p));
+ const v=r=>regTot(r.e||EVTS.find(z=>z.regs.includes(r)),r),rec=rows.filter(r=>r.pay==='pago').reduce((a,r)=>a+v(r),0),aR=pend.reduce((a,r)=>a+v(r),0),tot=rec+aR,pct=tot?Math.round(rec/tot*100):0,paid=rows.filter(r=>r.pay==='pago'),tk=paid.filter(r=>v(r)>0);
+ const evs=EVTS.filter(e=>evMoney(e)&&e.regs.length).map(e=>({e,r:e.regs.filter(x=>x.pay==='pago').reduce((a,x)=>a+v(x),0),p:e.regs.filter(x=>x.pay==='pendente').reduce((a,x)=>a+v(x),0)})).sort((a,b)=>(b.r+b.p)-(a.r+a.p)),mx=Math.max(1,...evs.map(x=>x.r+x.p));
  const m=n=>`<small>R$</small>${n.toLocaleString('pt-BR')}`;
  return `<section class="card insum rise" style="--d:1">
   <div class="ism"><span class="kl">Arrecadado</span><b class="ismv">${m(rec)}</b><span class="kd">de <b>R$ ${tot.toLocaleString('pt-BR')}</b> previstos · ${pct}% recebido</span>
@@ -2439,7 +2413,7 @@ function inscPage(){
  ${insSum(rows,pend)}
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="iq2" placeholder="Buscar pessoa ou evento" value="${esc(S.iq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todas'],['pendente','Pendentes'],['pago','Pagas'],['gratis','Gratuitas']].map(c=>`<button class="chipf ${S.iqf===c[0]?'on':''}" data-a="iqF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
-  ${l.length?`<div class="trow ai thead"><span>Pessoa</span><span>Evento</span><span>Pagamento</span><span>Data</span></div>${l.map(r=>`<div class="trow ai" tabindex="0" data-a="evOpenIns" data-v="${r.e.id}|${r.id}"><span class="tn"><span class="av" style="background:var(--tone-${TONES[r.n.length%6]});color:var(--tone-${TONES[r.n.length%6]}-ink)">${initials(r.n)}</span><span><b>${esc(r.n)}</b></span></span><span class="aev">${esc(r.e.t)}</span><span class="ts">${r.pay==='pago'?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Pago · ${r.val?brl(r.val):'bolsa'}</span>`:r.pay==='pendente'?`<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Pendente · ${brl(r.val)}</span>`:'<span class="soft">Gratuita</span>'}</span><span class="rdt">${dBR(r.d)}</span></div>`).join('')}`:'<div class="mempty"><p>Nada encontrado.</p></div>'}
+  ${l.length?`<div class="trow ai thead"><span>Pessoa</span><span>Evento</span><span>Pagamento</span><span>Data</span></div>${l.map(r=>`<div class="trow ai" tabindex="0" data-a="evOpenIns" data-v="${r.e.id}|${r.id}"><span class="tn"><span class="av" style="background:var(--tone-${TONES[r.n.length%6]});color:var(--tone-${TONES[r.n.length%6]}-ink)">${initials(r.n)}</span><span><b>${esc(r.n)}</b></span></span><span class="aev">${esc(r.e.t)}</span><span class="ts">${r.pay==='pago'?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Pago · ${regTot(r.e,r)?brl(regTot(r.e,r)):'bolsa'}</span>`:r.pay==='pendente'?`<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Pendente · ${brl(regTot(r.e,r))}</span>`:'<span class="soft">Gratuita</span>'}</span><span class="rdt">${dBR(r.d)}</span></div>`).join('')}`:'<div class="mempty"><p>Nada encontrado.</p></div>'}
   <div class="tfoot"><span>${l.length} inscrições</span></div></section>`;
 }
 
@@ -2528,7 +2502,7 @@ function evForm(kind,pre){
    <div id="evSum2">${whereSum()}</div>`;}
   if(k==='sub'||k==='rev'){const capT=F.rooms.reduce((a,id)=>a+slById(id).cap,0),place=evPlace();return `${k==='sub'?`<div class="evs-g evs-sub">
    <div class="fld"><span class="fl">Inscrição</span><div class="yn"><label><input type="radio" name="pay" value="0" ${F.pay?'':'checked'}><span>Gratuita</span></label><label><input type="radio" name="pay" value="1" ${F.pay?'checked':''}><span>Paga</span></label></div></div>
-   ${F.pay?`<label class="fld"><span class="fl">Valor</span><span class="mpre"><em>R$</em><input data-k="price" type="number" min="1" inputmode="decimal" value="${esc(F.price)}"></span><span class="err"></span></label>`:''}
+   ${F.pay?`<label class="fld"><span class="fl">Valor do ingresso</span><span class="mpre"><em>R$</em><input data-k="price" type="number" min="1" inputmode="decimal" value="${esc(F.price)}"></span><span class="err"></span><span class="hint">Depois você cria outros tipos de ingresso na página do evento.</span></label>`:''}
    <label class="fld"><span class="fl">Vagas <small>opcional</small></span><input data-k="cap" type="number" min="1" inputmode="numeric" value="${esc(F.cap)}" placeholder="${capT?`Até ${capT} lugares`:'Sem limite'}"></label>
    <p class="evf-cap wide" id="evCap" ${F.cap&&capT&&+F.cap>capT?'':'hidden'}>${ic('alert',13,2)}${F.cap} vagas é mais do que cabe no local (${capT} lugares).</p></div>`:''}
    <div class="evrv"><p class="fl">Revisão</p>
@@ -2625,7 +2599,7 @@ const GA={
  evCancel:()=>{S.eedit=false;rerEv();},
  evAdd:v=>evForm(v),
  evConfirm:(v,b,x)=>{x&&x.stopPropagation();const e=eById(v);
-  openDlg(`${dlgHead('Confirmar evento',`Defina a data de <b>${esc(e.t)}</b> (previsto para ${e.prev}) e se a inscrição é gratuita ou paga. O link do Asaas você gera depois, na página do evento.`)}
+  openDlg(`${dlgHead('Confirmar evento',`Defina a data de <b>${esc(e.t)}</b> (previsto para ${e.prev}) e se a inscrição é gratuita ou paga.`)}
   <form class="fgrid" id="cfF" novalidate style="grid-template-columns:1fr 1fr">
    <label class="fld"><span class="fl">Data confirmada</span><input name="d" type="date" min="2026-10-01"><span class="err"></span></label>
    <label class="fld"><span class="fl">Horário</span><input name="time" type="time" value="19:30"></label>
@@ -2636,12 +2610,11 @@ const GA={
   $('#cfP').addEventListener('change',mo);f.addEventListener('input',z=>z.target.closest('.fld')?.classList.remove('bad'));setTimeout(()=>f.d.focus(),80);
   f.addEventListener('submit',z=>{z.preventDefault();const fd=new FormData(f),bad=(n,m)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;i.focus();};
    if(!fd.get('d'))return bad('d','Escolha a data');const paid=fd.get('pay')==='1';if(paid&&!(+fd.get('price')>0))return bad('price','Informe o valor');
-   f.querySelector('[type=submit]').classList.add('busy');setTimeout(()=>{Object.assign(e,{st:'confirmado',prev:'',d:fd.get('d'),time:(fd.get('time')||'19:30').replace(':00','h').replace(':','h').replace(/^0/,''),paid,price:paid?+fd.get('price'):0,cap:0});closeDlg();S.evFrom=S.active;S.active='calendario';S.evt=e.id;S.etab='det';render();window.scrollTo({top:0});toast(`${e.t} confirmado para ${dBR(e.d)}${paid?' · gere o link no Asaas':''}`);},700);});},
+   f.querySelector('[type=submit]').classList.add('busy');setTimeout(()=>{Object.assign(e,{st:'confirmado',prev:'',d:fd.get('d'),time:(fd.get('time')||'19:30').replace(':00','h').replace(':','h').replace(/^0/,''),paid,price:paid?+fd.get('price'):0,cap:0});closeDlg();S.evFrom=S.active;S.active='calendario';S.evt=e.id;S.etab='det';render();window.scrollTo({top:0});toast(`${e.t} confirmado para ${dBR(e.d)}`);},700);});},
  ckRegen:v=>{const e=eById(S.evt),old=codeOf(e,v);confirmDel({title:'Gerar um novo código?',body:`O código atual <b class="mono">${old}</b> deixa de funcionar na hora. Quem já fez check-in não é afetado.`,label:'Gerar novo código',onConfirm:()=>{e.seed=(e.seed||0)+1;delete e.codes[v];rerEv();toast(`Novo código: ${codeOf(e,v)}`,()=>{e.codes[v]=old;rerEv();});}});},
  evDup:v=>{closePops();const e=eById(v),c=EV({...JSON.parse(JSON.stringify(e)),id:undefined,t:e.t+' (cópia)',regs:[],vouchers:[]});c.id='ev'+(++_eid);EVTS.push(c);S.evt=c.id;render();toast('Duplicado sem inscrições');},
- evDel:v=>{closePops();const e=eById(v);confirmDel({title:`Excluir ${e.t}?`,body:`${e.regs.length?`As ${e.regs.length} inscrições serão canceladas e os inscritos avisados.${e.paid&&raised(e)?` Reembolsos de ${brl(raised(e))} precisam ser feitos no Asaas.`:''} `:''}Esta ação não pode ser desfeita.`,label:'Excluir',typed:e.regs.length?e.t:null,onConfirm:()=>{EVTS.splice(EVTS.indexOf(e),1);S.evt=null;render();toast(`${e.t} excluído`);}});},
- evAsaas:(v,b)=>busy(b,1200,'Gerado',()=>{const e=eById(S.evt);e.link='https://asaas.com/c/'+norm(e.t).replace(/[^a-z0-9]+/g,'-');rerEv();toast('Link de pagamento gerado no Asaas');}),
- evPerDel:v=>{const e=eById(S.evt),p=e.periods[+v],used=e.items.some(i=>i.p===p);confirmDel({title:`Remover o período ${p}?`,body:`O código de check-in de ${p} deixa de valer.${used?' Os itens vinculados a ele passam a valer para o evento inteiro.':''}`,label:'Remover',onConfirm:()=>{e.periods.splice(+v,1);e.items.forEach(i=>{if(i.p===p)i.p='';});rerEv();toast('Período removido');}});},
+ evDel:v=>{closePops();const e=eById(v);confirmDel({title:`Excluir ${e.t}?`,body:`${e.regs.length?`As ${e.regs.length} inscrições serão canceladas e os inscritos avisados.${e.paid&&raised(e)?` Os reembolsos de ${brl(raised(e))} precisam ser combinados com a tesouraria.`:''} `:''}Esta ação não pode ser desfeita.`,label:'Excluir',typed:e.regs.length?e.t:null,onConfirm:()=>{EVTS.splice(EVTS.indexOf(e),1);S.evt=null;render();toast(`${e.t} excluído`);}});},
+ evPerDel:v=>{const e=eById(S.evt),p=e.periods[+v],used=e.items.some(i=>i.p===p);confirmDel({title:`Remover o período ${p}?`,body:`O código de check-in de ${p} deixa de valer.${used?' Os itens vinculados a ele passam a valer para o evento inteiro.':''}`,label:'Remover',onConfirm:()=>{e.periods.splice(+v,1);e.items.forEach(i=>{if(i.p===p)i.p='';});(e.tickets||[]).forEach(t=>{t.per=(t.per||[]).filter(x=>x!==p);});rerEv();toast('Período removido');}});},
  evItemDel:v=>{const e=eById(S.evt),it=e.items[+v];confirmDel({title:`Remover ${it.n}${it.p?' · '+it.p:''}?`,body:'Quem já comprou continua com o item; ele só deixa de ser vendido.',label:'Remover item',onConfirm:()=>{e.items.splice(+v,1);rerEv();toast('Item removido',()=>{e.items.splice(+v,0,it);rerEv();});}});},
  evReg:()=>{const e=eById(S.evt);if(e.cap&&e.regs.length>=e.cap){toast('Vagas esgotadas. Aumente as vagas para inscrever mais pessoas.');return;}const cand=MEMBERS.filter(m=>!e.regs.some(r=>r.n===m.n));
   openDlg(`${dlgHead('Adicionar inscrição',esc(e.t))}<label class="sbox" style="margin-bottom:10px">${ic('search',16)}<input id="rq" placeholder="Buscar membro" autocomplete="off"></label><div class="pick" id="rpk" style="max-height:200px">${candList(cand,'')}</div>
@@ -2657,18 +2630,19 @@ const GA={
  rgPaid:v=>{closePops();const e=eById(S.evt),r=e.regs.find(x=>x.id===v);r.pay='pago';rerEv();toast(`Pagamento de ${r.n.split(' ')[0]} confirmado manualmente`,()=>{r.pay='pendente';rerEv();});},
  rgLinkD:v=>{const r=eById(S.evt).regs.find(x=>x.id===v);toast(`Link de pagamento reenviado para ${r.n.split(' ')[0]}`);},
  rgLink:v=>{closePops();const r=eById(S.evt).regs.find(x=>x.id===v);toast(`Link de pagamento reenviado para ${r.n.split(' ')[0]}`);},
- rgDel:v=>{closePops();const e=eById(S.evt),i=e.regs.findIndex(x=>x.id===v),r=e.regs[i];confirmDel({title:`Cancelar a inscrição de ${r.n.split(' ')[0]}?`,body:`A vaga fica livre.${r.pay==='pago'&&r.val?` O reembolso de ${brl(r.val)} precisa ser feito no Asaas.`:''}`,label:'Cancelar inscrição',onConfirm:()=>{e.regs.splice(i,1);rerEv();toast('Inscrição cancelada',()=>{e.regs.splice(i,0,r);rerEv();});}});},
- vAdd:()=>{const e=eById(S.evt);openDlg(`${dlgHead('Novo voucher',`Desconto no ${esc(e.t)} (${brl(e.price)})`)}<form class="fgrid" id="vF" novalidate style="grid-template-columns:1fr 1fr">
+ rgDel:v=>{closePops();const e=eById(S.evt),i=e.regs.findIndex(x=>x.id===v),r=e.regs[i];confirmDel({title:`Cancelar a inscrição de ${r.n.split(' ')[0]}?`,body:`A vaga fica livre.${r.pay==='pago'&&r.val?` O reembolso de ${brl(regTot(e,r))} precisa ser combinado com a tesouraria.`:''}`,label:'Cancelar inscrição',onConfirm:()=>{e.regs.splice(i,1);rerEv();toast('Inscrição cancelada',()=>{e.regs.splice(i,0,r);rerEv();});}});},
+ vAdd:()=>{const e=eById(S.evt);evEnsure(e);openDlg(`${dlgHead('Novo voucher',`Desconto no ${esc(e.t)} (${brl(evTop(e))})`)}<form class="fgrid" id="vF" novalidate style="grid-template-columns:1fr 1fr">
    <label class="fld wide"><span class="fl">Código</span><input name="code" class="mono" placeholder="Ex.: RETIRO10" autocomplete="off" style="text-transform:uppercase"><span class="err"></span></label>
-   <label class="fld"><span class="fl">Desconto</span><span class="mpre"><em>R$</em><input name="disc" type="number" min="1" max="${e.price}" inputmode="decimal"></span><span class="hint" id="vH">Até ${brl(e.price)} (bolsa integral)</span><span class="err"></span></label>
+   <label class="fld"><span class="fl">Tipo de desconto</span><span class="selw"><select name="vt"><option value="val">Valor fixo (R$)</option><option value="pct">Percentual (%)</option></select>${ic('updown',14)}</span></label>
+   <label class="fld"><span class="fl">Desconto</span><span class="mpre"><em id="vU">R$</em><input name="disc" type="number" min="1" max="${evTop(e)}" inputmode="decimal"></span><span class="hint" id="vH">Até ${brl(evTop(e))} (bolsa integral)</span><span class="err"></span></label>
    <label class="fld"><span class="fl">Expira em <small>opcional</small></span><input name="exp" type="date" min="2026-10-01"></label>
    <div class="fld wide"><span class="fl">Quem pode usar</span><div class="vis two" id="vmG"><label><input type="radio" name="mode" value="liberado" checked><span><b>Qualquer pessoa</b><small>Quem tiver o código.</small></span></label><label><input type="radio" name="mode" value="especifico"><span><b>Uma pessoa</b><small>Só um e-mail autorizado.</small></span></label></div></div>
    <label class="fld wide" id="vEm" hidden><span class="fl">E-mail autorizado</span><input name="email" type="email" placeholder="pessoa@email.com"><span class="err"></span></label>
    <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="vOk" disabled>Criar voucher</button></div></form>`,'sm');
-  const f=$('#vF'),chk=()=>{const sp=f.mode.value==='especifico';$('#vEm').hidden=!sp;const d=+f.disc.value;$('#vH').textContent=d>0?(d>=e.price?'Bolsa integral: a inscrição fica gratuita':`Paga ${brl(e.price-d)}`):`Até ${brl(e.price)} (bolsa integral)`;$('#vOk').disabled=!(f.code.value.trim().length>=3&&d>0&&(!sp||/^\S+@\S+\.\S+$/.test(f.email.value)));};
+  const f=$('#vF'),chk=()=>{const sp=f.mode.value==='especifico',pc=f.vt.value==='pct';$('#vEm').hidden=!sp;$('#vU').textContent=pc?'%':'R$';f.disc.max=pc?100:evTop(e);const d=+f.disc.value;$('#vH').textContent=pc?(d>=100?'Bolsa integral: a inscrição fica gratuita':d>0?`${d}% de desconto no ingresso`:'De 1% a 100% do valor do ingresso'):d>0?(d>=evTop(e)?'Bolsa integral: a inscrição fica gratuita':`${evMulti(e)?brl(d)+' de desconto no ingresso':'Paga '+brl(evTop(e)-d)}`):`Até ${brl(evTop(e))} (bolsa integral)`;$('#vOk').disabled=!(f.code.value.trim().length>=3&&d>0&&(!sp||/^\S+@\S+\.\S+$/.test(f.email.value)));};
   f.addEventListener('input',x=>{x.target.closest('.fld')?.classList.remove('bad');if(x.target.name==='code')x.target.value=x.target.value.toUpperCase().replace(/\s/g,'-');chk();});f.addEventListener('change',chk);
-  f.addEventListener('submit',x=>{x.preventDefault();const c=f.code.value.trim();if(e.vouchers.some(v=>v.code===c)){f.code.closest('.fld').classList.add('bad');f.code.nextElementSibling.textContent='Esse código já existe neste evento';f.code.focus();return;}if(+f.disc.value>e.price){f.disc.closest('.fld').classList.add('bad');f.disc.closest('.fld').querySelector('.err').textContent=`No máximo ${brl(e.price)}`;return;}
-   $('#vOk').classList.add('busy');setTimeout(()=>{e.vouchers.push({code:c,disc:Math.min(+f.disc.value,e.price),exp:f.exp.value,mode:f.mode.value,email:f.mode.value==='especifico'?f.email.value.trim():'',uses:0});closeDlg();rerEv();toast(`Voucher ${c} criado`);},500);});},
+  f.addEventListener('submit',x=>{x.preventDefault();const c=f.code.value.trim();if(e.vouchers.some(v=>v.code===c)){f.code.closest('.fld').classList.add('bad');f.code.nextElementSibling.textContent='Esse código já existe neste evento';f.code.focus();return;}const pcv=f.vt.value==='pct';if(+f.disc.value>(pcv?100:evTop(e))){f.disc.closest('.fld').classList.add('bad');f.disc.closest('.fld').querySelector('.err').textContent=pcv?'No máximo 100%':`No máximo ${brl(evTop(e))}`;return;}
+   $('#vOk').classList.add('busy');setTimeout(()=>{e.vouchers.push({code:c,type:f.vt.value,disc:f.vt.value==='pct'?Math.min(+f.disc.value,100):Math.min(+f.disc.value,evTop(e)),exp:f.exp.value,mode:f.mode.value,email:f.mode.value==='especifico'?f.email.value.trim():'',uses:0});closeDlg();rerEv();toast(`Voucher ${c} criado`);},500);});},
  vDel:v=>{const e=eById(S.evt),c=e.vouchers[+v];confirmDel({title:`Excluir o voucher ${c.code}?`,body:`${c.uses?`Ele já foi usado ${c.uses} ${c.uses===1?'vez':'vezes'}; essas inscrições mantêm o desconto. `:''}Ninguém mais consegue usar o código.`,label:'Excluir voucher',onConfirm:()=>{e.vouchers.splice(+v,1);rerEv();toast('Voucher excluído',()=>{e.vouchers.splice(+v,0,c);rerEv();});}});},
  calTab:v=>{S.caltab=v;render();},
  calM:v=>{if(v==='0'){S.calM='2026-10';S.calSel='2026-10-01';}else{let [y,m]=S.calM.split('-').map(Number);m+=+v;if(m<1){m=12;y--;}if(m>12){m=1;y++;}S.calM=`${y}-${String(m).padStart(2,'0')}`;S.calSel=null;}render();},
@@ -4411,13 +4385,13 @@ const LANCS=[
 const FLOW=[['Abr',24800,6100],['Mai',27300,7900],['Jun',24100,5600],['Jul',28900,8200],['Ago',30200,6900],['Set',29700,4430]];
 let _pid2=0;const CP=(desc,venc,v,cat,paid=false)=>({id:'cp'+(++_pid2),desc,venc,v,cat,paid});
 const PAGAR=[CP('Energia elétrica','2026-09-28',640,'Estrutura'),CP('Fornecedor gráfica — banners','2026-09-30',890,'Comunicação'),CP('Aluguel do salão — Outubro','2026-10-05',3200,'Estrutura'),CP('Internet e telefonia','2026-10-08',289,'Estrutura'),CP('Seguro do prédio','2026-10-20',1150,'Estrutura'),CP('Material de limpeza','2026-09-10',340,'Manutenção',true)];
-const RECEB=[{id:'cr1',desc:'Inscrições — Retiro de Jovens 2026',prev:'2026-09-27',v:10440,got:10440,src:'Inscrições no app'},{id:'cr2',desc:'Campanha Reforma do Templo',prev:'',v:80000,got:34200,src:'Asaas · contínuo'},{id:'cr3',desc:'Conferência Missões — inscrições',prev:'2026-10-09',v:4800,got:1900,src:'Inscrições no app'}];
+const RECEB=[{id:'cr1',desc:'Inscrições — Retiro de Jovens 2026',prev:'2026-09-27',v:10440,got:10440,src:'Inscrições no app'},{id:'cr2',desc:'Campanha Reforma do Templo',prev:'',v:80000,got:34200,src:'Pix e cartão · contínuo'},{id:'cr3',desc:'Conferência Missões — inscrições',prev:'2026-10-09',v:4800,got:1900,src:'Inscrições no app'}];
 let _aid=0;const AP=(tipo,desc,v,d,who,extra={})=>({id:'ap'+(++_aid),tipo,desc,v,d,who,...extra});
 const APROVS=[
  AP('imp','Extrato Bradesco (OFX)',null,'2026-09-17','Rafael Pereira',{n:18,ent:14,sai:4,te:21340,ts:3870,rows:[['16/09','PIX recebido — M. Souza','Dízimos','e',350],['16/09','PIX recebido — A. C. Lima','Dízimos','e',500],['15/09','Boleto Enel','Estrutura','s',640],['15/09','TED recebida — campanha','Doações','e',1200],['14/09','Pag. Gráfica Rápida','Comunicação','s',890]]}),
  AP('lanc','Oferta missionária — Culto de quarta',1860,'2026-09-29','Larissa Pires',{tp:'e',cat:'Ofertas',lid:'lc8'}),
 ];
-let _cid2=0;const CMP=(n,meta,got,st='ativo',donors=[])=>({id:'cm'+(++_cid2),n,meta,got,st,donors,link:st==='ativo'?'asaas.com/c/'+n.toLowerCase().replace(/\s+/g,'-').normalize('NFD').replace(/[̀-ͯ]/g,''):''});
+let _cid2=0;const CMP=(n,meta,got,st='ativo',donors=[])=>({id:'cm'+(++_cid2),n,meta,got,st,donors,link:st==='ativo'?'pay.alva.app/c/'+n.toLowerCase().replace(/\s+/g,'-').normalize('NFD').replace(/[̀-ͯ]/g,''):''});
 const CAMPS=[CMP('Retiro de Jovens 2026',15000,8420,'ativo',[['Marcos Souza Ramos',500,'2026-09-28','Cartão'],['Ana Clara Lima',250,'2026-09-27','PIX'],['Anônimo',1000,'2026-09-25','PIX'],['Helena Duarte',120,'2026-09-22','Boleto']]),CMP('Reforma do Templo',80000,34200,'ativo',[['Família Teixeira',5000,'2026-09-29','PIX',1],['Ana Clara Lima',200,'2026-09-15','PIX'],['Marcos Souza Ramos',500,'2026-09-14','Cartão'],['Carlos Eduardo Silva',800,'2026-09-26','Boleto'],['Anônimo',100,'2026-09-12','PIX']]),CMP('Missões 2026',20000,20000,'concluido',[['Igreja parceira — Alva Norte',8000,'2026-08-10','PIX',1]])];
 Object.assign(S,{lf:'todos',lq:'',fbar:5,relM:'2026-09',fbank:'bb',ffile:null,apOpen:null,camp:null,ctab2:'pag'});
 const monthName=ym=>{const [y,m]=ym.split('-');return MONTHS[+m-1][0].toUpperCase()+MONTHS[+m-1].slice(1)+'/'+y;};
@@ -4580,11 +4554,11 @@ function cmDetail(){const c=CAMPS.find(x=>x.id===S.camp);if(!c){S.camp=null;retu
   <div class="pact"><button class="btn sec" data-a="cmSt">${act?'Encerrar campanha':'Reabrir campanha'}</button><button class="ibtn" data-a="cmDel" data-v="${c.id}" aria-label="Excluir campanha" title="Excluir">${ic('x',16)}</button></div>
   <div class="ikpi hk"><div><b>${c.donors.length}</b><span>Contribuições</span></div><div><b>${R0(c.donors.length?tot/c.donors.length:0)}</b><span>Ticket médio</span></div><div><b>${named.length}</b><span>Doadores identificados</span></div><div><b>${named.filter(d=>d[4]).length}<small class="kof">/${named.length}</small></b><span>Informes enviados</span></div></div>
   <div class="ptabs" role="tablist">${[['pag','Pagamento'],['con','Contribuições',c.donors.length]].map(t=>`<button role="tab" class="${S.ctab2===t[0]?'on':''}" data-a="cmTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div></header>
- <div class="rise" style="--d:2">${S.ctab2==='pag'?`<div class="fi-pay"><section class="card fi-pl"><h2>${ic('link',15)} Link de pagamento</h2>${c.link?`<p class="who" style="margin:0 0 12px">Divulgue no app, nos banners e no WhatsApp. Gerado pelo Asaas.</p><button class="cm-url fi-big-url" data-a="cmCopy" data-v="${c.id}"><span>https://${esc(c.link)}</span><b>${ic('copy',14)}Copiar</b></button>
+ <div class="rise" style="--d:2">${S.ctab2==='pag'?`<div class="fi-pay"><section class="card fi-pl"><h2>${ic('link',15)} Link de pagamento</h2>${c.link?`<p class="who" style="margin:0 0 12px">Divulgue no app, nos banners e no WhatsApp. Gerado pelo Alva.</p><button class="cm-url fi-big-url" data-a="cmCopy" data-v="${c.id}"><span>https://${esc(c.link)}</span><b>${ic('copy',14)}Copiar</b></button>
    <div class="fi-share">${[['message','WhatsApp'],['megaphone','Criar banner'],['bell','Enviar push']].map(x=>`<button class="btn sec sm" data-a="soon" data-v="${x[1]}">${ic(x[0],14)}${x[1]}</button>`).join('')}</div>`:`<p class="who">${act?'Esta campanha ainda não tem link de pagamento.':'Campanha encerrada — o link foi desativado.'}</p>${act?`<button class="btn pri" data-a="cmLink" data-v="${c.id}">${ic('link',14)}Gerar link de pagamento</button>`:''}`}
    <div class="fi-forms"><p class="fl">Por forma de pagamento</p>${Object.entries(FORMA).map(([k,v])=>`<div class="fi-cr"><span>${ic(v[1],13)} ${k}</span><b>${R0(by[k]||0)}</b><span class="tr"><i style="width:${(by[k]||0)/tot*100}%;background:var(--tone-${v[0]}-ink)"></i></span></div>`).join('')}</div></section>
   <section class="card fi-qrc"><h2>${ic('zap',15)} QR Code PIX</h2>${c.link?`<div class="fi-qrw">${qrSvg(c.id.length*7+(c.qr||0)*13+c.n.length)}</div><p class="who" style="text-align:center;margin:10px 0 12px">Para imprimir no boletim ou projetar no telão</p><div class="fi-share" style="justify-content:center"><button class="btn sec sm" data-a="soon" data-v="Download do QR Code">${ic('arrowDn',13,2)}Baixar PNG</button><button class="btn ghost sm" data-a="cmQr">Gerar novo</button></div>`:'<div class="fi-qrw off">'+ic('zap',28)+'</div><p class="who" style="text-align:center">Disponível depois de gerar o link</p>'}</section></div>
-  <p class="fi-note" style="margin-top:16px">${ic('shield',15)}<span>PIX, cartão, recorrência e estorno são processados pelo Asaas — o Alva só reflete o status das contribuições.</span></p>`
+  <p class="fi-note" style="margin-top:16px">${ic('shield',15)}<span>PIX, cartão, recorrência e estorno são processados pela cobrança configurada para a igreja — o Alva só reflete o status das contribuições.</span></p>`
  :`<section class="card mtab">${c.donors.length?`<div class="tbar" style="justify-content:space-between;align-items:center"><span class="who" style="margin:0 6px">${pend.length?`${pend.length} doador${pend.length===1?'':'es'} sem informe de doação`:'Todos os informes enviados'}</span>${pend.length?`<button class="btn pri sm" data-a="cmNotaAll">${ic('file',13)}Gerar ${pend.length} informe${pend.length===1?'':'s'}</button>`:''}</div>
   <div class="trow dn thead"><span>Doador</span><span>Forma</span><span>Valor</span><span>Informe de doação</span></div>${c.donors.map((d,i)=>{const an=d[0]==='Anônimo',f=FORMA[d[3]]||FORMA.PIX;return `<div class="trow dn"><span class="tn">${an?`<span class="av" style="background:var(--surface-2);color:var(--ink-soft)">${ic('user',14)}</span>`:avN(d[0])}<span class="hn"><b>${esc(d[0])}</b><span>${dBR(d[2])}</span></span></span>
    <span class="dn-f"><span class="fi-cat" style="--t:var(--tone-${f[0]});--ti:var(--tone-${f[0]}-ink)">${ic(f[1],11)} ${d[3]}</span></span><span class="dn-v e">${R$(d[1])}</span>
@@ -4627,10 +4601,10 @@ const FIA={
  mpPickY:(v,b,e)=>{e&&e.stopPropagation();S.mpY=+v;S.mpYears=false;mpRe();},
  fBank:v=>{S.fbank=v;fRe();},fFile:()=>{S.ffile=`extrato-${S.fbank}-set2026.ofx`;fRe();},fFileX:()=>{S.ffile=null;fRe();},
  fImport:(v,b)=>busy(b,1000,'Importado',()=>{const bk=BANKS.find(x=>x[0]===S.fbank)[1];APROVS.push(AP('imp',`Extrato ${bk} (OFX)`,null,NOWD,'Rafael Pereira',{n:23,ent:17,sai:6,te:18420,ts:4210,rows:[['30/09','PIX recebido — J. Prado','Dízimos','e',300],['29/09','Boleto Sabesp','Estrutura','s',212],['29/09','PIX recebido — campanha','Doações','e',150]]}));S.ffile=null;setTimeout(fRe,400);toast('Extrato enviado para aprovação',null);}),
- cmNew:()=>{openDlg(`${dlgHead('Nova campanha','O link de pagamento pode ser gerado agora ou depois.')}<form id="cmF" class="fgrid one" novalidate><label class="fld"><span class="fl">Nome</span><input name="n" placeholder="Ex.: Construção do salão infantil" autocomplete="off"></label><label class="fld"><span class="fl">Meta</span><span class="fi-amt e"><em>R$</em><input name="meta" inputmode="decimal" placeholder="0,00"></span></label><label class="tog"><input type="checkbox" name="link" checked><span class="sw"></span><span><b>Gerar link de pagamento (Asaas)</b><small>Pix, boleto e cartão — para divulgar no app e nos banners</small></span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit" disabled>Criar campanha</button></div></form>`,'sm');
+ cmNew:()=>{openDlg(`${dlgHead('Nova campanha','O link de pagamento pode ser gerado agora ou depois.')}<form id="cmF" class="fgrid one" novalidate><label class="fld"><span class="fl">Nome</span><input name="n" placeholder="Ex.: Construção do salão infantil" autocomplete="off"></label><label class="fld"><span class="fl">Meta</span><span class="fi-amt e"><em>R$</em><input name="meta" inputmode="decimal" placeholder="0,00"></span></label><label class="tog"><input type="checkbox" name="link" checked><span class="sw"></span><span><b>Gerar link de pagamento</b><small>Pix, boleto e cartão — para divulgar no app e nos banners</small></span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit" disabled>Criar campanha</button></div></form>`,'sm');
   const f=$('#cmF'),ok=f.querySelector('[type=submit]'),val=()=>+String(f.meta.value).replace(/\./g,'').replace(',','.')||0;f.addEventListener('input',()=>ok.disabled=!f.n.value.trim()||!(val()>0));setTimeout(()=>f.n.focus(),80);
   f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{const c=CMP(f.n.value.trim(),val(),0,'ativo',[]);if(!f.link.checked)c.link='';CAMPS.unshift(c);closeDlg();fRe();toast(c.link?'Campanha criada com link de pagamento':'Campanha criada');},700);});},
- cmLink:(v,b)=>{const c=CAMPS.find(x=>x.id===v);if(!b.classList.contains('btn'))return;busy(b,900,'Gerado',()=>{c.link='asaas.com/c/'+c.id;setTimeout(fRe,300);toast('Link de pagamento gerado');});},
+ cmLink:(v,b)=>{const c=CAMPS.find(x=>x.id===v);if(!b.classList.contains('btn'))return;busy(b,900,'Gerado',()=>{c.link='pay.alva.app/c/'+c.id;setTimeout(fRe,300);toast('Link de pagamento gerado');});},
  cmCopy:(v,b)=>{const c=CAMPS.find(x=>x.id===v);try{navigator.clipboard.writeText('https://'+c.link);}catch(e){}b.classList.add('ok');setTimeout(()=>b.classList.remove('ok'),1200);toast('Link copiado');},
  cmOpen:(v,b,e)=>{if(e&&e.target.closest('button'))return;S.camp=v;S.ctab2='pag';fGo();},
  cmView:v=>{S.camp=v;S.ctab2='pag';fGo();},cmBack:()=>{S.camp=null;fGo();},cmTab:v=>{S.ctab2=v;fRe();},
@@ -5282,7 +5256,7 @@ Object.keys(FOOD_STORES).forEach(k=>{
  const pending=foodSummary(FOOD_SALES.filter(s=>s.store===k)).pending;
  if(pending)RECEB.push({id:'food-receivable-'+k,desc:st.name+' — vendas no cartão',prev:'2026-10-02',v:pending/100,got:0,src:'Sistema de vendas · líquido de taxas'});
 });
-function foodFinancePanel(){const month='2026-'+String(S.fbar+4).padStart(2,'0');return `<section class="card fd-card rise"><div class="sh"><div><h2>Cafeteria, Restaurante e Loja</h2><p class="fd-sub">${monthName(month)} · vendas lançadas como receita</p></div></div><div class="fd-fins">${Object.entries(FOOD_STORES).map(([k,st])=>{const m=foodSummary(FOOD_SALES.filter(s=>s.store===k&&s.date.startsWith(month)));return `<div class="fd-fin"><div class="fd-fin-h">${kTile({c:st.c,ic:st.icon},36)}<span class="dkt"><b>${st.name}</b><span>${m.count} vendas concluídas</span></span></div><div class="fd-ln"><span>Vendido</span><b>${foodMoney(m.sold)}</b></div>${k==='shop'?'':`${k==='shop'?'':`<div class="fd-ln"><span>Recebido líquido</span><b style="color:var(--st-int)">${foodMoney(m.received)}</b></div><div class="fd-ln"><span>A receber</span><b>${foodMoney(m.pending)}</b></div>`}`}<button class="lnk" data-a="foodFin" data-v="${k}|${month}">Ver lançamentos ${ic('arrowR',13)}</button></div>`;}).join('')}</div><p class="fd-cap">Cafeteria e Restaurante têm recebimentos, taxas e valores a receber. Na Loja, vendas geram receita e cancelamentos geram estorno.</p></section>`;}
+function foodFinancePanel(){const month='2026-'+String(S.fbar+4).padStart(2,'0');return `<section class="card fd-card rise"><div class="sh"><div><h2>Cafeteria, Restaurante, Loja e Eventos</h2><p class="fd-sub">${monthName(month)} · vendas lançadas como receita</p></div></div><div class="fd-fins">${Object.entries(FOOD_STORES).map(([k,st])=>{const m=foodSummary(FOOD_SALES.filter(s=>s.store===k&&s.date.startsWith(month)));return `<div class="fd-fin"><div class="fd-fin-h">${kTile({c:st.c,ic:st.icon},36)}<span class="dkt"><b>${st.name}</b><span>${m.count} vendas concluídas</span></span></div><div class="fd-ln"><span>Vendido</span><b>${foodMoney(m.sold)}</b></div>${k==='shop'?'':`${k==='shop'?'':`<div class="fd-ln"><span>Recebido líquido</span><b style="color:var(--st-int)">${foodMoney(m.received)}</b></div><div class="fd-ln"><span>A receber</span><b>${foodMoney(m.pending)}</b></div>`}`}<button class="lnk" data-a="foodFin" data-v="${k}|${month}">Ver lançamentos ${ic('arrowR',13)}</button></div>`;}).join('')}${evFinCard()}</div><p class="fd-cap">Cafeteria e Restaurante têm recebimentos, taxas e valores a receber. Na Loja, vendas geram receita e cancelamentos geram estorno. Nos eventos pagos, o líquido entra em Receitas depois que o evento acontece.</p></section>`;}
 const foodOriginalFVis=fVis;fVis=()=>foodOriginalFVis()+foodFinancePanel();
 const FOODA={foodPkMenu:()=>{const p=$('#fdPk');if(!p)return;const open=!p.classList.contains('open');closePops(p);if(open){FDPK.y=+(S.foodMonth||FOOD_DATE).slice(0,4);FDPK.v=(S.foodDay||FOOD_DATE).slice(0,7);foodPkPaint();}p.classList.toggle('open',open);},
  foodPkNav:v=>{if(S.foodMode==='day'){const [y,m]=FDPK.v.split('-').map(Number),d=new Date(y,m-1+(+v),1);FDPK.v=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}else FDPK.y+=+v;foodPkPaint();},
@@ -5305,7 +5279,7 @@ const A={
  side:()=>$('#side').classList.add('open'),
  navToggle:v=>{const t=$(`.ni.par[data-v=${v}]`).closest('.ntree');const open=!t.classList.contains('open');if(open)$$('.ntree.open').forEach(o=>{if(o===t)return;const k=o.querySelector('.par').dataset.v;S.navOpen[k]=false;o.classList.remove('open');o.querySelector('.par').setAttribute('aria-expanded',false);if(k==='pessoas'&&!TASKS[0].done&&!o.querySelector('.par .cnt'))o.querySelector('.par .chev').insertAdjacentHTML('beforebegin',cntBadge());});S.navOpen[v]=open;t.classList.toggle('open',open);t.querySelector('.par').setAttribute('aria-expanded',open);const cb=t.querySelector('.par .cnt');if(open&&cb)cb.remove();else if(!open&&!cb&&!TASKS[0].done&&v==='pessoas')t.querySelector('.par .chev').insertAdjacentHTML('beforebegin',cntBadge());},
  closeSide:()=>$('#side').classList.remove('open'),
- done:v=>{setDone(v,true);const lab={t1:'Acolhimento',t2:'Escala de domingo',t3:'Escalas de outubro'}[v];toast(`${lab} marcado como resolvido`,()=>setDone(v,false));},
+ done:v=>{setDone(v,true);const lab={t1:'Acolhimento',t2:'Escalas'}[v];toast(`${lab} marcado como resolvido`,()=>setDone(v,false));},
  undoAll:()=>TASKS.forEach(t=>t.done&&setDone(t.id,false)),
  goTask:v=>{const t=TASKS.find(x=>x.id===v);A.nav(t.area);},
  remind:(v,b)=>busy(b,1100,'Enviado',()=>toast('Lembrete enviado para Bruno, Clara, Diego e Elisa')),
@@ -5526,11 +5500,11 @@ function nxShopOverview(){const st=FOOD_STORES.shop,sales=foodFiltered('shop'),v
  <section class="card mtab rise" style="--d:4"><div class="sh fd-mh"><h2>Últimas vendas</h2><button class="lnk" data-a="foodGo" data-v="shop|sales">Ver todas ${ic('arrowR',13)}</button></div>${recent.length?nxSaleRows(recent):foodEmpty('Nenhuma venda no período.')}</section>`;}
 function nxShopRows(sales){return nxSaleRows(sales);}
 const shThumb=(i,c,s=38)=>i.photo?`<img class="fd-ph" src="${i.photo}" alt="" style="--s:${s}px">`:kTile(foodCatK(c),s);
-function nxSaleRows(list){return `<div class="trow fd-sl thead"><span>Venda</span><span>Itens</span><span>Pagamento</span><span>Total</span><span>Situação</span><span></span></div>${list.map(s=>{const p=FOOD_PAY[s.method]||FOOD_PAY.Pix,units=s.lines.reduce((n,l)=>n+l.qty,0);return `<div class="trow fd-sl" data-a="nxSaleOpen" data-v="${s.id}" tabindex="0"><span class="tn"><span class="hn"><b>${s.id}</b><span>${dBR(s.date)} · ${s.time}</span></span></span><span class="fd-c hn"><b>${esc(s.lines[0].name)}</b><span>${s.lines.length>1?`+ ${s.lines.length-1} produto${s.lines.length>2?'s':''} · `:''}${units} ${units===1?'unidade':'unidades'}</span></span><span class="fd-c fd-pay"><span class="ax-kt" style="--k:${p[1]};--s:28px">${ic(p[0],13)}</span><span class="hn"><b>${s.method||'Pix'}</b><span>por ${esc((s.who||'Rafael Pereira').split(' ')[0])}</span></span></span><span class="fd-c hn"><b class="fd-v">${foodMoney(s.total)}</b>${s.discount?`<span>− ${foodMoney(s.discount)} desconto</span>`:''}</span><span class="ts">${s.status==='completed'?foodPill('Concluída','ok'):foodPill('Cancelada','off')}</span><span class="tc">${ic('chevR',15,2)}</span></div>`;}).join('')}`;}
-function nxShopSales(){const all=foodFiltered('shop'),byM=all.filter(s=>S.foodMethod==='all'||s.method===S.foodMethod),q=norm(S.foodQuery),list=byM.filter(s=>(S.foodStatus==='all'||s.status===S.foodStatus)&&(!q||norm(s.id+' '+s.lines.map(l=>l.name).join(' ')).includes(q))).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)),v=foodValid(all),cnt=k=>byM.filter(s=>k==='all'||s.status===k).length,disc=v.reduce((n,s)=>n+(s.discount||0),0);
+function nxSaleRows(list){return `<div class="trow fd-sl thead"><span>Venda</span><span>Itens</span><span>Pagamento</span><span>Total</span><span>Situação</span><span></span></div>${list.map(s=>{const p=FOOD_PAY[s.method]||FOOD_PAY.Pix,units=s.lines.reduce((n,l)=>n+l.qty,0);return `<div class="trow fd-sl" data-a="nxSaleOpen" data-v="${s.id}" tabindex="0"><span class="tn"><span class="hn"><b>${s.id}</b><span>${dBR(s.date)} · ${s.time}${s.buyer?` · ${esc(s.buyer)}`:''}</span></span></span><span class="fd-c hn"><b>${esc(s.lines[0].name)}</b><span>${s.lines.length>1?`+ ${s.lines.length-1} produto${s.lines.length>2?'s':''} · `:''}${units} ${units===1?'unidade':'unidades'}</span></span><span class="fd-c fd-pay"><span class="ax-kt" style="--k:${p[1]};--s:28px">${ic(p[0],13)}</span><span class="hn"><b>${s.method||'Pix'}</b><span>por ${esc((s.who||'Rafael Pereira').split(' ')[0])}</span></span></span><span class="fd-c hn"><b class="fd-v">${foodMoney(s.total)}</b>${s.discount?`<span>− ${foodMoney(s.discount)} desconto</span>`:''}</span><span class="ts">${s.status==='completed'?foodPill('Concluída','ok'):foodPill('Cancelada','off')}</span><span class="tc">${ic('chevR',15,2)}</span></div>`;}).join('')}`;}
+function nxShopSales(){const all=foodFiltered('shop'),byM=all.filter(s=>S.foodMethod==='all'||s.method===S.foodMethod),q=norm(S.foodQuery),list=byM.filter(s=>(S.foodStatus==='all'||s.status===S.foodStatus)&&(!q||norm(s.id+' '+(s.buyer||'')+' '+s.lines.map(l=>l.name).join(' ')).includes(q))).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)),v=foodValid(all),cnt=k=>byM.filter(s=>k==='all'||s.status===k).length,disc=v.reduce((n,s)=>n+(s.discount||0),0);
  return foodHead('shop','Vendas','Vendas registradas no caixa da loja',`<button class="btn sec" data-a="export" data-v="as vendas da loja (CSV)">Exportar CSV</button><button class="btn pri" data-a="nxSaleNew">${ic('ticket',15)}Nova venda</button>`,foodToolbar())+
  foodKpis([['Vendido',foodMoney(foodAmount(v)),`${v.length} vendas concluídas`],['Itens vendidos',v.flatMap(s=>s.lines).reduce((n,l)=>n+l.qty,0),'unidades'],['Descontos',foodMoney(disc),'dados no caixa'],['Canceladas',all.filter(s=>s.status==='cancelled').length,'estoque devolvido',all.some(s=>s.status==='cancelled')?'var(--st-sol)':'']])+
- `<section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="foodSearch" value="${esc(S.foodQuery)}" placeholder="Buscar venda ou produto" autocomplete="off"></label>${foodChips('foodSt',S.foodStatus,[['all','Todas',cnt('all')],['completed','Concluídas',cnt('completed')],['cancelled','Canceladas',cnt('cancelled')]])}${foodSel('foodMethod','Pagamento',[['all','Todos os pagamentos'],['Pix','Pix'],['Cartão','Cartão'],['Dinheiro','Dinheiro']],S.foodMethod)}</div>
+ `<section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="foodSearch" value="${esc(S.foodQuery)}" placeholder="Buscar venda, produto ou comprador" autocomplete="off"></label>${foodChips('foodSt',S.foodStatus,[['all','Todas',cnt('all')],['completed','Concluídas',cnt('completed')],['cancelled','Canceladas',cnt('cancelled')]])}${foodSel('foodMethod','Pagamento',[['all','Todos os pagamentos'],['Pix','Pix'],['Cartão','Cartão'],['Dinheiro','Dinheiro']],S.foodMethod)}</div>
  ${list.length?nxSaleRows(list.slice(0,S.foodRows)):foodEmpty('Nenhuma venda corresponde ao filtro.')}${foodMore(S.foodRows,list.length,list.length===1?'venda':'vendas')}</section>`;}
 function nxShopCash(){const a=foodFiltered('shop'),dates=[...new Set(a.map(s=>s.date))].sort().reverse(),v=foodValid(a);
  return foodHead('shop','Caixa diário','Quanto entrou em cada dia, por forma de pagamento','',foodToolbar())+
@@ -5543,13 +5517,14 @@ function nxShopMoves(){const per=FOOD_MOVES.filter(m=>m.store==='shop'&&m.date>'
  ${S.foodMv!=='all'?`<p class="rise" style="margin:0 0 10px"><button class="lnk" data-a="foodMv" data-v="all">${ic('x',12,2)} Mostrar todas</button></p>`:''}
  <section class="card mtab rise" style="--d:2"><div class="ax-tline">${Object.keys(g).length?Object.entries(g).map(([d,ms])=>`<div class="ax-day"><p class="ax-dh"><b>${+d.slice(8)}</b><span>${MONTHS[+d.slice(5,7)-1].slice(0,3)}</span><small>${wd(d)}</small></p><div class="ax-dms">${ms.map(m=>{const v=FOOD_MVT[m.kind]||FOOD_MVT.correction,it=foodItem('shop',m.item),ref=String(m.reason||''),sid=ref.split(' ')[0];return `<div class="ax-mv"><span class="ax-mi" style="--c:${v[2]};--b:${v[3]}">${ic(v[1],14,2)}</span><span class="dkt"><b>${esc(it?it.name:'Produto removido')}</b><span>${m.kind==='sale'||m.kind==='refund'?`${v[0]} · <button class="lnk" data-a="nxSaleOpen" data-v="${esc(sid)}">${esc(sid)}</button>${ref.includes(' · ')?' · '+esc(ref.split(' · ').slice(1).join(' · ')):''}`:v[0]+' · '+esc(ref)}</span></span><span class="ax-mq ${m.qty>0?'in':'out'}">${m.qty>0?'+':'−'}${Math.abs(m.qty)}</span></div>`;}).join('')}</div></div>`).join(''):foodEmpty('Nenhuma movimentação no período.')}</div>
  ${foodMore(S.foodRows,all.length,all.length===1?'movimentação':'movimentações')}</section>`;}
-let nxCart=[],nxDiscount={type:'value',value:0},nxMethod='Pix',nxPosQ='',nxPosCat='all';
+let nxCart=[],nxDiscount={type:'value',value:0},nxMethod='Pix',nxPosQ='',nxPosCat='all',nxBuyer='';
 function nxSaleForm(){const st=FOOD_STORES.shop;
  openDlg(`${dlgHead('Nova venda','Escolha os produtos, a forma de pagamento e confirme.')}<div class="pos"><div class="pos-l"><label class="sbox">${ic('search',16)}<input id="posQ" placeholder="Buscar produto ou código" autocomplete="off" value="${esc(nxPosQ)}"></label>
   <div class="chips pos-cats">${[['all','Todos'],...st.cats.map(c=>[c.id,c.name])].map(([v,l])=>`<button type="button" class="chipf ${nxPosCat===v?'on':''}" data-pc="${v}">${esc(l)}</button>`).join('')}</div><div class="pos-g" id="posG"></div></div>
   <aside class="pos-r"><p class="fl">Carrinho</p><div id="nxCart"></div>
    <p class="fl" style="margin-top:14px">Pagamento</p><div class="pos-pay">${Object.entries(FOOD_PAY).map(([p,[icn,c]])=>`<button type="button" class="${nxMethod===p?'on':''}" data-pm="${p}"><span class="ax-kt" style="--k:${c};--s:26px">${ic(icn,12)}</span>${p}</button>`).join('')}</div>
    <p class="fl" style="margin-top:14px">Desconto <small>opcional</small></p><div class="pos-disc"><div class="segc"><button type="button" data-dt="value" aria-pressed="${nxDiscount.type==='value'}">R$</button><button type="button" data-dt="percent" aria-pressed="${nxDiscount.type==='percent'}">%</button></div><input id="posD" type="number" min="0" step="0.01" inputmode="decimal" value="${nxDiscount.value||''}" placeholder="0"></div>
+   <p class="fl" style="margin-top:14px">Comprador <small>opcional</small></p><div class="pos-disc"><input id="posB" list="posBL" maxlength="60" autocomplete="off" placeholder="Escolha um membro ou digite o nome" value="${esc(nxBuyer)}"><datalist id="posBL">${MEMBERS.map(m=>`<option value="${esc(m.n)}">`).join('')}</datalist></div>
    <div id="posTot" class="pos-tot"></div></aside></div>
   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" id="nxConfirm" data-a="nxSaleConfirm">Confirmar venda</button></div>`,'xl pos-dlg');
  const D=$('.pos-dlg');D.addEventListener('click',e=>{const t=e.target.closest('[data-pc],[data-pm],[data-dt],[data-add],[data-q],[data-rm]');if(!t)return;
@@ -5559,7 +5534,7 @@ function nxSaleForm(){const st=FOOD_STORES.shop;
   if(t.dataset.add){const i=foodItem('shop',t.dataset.add),l=nxCart.find(x=>x.item===i.id);if(l){if(l.qty<i.stock)l.qty++;}else nxCart.push({item:i.id,name:i.name,cat:i.cat,qty:1,price:i.price});nxPosPaint();nxCartPaint();}
   if(t.dataset.q){const [ix,d]=t.dataset.q.split('|'),l=nxCart[+ix],i=foodItem('shop',l.item);l.qty=Math.max(1,Math.min(i.stock,l.qty+ +d));nxPosPaint();nxCartPaint();}
   if(t.dataset.rm!=null){nxCart.splice(+t.dataset.rm,1);nxPosPaint();nxCartPaint();}});
- $('#posQ').addEventListener('input',e=>{nxPosQ=e.target.value;nxPosPaint();});$('#posD').addEventListener('input',e=>{nxDiscount.value=+e.target.value||0;nxCartPaint();});
+ $('#posQ').addEventListener('input',e=>{nxPosQ=e.target.value;nxPosPaint();});$('#posD').addEventListener('input',e=>{nxDiscount.value=+e.target.value||0;nxCartPaint();});$('#posB').addEventListener('input',e=>{nxBuyer=e.target.value;});
  nxPosPaint();nxCartPaint();setTimeout(()=>$('#posQ')?.focus(),60);}
 function nxPosPaint(){const g=$('#posG');if(!g)return;const q=norm(nxPosQ),l=FOOD_STORES.shop.items.filter(i=>i.active&&(nxPosCat==='all'||i.cat===nxPosCat)&&(!q||norm(i.name+' '+i.sku).includes(q)));
  g.innerHTML=l.length?l.map(i=>{const c=foodCat('shop',i.cat),inCart=nxCart.filter(x=>x.item===i.id).reduce((n,x)=>n+x.qty,0),left=i.stock-inCart;return `<button type="button" class="pos-p ${inCart?'in':''}" data-add="${i.id}" ${left<=0?'disabled':''}>${shThumb(i,c,44)}<span class="dkt"><b>${esc(i.name)}</b><span>${esc(i.sku)} · ${left>0?`${left} em estoque`:'sem estoque'}</span></span><b class="fd-v">${foodMoney(i.price)}</b>${inCart?`<em class="pos-badge">${inCart}</em>`:`<span class="pos-plus">${ic('plus',13,2.4)}</span>`}</button>`;}).join(''):'<div class="mempty"><p>Nenhum produto encontrado.</p></div>';}
@@ -5576,7 +5551,7 @@ function nxSaleDetail(id){const s=FOOD_SALES.find(s=>s.id===id);if(!s)return;con
   ${s.status==='cancelled'?`<p class="fd-cap">${ic('undo',13,2)} Cancelada${s.reason?': '+esc(s.reason):''}. O estoque voltou e o estorno foi lançado no Financeiro.</p>`:''}</div>
   <div class="dfoot">${s.status==='completed'?`<button class="btn sec dang-t" data-a="nxSaleCancel" data-v="${s.id}" style="margin-right:auto">Cancelar venda</button>`:''}<button class="btn sec" data-a="closeDlg">Fechar</button></div>`);}
 Object.assign(NXA,{nxSaleNew:()=>{nxCart=[];nxDiscount={type:'value',value:0};nxSaleForm();},nxSaleOpen:nxSaleDetail,nxCartRemove:v=>{nxCart.splice(+v,1);nxCartPaint();},nxDiscount:()=>{$('#nxDiscountBox').innerHTML=`<form id="nxDiscountF" class="fgrid"><label class="fld"><span class="fl">Tipo</span><select name="type"><option value="value">Valor (R$)</option><option value="percent">Percentual (%)</option></select></label><label class="fld"><span class="fl">Desconto</span><input name="value" type="number" min="0" step="0.01" value="${nxDiscount.value}"></label><button class="btn sec">Aplicar</button></form>`;const f=$('#nxDiscountF');f.elements.type.value=nxDiscount.type;f.onsubmit=e=>{e.preventDefault();if(f.elements.type.value==='percent'&&+f.elements.value.value>100)return toast('O desconto não pode superar 100%');nxDiscount={type:f.elements.type.value,value:+f.elements.value.value};nxCartPaint();};},nxSaleConfirm:()=>{if(!nxCart.length)return;for(const i of FOOD_STORES.shop.items)if(nxCart.filter(l=>l.item===i.id).reduce((n,l)=>n+l.qty,0)>i.stock)return toast('Saldo insuficiente para '+i.name);const t=nxCartTotal(),s={id:'LJ-'+Date.now(),store:'shop',date:FOOD_DATE,time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),status:'completed',lines:nxCart.map(l=>({...l})),total:t.total,discount:t.discount,who:'Rafael Pereira'};s.lines.forEach(l=>{foodItem('shop',l.item).stock-=l.qty;FOOD_MOVES.push({id:'mv-'+s.id+'-'+l.item,store:'shop',item:l.item,date:s.date,kind:'sale',qty:-l.qty,reason:s.id});});FOOD_SALES.push(s);nxShopPosting(s);nxCart=[];closeDlg();S.foodMonth=FOOD_DATE.slice(0,7);S.foodDay=FOOD_DATE;S.foodStatus='all';S.foodQuery='';render();toast('Venda registrada');},nxSaleCancel:id=>{openDlg(`${dlgHead('Cancelar venda','O estoque será devolvido e o financeiro receberá o estorno.')}<form id="nxCancelF" class="fgrid one"><label class="fld"><span class="fl">Motivo</span><textarea name="reason" class="ta" required></textarea></label><div class="dfoot"><button class="btn sec" type="button" data-a="closeDlg">Voltar</button><button class="btn dang">Confirmar cancelamento</button></div></form>`,'sm');$('#nxCancelF').onsubmit=e=>{e.preventDefault();const s=FOOD_SALES.find(s=>s.id===id);if(s.status!=='completed')return;s.status='cancelled';s.reason=e.target.elements.reason.value;s.lines.forEach(l=>{const i=foodItem('shop',l.item);if(i)i.stock+=l.qty;FOOD_MOVES.push({id:'rv-'+s.id+'-'+l.item,store:'shop',item:l.item,date:FOOD_DATE,kind:'refund',qty:l.qty,reason:s.id+' · '+s.reason});});nxShopPosting(s,true);closeDlg();render();toast('Venda cancelada e estoque devolvido');};}});
-FOOD_SALES.filter(x=>x.store==='shop').forEach((x,i)=>{x.method=x.method||['Pix','Cartão','Dinheiro','Pix'][i%4];});
+FOOD_SALES.filter(x=>x.store==='shop').forEach((x,i)=>{x.method=x.method||['Pix','Cartão','Dinheiro','Pix'][i%4];if(i%4===1&&!x.buyer)x.buyer=MEMBERS[(i*3)%MEMBERS.length].n;});
 const nxFoodPage=foodPage;foodPage=()=>S.active.startsWith('shop-')?({vis:nxShopOverview,sales:nxShopSales,cash:nxShopCash,moves:nxShopMoves,items:()=>foodItems('shop'),cats:()=>foodCategories('shop')}[S.active.split('-')[1]]||nxShopOverview)():nxFoodPage();
 
 CASAS.forEach((c,i)=>{c.meets.push({id:'scheduled-'+c.id,d:'2026-10-'+String(10+i%5).padStart(2,'0'),start:'19:30',end:'21:00',mode:i%2?'Presencial':'Remoto',url:i%2?'':'https://meet.google.com/',desc:'Encontro da casa · comunhão e estudo',mat:'Estudo da semana',pres:{},why:{},done:false,scheduled:true,cancelled:false});});
@@ -5611,7 +5586,7 @@ function nxHouseAgenda(){const month=S.calM||'2026-10',meetings=CASAS.filter(c=>
 const nxCalPage=calPage;calPage=()=>nxCalPage()+nxHouseAgenda();
 
 Object.assign(A,NXA);
-{const base=A.nxSaleConfirm;A.nxSaleNew=()=>{nxCart=[];nxDiscount={type:'value',value:0};nxMethod='Pix';nxPosQ='';nxPosCat='all';nxSaleForm();};A.nxSaleConfirm=(v,b)=>{const n=FOOD_SALES.length;base(v,b);if(FOOD_SALES.length>n)FOOD_SALES[FOOD_SALES.length-1].method=nxMethod;};}
+{const base=A.nxSaleConfirm;A.nxSaleNew=()=>{nxCart=[];nxDiscount={type:'value',value:0};nxMethod='Pix';nxPosQ='';nxPosCat='all';nxBuyer='';nxSaleForm();};A.nxSaleConfirm=(v,b)=>{const n=FOOD_SALES.length;base(v,b);if(FOOD_SALES.length>n){const x=FOOD_SALES[FOOD_SALES.length-1];x.method=nxMethod;if(nxBuyer.trim())x.buyer=nxBuyer.trim();nxBuyer='';}};}
 Object.assign(A,CPA,PA,IA,DA,CA,HA,RA,KA,AA,AU,GA,EA,LMA,CKA,BBA,PFA,SPA,CMA,CTA,FIA,AXA,BKA,FOODA,CAREA,ID_ACTIONS);
 const foodBaseNav=A.nav;A.nav=v=>{if(/^(cafe|rest|shop)-/.test(v)&&v!==S.active){S.foodQuery="";S.foodCat="all";S.foodStatus="all";S.foodMethod="all";S.foodItemF="all";S.foodMv="all";S.foodRows=20;}foodBaseNav(v);};
 /* ---- Ajustes de 09/10/2026: Vídeos e Séries abrem pela lista, marcador de visibilidade e Cursos em cartões ---- */
@@ -5951,18 +5926,22 @@ function bdRe(){const y=window.scrollY;if(S.active==='ministerios'&&S.mini)reMn(
 function bdTab(type,id){
  let b=S.bd&&BOARDS.find(x=>x.id===S.bd);if(b&&!bdVisible(b,type,id))b=null;
  if(b)return bdView(b);S.bd=null;
- const own=bdOwn(type,id),shared=bdShared(type,id);
+ const v=S.bdv==='encerrado'?'encerrado':'aberto',st=x=>(x.status==='encerrado')===(v==='encerrado');
+ const ownAll=bdOwn(type,id),sharedAll=bdShared(type,id),own=ownAll.filter(st),shared=sharedAll.filter(st);
+ const nOpen=[...ownAll,...sharedAll].filter(x=>x.status!=='encerrado').length,nClosed=ownAll.length+sharedAll.length-nOpen;
  const card=(b,sh)=>{const ts=sh?b.tasks.filter(t=>t.min===id):b.tasks,dn=ts.filter(t=>bdDone(b,t)).length,pct=ts.length?Math.round(dn/ts.length*100):0,nm=new Set(b.tasks.map(t=>t.min).filter(Boolean)).size;
   return '<article class="card bd-c" tabindex="0" data-a="bdOpen" data-v="'+b.id+'"><div class="bd-ct"><b>'+esc(b.name)+'</b>'+bdPill(b)+'</div>'+(sh?'<span class="who">'+bdOwnerKind(b)+': '+esc(bdOwnerName(b))+'</span>':'')+'<span class="bd-bar"><i style="width:'+pct+'%"></i></span><span class="who"><b>'+dn+'</b> de '+ts.length+(sh?' tarefas suas':' tarefa'+(ts.length===1?'':'s'))+' feita'+(dn===1?'':'s')+(!sh&&nm?' · '+nm+' ministério'+(nm===1?'':'s'):'')+'</span></article>';};
+ const empty=v==='encerrado'?'<div class="soft-empty"><p>Nenhum quadro encerrado.</p><span class="who">Os quadros encerrados ficam aqui, só para consulta, e podem ser reabertos.</span></div>':'<div class="soft-empty"><p>Nenhum quadro aberto.</p><span class="who">Crie um quadro para começar a distribuir tarefas.</span></div>';
  return '<section class="card pc"><div class="sh"><div><h2>Quadros de tarefas</h2><p class="who" style="margin:4px 0 0">'+(type==='min'?'Organize o trabalho do ministério. Você pode ter vários quadros, encerrar um e abrir outro.':'Distribua as tarefas entre ministérios e pessoas. Cada ministério vê o quadro com as tarefas dele.')+'</p></div><button class="btn pri sm" data-a="bdNew" data-v="'+type+'|'+id+'">'+ic('plus',14,2.2)+'Novo quadro</button></div>'
-  +(own.length?'<div class="bd-g">'+own.map(x=>card(x,false)).join('')+'</div>':'<div class="soft-empty"><p>Nenhum quadro ainda.</p><span class="who">Crie um quadro para começar a distribuir tarefas.</span></div>')+'</section>'
+  +'<div class="bd-seg"><div class="segc" role="group" aria-label="Situação dos quadros"><button data-a="bdV" data-v="aberto" aria-pressed="'+(v==='aberto')+'">Abertos<small>'+nOpen+'</small></button><button data-a="bdV" data-v="encerrado" aria-pressed="'+(v==='encerrado')+'">Encerrados<small>'+nClosed+'</small></button></div></div>'
+  +(own.length?'<div class="bd-g">'+own.map(x=>card(x,false)).join('')+'</div>':empty)+'</section>'
   +(shared.length?'<section class="card pc" style="margin-top:16px"><div class="sh"><div><h2>Tarefas deste ministério em outros quadros</h2><p class="who" style="margin:4px 0 0">Quadros de eventos, cultos e outros ministérios com tarefas entregues a este ministério. As demais tarefas ficam bloqueadas.</p></div></div><div class="bd-g">'+shared.map(x=>card(x,true)).join('')+'</div></section>':'');
 }
 function bdCard(b,t,R,mine,closed){
  const m=t.min&&mnById(t.min),own=!R||t.min===mine,done=bdDone(b,t),late=t.due&&!done&&t.due<TODAY.toISOString().slice(0,10);
  const meta=(m?'<span class="bd-mn">'+mTile(m,18)+esc(m.n)+'</span>':'')+(t.who?'<span class="bd-who">'+avN(t.who)+'<i>'+esc(t.who.split(' ')[0])+'</i></span>':'')+(t.due?'<span class="bd-due'+(late?' late':'')+'">'+ic('calendar',11,2)+fmtD(t.due)+'</span>':'');
  if(!own)return '<div class="bd-t lock" title="'+esc(m?'Tarefa do Ministério de '+m.n:'Tarefa sem ministério')+'"><div class="bd-lt">'+ic('lock',12,2)+'<b>'+esc(t.t)+'</b></div>'+(meta?'<div class="bd-m">'+meta+'</div>':'')+'</div>';
- return '<div class="bd-t'+(done?' done':'')+'" data-tk="'+t.id+'"'+(!closed?' draggable="true"':'')+' tabindex="0" data-a="bdTask" data-v="'+b.id+'|'+t.col+'|'+t.id+'"><b>'+esc(t.t)+'</b>'+(meta?'<div class="bd-m">'+meta+'</div>':'')+'</div>';
+ return '<div class="bd-t'+(done?' done':'')+'" data-tk="'+t.id+'"'+(!closed?' draggable="true"':'')+' tabindex="0" data-a="bdTask" data-v="'+b.id+'|'+t.col+'|'+t.id+'"><b>'+esc(t.t)+'</b>'+(meta||(t.cm||[]).length?'<div class="bd-m">'+meta+((t.cm||[]).length?'<span class="bd-cm">'+ic('message',11,2)+t.cm.length+'</span>':'')+'</div>':'')+'</div>';
 }
 function bdView(b){
  const R=bdRestricted(b),mine=R?S.mini:null,closed=b.status==='encerrado',canEdit=!R&&!closed,total=b.tasks.length,done=b.tasks.filter(t=>bdDone(b,t)).length,mt=R?b.tasks.filter(t=>t.min===mine).length:0;
@@ -5979,10 +5958,7 @@ function bdView(b){
 }
 function bdTaskDlg(bid,col,tid){
  const b=BOARDS.find(x=>x.id===bid),t=tid?b.tasks.find(x=>x.id===tid):null,R=bdRestricted(b),closed=b.status==='encerrado',m=t&&t.min&&mnById(t.min),cn=c=>(b.cols.find(x=>x.id===c)||{}).n;
- if(t&&closed){recordDialog(t.t,esc(b.name),recordField('Descrição',t.desc)+recordField('Ministério',m?m.n:'')+recordField('Responsável',t.who)+recordField('Prazo',t.due?fmtD(t.due):'')+recordField('Coluna',cn(t.col)));return;}
- if(t&&R){
-  openDlg(dlgHead(t.t,esc(b.name))+'<form id="bdF" class="fgrid one" novalidate><div class="record-body">'+recordField('Descrição',t.desc)+recordField('Responsável',t.who)+recordField('Prazo',t.due?fmtD(t.due):'')+'</div><label class="fld"><span class="fl">Situação</span><span class="selw"><select name="col">'+b.cols.map(c=>'<option value="'+c.id+'"'+(c.id===t.col?' selected':'')+'>'+esc(c.n)+'</option>').join('')+'</select>'+ic('updown',14)+'</span><span class="hint">Você só muda a situação. O resto é do quadro de quem o criou.</span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>');
-  $('#bdF').onsubmit=e=>{e.preventDefault();t.col=e.target.elements.col.value;closeDlg();bdRe();toast('Tarefa movida para '+cn(t.col));};return;}
+ if(t&&(closed||R)){bdTaskView(b,t,R,closed);return;}
  const people=[...new Set([...(t&&t.who?[t.who]:[]),...MEMBERS.filter(x=>x.tit).map(x=>x.n)])].slice(0,40);
  openDlg(dlgHead(t?'Editar tarefa':'Nova tarefa',esc(b.name))+'<form id="bdF" class="fgrid" novalidate style="grid-template-columns:1fr 1fr">'
   +'<label class="fld wide"><span class="fl">Tarefa</span><input name="t" value="'+esc(t?t.t:'')+'" maxlength="90" autocomplete="off" placeholder="Ex.: Montar a escala de recepção"><span class="err"></span></label>'
@@ -5991,13 +5967,39 @@ function bdTaskDlg(bid,col,tid){
   +'<label class="fld"><span class="fl">Pessoa responsável <small>opcional</small></span><span class="selw"><select name="who"><option value="">Ninguém</option>'+people.map(n=>'<option'+(t&&t.who===n?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select>'+ic('updown',14)+'</span></label>'
   +'<label class="fld"><span class="fl">Prazo <small>opcional</small></span><input type="date" name="due" value="'+(t?t.due:'')+'"></label>'
   +'<label class="fld"><span class="fl">Coluna</span><span class="selw"><select name="col">'+b.cols.map(c=>'<option value="'+c.id+'"'+((t?t.col:col)===c.id?' selected':'')+'>'+esc(c.n)+'</option>').join('')+'</select>'+ic('updown',14)+'</span></label>'
-  +'<div class="dfoot wide">'+(t?'<button type="button" class="btn dang sm" data-a="bdTaskDel" data-v="'+b.id+'|'+t.id+'" style="margin-right:auto">Excluir tarefa</button>':'')+'<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">'+(t?'Salvar':'Adicionar')+'</button></div></form>');
+  +(t?'<div class="wide">'+bdCmBar(b,t,true)+'</div>':'')+'<div class="dfoot wide">'+(t?'<button type="button" class="btn dang sm" data-a="bdTaskDel" data-v="'+b.id+'|'+t.id+'" style="margin-right:auto">Excluir tarefa</button>':'')+'<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">'+(t?'Salvar':'Adicionar')+'</button></div></form>');
  const f=$('#bdF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
  f.onsubmit=e=>{e.preventDefault();const q=f.elements,title=q.t.value.trim();if(!title){const fl=q.t.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Dê um nome à tarefa';q.t.focus();return;}
   const data={t:title,desc:q.desc.value.trim(),min:q.min.value,who:q.who.value,due:q.due.value,col:q.col.value};
   if(t)Object.assign(t,data);else b.tasks.push(Object.assign({id:'tk'+(++_tkid)},data));closeDlg();bdRe();toast(t?'Tarefa atualizada':'Tarefa adicionada');};
 }
+/* detalhe só de leitura da tarefa (quadro encerrado ou tarefa do meu ministério em quadro de outro dono) + comentários */
+const bdCm=t=>t.cm||(t.cm=[]);
+function bdCmBar(b,t,can){const n=bdCm(t).length,k=b.id+'|'+t.id;
+ return '<div class="bd-cmbar"><button type="button" class="bd-cmv" data-a="bdCmList" data-v="'+k+'">'+ic('message',15,1.9)+'Ver comentários<small>'+n+'</small></button>'+(can?'<button type="button" class="btn sec sm" data-a="bdCmAdd" data-v="'+k+'">'+ic('plus',14,2.2)+'Adicionar comentário</button>':'')+'</div>';}
+function bdTaskView(b,t,R,closed){
+ const m=t.min&&mnById(t.min),col=(b.cols.find(x=>x.id===t.col)||{}).n,done=bdDone(b,t),dd=t.due&&!done?myDue(t):null;
+ const F=(l,h)=>'<div class="tkv-f"><span>'+l+'</span><div>'+h+'</div></div>';
+ openDlg(dlgHead(t.t,esc(b.name)+' · '+bdOwnerKind(b)+': '+esc(bdOwnerName(b)))+'<div class="tkv">'
+  +'<div class="tkv-top"><span class="tkv-col'+(done?' ok':'')+'">'+(done?ic('check',12,2.4):'<i></i>')+esc(col||'')+'</span>'+(dd?'<span class="mytk-d '+dd[0]+'">'+ic(dd[0]==='is-late'?'alert':'calendar',12,2)+'<em>'+dd[1]+'</em></span>':'')+'</div>'
+  +'<div class="tkv-g">'+F('Ministério',m?mTile(m,28)+'<b>'+esc(m.n)+'</b>':'<span class="soft">Sem ministério</span>')+F('Responsável',t.who?avN(t.who)+'<b>'+esc(t.who)+'</b>':'<span class="soft">Sem pessoa</span>')+F('Prazo',t.due?'<span class="tkv-ic">'+ic('calendar',15,1.9)+'</span><b>'+fmtDate(t.due)+'</b>':'<span class="soft">Sem prazo</span>')+'</div>'
+  +'<section class="tkv-d"><h3>Descrição</h3>'+(t.desc?'<p>'+esc(t.desc)+'</p>':'<p class="soft">Sem descrição.</p>')+'</section>'
+  +bdCmBar(b,t,!closed)
+  +'<p class="tkv-n">'+ic('lock',13,2)+(closed?'Quadro encerrado: só para consulta. Reabra o quadro para mexer nas tarefas.':'Para mudar a situação, arraste a tarefa entre as colunas. O resto é de quem criou o quadro.')+'</p></div>'
+  +'<div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>');}
+function bdCmList(bid,tid){const b=BOARDS.find(x=>x.id===bid),t=b&&b.tasks.find(x=>x.id===tid);if(!t)return;closeDlg(true);
+ const l=bdCm(t),closed=b.status==='encerrado',k=bid+'|'+tid;
+ openDlg(dlgHead('Comentários',esc(t.t))+'<div class="bdc">'+(l.length?l.map(c=>'<article class="bdc-i">'+avN(c.by)+'<div><header><b>'+esc(c.by)+'</b><span>'+fmtDate(c.d)+'</span></header><p>'+esc(c.text)+'</p></div></article>').join(''):'<p class="soft" style="margin:6px 0">Nenhum comentário ainda.</p>')+'</div>'
+  +'<div class="dfoot"><button type="button" class="btn sec" data-a="bdCmBack" data-v="'+k+'">Voltar à tarefa</button>'+(closed?'':'<button type="button" class="btn pri" data-a="bdCmAdd" data-v="'+k+'">'+ic('plus',14,2.2)+'Adicionar comentário</button>')+'</div>','sm');
+ const el=$('.bdc');if(el)el.scrollTop=el.scrollHeight;}
+function bdCmAdd(bid,tid){const b=BOARDS.find(x=>x.id===bid),t=b&&b.tasks.find(x=>x.id===tid);if(!t||b.status==='encerrado')return;closeDlg(true);
+ openDlg(dlgHead('Novo comentário',esc(t.t))+'<form id="bdCF" class="fgrid one" novalidate><label class="fld"><span class="fl">Comentário</span><textarea class="ta" name="c" rows="4" maxlength="400" placeholder="Escreva uma atualização ou um recado para quem trabalha nesta tarefa"></textarea><span class="err"></span></label>'
+  +'<div class="dfoot"><button type="button" class="btn sec" data-a="bdCmList" data-v="'+bid+'|'+tid+'">Cancelar</button><button type="submit" class="btn pri">Comentar</button></div></form>','sm');
+ const f=$('#bdCF');f.addEventListener('input',()=>f.elements.c.closest('.fld').classList.remove('bad'));
+ f.onsubmit=e=>{e.preventDefault();const x=f.elements.c.value.trim();if(!x){const fl=f.elements.c.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Escreva o comentário';return;}
+  bdCm(t).push({by:ME_NAME,d:myTd(),text:x});bdRe();toast('Comentário adicionado');bdCmList(bid,tid);};}
 Object.assign(A,{
+ bdV:v=>{S.bdv=v;bdRe();},bdCmList:v=>{const [b,t]=v.split('|');bdCmList(b,t);},bdCmAdd:v=>{const [b,t]=v.split('|');bdCmAdd(b,t);},bdCmBack:v=>{const [b,t]=v.split('|'),x=BOARDS.find(y=>y.id===b),k=x&&x.tasks.find(y=>y.id===t);closeDlg(true);if(k)bdTaskDlg(b,k.col,t);},
  bdOpen:v=>{S.bd=v;bdRe();},bdBack:()=>{S.bd=null;bdRe();},
  bdMenu:v=>{const p=$('#bdPop-'+v);closePops(p);p.classList.toggle('open');},
  bdColMenu:v=>{const p=$('#bdcPop-'+v);closePops(p);p.classList.toggle('open');},
@@ -6010,10 +6012,10 @@ Object.assign(A,{
   const f=$('#bdNF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
   f.onsubmit=e=>{e.preventDefault();const n=f.elements.n.value.trim();if(!n){const fl=f.elements.n.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Dê um nome ao quadro';return;}
    const nb=bdNewBoard(type,id,n),src=f.elements.from&&f.elements.from.value&&BOARDS.find(x=>x.id===f.elements.from.value);
-   if(src){nb.cols=src.cols.map(c=>({id:c.id,n:c.n}));src.tasks.forEach(t=>nb.tasks.push(Object.assign({},t,{id:'tk'+(++_tkid),col:nb.cols[0].id})));}
+   if(src){nb.cols=src.cols.map(c=>({id:c.id,n:c.n}));src.tasks.forEach(t=>nb.tasks.push(Object.assign({},t,{id:'tk'+(++_tkid),col:nb.cols[0].id,cm:[]})));}
    S.bd=nb.id;closeDlg();bdRe();toast('Quadro criado');};},
  bdRen:v=>{closePops();const b=BOARDS.find(x=>x.id===v);nxNameDlg('Renomear quadro','',b.name,'Nome do quadro',x=>{if(!x)return 'Dê um nome';b.name=x;closeDlg();bdRe();toast('Quadro renomeado');});},
- bdDup:v=>{closePops();const b=BOARDS.find(x=>x.id===v),nb=bdNewBoard(b.ownerType,b.ownerId,b.name+' (cópia)');nb.cols=b.cols.map(c=>({id:c.id,n:c.n}));b.tasks.forEach(t=>nb.tasks.push(Object.assign({},t,{id:'tk'+(++_tkid),col:nb.cols[0].id})));S.bd=nb.id;bdRe();toast('Quadro duplicado; as tarefas voltaram para a primeira coluna');},
+ bdDup:v=>{closePops();const b=BOARDS.find(x=>x.id===v),nb=bdNewBoard(b.ownerType,b.ownerId,b.name+' (cópia)');nb.cols=b.cols.map(c=>({id:c.id,n:c.n}));b.tasks.forEach(t=>nb.tasks.push(Object.assign({},t,{id:'tk'+(++_tkid),col:nb.cols[0].id,cm:[]})));S.bd=nb.id;bdRe();toast('Quadro duplicado; as tarefas voltaram para a primeira coluna');},
  bdDel:v=>{closePops();const b=BOARDS.find(x=>x.id===v);confirmDel({title:'Excluir '+esc(b.name)+'?',body:'As '+b.tasks.length+' tarefas do quadro serão apagadas. Para guardar o histórico, prefira encerrar o quadro.',typed:b.tasks.length?b.name:null,onConfirm:()=>{BOARDS.splice(BOARDS.indexOf(b),1);S.bd=null;bdRe();toast('Quadro excluído');}});},
  bdClose:v=>{const b=BOARDS.find(x=>x.id===v),open=b.tasks.filter(t=>!bdDone(b,t)).length;confirmDel({title:'Encerrar este quadro?',body:(open?open+' tarefa'+(open===1?' ainda não está':'s ainda não estão')+' em “'+esc(b.cols[b.cols.length-1].n)+'”. ':'')+'O quadro fica só para consulta e você pode reabri-lo. Para continuar o trabalho, abra um novo quadro.',label:'Encerrar quadro',onConfirm:()=>{b.status='encerrado';bdRe();toast('Quadro encerrado',()=>{b.status='aberto';bdRe();});}});},
  bdReopen:v=>{BOARDS.find(x=>x.id===v).status='aberto';bdRe();toast('Quadro reaberto');},
@@ -6029,7 +6031,7 @@ document.addEventListener('dragover',e=>{const c=e.target.closest&&e.target.clos
 document.addEventListener('drop',e=>{const c=e.target.closest&&e.target.closest('.bd-col');if(!c||!S.bd)return;e.preventDefault();const b=BOARDS.find(x=>x.id===S.bd),id=e.dataTransfer.getData('text/plain'),t=b&&b.tasks.find(x=>x.id===id);if(!t||b.status==='encerrado')return;
  if(bdRestricted(b)&&t.min!==S.mini)return;const old=t.col,to=c.dataset.col;if(old===to)return;t.col=to;bdRe();toast('Movida para '+b.cols.find(x=>x.id===to).n,()=>{t.col=old;bdRe();});});
 /* abas e reinício do quadro aberto ao trocar de ministério, evento ou aba */
-for(const k of ['nav','mnOpen','mnTab','evOpen','evTab']){const base=A[k];if(base)A[k]=function(){S.bd=null;return base.apply(this,arguments);};}
+for(const k of ['nav','mnOpen','mnTab','evOpen','evTab']){const base=A[k];if(base)A[k]=function(){S.bd=null;S.bdv='aberto';return base.apply(this,arguments);};}
 /* dados de demonstração */
 (()=>{const mi=n=>(MINIS.find(m=>m.n===n)||{}).id,ev=(t,d)=>EVTS.find(e=>e.t===t&&(!d||e.d===d));
  const cm=ev('Congresso de Mulheres 2027');
@@ -6293,12 +6295,26 @@ const myTasks=()=>{const td=TODAY.toISOString().slice(0,10),out=[];BOARDS.filter
  return out.sort((x,y)=>(y.late-x.late)||((x.t.due||'9')>(y.t.due||'9')?1:-1));};
 const myDue=t=>{if(!t.due)return '';const d=Math.round((new Date(t.due+'T12:00')-new Date(TODAY.toISOString().slice(0,10)+'T12:00'))/864e5);
  return d<0?['is-late','atrasada · '+fmtD(t.due)]:d===0?['is-soon','vence hoje']:d===1?['is-soon','vence amanhã']:d<=3?['is-soon','em '+d+' dias']:['',fmtD(t.due)];};
-function myTasksCard(){const l=myTasks();if(!l.length)return '';
- return `<section class="mytk rise" style="--d:1" aria-labelledby="h-mytk"><div class="sh"><h2 id="h-mytk">Suas tarefas <span class="pill">${l.length}</span></h2><span class="who">Atribuídas a você nos quadros</span></div>
- <div class="mytk-l" style="--n:${Math.min(l.length,3)}">${l.map(({b,t})=>{const m=t.min&&mnById(t.min),dd=myDue(t),col=(b.cols.find(c=>c.id===t.col)||{}).n;
-  return `<button class="mytk-r" data-a="myTask" data-v="${b.id}|${t.id}"><span class="mytk-i" ${m?`style="--tc:var(--tone-${m.tone}-ink);--tb:var(--tone-${m.tone})"`:''}>${ic(m?m.icon:'check',16,1.9)}</span><span class="mytk-t"><b>${esc(t.t)}</b><span>${esc(col||'')} · ${esc(b.name)}</span>${dd?`<span class="mytk-d ${dd[0]}">${ic(dd[0]==='is-late'?'alert':'calendar',12,2)}<em>${dd[1]}</em></span>`:''}</span></button>`;}).join('')}</div></section>`;}
-const _homeMy=home;home=function(){const h=_homeMy(),k=h.indexOf('<div class="dash">');return h.slice(0,k)+myTasksCard()+h.slice(k);};
-Object.assign(A,{myTask:v=>{const [bid,tid]=v.split('|'),b=BOARDS.find(x=>x.id===bid),t=b&&b.tasks.find(x=>x.id===tid);if(!t)return;
+
+/* comentários de demonstração */
+(()=>{const f=p=>{for(const b of BOARDS){const t=b.tasks.find(x=>x.t.startsWith(p));if(t)return t;}};
+ let t=f('Reservar o auditório');if(t)t.cm=[{by:'Diego Martins',d:'2026-09-28',text:'O auditório está confirmado para os dois dias. Falta só fechar o mapa de salas.'},{by:'Rafael Pereira',d:'2026-09-29',text:'Ótimo. Mandem o mapa até sexta para eu aprovar.'}];
+ t=f('Fechar o orçamento');if(t)t.cm=[{by:'Rafael Pereira',d:'2026-09-30',text:'Já pedi as três cotações ao Financeiro.'}];})();
+const MYT_DAYS=7;
+const myTd=()=>TODAY.toISOString().slice(0,10);
+const myUrgent=()=>{const lim=new Date(TODAY.getTime()+MYT_DAYS*864e5).toISOString().slice(0,10);return myTasks().filter(x=>x.t.due&&x.t.due<=lim);};
+const myRow=({b,t},cls)=>{const m=t.min&&mnById(t.min),dd=myDue(t),col=(b.cols.find(c=>c.id===t.col)||{}).n;
+ return `<button class="${cls}" data-a="myTask" data-v="${b.id}|${t.id}"><span class="mytk-i" ${m?`style="--tc:var(--tone-${m.tone}-ink);--tb:var(--tone-${m.tone})"`:''}>${ic(m?m.icon:'check',16,1.9)}</span><span class="mytk-t"><b>${esc(t.t)}</b><span>${esc(col||'')} · ${esc(b.name)}</span>${dd?`<span class="mytk-d ${dd[0]}">${ic(dd[0]==='is-late'?'alert':'calendar',12,2)}<em>${dd[1]}</em></span>`:''}</span></button>`;};
+function myTasksAct(){const all=myTasks(),u=myUrgent(),late=u.filter(x=>x.late).length,shown=u.slice(0,3),rest=all.length-shown.length;
+ return `<article class="card act tk" id="tk"><div class="top"><span class="tg" style="background:var(--seq1,var(--brand))"></span>Suas tarefas</div>
+  ${u.length?`<div class="hero"><span class="n">${u.length}</span><span class="u">${u.length>1?'tarefas suas vencem':'tarefa sua vence'} em até ${MYT_DAYS} dias${late?` · <b class="tk-late">${late} atrasada${late>1?'s':''}</b>`:''}</span></div>
+  <div class="viz tk-l">${shown.map(x=>myRow(x,'tk-r')).join('')}</div>`
+  :`<div class="hero"><span class="n">${ic('check',26,2)}</span><span class="u">${all.length?'Nada urgente nos próximos '+MYT_DAYS+' dias':'Você não tem tarefas nos quadros'}</span></div><div class="viz"></div>`}
+  <div class="foot">${all.length?`<button class="btn sec" data-a="tkAll">Ver todas${rest>0?` <small class="tk-more">+${rest}</small>`:` <small class="tk-more">${all.length}</small>`}</button>`:''}</div></article>`;}
+function tkAllDlg(){const all=myTasks(),lim=new Date(TODAY.getTime()+MYT_DAYS*864e5).toISOString().slice(0,10);
+ const G=[['Atrasadas',all.filter(x=>x.late)],['Nos próximos '+MYT_DAYS+' dias',all.filter(x=>!x.late&&x.t.due&&x.t.due<=lim)],['Depois',all.filter(x=>x.t.due&&x.t.due>lim)],['Sem prazo',all.filter(x=>!x.t.due)]].filter(g=>g[1].length);
+ openDlg(dlgHead('Suas tarefas',all.length+(all.length===1?' tarefa atribuída a você nos quadros':' tarefas atribuídas a você nos quadros'))+`<div class="tkd">${G.map(([h,l])=>`<p class="eh">${h}<small>${l.length}</small></p><div class="tkd-l">${l.map(x=>myRow(x,'mytk-r')).join('')}</div>`).join('')||'<p class="who">Nenhuma tarefa sua em aberto.</p>'}</div><div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`,'lg');}
+Object.assign(A,{tkAll:()=>tkAllDlg(),myTask:v=>{closeDlg();const [bid,tid]=v.split('|'),b=BOARDS.find(x=>x.id===bid),t=b&&b.tasks.find(x=>x.id===tid);if(!t)return;
  if(b.ownerType==='min'){S.active='ministerios';S.mini=b.ownerId;S.mtab='quad';}else{const e=eById(b.ownerId);S.active=e&&e.kind==='culto'?'cultos':'eventos';S.evt=b.ownerId;S.etab='quad';}
  S.bd=b.id;render();window.scrollTo(0,0);setTimeout(()=>bdTaskDlg(b.id,t.col,t.id),80);}});
 
@@ -6442,7 +6458,7 @@ const H_SEED_R=['sim','sim','sim','','nao','sim','','sim','sim','','sim','nao','
 function hRsvp(c,m){if(!m.rsvp){m.rsvp={};c.ppl.forEach((p,i)=>{const r=m.done?(m.pres&&m.pres[p.id]?'sim':(i%3?'':'nao')):H_SEED_R[i%H_SEED_R.length];m.rsvp[p.id]={r,why:r==='nao'?(i%2?'Viagem a trabalho':'Plantão no hospital'):''};});}return c.ppl.map(p=>({n:p.n,id:p.id,...(m.rsvp[p.id]||{r:'',why:''})}));}
 {const _h=hEnc;hEnc=function(c){const h=_h.apply(this,arguments);
  return h.replace(/<li class="sched">([\s\S]*?)<\/li>/g,(li,body)=>{const id=(body.match(/data-a="nxHouseRegister" data-v="([^"]+)"/)||[])[1];const m=id&&c.meets.find(x=>x.id===id);if(!m)return li;
-  return li.replace(/<b>([^<]*)<\/b>/,'<b><button class="lnk record-title" data-a="hInvView" data-v="'+id+'">$1</button></b>').replace('</span></div><div class="ea">','</span>'+rsSum(hRsvp(c,m),'hInvView',id)+'</div><div class="ea">');});};}
+  return li.replace(/(<div class="et"><div>)<b>([^<]*)<\/b>/,(m,a,t)=>a+'<b><button class="lnk record-title" data-a="hInvView" data-v="'+id+'">'+t+'</button></b>').replace('</span></div><div class="ea">','</span>'+rsSum(hRsvp(c,m),'hInvView',id)+'</div><div class="ea">');});};}
 hViewMeet=function(id){const c=hById(S.casa),m=c.meets.find(x=>x.id===id);if(!m)return;const rs=hRsvp(c,m);
  meetView({title:'Encontro realizado',sub:esc(c.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start,m.end),mode:m.mode,where:m.mode==='Presencial'?m.where:'',
   blocks:[['O que foi tratado',m.desc],['Material de apoio',m.mat]],
@@ -6500,7 +6516,7 @@ nxSaleDetail=function(id){const s=FOOD_SALES.find(x=>x.id===id);if(!s)return;con
  openDlg(dlgHead('Venda '+s.id,'Loja · balcão')
   +'<div class="svd">'
   +'<div class="svd-hero '+(ok?'':'off')+'"><div class="svd-tot"><small>Total da venda</small><b>'+foodMoney(s.total)+'</b>'+(ok?foodPill('Concluída','ok'):foodPill('Cancelada','off'))+'</div>'
-   +'<div class="svd-fs">'+fact(ic('calendar',15,1.9),'Data',dBR(s.date)+' · '+s.time)+fact('<span class="ax-kt" style="--k:'+p[1]+';--s:28px">'+ic(p[0],13)+'</span>','Pagamento',esc(s.method||'Pix'))+fact(avN(who),'Vendido por',esc(who.split(' ').slice(0,2).join(' ')))+fact(ic('bag',15,1.9),'Itens',units+' unidade'+(units>1?'s':''))+'</div></div>'
+   +'<div class="svd-fs">'+fact(ic('calendar',15,1.9),'Data',dBR(s.date)+' · '+s.time)+fact('<span class="ax-kt" style="--k:'+p[1]+';--s:28px">'+ic(p[0],13)+'</span>','Pagamento',esc(s.method||'Pix'))+fact(avN(who),'Vendido por',esc(who.split(' ').slice(0,2).join(' ')))+(s.buyer?fact(avN(s.buyer),'Comprador',esc(s.buyer)):'')+fact(ic('bag',15,1.9),'Itens',units+' unidade'+(units>1?'s':''))+'</div></div>'
   +(ok?'':'<div class="svd-cancel">'+ic('undo',15,2)+'<div><b>Venda cancelada'+(s.reason?' · '+esc(s.reason):'')+'</b><span>O estoque voltou e o estorno foi lançado no Financeiro.</span></div></div>')
   +'<section class="svd-box"><div class="svd-bh"><h3>Itens</h3><span class="who">'+s.lines.length+' produto'+(s.lines.length>1?'s':'')+' · '+units+' un.</span></div>'
    +s.lines.map(l=>{const i=foodItem('shop',l.item),c=foodCat('shop',l.cat);return '<div class="svd-ln">'+(i?shThumb(i,c,40):kTile(foodCatK(c),40))+'<span class="svd-lt"><b>'+esc(l.name)+'</b><small>'+(i&&i.sku?esc(i.sku)+' · ':'')+l.qty+' × '+foodMoney(l.price)+'</small></span><b class="svd-lv">'+foodMoney(l.qty*l.price)+'</b></div>';}).join('')
@@ -6569,5 +6585,576 @@ document.addEventListener('submit',e=>{if(e.target.id!=='aoFind')return;e.preven
  const k=h.indexOf('</header>');return k<0?card+h:h.slice(0,k+9)+card+h.slice(k+9);};}
 {const base=nxSaleRows;nxSaleRows=function(){return base.apply(this,arguments).replace(/por App</g,'pelo app<');};}
 {const base=nxSaleDetail;nxSaleDetail=function(id){const s=FOOD_SALES.find(x=>x.id===id);if(s&&s.app){aoDetail(s.app);return;}return base(id);};Object.assign(A,{nxSaleOpen:nxSaleDetail});}
+
+/* ---- Discipulado e Acompanhamento: o encontro agendado mostra a resposta da pessoa convidada (como as Casas, mas com uma pessoa só) ---- */
+const RS1_L={sim:'Aceitou',nao:'Recusou','':'Aguardando resposta'};
+let _rs1=0;
+const rsOne=m=>{if(!m.rsvp){const r=['','sim','nao'][(_rs1++)%3];m.rsvp={r,why:r==='nao'?'Compromisso de trabalho nesse horário':''};}return m.rsvp;};
+const rsOneCls=r=>r==='sim'?'r-ok':r==='nao'?'r-no':'r-pe';
+const rsOneChip=(m,act,key)=>{const r=rsOne(m).r;return '<button type="button" class="rsum rsone" data-a="'+act+'" data-v="'+key+'" title="Ver resposta"><span class="'+rsOneCls(r)+'">'+(r==='sim'?ic('check',11,2.6):r==='nao'?ic('x',11,2.6):ic('clock',11,2.2))+RS1_L[r]+'</span></button>';};
+const rsOneBlock=(m,name,sub)=>{const x=rsOne(m);
+ return '<section class="mv-b"><div class="mv-bh"><h3>Resposta ao convite</h3></div><div class="rs1">'+avN(name)+'<span class="dkt"><b>'+esc(name)+'</b><small>'+esc(sub)+'</small></span><span class="rs1-st '+rsOneCls(x.r)+'">'+RS1_L[x.r]+'</span></div>'
+  +(x.r==='nao'?'<p class="rs1-why"><b>Motivo:</b> '+esc(x.why||'Sem motivo informado')+'</p>':'')
+  +'<p class="rs-note">'+ic('info',13,2)+'A pessoa responde na Agenda do app e recebe um lembrete antes do encontro. A presença é registrada depois, ao concluir o encontro.</p></section>';};
+const rsOneNudge=(m,name)=>!rsOne(m).r?'<button class="btn sec" data-a="rsOneNudge" data-v="'+esc(name)+'" style="margin-right:auto">'+ic('bell',14)+'Lembrar '+esc(name.split(' ')[0])+'</button>':'';
+const rsOneInject=(h,find)=>h.replace(/<li class="sched">([\s\S]*?)<\/li>/g,(li,body)=>{const f=find(body);if(!f)return li;
+ return li.replace(/(<div class="et"><div>)<b>([^<]*)<\/b>/,(m,a,t)=>a+'<b><button class="lnk record-title" data-a="'+f.act+'" data-v="'+f.key+'">'+t+'</button></b>')
+  .replace(/(<span class="who">[^<]*<\/span>)(<\/div>\s*<div class="ea">)/,(m,a,b)=>a+rsOneChip(f.m,f.act,f.key)+b);});
+{const _d=dEnc;dEnc=function(d){const h=_d.apply(this,arguments);
+ return rsOneInject(h,body=>{const id=(body.match(/data-a="dConclude" data-v="([^"]+)"/)||[])[1],m=id&&d.meets.find(x=>x.id===id);return m?{m,act:'dInvView',key:id}:null;});};}
+{const _c=careMeetings;careMeetings=function(c){const h=_c.apply(this,arguments);
+ return rsOneInject(h,body=>{const k=(body.match(/data-a="cDone" data-v="([^"]+)"/)||[])[1],i=k&&+k.split('|')[1],m=k&&c.sched[i];return m?{m,act:'careInvView',key:k}:null;});};}
+Object.assign(A,{
+ dInvView:id=>{const d=dById(S.disc),m=d.meets.find(x=>x.id===id);if(!m)return;
+  meetView({title:'Encontro agendado',sub:esc(d.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:(m.time||'').replace(':00','h'),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.content],['Material de apoio',m.mat]],
+   extra:rsOneBlock(m,d.n,d.role||'Discipulado'),edit:rsOneNudge(m,d.n),primary:'<button class="btn pri" data-a="dInvDone" data-v="'+id+'">Concluir encontro</button>'});},
+ dInvDone:id=>{closeDlg();setTimeout(()=>A.dConclude(id),60);},
+ careInvView:k=>{const [cid,i]=k.split('|'),c=cById(cid),m=c&&c.sched[+i];if(!m)return;
+  meetView({title:'Encontro agendado',sub:esc(c.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.t),mode:m.mode||'Pastoral',where:m.where,blocks:[['Situação','Ainda não aconteceu. Ao concluir, registre o que foi tratado e os próximos passos.']],
+   extra:rsOneBlock(m,c.n,'Acompanhamento pastoral'),edit:rsOneNudge(m,c.n),primary:'<button class="btn pri" data-a="careInvDone" data-v="'+k+'">Concluir encontro</button>'});},
+ careInvDone:k=>{closeDlg();setTimeout(()=>A.cDone(k),60);},
+ rsOneNudge:v=>toast('Lembrete enviado para '+v.split(' ')[0])});
+
+/* ---- Caixas de ministério e de evento: entradas, saídas e saldo (só na web, não aparece no app) ---- */
+let _cxid=0,_cxe=0;
+const CAIXAS=[];
+const cxMoney=c=>R$(c/100);
+const cxValid=x=>x.entries.filter(e=>!e.rev&&!e.est);
+const cxIn=x=>cxValid(x).filter(e=>e.t==='in'&&!e.xfer).reduce((a,e)=>a+e.v,0);
+const cxOut=x=>cxValid(x).filter(e=>e.t==='out'&&!e.xfer).reduce((a,e)=>a+e.v,0);
+const cxXf=x=>cxValid(x).filter(e=>e.xfer).reduce((a,e)=>a+(e.t==='in'?e.v:-e.v),0);
+const cxBal=x=>cxIn(x)-cxOut(x)+cxXf(x);
+const cxXfer=(from,to,v,d,by)=>{const k=to.main?'Repasse':from.main?'Aporte':'Transferência';cxAdd(from,'out',v,d,k+' para '+to.name,k,by,{xfer:true});cxAdd(to,'in',v,d,k+(from.main?' do ':' de ')+from.name,k,by,{xfer:true});};
+const cxOwnerName=x=>x.ownerType==='min'?'Ministério de '+((mnById(x.ownerId)||{}).n||'—'):((eById(x.ownerId)||{}).t||'Evento');
+const cxOwnerKind=x=>x.ownerType==='min'?'Ministério':((eById(x.ownerId)||{}).kind==='culto'?'Culto':'Evento');
+const cxNew=(type,id,name,o={})=>{const x={id:'cx'+(++_cxid),ownerType:type,ownerId:id,name,main:!!o.main,status:o.status||'aberto',closedAt:o.closedAt||'',entries:[]};CAIXAS.push(x);return x;};
+const cxAdd=(x,t,v,d,desc,cat,by,o={})=>{x.entries.push(Object.assign({id:'ce'+(++_cxe),t,v:Math.round(v*100),d,desc,cat,by:by||'Rafael Pereira'},o));return x;};
+const cxOwn=(type,id)=>{if(!CAIXAS.some(x=>x.ownerType===type&&x.ownerId===id&&x.main))cxNew(type,id,'Caixa principal',{main:true});
+ return CAIXAS.filter(x=>x.ownerType===type&&x.ownerId===id).sort((a,b)=>(b.main-a.main)||((a.status==='encerrado')-(b.status==='encerrado'))||a.id.localeCompare(b.id,undefined,{numeric:true}));};
+const cxCount=(type,id)=>cxOwn(type,id).length;
+const cxPill=x=>x.status==='encerrado'?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Encerrado</span>':x.main?'<span class="stp" style="--c:var(--brand-text);--b:var(--brand-soft)"><i></i>Principal</span>':'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Aberto</span>';
+const CX_CATS={in:['Oferta ou doação','Inscrição','Venda','Aporte da igreja','Outros'],out:['Material','Alimentação','Transporte','Hospedagem','Serviços','Outros']};
+function cxTab(type,id){
+ const all=cxOwn(type,id),multi=true;
+ const c=S.cx&&all.find(x=>x.id===S.cx);if(c)return cxView(c);S.cx=null;
+ const v=multi&&S.cxv==='encerrado'?'encerrado':'aberto',list=multi?all.filter(x=>(x.status==='encerrado')===(v==='encerrado')):all;
+ const nOpen=all.filter(x=>x.status!=='encerrado').length,nClosed=all.length-nOpen;
+ const card=x=>'<article class="card bd-c cx-c" tabindex="0" data-a="cxOpen" data-v="'+x.id+'"><div class="bd-ct"><b>'+esc(x.name)+'</b>'+cxPill(x)+'</div><span class="cx-bal'+(cxBal(x)<0?' neg':'')+'">'+cxMoney(cxBal(x))+'</span><span class="who">Entradas <b class="cx-in">'+cxMoney(cxIn(x))+'</b> · Saídas <b class="cx-out">'+cxMoney(cxOut(x))+'</b></span><span class="who">'+cxValid(x).length+' lançamento'+(cxValid(x).length===1?'':'s')+(x.status==='encerrado'&&x.closedAt?' · encerrado em '+dBR(x.closedAt):'')+'</span></article>';
+ return '<section class="card pc"><div class="sh"><div><h2>'+(multi?'Caixas':'Caixa')+'</h2><p class="who" style="margin:4px 0 0">'+(multi?'Controle o dinheiro do ministério. Há sempre o caixa principal; abra outros para separar o dinheiro de um retiro ou de uma campanha e encerre quando acabar.':'O dinheiro deste '+((eById(id)||{}).kind==='culto'?'culto':'evento')+'. Há sempre o caixa principal; abra outros para cada frente, como comida, recepção ou equipamento, e passe dinheiro entre eles.')+'</p></div>'+(multi?'<button class="btn pri sm" data-a="cxNewDlg" data-v="'+type+'|'+id+'">'+ic('plus',14,2.2)+'Novo caixa</button>':'')+'</div>'
+  +'<p class="bd-note">'+ic('lock',13,2)+'Área restrita da web. Os caixas não aparecem no app.</p>'
+  +(multi?'<div class="bd-seg"><div class="segc" role="group" aria-label="Situação dos caixas"><button data-a="cxV" data-v="aberto" aria-pressed="'+(v==='aberto')+'">Abertos<small>'+nOpen+'</small></button><button data-a="cxV" data-v="encerrado" aria-pressed="'+(v==='encerrado')+'">Encerrados<small>'+nClosed+'</small></button></div></div>':'')
+  +(list.length?'<div class="bd-g">'+list.map(card).join('')+'</div>':'<div class="soft-empty"><p>Nenhum caixa encerrado.</p><span class="who">Os caixas encerrados ficam aqui, só para consulta, e podem ser reabertos.</span></div>')+'</section>';
+}
+function cxRows(c){
+ const q=norm(S.cxq||''),f=S.cxf||'all',closed=c.status==='encerrado';
+ const l=c.entries.filter(e=>(f==='all'||e.t===f)&&(!q||norm(e.desc+' '+e.cat+' '+e.by).includes(q))).slice().sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id,undefined,{numeric:true}));
+ if(!l.length)return '<div class="soft-empty" style="padding:28px 16px"><p>'+(c.entries.length?'Nenhum lançamento corresponde ao filtro.':'Nenhum lançamento ainda.')+'</p>'+(c.entries.length||closed?'':'<span class="who">Registre a primeira entrada ou saída deste caixa.</span>')+'</div>';
+ return '<div class="trow cx-r thead"><span>Lançamento</span><span>Categoria</span><span>Registrado por</span><span>Valor</span><span></span></div>'+l.map(e=>{
+  const [y,m,d]=e.d.split('-'),sign=e.t==='in'?1:-1;
+  return '<div class="trow cx-r'+(e.rev?' rev':'')+(e.est?' est':'')+'"><span class="tn"><span class="fd-dt"><b>'+(+d)+'</b><small>'+MONTHS[+m-1].slice(0,3)+'</small></span><span class="hn"><b>'+esc(e.desc)+'</b><span>'+dBR(e.d)+(e.file?' · '+ic('file',11,2)+' '+esc(e.file):'')+(e.rev?' · <em>estornado</em>':'')+'</span></span></span><span class="te">'+(e.xfer?ic('arrowRL',12,2)+' ':'')+esc(e.cat)+'</span><span class="tp">'+esc(e.by)+'</span><span class="ts cx-v '+(e.xfer?'xf':e.t)+'">'+(e.t==='in'?'+':'−')+cxMoney(e.v).replace('−','')+'</span><span class="cx-act">'+(!closed&&!e.rev&&!e.est&&!e.xfer?'<button class="ibtn sm" data-a="cxRev" data-v="'+c.id+'|'+e.id+'" aria-label="Estornar lançamento" title="Estornar lançamento">'+ic('undo',14)+'</button>':'')+'</span></div>';}).join('');}
+function cxView(c){
+ const closed=c.status==='encerrado',bal=cxBal(c),all=c.entries,others=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado'),canXfer=!closed&&(c.main?others.some(x=>!x.main):true);
+ const chip=(v,l,n)=>'<button class="chipf '+((S.cxf||'all')===v?'on':'')+'" data-a="cxF" data-v="'+v+'">'+l+'<small>'+n+'</small></button>';
+ const nIn=all.filter(e=>e.t==='in').length,nOut=all.filter(e=>e.t==='out').length;
+ return '<section class="card pc cx-board"><div class="bd-top"><button class="btn sec sm" data-a="cxBack">'+ic('chevL',14,2)+'Caixas</button><div class="bd-tt"><h2>'+esc(c.name)+'</h2><span class="who">'+cxOwnerKind(c)+': '+esc(cxOwnerName(c))+(closed&&c.closedAt?' · encerrado em '+dBR(c.closedAt):'')+'</span></div>'+cxPill(c)
+  +'<div class="pact">'+(canXfer?'<button class="btn sec sm" data-a="cxXfer" data-v="'+c.id+'">'+ic('arrowRL',14,2)+(c.main?'Enviar a um caixa':'Devolver ao principal')+'</button>':'')+(closed?'':'<button class="btn sec sm" data-a="cxEntry" data-v="'+c.id+'|out">'+ic('minus',14,2.2)+'Saída</button><button class="btn pri sm" data-a="cxEntry" data-v="'+c.id+'|in">'+ic('plus',14,2.2)+'Entrada</button>')
+  +(closed?'<button class="btn sec sm" data-a="cxReopen" data-v="'+c.id+'">Reabrir caixa</button>':(c.main?'':'<button class="btn sec sm" data-a="cxClose" data-v="'+c.id+'">Encerrar caixa</button>'))
+  +(c.main?'':'<span style="position:relative"><button class="ibtn" data-a="cxMenu" data-v="'+c.id+'" aria-label="Mais ações">'+ic('dots',17)+'</button><div class="pop" id="cxPop-'+c.id+'" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="cxRen" data-v="'+c.id+'">'+ic('pen',16)+'Renomear caixa</button><hr><button class="pi danger" data-a="cxDel" data-v="'+c.id+'">'+ic('x',16)+'Excluir caixa</button></div></span>')+'</div></div>'
+  +(closed?'<p class="bd-note">'+ic('lock',13,2)+'Caixa encerrado: só para consulta. Reabra para fazer novos lançamentos.</p>':'')
+  +'<div class="cx-kp"><div class="cx-k main"><span>Saldo</span><b class="'+(bal<0?'neg':'')+'">'+cxMoney(bal)+'</b>'+(bal<0?'<small>Saldo negativo: saiu mais do que entrou.</small>':'')+'</div><div class="cx-k"><span>Entradas</span><b class="cx-in">'+cxMoney(cxIn(c))+'</b></div><div class="cx-k"><span>Saídas</span><b class="cx-out">'+cxMoney(cxOut(c))+'</b></div><div class="cx-k"><span>Aportes e repasses</span><b class="cx-xf">'+(cxXf(c)>0?'+':'')+cxMoney(cxXf(c))+'</b><small class="cx-sub">'+(c.main?'Enviado e devolvido pelos outros caixas':'Recebido do principal, menos o devolvido')+'</small></div></div>'
+  +'<div class="tbar cx-tb"><label class="sbox">'+ic('search',16)+'<input id="cxQ" placeholder="Buscar lançamento, categoria ou pessoa" value="'+esc(S.cxq||'')+'" autocomplete="off"></label><div class="chips">'+chip('all','Todos',all.length)+chip('in','Entradas',nIn)+chip('out','Saídas',nOut)+'</div></div>'
+  +'<div class="cx-list" id="cxRows">'+cxRows(c)+'</div></section>';
+}
+function cxEntryDlg(cid,t){
+ const c=CAIXAS.find(x=>x.id===cid);if(!c||c.status==='encerrado')return;
+ openDlg(dlgHead('Novo lançamento',esc(c.name)+' · saldo '+cxMoney(cxBal(c)))+'<form id="cxF" class="fgrid" novalidate style="grid-template-columns:1fr 1fr">'
+  +'<div class="fld wide"><span class="fl">Tipo</span><div class="yn" role="radiogroup"><label><input type="radio" name="t" value="in"'+(t==='in'?' checked':'')+'><span>'+ic('plus',14,2.2)+'&nbsp;Entrada</span></label><label><input type="radio" name="t" value="out"'+(t==='out'?' checked':'')+'><span>'+ic('minus',14,2.2)+'&nbsp;Saída</span></label></div></div>'
+  +'<label class="fld"><span class="fl">Valor (R$)</span><input name="v" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"><span class="err"></span></label>'
+  +'<label class="fld"><span class="fl">Data</span><input type="date" name="d" value="'+myTd()+'" max="'+myTd()+'"><span class="err"></span></label>'
+  +'<label class="fld wide"><span class="fl">Descrição</span><input name="desc" maxlength="80" autocomplete="off" placeholder="Ex.: Compra de cordas"><span class="err"></span></label>'
+  +'<label class="fld"><span class="fl">Categoria</span><span class="selw"><select name="cat"></select>'+ic('updown',14)+'</span></label>'
+  +'<label class="fld"><span class="fl">Comprovante <small>opcional</small></span><input type="file" name="file" accept="image/*,application/pdf"></label>'
+  +'<p class="hint wide" id="cxH"></p>'
+  +'<div class="dfoot wide"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Lançar</button></div></form>','sm');
+ const f=$('#cxF'),typ=()=>f.elements.t.value,paint=()=>{const k=typ();f.elements.cat.innerHTML=CX_CATS[k].map(x=>'<option>'+x+'</option>').join('');
+  const v=Math.round((+f.elements.v.value||0)*100);$('#cxH').textContent=k==='out'&&v>cxBal(c)?'Atenção: esta saída é maior que o saldo e deixa o caixa negativo.':'';};
+ paint();f.addEventListener('change',e=>{if(e.target.name==='t')paint();});f.addEventListener('input',e=>{e.target.closest('.fld')?.classList.remove('bad');if(e.target.name==='v')paint();});
+ f.onsubmit=e=>{e.preventDefault();const q=f.elements,bad=(n,m)=>{const i=q[n],fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;i.focus();};
+  const v=+q.v.value;if(!(v>0))return bad('v','Informe um valor maior que zero');if(!q.d.value)return bad('d','Escolha a data');if(!q.desc.value.trim())return bad('desc','Descreva o lançamento');
+  cxAdd(c,typ(),v,q.d.value,q.desc.value.trim(),q.cat.value,ME_NAME,{file:q.file.files&&q.file.files[0]?q.file.files[0].name:''});
+  closeDlg();bdRe();toast((typ()==='in'?'Entrada':'Saída')+' de '+cxMoney(Math.round(v*100))+' lançada');};
+}
+function cxXferDlg(cid){
+ const c=CAIXAS.find(x=>x.id===cid);if(!c||c.status==='encerrado')return;
+ const all=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado'),dests=c.main?all.filter(x=>!x.main):all.filter(x=>x.main),bal=cxBal(c);
+ if(!dests.length){toast('Crie outro caixa para passar dinheiro entre eles');return;}
+ openDlg(dlgHead(c.main?'Enviar a um caixa':'Devolver ao caixa principal',(c.main?'Aporte do ':'Repasse de ')+esc(c.name)+' · saldo '+cxMoney(bal))+'<form id="cxX" class="fgrid one" novalidate>'
+  +'<label class="fld"><span class="fl">'+(c.main?'Para qual caixa?':'Devolver para')+'</span><span class="selw"><select name="to"'+(c.main?'':' disabled')+'>'+dests.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+(c.main?ic('updown',14):'')+'</span></label>'
+  +'<label class="fld"><span class="fl">Valor (R$)</span><input name="v" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"><span class="err"></span><span class="hint">Disponível neste caixa: '+cxMoney(bal)+'. Não dá para enviar mais do que o saldo.</span></label>'
+  +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">'+(c.main?'Enviar':'Devolver')+'</button></div></form>','sm');
+ const f=$('#cxX');f.addEventListener('input',()=>f.elements.v.closest('.fld').classList.remove('bad'));
+ f.onsubmit=e=>{e.preventDefault();const v=Math.round((+f.elements.v.value||0)*100),fl=f.elements.v.closest('.fld'),bad=m=>{fl.classList.add('bad');fl.querySelector('.err').textContent=m;f.elements.v.focus();};
+  if(!(v>0))return bad('Informe um valor maior que zero');if(v>bal)return bad('O saldo deste caixa é '+cxMoney(bal));
+  const to=CAIXAS.find(x=>x.id===(c.main?f.elements.to.value:dests[0].id));cxXfer(c,to,v/100,myTd(),ME_NAME);closeDlg();bdRe();toast((c.main?'Aporte':'Repasse')+' de '+cxMoney(v)+' para '+to.name);};
+}
+function cxCloseDlg(cid){
+ const c=CAIXAS.find(x=>x.id===cid);if(!c||c.main)return;const bal=cxBal(c),others=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado');
+ openDlg(dlgHead('Encerrar este caixa?','O caixa fica só para consulta e pode ser reaberto.')+'<form id="cxC" class="fgrid one" novalidate>'
+  +(bal>0?'<div class="fld"><span class="fl">O que fazer com o saldo de '+cxMoney(bal)+'?</span><span class="selw"><select name="dest">'+others.map(x=>'<option value="to:'+x.id+'">'+(x.main?'Devolver ao “'+esc(x.name)+'”':'Transferir para “'+esc(x.name)+'”')+'</option>').join('')+'<option value="church">Repassar à igreja</option><option value="keep">Deixar o saldo neste caixa encerrado</option></select>'+ic('updown',14)+'</span></div>':'<p class="who" style="margin:0">'+(bal<0?'O saldo está negativo ('+cxMoney(bal)+'). Ele será mantido no caixa encerrado.':'O saldo é zero. Nada a transferir.')+'</p>')
+  +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Encerrar caixa</button></div></form>','sm');
+ $('#cxC').onsubmit=e=>{e.preventDefault();const dest=bal>0?e.target.elements.dest.value:'keep',t=myTd();
+  if(dest.startsWith('to:')){const to=CAIXAS.find(x=>x.id===dest.slice(3));cxXfer(c,to,bal/100,t,ME_NAME);}
+  else if(dest==='church')cxAdd(c,'out',bal/100,t,'Repasse à igreja no encerramento','Repasse',ME_NAME);
+  c.status='encerrado';c.closedAt=t;closeDlg();S.cxv='encerrado';bdRe();toast('Caixa encerrado');};
+}
+Object.assign(A,{
+ cxOpen:v=>{S.cx=v;S.cxf='all';S.cxq='';bdRe();},cxBack:()=>{S.cx=null;bdRe();},cxV:v=>{S.cxv=v;bdRe();},cxF:v=>{S.cxf=v;bdRe();},
+ cxMenu:v=>{const p=$('#cxPop-'+v);closePops(p);p.classList.toggle('open');},
+ cxEntry:v=>{const [id,t]=v.split('|');cxEntryDlg(id,t);},
+ cxClose:v=>cxCloseDlg(v),cxXfer:v=>cxXferDlg(v),
+ cxReopen:v=>{const c=CAIXAS.find(x=>x.id===v);c.status='aberto';c.closedAt='';S.cxv='aberto';bdRe();toast('Caixa reaberto');},
+ cxNewDlg:v=>{const [type,id]=v.split('|');nxNameDlg('Novo caixa','Um caixa separado, por exemplo para um retiro ou uma campanha.','','Ex.: Retiro de jovens 2027',x=>{if(!x)return 'Dê um nome';const n=cxNew(type,id,x);S.cx=n.id;S.cxv='aberto';S.cxf='all';S.cxq='';closeDlg();bdRe();toast('Caixa criado');});},
+ cxRen:v=>{closePops();const c=CAIXAS.find(x=>x.id===v);nxNameDlg('Renomear caixa','',c.name,'Nome do caixa',x=>{if(!x)return 'Dê um nome';c.name=x;closeDlg();bdRe();toast('Caixa renomeado');});},
+ cxDel:v=>{closePops();const c=CAIXAS.find(x=>x.id===v),n=c.entries.length;confirmDel({title:'Excluir '+esc(c.name)+'?',body:(n?'Os '+n+' lançamentos serão apagados. ':'')+'Para guardar o histórico do dinheiro, prefira encerrar o caixa.',typed:n?c.name:null,onConfirm:()=>{CAIXAS.splice(CAIXAS.indexOf(c),1);S.cx=null;bdRe();toast('Caixa excluído');}});},
+ cxRev:v=>{const [cid,eid]=v.split('|'),c=CAIXAS.find(x=>x.id===cid),e=c&&c.entries.find(x=>x.id===eid);if(!e)return;
+  confirmDel({title:'Estornar este lançamento?',body:'“'+esc(e.desc)+'” ('+(e.t==='in'?'entrada':'saída')+' de '+cxMoney(e.v)+') continua na lista, marcado como estornado, e um lançamento contrário desfaz o efeito no saldo. Nada é apagado.',label:'Estornar',onConfirm:()=>{e.rev=true;c.entries.push({id:'ce'+(++_cxe),t:e.t==='in'?'out':'in',v:e.v,d:myTd(),desc:'Estorno: '+e.desc,cat:'Estorno',by:ME_NAME,est:true,of:e.id});bdRe();toast('Lançamento estornado');}});}
+});
+document.addEventListener('input',e=>{if(e.target.id!=='cxQ')return;S.cxq=e.target.value;const c=CAIXAS.find(x=>x.id===S.cx),box=$('#cxRows');if(c&&box)box.innerHTML=cxRows(c);});
+for(const k of ['nav','mnOpen','mnTab','evOpen','evTab']){const base=A[k];if(base)A[k]=function(){S.cx=null;S.cxv='aberto';S.cxf='all';S.cxq='';return base.apply(this,arguments);};}
+/* dados de demonstração */
+(()=>{const mi=n=>(MINIS.find(m=>m.n===n)||{}).id;
+ const lo=mi('Louvor');if(lo){const p=cxNew('min',lo,'Caixa principal',{main:true});
+  cxAdd(p,'in',2500,'2026-07-05','Aporte da igreja · 3º trimestre','Aporte da igreja','Rafael Pereira');
+  cxAdd(p,'out',386.9,'2026-07-18','Cordas e palhetas','Material','Ana Clara Lima',{file:'nota-cordas.pdf'});
+  cxAdd(p,'out',420,'2026-08-02','Manutenção do teclado','Serviços','Ana Clara Lima',{file:'recibo-teclado.jpg'});
+  cxAdd(p,'in',340,'2026-08-16','Venda de CDs do ministério','Venda','Rafael Pereira');
+  cxAdd(p,'out',128.5,'2026-09-12','Lanche do ensaio geral','Alimentação','Ana Clara Lima');
+  const bad=cxAdd(p,'out',64,'2026-09-19','Impressão de cifras (valor errado)','Material','Ana Clara Lima');const bi=bad.entries[bad.entries.length-1];bi.rev=true;
+  cxAdd(p,'in',64,'2026-09-19','Estorno: Impressão de cifras (valor errado)','Estorno','Rafael Pereira',{est:true,of:bi.id});
+  cxAdd(p,'out',46,'2026-09-19','Impressão de cifras','Material','Ana Clara Lima');
+  cxAdd(p,'in',600,'2026-09-27','Oferta para o ministério','Oferta ou doação','Rafael Pereira');
+  const r=cxNew('min',lo,'Retiro de Louvor 2026');
+  cxAdd(r,'in',4800,'2026-09-01','Inscrições do retiro (24 pessoas)','Inscrição','Rafael Pereira');
+  cxAdd(r,'out',1500,'2026-09-05','Sinal da chácara','Hospedagem','Ana Clara Lima',{file:'contrato-chacara.pdf'});
+  cxAdd(r,'out',612.3,'2026-09-26','Compras do mercado','Alimentação','Ana Clara Lima');
+  cxXfer(p,r,1000,'2026-09-02','Rafael Pereira');cxXfer(r,p,200,'2026-09-29','Ana Clara Lima');
+  const n=cxNew('min',lo,'Cantata de Natal 2025',{status:'encerrado',closedAt:'2026-01-10'});
+  cxAdd(n,'in',1800,'2025-11-20','Aporte da igreja para a cantata','Aporte da igreja','Rafael Pereira');
+  cxAdd(n,'out',950,'2025-12-10','Figurinos e cenário','Material','Ana Clara Lima');
+  cxAdd(n,'out',310,'2025-12-21','Lanche da apresentação','Alimentação','Ana Clara Lima');
+  cxAdd(n,'out',540,'2026-01-10','Repasse à igreja no encerramento','Repasse','Rafael Pereira');}
+ const re=mi('Recepção');if(re){const p=cxNew('min',re,'Caixa principal',{main:true});
+  cxAdd(p,'in',800,'2026-08-10','Aporte da igreja · materiais','Aporte da igreja','Rafael Pereira');
+  cxAdd(p,'out',214.8,'2026-08-24','Crachás e cordões','Material','Juliana Reis',{file:'nota-crachas.pdf'});}
+ const cm=EVTS.find(e=>e.t==='Congresso de Mulheres 2027');if(cm){const p=cxNew('evt',cm.id,'Caixa principal',{main:true});
+  cxAdd(p,'in',5000,'2026-09-02','Aporte inicial da igreja','Aporte da igreja','Rafael Pereira');
+  cxAdd(p,'in',3000,'2026-09-15','Patrocínio · Livraria Esperança','Oferta ou doação','Diego Martins');
+  cxAdd(p,'out',2000,'2026-09-20','Sinal do auditório','Serviços','Diego Martins',{file:'contrato-auditorio.pdf'});
+  cxAdd(p,'out',380,'2026-09-24','Arte e impressão dos crachás','Material','Diego Martins');
+  cxAdd(p,'out',1200,'2026-09-28','Contratação de som','Serviços','Diego Martins',{file:'orcamento-som.pdf'});
+  const al=cxNew('evt',cm.id,'Alimentação'),rc=cxNew('evt',cm.id,'Recepção');
+  cxXfer(p,al,1500,'2026-09-29','Rafael Pereira');cxXfer(p,rc,600,'2026-09-29','Rafael Pereira');
+  cxAdd(al,'out',520,'2026-09-30','Coffee break · sinal ao buffet','Alimentação','Juliana Reis',{file:'sinal-buffet.pdf'});
+  cxAdd(rc,'out',140,'2026-09-30','Cordões e porta-crachás','Material','Juliana Reis');}
+})();
+
+/* ================= Eventos: tipos de ingresso e compras adicionais ================= */
+let _tkn=0;
+function evMoney(e){return !!e.paid||(e.items||[]).some(i=>+i.price>0);}
+function evEnsure(e){
+ e.items=e.items||[];e.tickets=e.tickets||[];
+ e.items.forEach(i=>{if(!i.id)i.id='it'+(++_tkn);});
+ if(e.paid&&!e.tickets.length)e.tickets.push({id:'tk'+(++_tkn),n:'Inscrição',desc:'',price:+e.price||0,cap:0,incl:[],per:[],off:false});
+ e.tickets.forEach(t=>{if(!t.id)t.id='tk'+(++_tkn);t.incl=t.incl||[];t.per=t.per||[];});
+ evSync(e);return e;
+}
+function evSync(e){const act=(e.tickets||[]).filter(t=>!t.off);if(act.length)e.price=Math.min(...act.map(t=>+t.price||0));}
+const tkPrice=(e,t)=>e.paid?(+t.price||0):0;
+const tkSold=(e,t)=>e.regs.filter(r=>r.tk===t.id).length;
+const tkFull=(e,t)=>!!t.cap&&tkSold(e,t)>=t.cap;
+const tkOf=(e,r)=>(e.tickets||[]).find(t=>t.id===r.tk)||null;
+const itById=(e,id)=>(e.items||[]).find(i=>i.id===id);
+const itLabel=i=>i.n+(i.p?' · '+i.p:'');
+const itSold=(e,it)=>e.regs.filter(r=>(r.buy||[]).includes(it.id)).length;
+function buyOf(e,r){return (r.buy||[]).map(id=>itById(e,id)).filter(Boolean);}
+function regTot(e,r){return (+r.val||0)+buyOf(e,r).reduce((a,i)=>a+(+i.price||0),0);}
+function evTop(e){const p=(e.tickets||[]).map(t=>+t.price||0);return p.length?Math.max(...p):(+e.price||0);}
+function evFromTxt(e){const act=(e.tickets||[]).filter(t=>!t.off);if(act.length>1){const m=Math.min(...act.map(t=>+t.price||0)),M=Math.max(...act.map(t=>+t.price||0));return m===M?brl(m):'a partir de '+brl(m);}return brl(e.price);}
+function evMulti(e){return (e.tickets||[]).filter(t=>!t.off).length>1;}
+function tkInclTxt(e,t){return (t.incl||[]).map(id=>itById(e,id)).filter(Boolean).map(itLabel);}
+
+/* ---------- detalhe do evento ---------- */
+evDet=function(e){
+ evEnsure(e);
+ const base=`<div class="pgrid"><div class="col">
+  <section class="card pc evi"><div class="sh"><h2>Informações</h2><button class="btn sec sm" data-a="evEdit">${ic('pen',14)}Editar</button></div><div class="evi-g">${evInfoRows(e)}</div></section>`;
+ if(e.st==='previsao')return base+`<section class="card pc"><div class="soft-empty"><p>Ainda é uma previsão.</p><span class="who">Inscrições, pagamento e check-in ficam disponíveis quando a data for confirmada.</span><button class="btn pri" data-a="evConfirm" data-v="${e.id}">Confirmar data</button></div></section></div><div class="col"></div></div>`;
+ const tks=e.tickets,act=tks.filter(t=>!t.off);
+ const tkCard=`<section class="card pc"><div class="sh"><h2>Ingressos</h2><button class="btn sec sm" data-a="tkNew">${ic('plus',14,2.2)}Novo ingresso</button></div>
+  <p class="who" style="margin:-6px 0 12px">${tks.length?'Os tipos que a pessoa escolhe ao se inscrever.':'Hoje a inscrição é uma só. Crie tipos de ingresso se precisar separar, por exemplo, participante e equipe.'}</p>
+  ${tks.length?`<div class="tg-list">${tks.map(t=>{const sold=tkSold(e,t),inc=tkInclTxt(e,t),pr=tkPrice(e,t);return `<div class="tg-r ${t.off?'off':''}" tabindex="0" data-a="tkEdit" data-v="${t.id}">
+   <span class="tg-main"><span class="tg-t"><b>${esc(t.n)}</b>${t.off?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Vendas pausadas</span>':tkFull(e,t)?'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Esgotado</span>':''}</span>${t.desc?`<small>${esc(t.desc)}</small>`:''}
+    ${inc.length||(t.per||[]).length?`<span class="tg-chips">${inc.map(x=>`<i>${ic('check',10,3)}${esc(x)}</i>`).join('')}${(t.per||[]).length?`<i class="per">${ic('calendar',10,2.4)}${esc(t.per.join(' + '))}</i>`:''}</span>`:''}</span>
+   <span class="tg-pr"><b class="mono">${brl(pr)}</b><small>${sold}${t.cap?'/'+t.cap:''} ${sold===1?'inscrito':'inscritos'}</small>${t.cap?`<span class="tr"><i style="width:${Math.min(100,sold/t.cap*100)}%"></i></span>`:''}</span>
+   <span class="hact"><div style="position:relative"><button class="ibtn sm" data-a="tkMenu" data-v="${t.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="tgPop-${t.id}" style="right:0;top:calc(100% + 4px)"><button class="pi" data-a="tkEdit" data-v="${t.id}">${ic('pen',16)}Editar</button><button class="pi" data-a="tkPause" data-v="${t.id}">${ic(t.off?'check':'pause',16)}${t.off?'Retomar vendas':'Pausar vendas'}</button><hr><button class="pi danger" data-a="tkDel" data-v="${t.id}">${ic('x',16)}Excluir ingresso</button></div></div></span></div>`;}).join('')}</div>`:`<button class="btn sec" data-a="tkNew">${ic('plus',14,2.2)}Criar tipos de ingresso</button>`}
+  ${e.paid&&!act.length?`<div class="rgwarn" style="margin-top:12px">${ic('alert',14,2)}Nenhum ingresso à venda. Retome ou crie um ingresso.</div>`:''}</section>`;
+ const insc=`<section class="card pc"><div class="sh"><h2>Inscrição</h2></div>
+   <div class="yn" style="max-width:280px" id="payG"><label><input type="radio" name="pay" value="0" ${!e.paid?'checked':''}><span>Gratuita</span></label><label><input type="radio" name="pay" value="1" ${e.paid?'checked':''}><span>Paga</span></label></div>
+   ${e.paid?`<p class="hint" style="margin:12px 0 0">${ic('shield',13,2)} Pix e cartão. Taxas e repasse seguem a configuração de pagamentos da sua igreja no Alva.</p>`:''}</section>`;
+ const its=e.items;
+ const itCard=`<section class="card pc"><div class="sh"><h2>Compras adicionais</h2><span class="who">almoço, café, camiseta…</span></div>
+   <p class="who" style="margin:-6px 0 12px">Itens que a pessoa pode comprar junto com o ingresso${e.checkin==='off'?'. Sem check-in, o item é cobrado mas não gera código':''}.</p>
+   ${its.length?`<div class="eitems">${its.map(it=>{const n=itSold(e,it),inTk=e.tickets.filter(t=>t.incl.includes(it.id));return `<div class="eit ${it.off?'off':''}"><span><b>${esc(it.n)}</b><small>${it.p||'Evento inteiro'}${n?` · ${n} ${n===1?'comprou':'compraram'}`:''}${inTk.length?` · incluso em ${inTk.map(t=>esc(t.n)).join(', ')}`:''}${it.off?' · venda encerrada':''}</small></span><b class="mono">${brl(it.price)}</b><button class="ibtn sm" data-a="evItemDel" data-v="${it.id}" aria-label="${it.off?'Retomar':'Remover'}" title="${it.off?'Retomar venda':'Remover'}">${ic(it.off?'check':'x',14)}</button></div>`;}).join('')}</div>`:'<p class="who" style="margin:0 0 12px">Nenhum item ainda.</p>'}
+   <form class="itF ${e.checkin==='periodo'&&e.periods.length?'wp':''}" id="itF2"><input name="n" placeholder="Ex.: Almoço" aria-label="Item" autocomplete="off"><span class="mpre sm"><em>R$</em><input name="p" type="number" min="1" step="0.01" placeholder="0" aria-label="Preço"></span>${e.checkin==='periodo'&&e.periods.length?`<span class="selw"><select name="per" aria-label="Vale para"><option value="">Evento inteiro</option>${e.periods.map(p=>`<option>${esc(p)}</option>`).join('')}</select>${ic('updown',13)}</span>`:''}<button class="btn sec sm" type="submit">${ic('plus',13,2.2)}Adicionar item</button></form></section>`;
+ const ckCard=`<section class="card pc"><div class="sh"><h2>Check-in</h2></div><p class="who" style="margin:-6px 0 12px">Escolha de quem monta o evento, independe de ser gratuito ou pago. A entrada é confirmada pela equipe no app do VEM.</p>
+   <div class="vis" id="ckG">${[['off','Desabilitado','Sem controle de entrada.'],['inteiro','Evento inteiro','Um código vale para o evento todo.'],['periodo','Por período','Um código por dia ou turno.']].map(o=>`<label><input type="radio" name="ck" value="${o[0]}" ${e.checkin===o[0]?'checked':''}><span><b>${o[1]}</b><small>${o[2]}</small></span></label>`).join('')}</div>
+   ${e.checkin==='inteiro'?`<div class="fld ckc"><span class="fl">Código de acesso</span><div class="ccode"><span class="mono">${codeOf(e,'*')}</span><button class="btn sec sm" data-a="copy" data-v="${codeOf(e,'*')}">Copiar</button><button class="ibtn sm" data-a="ckRegen" data-v="*" aria-label="Gerar novo código" title="Gerar novo código">${ic('swap',14)}</button></div><span class="hint">Vale do início ao fim do evento. Use no totem ou no app de check-in.</span></div>`:''}
+   ${e.checkin==='periodo'?`<div class="fld ckc"><span class="fl">Períodos <small>cada um gera seu próprio código</small></span>
+    ${e.periods.length?`<div class="pers">${e.periods.map((p,i)=>`<div class="per"><span class="pn">${esc(p)}</span><span class="mono">${codeOf(e,p)}</span><button class="ibtn sm" data-a="copy" data-v="${codeOf(e,p)}" aria-label="Copiar código de ${esc(p)}" title="Copiar">${ic('clipboard',14)}</button><button class="ibtn sm" data-a="evPerDel" data-v="${i}" aria-label="Remover ${esc(p)}" title="Remover">${ic('x',14)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0">Nenhum período ainda. Adicione o primeiro, ex.: Sábado.</p>'}
+    <form class="perF" id="perF"><input placeholder="Ex.: Sábado" aria-label="Novo período" autocomplete="off"><button class="btn sec sm" type="submit">${ic('plus',13,2.2)}Adicionar período</button></form></div>`:''}</section>`;
+ return base+insc+tkCard+`</div><div class="col">${ckCard}${itCard}${vemCard(e)}</div></div>`;
+};
+
+/* ---------- inscrições do evento ---------- */
+evIns=function(e){
+ evEnsure(e);const mny=evMoney(e),pd=e.regs.filter(r=>r.pay==='pago').length;
+ const chips=e.tickets.length>1?`<div class="tg-sumbar">${e.tickets.map(t=>`<span><b>${tkSold(e,t)}</b> ${esc(t.n)}</span>`).join('')}</div>`:'';
+ return `<section class="card mtab"><div class="tbar"><span class="who" style="margin-right:auto"><b style="color:var(--ink)">${e.regs.length}</b>${e.cap?` de ${e.cap} vagas`:' inscritos'}${mny?` · ${pd} pagos · ${brl(raised(e))}`:''}</span><button class="btn pri sm" data-a="evReg">${ic('plus',14,2.2)}Adicionar inscrição</button></div>${chips}
+  ${e.regs.length?`<div class="trow rg thead"><span>Nome</span><span>Inscrição</span>${mny?'<span>Pagamento</span><span>Valor</span>':''}<span></span></div>${e.regs.map(r=>{const tk=tkOf(e,r),nb=buyOf(e,r).length,tot=regTot(e,r);return `<div class="trow rg ${mny?'':'free'} ${S.rgHi===r.id?'hi':''}" id="rg-${r.id}" tabindex="0" data-a="rgView" data-v="${r.id}" style="cursor:pointer"><span class="tn"><span class="av" style="background:var(--tone-${TONES[r.n.length%6]});color:var(--tone-${TONES[r.n.length%6]}-ink)">${initials(r.n)}</span><span class="hn"><b>${esc(r.n)}</b>${tk&&e.tickets.length>1||nb?`<span class="tg-sub">${tk&&e.tickets.length>1?esc(tk.n):''}${nb?`${tk&&e.tickets.length>1?' · ':''}+${nb} ${nb===1?'compra':'compras'}`:''}</span>`:''}${r.vch?`<span class="mono vtag">${ic('ticket',11)}${esc(r.vch)}</span>`:''}</span></span>
+   <span class="rdt">${dBR(r.d)}</span>${mny?`<span class="ts">${r.pay==='pago'?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Pago</span>':r.pay==='pendente'?'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Pendente</span>':'<span class="soft">Gratuita</span>'}</span><span class="rv mono">${r.pay==='—'?'—':tot?brl(tot):'Bolsa'}</span>`:''}
+   <span class="hact"><div style="position:relative"><button class="ibtn sm" data-a="rgMenu" data-v="${r.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="rgPop-${r.id}" style="right:0;top:calc(100% + 4px)"><button class="pi" data-a="rgView" data-v="${r.id}">${ic('eye',16)}Ver inscrição</button><hr>${mny&&r.pay==='pendente'?`<button class="pi" data-a="rgPaid" data-v="${r.id}">${ic('check',16)}Marcar como pago</button><button class="pi" data-a="rgLink" data-v="${r.id}">${ic('mail',16)}Reenviar link de pagamento</button><hr>`:''}<button class="pi danger" data-a="rgDel" data-v="${r.id}">${ic('x',16)}Cancelar inscrição</button></div></div></span></div>`;}).join('')}`
+  :`<div class="mempty"><p>Ninguém inscrito ainda.</p><span>Compartilhe o link do evento ou adicione alguém manualmente.</span></div>`}</section>`;
+};
+
+/* ---------- ingressos e compras de uma inscrição ---------- */
+tickets=function(e,r){
+ const num=String(400+EVTS.indexOf(e)*37+e.regs.indexOf(r)+1),slug=t=>norm(t).replace(/[^a-z0-9]+/g,'-').toUpperCase(),tk=tkOf(e,r);
+ const ps=tk&&tk.per&&tk.per.length?e.periods.filter(p=>tk.per.includes(p)):e.periods;
+ const acc=e.checkin==='off'?[{k:'insc',n:'Inscrição'+(tk&&e.tickets.length>1?' · '+tk.n:''),tag:'Inscrição',code:''}]:e.checkin==='inteiro'?[{k:'geral',n:'Entrada geral',tag:'Acesso',code:`ALVA-${num}-ACESSO-GERAL`}]:ps.map(p=>({k:'p:'+p,n:'Entrada · '+p,tag:'Acesso',code:`ALVA-${num}-${slug(p)}`}));
+ const inc=(tk?tk.incl:[]).map(id=>itById(e,id)).filter(Boolean).map(it=>({k:'inc:'+it.id,n:itLabel(it),tag:'Incluso',price:0,code:e.checkin==='off'?'':`ALVA-${num}-${slug(it.n+(it.p?'-'+it.p:''))}-INC`}));
+ const its=buyOf(e,r).map(it=>({k:'i:'+it.id,n:itLabel(it),tag:'Compra',price:it.price,code:e.checkin==='off'?'':`ALVA-${num}-${slug(it.n+(it.p?'-'+it.p:''))}`}));
+ return [...acc,...inc,...its];
+};
+rgDlg=function(e,rid){
+ const r=e.regs.find(x=>x.id===rid);if(!r)return;r.ck=r.ck||{};evEnsure(e);S.rgE=e.id;
+ const mail=(MEMBERS.find(m=>m.n===r.n)||{}).e||norm(r.n).replace(/\s+/g,'.')+'@email.com',mny=evMoney(e);
+ const tk=tickets(e,r),tkt=tkOf(e,r),tot=regTot(e,r),done=tk.filter(t=>r.ck[t.k]).length,blocked=mny&&r.pay==='pendente';
+ openDlg(`<div class="dh"><div class="drh"><span class="av lg" style="background:var(--tone-${TONES[r.n.length%6]});color:var(--tone-${TONES[r.n.length%6]}-ink)">${initials(r.n)}</span><div><h3>${esc(r.n)}</h3><p>${esc(e.t)}</p></div></div><button class="ibtn sm" data-a="closeDlg" aria-label="Fechar">${ic('x',16)}</button></div>
+  <dl class="kv grid2 rgkv"><div><dt>E-mail</dt><dd><span class="cp" data-a="copy" data-v="${esc(mail)}">${esc(mail)}</span></dd></div><div><dt>Inscrição</dt><dd>${dBR(r.d)}</dd></div>
+   ${tkt?`<div><dt>Ingresso</dt><dd>${esc(tkt.n)}</dd></div>`:''}
+   ${mny?`<div><dt>Pagamento</dt><dd>${r.pay==='pago'?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Pago</span>':r.pay==='pendente'?'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Pendente</span>':'<span class="soft">Gratuita</span>'}</dd></div><div><dt>Total</dt><dd class="mono">${tot?brl(tot):r.pay==='—'?'—':'Bolsa integral'}${r.vch?` <span class="vtag mono">${ic('ticket',11)}${esc(r.vch)}</span>`:''}</dd></div>`:''}</dl>
+  <div class="sh" style="margin:20px 0 10px"><span class="fl">Ingressos e compras</span><span class="who">${e.checkin==='off'?'check-in desabilitado':`${done} de ${tk.length} com check-in`}</span></div>
+  ${blocked?`<div class="rgwarn">${ic('alert',14,2)}O check-in libera quando o pagamento for confirmado.</div>`:''}
+  <div class="tks">${tk.map(t=>{const c=r.ck[t.k],alt=t.tag==='Compra'||t.tag==='Incluso';return `<div class="tk ${c?'in':''}"><div class="tkl"><div class="tk1"><b>${esc(t.n)}</b><span class="stp" style="--c:${alt?'var(--st-ace)':'var(--st-int)'};--b:${alt?'var(--st-ace-bg)':'var(--st-int-bg)'}"><i></i>${t.tag}</span>${t.price?`<span class="mono who">${brl(t.price)}</span>`:''}</div>${t.code?`<span class="mono tkc">${t.code}</span>`:''}</div>
+   ${e.checkin==='off'?'':c?`<button class="tks-st ok" data-a="rgCk" data-v="${r.id}|${t.k}" title="Desfazer check-in">${ic('check',13,2.6)}Entrou às ${c}</button>`:`<button class="tks-st" data-a="rgCk" data-v="${r.id}|${t.k}" ${blocked?'disabled':''}>Aguardando · fazer check-in</button>`}</div>`;}).join('')}</div>
+  <div class="dfoot" style="justify-content:space-between;margin-top:18px">${mny&&r.pay==='pendente'?`<button class="btn sec" data-a="rgLinkD" data-v="${r.id}">${ic('mail',15)}Reenviar link</button>`:'<span></span>'}<button class="btn sec" data-a="closeDlg">Fechar</button></div>`,'');
+};
+
+/* ---------- vouchers com vários ingressos ---------- */
+evVch=function(e){
+ evEnsure(e);const one=e.tickets.filter(t=>!t.off).length<2,ref=e.tickets.length?Math.min(...e.tickets.map(t=>+t.price||0)):e.price;
+ return `<section class="card mtab"><div class="tbar"><span class="who" style="margin-right:auto">Códigos de desconto válidos só para este evento.${one?'':' O desconto vale para qualquer ingresso, sem passar do valor dele.'}</span><button class="btn pri sm" data-a="vAdd">${ic('plus',14,2.2)}Novo voucher</button></div>
+  ${e.vouchers.length?`<div class="vgrid">${e.vouchers.map((v,i)=>{const exp=v.exp&&inDays(v.exp)<0,pct=v.type==='pct',full=pct?v.disc>=100:one&&v.disc>=ref;return `<article class="vc ${exp?'exp':''}"><div class="vc1"><span class="mono vcode">${esc(v.code)}</span><button class="ibtn sm" data-a="vDel" data-v="${i}" aria-label="Excluir voucher">${ic('x',14)}</button></div>
+   <div class="vc2"><b>${full?'100%':pct?v.disc+'%':'− '+brl(v.disc)}</b><span>${full?'bolsa integral':pct?'de desconto no ingresso':one?`paga ${brl(Math.max(0,ref-v.disc))}`:'de desconto no ingresso'}</span></div>
+   <div class="vc3"><span>${v.mode==='liberado'?`${ic('users',13)}Qualquer pessoa`:`${ic('lock',13)}${esc(v.email)}`}</span><span>${v.uses} ${v.uses===1?'uso':'usos'}</span></div>
+   <div class="vc4 ${exp?'bad':''}">${v.exp?(exp?`Expirou em ${dBR(v.exp)}`:`Vale até ${dBR(v.exp)}`):'Nunca expira'}</div></article>`;}).join('')}</div>`:`<div class="mempty"><p>Nenhum voucher.</p><span>Crie códigos de desconto ou bolsas para este evento.</span></div>`}</section>`;
+};
+
+/* ---------- diálogo de ingresso ---------- */
+function tkDlg(tid){
+ const e=eById(S.evt);evEnsure(e);const t=tid?e.tickets.find(x=>x.id===tid):null,sold=t?tkSold(e,t):0,money=e.paid,per=e.checkin==='periodo'&&e.periods.length;
+ const shown=e.items.filter(i=>!i.off||(t&&t.incl.includes(i.id)));
+ openDlg(`${dlgHead(t?'Editar ingresso':'Novo ingresso',esc(e.t))}<form class="fgrid" id="tgF" novalidate style="grid-template-columns:1fr 1fr">
+  <label class="fld wide"><span class="fl">Nome</span><input name="n" placeholder="Ex.: VIP" value="${esc(t?t.n:'')}" autocomplete="off"><span class="err"></span></label>
+  <label class="fld wide"><span class="fl">Descrição <small>opcional</small></span><input name="desc" placeholder="Ex.: Lugar na frente e kit de boas-vindas" value="${esc(t?t.desc||'':'')}" autocomplete="off"></label>
+  ${money?`<label class="fld"><span class="fl">Valor</span><span class="mpre"><em>R$</em><input name="price" type="number" min="0" step="0.01" inputmode="decimal" value="${t?t.price:''}" placeholder="0,00"></span><span class="err"></span></label>`:''}
+  <label class="fld ${money?'':'wide'}"><span class="fl">Vagas <small>opcional</small></span><input name="cap" type="number" min="1" inputmode="numeric" value="${t&&t.cap?t.cap:''}" placeholder="Sem limite"><span class="err"></span>${sold?`<span class="hint">${sold} ${sold===1?'inscrito':'inscritos'} neste ingresso</span>`:''}</label>
+  ${per?`<div class="fld wide"><span class="fl">Vale para <small>sem marcar, vale para o evento todo</small></span><div class="tg-inc">${e.periods.map(p=>`<label class="tg-ic"><input type="checkbox" name="per" value="${esc(p)}" ${t&&t.per.includes(p)?'checked':''}><span><b>${esc(p)}</b></span></label>`).join('')}</div></div>`:''}
+  <div class="fld wide"><span class="fl">O que já vem incluso <small>opcional</small></span>
+   ${shown.length?`<div class="tg-inc">${shown.map(i=>`<label class="tg-ic"><input type="checkbox" name="inc" value="${i.id}" ${t&&t.incl.includes(i.id)?'checked':''}><span><b>${esc(i.n)}</b><small>${i.p||'Evento inteiro'} · ${brl(i.price)} à parte</small></span></label>`).join('')}</div><span class="hint">Cada item incluso gera o próprio código de acesso.</span>`:`<p class="who" style="margin:0">Nenhum item cadastrado. Crie almoço, café ou kit em “Compras adicionais” e volte aqui para incluí-los.</p>`}</div>
+  <div class="dfoot" style="grid-column:1/-1"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${t?'Salvar':'Criar ingresso'}</button></div></form>`,'sm');
+ const f=$('#tgF'),bad=(n,m)=>{const el=f.elements[n],fl=el.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;el.focus();};
+ f.addEventListener('input',x=>x.target.closest('.fld')?.classList.remove('bad'));
+ f.addEventListener('submit',x=>{x.preventDefault();const n=f.elements.n.value.trim();
+  if(!n)return bad('n','Informe o nome');
+  if(e.tickets.some(o=>o!==t&&norm(o.n)===norm(n)))return bad('n','Já existe um ingresso com esse nome');
+  let price=t?t.price:0;if(money){if(f.elements.price.value==='')return bad('price','Informe o valor (0 para gratuito)');price=+f.elements.price.value;if(!(price>=0))return bad('price','Valor inválido');}
+  const cap=+f.elements.cap.value||0;if(cap&&cap<sold)return bad('cap',`Já há ${sold} inscritos; as vagas não podem ser menos que isso`);
+  const incl=[...f.querySelectorAll('input[name=inc]:checked')].map(i=>i.value),pers=[...f.querySelectorAll('input[name=per]:checked')].map(i=>i.value);
+  const d={n,desc:f.elements.desc.value.trim(),price,cap,incl,per:pers};
+  if(t)Object.assign(t,d);else e.tickets.push({id:'tk'+(++_tkn),off:false,...d});
+  evSync(e);closeDlg();rerEv();toast(t?`${n} atualizado`:`${n} criado`);});
+ setTimeout(()=>f.elements.n.focus(),80);
+}
+
+/* ---------- inscrição manual com ingresso, compras e voucher ---------- */
+/* desconto do voucher sobre o valor do ingresso: valor fixo (padrão) ou percentual; nunca passa do ingresso */
+function vDisc(v,price){return v.type==='pct'?Math.min(price,Math.round(price*v.disc)/100):Math.min(price,v.disc);}
+function regCalc(e,st,m){
+ const t=e.tickets.find(x=>x.id===st.tk),base=t?tkPrice(e,t):0,code=(st.vc||'').trim().toUpperCase(),vc=code?e.vouchers.find(x=>x.code===code):null;
+ let err='',disc=0;
+ if(code&&!vc)err='Voucher não encontrado neste evento';
+ else if(vc&&vc.exp&&inDays(vc.exp)<0)err=`Expirou em ${dBR(vc.exp)}`;
+ else if(vc&&vc.mode==='especifico'&&m&&vc.email!==m.e)err=`Este voucher é só para ${vc.email}`;
+ else if(vc)disc=vDisc(vc,base);
+ const adds=[...st.buy].map(id=>itById(e,id)).filter(i=>i&&!(t&&t.incl.includes(i.id))),add=adds.reduce((a,i)=>a+(+i.price||0),0);
+ return {t,base,vc,code,disc,err,adds,add,val:base-disc,tot:base-disc+add};
+}
+function regTotHtml(e,c){
+ if(!evMoney(e)&&!c.add)return '';
+ const rows=[];if(c.t&&e.paid)rows.push(`<span>${esc(c.t.n)}</span><b>${brl(c.base)}</b>`);
+ if(c.disc)rows.push(`<span>Voucher ${esc(c.code)}${c.vc&&c.vc.type==='pct'?' ('+c.vc.disc+'%)':''}</span><b>− ${brl(c.disc)}</b>`);
+ if(c.add)rows.push(`<span>${c.adds.length} ${c.adds.length===1?'compra adicional':'compras adicionais'}</span><b>${brl(c.add)}</b>`);
+ return `<div class="tg-tot">${rows.map(r=>`<div>${r}</div>`).join('')}<div class="tt"><span>Total</span><b>${c.tot?brl(c.tot):'Gratuito'}</b></div></div>`;
+}
+Object.assign(A,{
+ tkNew:()=>tkDlg(),
+ tkEdit:(v,b,x)=>{if(x&&x.target.closest('.hact'))return;closePops();tkDlg(v);},
+ tkMenu:v=>{const p=$('#tgPop-'+v);closePops(p);p.classList.toggle('open');},
+ tkPause:v=>{closePops();const e=eById(S.evt),t=e.tickets.find(x=>x.id===v);t.off=!t.off;evSync(e);rerEv();toast(t.off?`Vendas de ${t.n} pausadas`:`Vendas de ${t.n} retomadas`,()=>{t.off=!t.off;evSync(e);rerEv();});},
+ tkDel:v=>{closePops();const e=eById(S.evt),i=e.tickets.findIndex(x=>x.id===v),t=e.tickets[i],sold=tkSold(e,t);
+  if(sold){toast(`${sold} ${sold===1?'pessoa já está inscrita':'pessoas já estão inscritas'} em ${t.n}. Pause as vendas em vez de excluir.`);return;}
+  if(e.paid&&e.tickets.length<2){toast('Um evento pago precisa de pelo menos um ingresso');return;}
+  confirmDel({title:`Excluir o ingresso ${t.n}?`,body:'Ele deixa de ser oferecido na inscrição.',label:'Excluir ingresso',onConfirm:()=>{e.tickets.splice(i,1);evSync(e);rerEv();toast('Ingresso excluído',()=>{e.tickets.splice(i,0,t);evSync(e);rerEv();});}});},
+ evItemDel:v=>{const e=eById(S.evt),it=itById(e,v);if(!it)return;
+  if(it.off){it.off=false;rerEv();toast(`${it.n} voltou a ser vendido`);return;}
+  const inTk=e.tickets.filter(t=>t.incl.includes(it.id));if(inTk.length){toast(`${it.n} está incluso em ${inTk.map(t=>t.n).join(', ')}. Tire de lá antes de remover.`);return;}
+  const n=itSold(e,it);
+  confirmDel({title:`Remover ${itLabel(it)}?`,body:n?`${n} ${n===1?'pessoa já comprou':'pessoas já compraram'}; o item continua valendo para ${n===1?'ela':'elas'} e só deixa de ser vendido.`:'Ele deixa de ser oferecido na inscrição.',label:n?'Parar de vender':'Remover item',onConfirm:()=>{if(n){it.off=true;rerEv();toast(`${it.n} não é mais vendido`,()=>{it.off=false;rerEv();});}else{const i=e.items.indexOf(it);e.items.splice(i,1);rerEv();toast('Item removido',()=>{e.items.splice(i,0,it);rerEv();});}}});},
+ evReg:()=>{const e=eById(S.evt);evEnsure(e);
+  if(e.cap&&e.regs.length>=e.cap){toast('Vagas esgotadas. Aumente as vagas para inscrever mais pessoas.');return;}
+  const tks=e.tickets.filter(t=>!t.off);if(e.paid&&!tks.length){toast('Nenhum ingresso à venda. Crie ou retome um ingresso primeiro.');return;}
+  const cand=MEMBERS.filter(m=>!e.regs.some(r=>r.n===m.n)),adds=e.items.filter(i=>!i.off),st={tk:tks.length?(tks.find(t=>!tkFull(e,t))||tks[0]).id:'',buy:new Set(),vc:''},mny=evMoney(e);
+  openDlg(`${dlgHead('Adicionar inscrição',esc(e.t))}<div id="rgW"><label class="sbox" style="margin-bottom:10px">${ic('search',16)}<input id="rq" placeholder="Buscar membro" autocomplete="off"></label><div class="pick" id="rpk" style="max-height:170px">${candList(cand,'')}</div>
+   ${tks.length?`<p class="fl tg-h">Ingresso</p><div class="tg-opts">${tks.map(t=>`<label class="tg-o ${tkFull(e,t)?'off':''}"><input type="radio" name="tk" value="${t.id}" ${st.tk===t.id?'checked':''} ${tkFull(e,t)?'disabled':''}><span><b>${esc(t.n)}</b><small>${tkFull(e,t)?'Esgotado':esc([t.desc,tkInclTxt(e,t).length?'Inclui '+tkInclTxt(e,t).join(', '):''].filter(Boolean).join(' · '))||'&nbsp;'}</small></span><b class="mono">${brl(tkPrice(e,t))}</b></label>`).join('')}</div>`:''}
+   ${adds.length?`<p class="fl tg-h">Compras adicionais <small>opcional</small></p><div class="tg-opts" id="rgAd">${adds.map(i=>`<label class="tg-o"><input type="checkbox" value="${i.id}"><span><b>${esc(i.n)}</b><small>${i.p||'Evento inteiro'}</small></span><b class="mono">${brl(i.price)}</b></label>`).join('')}</div>`:''}
+   ${e.paid&&e.vouchers.length?`<label class="fld" style="margin-top:14px"><span class="fl">Voucher <small>opcional</small></span><input id="rv" class="mono" placeholder="Ex.: ${esc(e.vouchers[0].code)}" autocomplete="off" style="text-transform:uppercase"><span class="err"></span></label>`:''}
+   <div id="rtot"></div>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="evRegDo">Inscrever</button></div></div>`,'sm');
+  const W=$('#rgW'),member=()=>{const s=$('input[name=pm]:checked');return s?byId(s.value):null;},paint=()=>{const c=regCalc(e,st,member());$('#rtot').innerHTML=regTotHtml(e,c);const rv=$('#rv');if(rv){const fl=rv.closest('.fld');fl.classList.toggle('bad',!!c.err&&!!c.code);fl.querySelector('.err').textContent=c.code?c.err:'';}
+   W.querySelectorAll('#rgAd input').forEach(i=>{const inc=c.t&&c.t.incl.includes(i.value),lb=i.closest('.tg-o');lb.classList.toggle('off',!!inc);i.disabled=!!inc;if(inc){i.checked=false;st.buy.delete(i.value);lb.querySelector('small').textContent='Já incluso neste ingresso';}});};
+  $('#rq').addEventListener('input',x=>{$('#rpk').innerHTML=candList(cand,x.target.value);});
+  W.addEventListener('change',x=>{const t=x.target;if(t.name==='tk')st.tk=t.value;else if(t.closest('#rgAd')){t.checked?st.buy.add(t.value):st.buy.delete(t.value);}paint();});
+  const rv=$('#rv');if(rv)rv.addEventListener('input',()=>{st.vc=rv.value;paint();});
+  W._st=st;paint();},
+ evRegDo:(v,b)=>{const e=eById(S.evt),s=$('input[name=pm]:checked');if(!s){toast('Escolha um membro');return;}const m=byId(s.value),W=$('#rgW'),st=W._st;
+  const c=regCalc(e,st,m),rv=$('#rv');
+  if(c.code&&c.err){const fl=rv.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=c.err;return;}
+  if(c.t&&tkFull(e,c.t)){toast(`${c.t.n} esgotado`);return;}
+  b.classList.add('busy');
+  setTimeout(()=>{const money=evMoney(e),pay=money?(c.tot>0?'pendente':(e.paid?'pago':'—')):'—',r=R(m.n,'2026-10-01',pay,c.val,c.vc?c.code:'');
+   if(c.vc)c.vc.uses++;if(c.t)r.tk=c.t.id;r.buy=c.adds.map(i=>i.id);e.regs.push(r);closeDlg();rerEv();
+   toast(c.tot>0?`${m.n.split(' ')[0]} inscrito(a) · link de pagamento enviado`:`${m.n.split(' ')[0]} inscrito(a)`);},600);},
+});
+{const _ag=agAfter;agAfter=function(){_ag();const e=S.evt&&eById(S.evt);if(!e)return;
+ const it=$('#itF2');if(it)it.addEventListener('submit',x=>{x.preventDefault();const fd=new FormData(it),n=fd.get('n').trim(),p=+fd.get('p'),per=fd.get('per')||'';if(!n){it.n.focus();return;}if(!(p>0)){it.p.focus();toast('Informe o preço do item');return;}
+  if(e.items.some(i=>norm(i.n)===norm(n)&&(i.p||'')===per)){toast('Esse item já existe');return;}
+  e.items.push({id:'it'+(++_tkn),n,price:p,p:per});rerEv();toast(`${n} adicionado`);});};}
+
+/* dados de demonstração */
+(function evSeed(){
+ const buyRule=(e,r)=>{const tk=tkOf(e,r);r.buy=r.buy||e.items.filter((_,i)=>(r.n.length+i)%2===0&&r.pay!=='pendente'&&!(tk&&tk.incl.includes(e.items[i].id))).map(i=>i.id);};
+ // Retiro de Jovens: três ingressos, almoço por dia
+ const rj=EVTS.find(x=>x.t==='Retiro de Jovens 2026');evEnsure(rj);
+ const [aS,aD]=rj.items;
+ rj.tickets=[{id:'tkRJa',n:'Participante',desc:'Hospedagem e programação do retiro.',price:120,cap:0,incl:[],per:[]},
+  {id:'tkRJb',n:'Participante + almoços',desc:'Programação e os dois almoços.',price:160,cap:40,incl:[aS.id,aD.id],per:[]},
+  {id:'tkRJc',n:'Equipe de serviço',desc:'Para quem serve no retiro.',price:80,cap:20,incl:[],per:[]}];
+ rj.regs.forEach(r=>{r.tk='tkRJa';});
+ const cam=rj.regs.find(r=>r.n==='Camila Sousa');cam.tk='tkRJb';cam.val=160;
+ rj.regs.push(Object.assign(R('Marcos Vieira','2026-09-15','pago',80),{tk:'tkRJc'}),Object.assign(R('Beatriz Nunes','2026-09-16','pendente',120),{tk:'tkRJa',buy:[aS.id]}));
+ rj.regs.forEach(r=>buyRule(rj,r));evSync(rj);
+ // Conferência Missões: ingresso único
+ const cm=EVTS.find(x=>x.t==='Conferência Missões');evEnsure(cm);cm.regs.forEach(r=>{r.tk=cm.tickets[0].id;buyRule(cm,r);});
+ // Conferência de Mulheres: quatro ingressos e três compras
+ const cafe={id:'itMc',n:'Café da manhã',price:15,p:''},alm={id:'itMa',n:'Almoço',price:35,p:''},kit={id:'itMk',n:'Kit de boas-vindas',price:20,p:''};
+ const cmu=EV({t:'Conferência de Mulheres',type:'Conferência',d:'2026-11-14',time:'08h30',place:'Auditório',min:'Eventos',paid:true,price:80,cap:300,checkin:'inteiro',items:[cafe,alm,kit],
+  tickets:[{id:'tkMa',n:'Normal',desc:'Entrada na conferência.',price:80,cap:0,incl:[],per:[]},{id:'tkMb',n:'Com café',desc:'Entrada e café da manhã.',price:95,cap:0,incl:['itMc'],per:[]},{id:'tkMc',n:'Com café e almoço',desc:'Entrada, café da manhã e almoço.',price:125,cap:0,incl:['itMc','itMa'],per:[]},{id:'tkMd',n:'VIP',desc:'Lugar na frente, café, almoço e kit.',price:180,cap:40,incl:['itMc','itMa','itMk'],per:[]}],
+  vouchers:[{code:'MULHERES10',disc:10,exp:'2026-11-10',mode:'liberado',email:'',uses:2}],
+  regs:[Object.assign(R('Juliana Reis','2026-10-02','pago',80),{tk:'tkMa',buy:['itMa']}),Object.assign(R('Patrícia Gomes','2026-10-02','pago',95),{tk:'tkMb',buy:[]}),Object.assign(R('Débora Alves','2026-10-03','pago',125),{tk:'tkMc',buy:['itMk']}),Object.assign(R('Helena Costa','2026-10-03','pago',180),{tk:'tkMd',buy:[]}),Object.assign(R('Sandra Lopes','2026-10-04','pendente',70,'MULHERES10'),{tk:'tkMa',buy:['itMc','itMa']}),Object.assign(R('Rebeca Dias','2026-10-04','pago',115,'MULHERES10'),{tk:'tkMb',buy:[]}),Object.assign(R('Marta Silveira','2026-10-05','pendente',125),{tk:'tkMc',buy:[]}),Object.assign(R('Aline Barros','2026-10-05','pago',80),{tk:'tkMa',buy:[]})]});
+ EVTS.push(cmu);evEnsure(cmu);
+})();
+
+/* ================= Eventos: check-in (acompanhamento), financeiro, VEM e Inscrições completas ================= */
+Object.assign(S,{eif:'todos',eiq:'',iqe:'todos',iqc:'todos',iqt:'todos'});
+const brl2=v=>'R$ '+(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+/* formas de pagamento e taxas: valores de exemplo; a tabela real vem da configuração de pagamentos da igreja (Assinaturas) */
+const PAYFEE={pix:{n:'Pix',pct:.0099,fix:0},cartao:{n:'Cartão',pct:.0399,fix:.49}};
+const payM=r=>r.n.length%3===0?'cartao':'pix';
+const regFee=(e,r)=>{const t=regTot(e,r);if(!t)return 0;const f=PAYFEE[payM(r)];return Math.round((t*f.pct+f.fix)*100)/100;};
+const stpill=(c,b,t)=>`<span class="stp" style="--c:${c};--b:${b}"><i></i>${t}</span>`;
+
+/* ---------- Check-in: só acompanhamento ---------- */
+function eiData(e){
+ const rows=[];
+ e.regs.forEach(r=>{r.ck=r.ck||{};const blocked=evMoney(e)&&r.pay==='pendente',tk=tkOf(e,r);
+  tickets(e,r).forEach(t=>{if(t.tag==='Inscrição')return;rows.push({r,t,blocked,tk:tk?tk.n:'',at:r.ck[t.k]||''});});});
+ const acc=rows.filter(x=>x.t.tag==='Acesso'),ok=acc.filter(x=>!x.blocked),done=ok.filter(x=>x.at);
+ const grp=(list,key)=>{const m=new Map();list.forEach(x=>{const k=key(x),g=m.get(k)||{k,n:0,d:0};g.n++;if(x.at)g.d++;m.set(k,g);});return [...m.values()];};
+ return {rows,acc,ok,done,blocked:acc.filter(x=>x.blocked),
+  byPer:grp(ok,x=>x.t.n.replace('Entrada · ','').replace('Entrada geral','Evento inteiro')),
+  byTk:grp(ok,x=>x.tk||'Inscrição'),
+  byItem:grp(rows.filter(x=>x.t.tag!=='Acesso'&&!x.blocked),x=>x.t.n),
+  last:rows.filter(x=>x.at).sort((a,b)=>a.at<b.at?1:-1)};
+}
+const eiDone=e=>e.checkin==='off'?0:eiData(e).done.length;
+function eiBar(g){const p=g.n?Math.round(g.d/g.n*100):0;return `<div class="ei-b"><div class="ei-bh"><span>${esc(g.k)}</span><b>${g.d}<small>/${g.n}</small></b></div><span class="ei-tr" role="img" aria-label="${p}%"><i style="width:${p}%"></i></span></div>`;}
+function eiRows(e){
+ const d=eiData(e),q=norm(S.eiq),f=S.eif;
+ const wait=x=>!x.at&&!x.blocked;
+ const l=d.rows.filter(x=>(f==='todos'||(f==='in'?x.at:f==='wait'?wait(x):x.blocked&&!x.at))&&(!q||norm(x.r.n+' '+x.t.n).includes(q))).sort((a,b)=>a.at&&b.at?(a.at<b.at?1:-1):a.at?-1:b.at?1:a.r.n<b.r.n?-1:1);
+ if(!l.length)return `<div class="mempty"><p>Nada por aqui.</p><span>Nenhum código corresponde a esses filtros.</span></div>`;
+ return `<div class="trow ei thead"><span>Pessoa</span><span>Código</span><span>Ingresso</span><span>Situação</span></div>${l.map(x=>`<div class="trow ei" tabindex="0" data-a="rgView" data-v="${x.r.id}"><span class="tn"><span class="av" style="background:var(--tone-${TONES[x.r.n.length%6]});color:var(--tone-${TONES[x.r.n.length%6]}-ink)">${initials(x.r.n)}</span><span class="hn"><b>${esc(x.r.n)}</b></span></span>
+  <span class="ec">${esc(x.t.n)}<small>${x.t.tag}</small></span><span class="eg">${esc(x.tk||'—')}</span>
+  <span class="ts">${x.at?stpill('var(--st-int)','var(--st-int-bg)','Entrou às '+x.at):x.blocked?stpill('var(--st-sol)','var(--st-sol-bg)','Aguardando pagamento'):stpill('var(--ink-muted)','var(--surface-2)','Aguardando')}</span></div>`).join('')}<div class="tfoot"><span>${l.length} ${l.length===1?'código':'códigos'}</span></div>`;
+}
+function eiTab(e){
+ evEnsure(e);const d=eiData(e),pct=d.ok.length?Math.round(d.done.length/d.ok.length*100):0,last=d.last[0],nWait=d.rows.filter(x=>!x.at&&!x.blocked).length,nBlk=d.rows.filter(x=>x.blocked&&!x.at).length,nIn=d.rows.filter(x=>x.at).length;
+ const items=d.byItem.length?`<section class="card pc"><div class="sh"><h2>Itens retirados</h2><span class="who">almoço, café, kit…</span></div>${d.byItem.map(eiBar).join('')}</section>`:'';
+ return `<div class="ei-note">${ic('shield',16)}<span><b>O check-in é feito pela equipe, no app do VEM.</b> Leitor de QR, totem ou busca manual. Aqui você só acompanha.</span><button class="btn sec sm" data-a="vemOpen">${ic('share',14)}Abrir no VEM</button></div>
+ <section class="card kpis4 rise" style="--d:1">
+  <div class="k4"><span class="kl">Entradas</span><span class="kv">${d.done.length}<small class="kof">/${d.ok.length}</small></span><span class="kd">${pct}% dos códigos liberados</span></div>
+  <div class="k4"><span class="kl">Faltam entrar</span><span class="kv">${d.ok.length-d.done.length}</span><span class="kd">códigos liberados</span></div>
+  <div class="k4"><span class="kl">Aguardando pagamento</span><span class="kv" style="${d.blocked.length?'color:var(--st-sol)':''}">${d.blocked.length}</span><span class="kd">${d.blocked.length?'libera depois de pagar':'nenhum código travado'}</span></div>
+  <div class="k4"><span class="kl">Último check-in</span><span class="kv">${last?last.at:'—'}</span><span class="kd">${last?esc(last.r.n):'ninguém entrou ainda'}</span></div></section>
+ <div class="pgrid" style="margin-top:16px"><div class="col"><section class="card pc"><div class="sh"><h2>${e.checkin==='periodo'?'Por período':'Entrada'}</h2></div>${d.byPer.length?d.byPer.map(eiBar).join(''):'<p class="who" style="margin:0">Nenhum código liberado ainda.</p>'}</section>
+  ${e.tickets.length>1?`<section class="card pc"><div class="sh"><h2>Por ingresso</h2></div>${d.byTk.map(eiBar).join('')}</section>`:''}</div>
+  <div class="col">${items}</div></div>
+ <section class="card mtab" style="margin-top:16px"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="eiq" placeholder="Buscar pessoa ou código" value="${esc(S.eiq)}" autocomplete="off"></label>
+  <div class="chips">${[['todos','Todos',d.rows.length],['in','Entraram',nIn],['wait','Aguardando',nWait],...(nBlk?[['blk','Sem pagamento',nBlk]]:[])].map(c=>`<button class="chipf ${S.eif===c[0]?'on':''}" data-a="eiF" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div></div>
+  <div id="eirows">${eiRows(e)}</div></section>`;
+}
+
+/* ---------- Financeiro do evento ---------- */
+function efTab(e){
+ evEnsure(e);const paid=e.regs.filter(r=>r.pay==='pago'),pend=e.regs.filter(r=>r.pay==='pendente');
+ const gross=paid.reduce((a,r)=>a+regTot(e,r),0),fees=paid.reduce((a,r)=>a+regFee(e,r),0),net=gross-fees,toRec=pend.reduce((a,r)=>a+regTot(e,r),0);
+ const byTk=e.tickets.map(t=>{const rs=e.regs.filter(r=>r.tk===t.id),pg=rs.filter(r=>r.pay==='pago');return {t,n:rs.length,pg:pg.length,v:pg.reduce((a,r)=>a+(+r.val||0),0)};}).filter(x=>x.n);
+ const byIt=e.items.map(it=>{const rs=e.regs.filter(r=>(r.buy||[]).includes(it.id)),pg=rs.filter(r=>r.pay==='pago');return {it,n:rs.length,pg:pg.length,v:pg.length*(+it.price||0)};}).filter(x=>x.n);
+ const vcs=e.vouchers.map(v=>{const rs=e.regs.filter(r=>r.vch===v.code),dsc=rs.reduce((a,r)=>{const t=tkOf(e,r);return a+Math.max(0,(t?tkPrice(e,t):(+e.price||0))-(+r.val||0));},0);return {v,n:rs.length,dsc};}).filter(x=>x.n);
+ const dscT=vcs.reduce((a,x)=>a+x.dsc,0);
+ const meth=['pix','cartao'].map(m=>{const rs=paid.filter(r=>payM(r)===m);return {m,n:rs.length,v:rs.reduce((a,r)=>a+regTot(e,r),0),fee:rs.reduce((a,r)=>a+regFee(e,r),0)};}).filter(x=>x.n);
+ const row=(l,sub,v)=>`<div class="ef-r"><span><b>${l}</b>${sub?`<small>${sub}</small>`:''}</span><b class="mono">${v}</b></div>`;
+ return `<section class="card kpis4 rise" style="--d:1">
+  <div class="k4"><span class="kl">Arrecadado (bruto)</span><span class="kv sm">${brl2(gross)}</span><span class="kd">${paid.length} ${paid.length===1?'pagamento':'pagamentos'} confirmados</span></div>
+  <div class="k4"><span class="kl">Taxas de pagamento</span><span class="kv sm">− ${brl2(fees)}</span><span class="kd">Pix e cartão</span></div>
+  <div class="k4"><span class="kl">Líquido</span><span class="kv sm" style="color:var(--st-int)">${brl2(net)}</span><span class="kd">o que entra no Financeiro</span></div>
+  <div class="k4"><span class="kl">A receber</span><span class="kv sm" style="${toRec?'color:var(--st-sol)':''}">${brl2(toRec)}</span><span class="kd">${pend.length} ${pend.length===1?'pagamento pendente':'pagamentos pendentes'}</span></div></section>
+ <div class="pgrid" style="margin-top:16px"><div class="col">
+  <section class="card pc"><div class="sh"><h2>Vendas por ingresso</h2></div>${byTk.length?byTk.map(x=>row(esc(x.t.n),`${x.pg} pagos de ${x.n} inscritos`,brl2(x.v))).join(''):'<p class="who" style="margin:0">Nenhuma venda ainda.</p>'}</section>
+  <section class="card pc"><div class="sh"><h2>Compras adicionais</h2></div>${byIt.length?byIt.map(x=>row(esc(itLabel(x.it)),`${x.pg} pagas de ${x.n} compras`,brl2(x.v))).join(''):'<p class="who" style="margin:0">Nenhuma compra adicional ainda.</p>'}</section></div>
+ <div class="col">
+  <section class="card pc"><div class="sh"><h2>Taxas por forma de pagamento</h2></div>${meth.length?meth.map(x=>row(PAYFEE[x.m].n,`${x.n} ${x.n===1?'pagamento':'pagamentos'} · ${brl2(x.v)}`,'− '+brl2(x.fee))).join(''):'<p class="who" style="margin:0">Nenhum pagamento confirmado.</p>'}
+   <p class="hint" style="margin:12px 0 0">${ic('shield',13,2)} Taxas conforme a configuração de pagamentos da sua igreja no Alva.</p></section>
+  ${vcs.length?`<section class="card pc"><div class="sh"><h2>Descontos concedidos</h2><b class="mono">− ${brl2(dscT)}</b></div>${vcs.map(x=>row(`<span class="mono">${esc(x.v.code)}</span>`,`${x.n} ${x.n===1?'uso':'usos'}`,'− '+brl2(x.dsc))).join('')}</section>`:''}
+  <section class="card pc"><div class="sh"><h2>Entrada no Financeiro</h2></div><div class="ef-fin">${ic(past(e)?'check':'mail',16)}<span>${past(e)?`Líquido de <b>${brl2(net)}</b> lançado em Receitas após o evento.`:`O líquido de <b>${brl2(net)}</b> até agora entra em Receitas depois do evento${e.d?`, previsto para ${dBR(e.d)}`:''}.`}</span></div></section></div></div>`;
+}
+
+/* ---------- Divulgação no VEM ---------- */
+const VEMCATS=['Conferência','Retiro','Congresso','Curso','Encontro','Show','Culto','Outro'];
+function vemOf(e){if(!e.vem)e.vem={on:e.kind==='evento'&&e.st==='confirmado'&&!!(e.paid||e.regs.length),cat:VEMCATS.includes(e.type)?e.type:e.type==='Evento especial'?'Encontro':'Outro',city:'São Paulo',uf:'SP',desc:'',cover:''};return e.vem;}
+const vemMiss=v=>[!v.cover&&'capa',!(v.desc||'').trim()&&'descrição',!(v.city||'').trim()&&'cidade',!/^[A-Za-z]{2}$/.test(v.uf||'')&&'UF'].filter(Boolean);
+const vemPill=e=>{if(e.kind==='culto'||e.st==='previsao')return '';const v=vemOf(e);return !v.on?'':vemMiss(v).length?stpill('var(--st-sol)','var(--st-sol-bg)','VEM · incompleto'):stpill('var(--st-int)','var(--st-int-bg)','No VEM');};
+function vemStHtml(e){const v=vemOf(e),m=vemMiss(v);return m.length?`<div class="rgwarn">${ic('alert',14,2)}Falta ${m.join(', ')}. Enquanto isso o evento não aparece no VEM.</div>`:`<div class="vem-ok">${ic('check',14,2.4)}<span>Publicado no VEM. As inscrições feitas lá aparecem aqui, na aba Inscrições.</span></div>`;}
+function vemCard(e){
+ if(e.kind==='culto'||e.st==='previsao')return '';const v=vemOf(e);
+ return `<section class="card pc"><div class="sh"><h2>Divulgar no VEM</h2>${vemPill(e)}</div>
+  <p class="who" style="margin:-6px 0 12px">O VEM é o app de inscrições. Com a chave ligada, o evento aparece lá para qualquer pessoa, e as vendas voltam para este evento.</p>
+  <label class="tog"><input type="checkbox" id="vemOn" ${v.on?'checked':''}><span class="sw"></span><span><b>Mostrar este evento no VEM</b><small>${v.on?'Visível para quem usa o VEM':'Só quem tem o link se inscreve'}</small></span></label>
+  ${v.on?`<form class="fgrid vem-f" id="vemF" novalidate style="grid-template-columns:1fr 1fr;margin-top:16px">
+   <label class="fld wide"><span class="fl">Categoria</span><span class="selw"><select name="cat">${VEMCATS.map(c=>`<option ${v.cat===c?'selected':''}>${c}</option>`).join('')}</select>${ic('updown',14)}</span></label>
+   <label class="fld"><span class="fl">Cidade</span><input name="city" value="${esc(v.city)}" autocomplete="off"></label>
+   <label class="fld"><span class="fl">UF</span><input name="uf" value="${esc(v.uf)}" maxlength="2" style="text-transform:uppercase" autocomplete="off"></label>
+   <label class="fld wide"><span class="fl">Descrição</span><textarea name="desc" rows="3" placeholder="O que a pessoa precisa saber para se inscrever">${esc(v.desc)}</textarea></label>
+   <div class="fld wide"><span class="fl">Capa</span>${v.cover?`<div class="vem-cv"><span class="vem-th"></span><span class="mono">${esc(v.cover)}</span><button type="button" class="btn sec sm" data-a="vemCoverDel">Remover</button></div>`:`<button type="button" class="btn sec" data-a="vemCover">${ic('plus',14,2.2)}Escolher imagem</button>`}</div>
+   <div class="wide" id="vemSt" style="grid-column:1/-1">${vemStHtml(e)}</div></form>`:''}</section>`;
+}
+
+/* ---------- Inscrições (todas) ---------- */
+function insCk(e,r){
+ if(e.checkin==='off')return {k:'nock',d:0,t:0};
+ const acc=tickets(e,r).filter(t=>t.tag==='Acesso'),d=acc.filter(t=>(r.ck||{})[t.k]).length;
+ return {k:d===0?'wait':d===acc.length?'in':'part',d,t:acc.length};
+}
+const insCkPill=c=>c.k==='nock'?'<span class="soft">Sem check-in</span>':c.k==='in'?stpill('var(--st-int)','var(--st-int-bg)',c.t>1?`Entrou · ${c.d}/${c.t}`:'Entrou'):c.k==='part'?stpill('var(--st-sol)','var(--st-sol-bg)',`Parcial · ${c.d}/${c.t}`):stpill('var(--ink-muted)','var(--surface-2)','Aguardando');
+inscPage=function(){
+ const rows=EVTS.flatMap(e=>{evEnsure(e);return e.regs.map(r=>({...r,e,_r:r}));}),q=norm(S.iq);
+ const evs=EVTS.filter(e=>e.regs.length),scope=S.iqe==='todos'?rows:rows.filter(r=>r.e.id===S.iqe);
+ const tkNames=[...new Set(scope.map(r=>{const t=tkOf(r.e,r);return t&&r.e.tickets.length>1?t.n:null;}).filter(Boolean))];
+ if(S.iqt!=='todos'&&!tkNames.includes(S.iqt))S.iqt='todos';
+ const l=rows.filter(r=>(S.iqf==='todos'||(S.iqf==='pago'?r.pay==='pago':S.iqf==='pendente'?r.pay==='pendente':r.pay==='—'))
+  &&(S.iqe==='todos'||r.e.id===S.iqe)&&(S.iqt==='todos'||(tkOf(r.e,r)||{}).n===S.iqt)&&(S.iqc==='todos'||insCk(r.e,r._r).k===S.iqc)
+  &&(!q||norm(r.n+' '+r.e.t).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
+ const pend=rows.filter(r=>r.pay==='pendente');
+ const sel=(id,val,opts)=>`<span class="selw"><select id="${id}" aria-label="${id}">${opts.map(([v,t])=>`<option value="${esc(v)}" ${val===v?'selected':''}>${esc(t)}</option>`).join('')}</select>${ic('updown',14)}</span>`;
+ return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>Inscrições</h1><p class="lede">Todas as inscrições em cultos e eventos</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="as inscrições, com ingresso, compras, pagamento e check-in">Exportar CSV</button></div></header>
+ ${insSum(rows,pend)}
+ <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="iq2" placeholder="Buscar pessoa ou evento" value="${esc(S.iq)}" autocomplete="off"></label>
+  <div class="chips">${[['todos','Todas'],['pendente','Pendentes'],['pago','Pagas'],['gratis','Gratuitas']].map(c=>`<button class="chipf ${S.iqf===c[0]?'on':''}" data-a="iqF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>
+  <div class="ins-fil">${sel('iqE',S.iqe,[['todos','Todos os eventos'],...evs.map(e=>[e.id,e.t])])}${tkNames.length?sel('iqT',S.iqt,[['todos','Todos os ingressos'],...tkNames.map(n=>[n,n])]):''}${sel('iqC',S.iqc,[['todos','Qualquer check-in'],['in','Entrou'],['part','Parcial'],['wait','Aguardando'],['nock','Evento sem check-in']])}</div></div>
+  ${l.length?`<div class="trow ax2 thead"><span>Pessoa</span><span>Evento e ingresso</span><span>Pagamento</span><span>Check-in</span><span>Data</span></div>${l.map(r=>{const tk=tkOf(r.e,r),nb=buyOf(r.e,r).length,tot=regTot(r.e,r),ck=insCk(r.e,r._r);return `<div class="trow ax2" tabindex="0" data-a="insView" data-v="${r.e.id}|${r.id}"><span class="tn"><span class="av" style="background:var(--tone-${TONES[r.n.length%6]});color:var(--tone-${TONES[r.n.length%6]}-ink)">${initials(r.n)}</span><span class="hn"><b>${esc(r.n)}</b>${r.vch?`<span class="mono vtag">${ic('ticket',11)}${esc(r.vch)}</span>`:''}</span></span>
+   <span class="aev"><b>${esc(r.e.t)}</b><small>${[tk&&r.e.tickets.length>1?esc(tk.n):'',nb?`+${nb} ${nb===1?'compra':'compras'}`:''].filter(Boolean).join(' · ')||'&nbsp;'}</small></span>
+   <span class="ts">${r.pay==='pago'?stpill('var(--st-int)','var(--st-int-bg)','Pago · '+(tot?brl(tot):'bolsa')):r.pay==='pendente'?stpill('var(--st-sol)','var(--st-sol-bg)','Pendente · '+brl(tot)):'<span class="soft">Gratuita</span>'}</span>
+   <span class="ack">${insCkPill(ck)}</span><span class="rdt">${dBR(r.d)}</span></div>`;}).join('')}`:'<div class="mempty"><p>Nada encontrado.</p><span>Tente outros filtros.</span></div>'}
+  <div class="tfoot"><span>${l.length} inscrições</span></div></section>`;
+};
+
+/* ---------- ações ---------- */
+Object.assign(A,{
+ eiF:v=>{S.eif=v;rerEv();},
+ insView:v=>{const [eid,rid]=v.split('|'),e=eById(eid);if(e)rgDlg(e,rid);},
+ vemOpen:()=>toast('Abre o app do VEM neste evento'),
+ vemCover:()=>{const e=eById(S.evt),v=vemOf(e);v.cover='capa-'+norm(e.t).replace(/[^a-z0-9]+/g,'-')+'.jpg';rerEv();toast('Capa adicionada');},
+ vemCoverDel:()=>{const e=eById(S.evt);vemOf(e).cover='';rerEv();},
+ rgCk:v=>{const [rid,k]=v.split('|'),e=eById(S.rgE||S.evt),r=e.regs.find(x=>x.id===rid);r.ck=r.ck||{};
+  if(r.ck[k]){const old=r.ck[k];delete r.ck[k];rerEv();rgDlg(e,rid);toast('Check-in desfeito',()=>{r.ck[k]=old;rerEv();rgDlg(e,rid);});return;}
+  r.ck[k]=new Date().toTimeString().slice(0,5);rerEv();rgDlg(e,rid);toast(`Check-in de ${r.n.split(' ')[0]} registrado`);},
+ rgLinkD:v=>{const r=eById(S.rgE||S.evt).regs.find(x=>x.id===v);toast(`Link de pagamento reenviado para ${r.n.split(' ')[0]}`);},
+});
+{const _ag=agAfter;agAfter=function(){_ag();
+ ['iqE:iqe','iqC:iqc','iqT:iqt'].forEach(p=>{const [id,k]=p.split(':'),el=$('#'+id);if(el)el.addEventListener('change',()=>{S[k]=el.value;if(k==='iqe')S.iqt='todos';render();});});
+ const e=S.evt&&eById(S.evt);if(!e)return;
+ const q=$('#eiq');if(q)q.addEventListener('input',x=>{S.eiq=x.target.value;$('#eirows').innerHTML=eiRows(e);});
+ const on=$('#vemOn');if(on)on.addEventListener('change',()=>{vemOf(e).on=on.checked;rerEv();toast(on.checked?'Evento será divulgado no VEM':'Evento fora do VEM');});
+ const vf=$('#vemF');if(vf){const sync=()=>{const v=vemOf(e);v.cat=vf.cat.value;v.city=vf.city.value;v.uf=vf.uf.value.toUpperCase();v.desc=vf.desc.value;const st=$('#vemSt');if(st)st.innerHTML=vemStHtml(e);};vf.addEventListener('input',sync);vf.addEventListener('change',()=>{sync();rerEv();});}
+};}
+
+/* dados de demonstração: divulgação no VEM e check-ins */
+(function ev2Seed(){
+ const rj0=EVTS.find(x=>x.t==='Retiro de Jovens 2026');if(rj0&&!rj0.vouchers.some(v=>v.code==='JOVEM15'))rj0.vouchers.push({code:'JOVEM15',type:'pct',disc:15,exp:'',mode:'liberado',email:'',uses:2});
+ const rj=EVTS.find(x=>x.t==='Retiro de Jovens 2026'),cms=EVTS.find(x=>x.t==='Conferência Missões'),cmu=EVTS.find(x=>x.t==='Conferência de Mulheres');
+ Object.assign(vemOf(rj),{desc:'Dois dias de retiro para jovens na Chácara Alva: louvor, estudos e comunhão. Vagas limitadas.',cover:'capa-retiro-de-jovens-2026.jpg'});
+ Object.assign(vemOf(cmu),{desc:'Uma manhã de conferência para mulheres, com palestras, louvor e comunhão. Escolha o ingresso com café, almoço ou VIP.',cover:'capa-conferencia-de-mulheres.jpg'});
+ Object.assign(vemOf(cms),{desc:'Noite de conferência sobre missões, com missionários convidados.'});
+ const ck=(e,nm,k,at)=>{const r=e.regs.find(x=>x.n===nm);if(r){r.ck=r.ck||{};r.ck[k]=at;}};
+ const aS=rj.items[0];
+ ck(rj,'Giovanna Martins','p:Sábado','08:12');ck(rj,'Camila Sousa','p:Sábado','08:20');ck(rj,'Camila Sousa','inc:'+aS.id,'12:05');ck(rj,'Marcos Vieira','p:Sábado','08:05');ck(rj,'Giovanna Martins','p:Domingo','08:31');
+ ck(cms,'Felipe Andrade','geral','19:41');
+})();
+
+
+/* ================= Financeiro: eventos pagos ================= */
+function evFinRows(){
+ return EVTS.filter(e=>e.st==='confirmado'&&evMoney(e)&&e.regs.length).map(e=>{evEnsure(e);
+  const paid=e.regs.filter(r=>r.pay==='pago'),pend=e.regs.filter(r=>r.pay==='pendente'),sum=(l,f)=>l.reduce((a,r)=>a+f(r),0),net=r=>regTot(e,r)-regFee(e,r);
+  const gross=sum(paid,r=>regTot(e,r)),fees=sum(paid,r=>regFee(e,r));
+  return {e,gross,fees,net:gross-fees,pend:sum(pend,r=>regTot(e,r)),netPaid:sum(paid,net),netAll:sum(paid,net)+sum(pend,net),posted:past(e)?gross-fees:0};});
+}
+/* a lista de recebimentos acompanha as inscrições reais dos eventos */
+function evRecebSync(){
+ for(let i=RECEB.length-1;i>=0;i--)if(/^(ev-|cr1$|cr3$)/.test(RECEB[i].id))RECEB.splice(i,1);
+ evFinRows().forEach(x=>{if(x.netAll>0)RECEB.push({id:'ev-'+x.e.id,desc:x.e.t+' — inscrições',prev:x.e.d,v:Math.round(x.netAll*100)/100,got:Math.round(x.netPaid*100)/100,src:'Inscrições · líquido de taxas'});});
+}
+function evFinCard(){
+ const rows=evFinRows(),t=k=>rows.reduce((a,x)=>a+x[k],0);
+ return `<div class="fd-fin"><div class="fd-fin-h">${kTile({c:'var(--tone-lima-ink)',ic:'ticket'},36)}<span class="dkt"><b>Eventos pagos</b><span>${rows.length} ${rows.length===1?'evento':'eventos'} com inscrições</span></span></div>
+  <div class="fd-ln"><span>Vendido (bruto)</span><b>${brl2(t('gross'))}</b></div>
+  <div class="fd-ln"><span>Recebido líquido</span><b style="color:var(--st-int)">${brl2(t('net'))}</b></div>
+  <div class="fd-ln"><span>A receber</span><b>${brl2(t('pend'))}</b></div>
+  <div class="fd-ln"><span>Lançado em Receitas</span><b>${brl2(t('posted'))}</b></div>
+  <button class="lnk" data-a="evFinGo">Ver eventos ${ic('arrowR',13)}</button></div>`;
+}
+{const _v=fVis;fVis=()=>{evRecebSync();return _v();};const _r=fRec;fRec=()=>{evRecebSync();return _r();};}
+Object.assign(A,{evFinGo:()=>{S.etype='todos';S.ef='todos';A.nav('eventos');}});
 
 render();
