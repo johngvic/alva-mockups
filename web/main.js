@@ -95,9 +95,9 @@ const CHURCHES=[{n:'Alva Sede',c:'Centro',i:'AS',city:'São Paulo, SP',m:1240,ro
 const chTile=()=>'';
 const NAV=[
  ['Geral',[['hoje','dawn','Dashboard'],['pessoas','users','Pessoas',[['membros','Membros'],['integracao','Integração de membros']]],['cuidado','heart','Cuidado',[['discipulado','Discipulado'],['acompanhamento','Acompanhamento'],['oracao','Pedidos de oração']]],['comunidade','home','Comunidade',[['casas','Casas de Apascentamento'],['redes','Redes de célula'],['ministerios','Ministérios']]],['kids','baby','Kids',[['kvis','Visão geral'],['ksalas','Salas'],['ktimes','Times'],['kturmas','Turmas']]]]],
- ['Operação',[['agenda','calendar','Agenda e serviço',[['cultos','Cultos'],['eventos','Eventos'],['calendario','Calendário'],['escalas','Escalas'],['bebes','Apresentações'],['ag-insc','Inscrições']]],['espacos','building','Espaços',[['salas','Salas'],['reservas','Reservas']]],['shop','bag','Loja', [['shop-vis','Visão geral'],['shop-items','Itens'],['shop-cats','Categorias'],['shop-sales','Vendas'],['shop-cash','Caixa diário'],['shop-moves','Movimentações']]],['almox','box','Almoxarifado',[['arel','Visão geral'],['aitens','Itens'],['acat','Categorias'],['aemp','Empréstimos'],['adev','Devoluções'],['amov','Movimentações']]],["cafe", "coffee", "Cafeteria", [["cafe-vis", "Visão geral"], ["cafe-items", "Itens"], ["cafe-cats", "Categorias"], ["cafe-sales", "Vendas"], ["cafe-cash", "Caixa diário"], ["cafe-moves", "Movimentações"]]],["rest", "chef", "Restaurante", [["rest-vis", "Visão geral"], ["rest-items", "Itens"], ["rest-cats", "Categorias"], ["rest-sales", "Vendas"], ["rest-cash", "Caixa diário"], ["rest-moves", "Movimentações"]]]]],
+ ['Operação',[['agenda','calendar','Agenda',[['cultos','Cultos'],['eventos','Eventos'],['calendario','Calendário'],['escalas','Escalas'],['bebes','Apresentações'],['ag-insc','Inscrições']]],['espacos','building','Espaços',[['salas','Salas'],['reservas','Reservas']]],['shop','bag','Loja', [['shop-vis','Visão geral'],['shop-items','Itens'],['shop-cats','Categorias'],['shop-sales','Vendas'],['shop-cash','Caixa diário'],['shop-moves','Movimentações']]],['almox','box','Almoxarifado',[['arel','Visão geral'],['aitens','Itens'],['acat','Categorias'],['aemp','Empréstimos'],['adev','Devoluções'],['amov','Movimentações']]],["cafe", "coffee", "Cafeteria", [["cafe-vis", "Visão geral"], ["cafe-items", "Itens"], ["cafe-cats", "Categorias"], ["cafe-sales", "Vendas"], ["cafe-cash", "Caixa diário"], ["cafe-moves", "Movimentações"]]],["rest", "chef", "Restaurante", [["rest-vis", "Visão geral"], ["rest-items", "Itens"], ["rest-cats", "Categorias"], ["rest-sales", "Vendas"], ["rest-cash", "Caixa diário"], ["rest-moves", "Movimentações"]]]]],
  ['Comunicação',[['conteudo','layers','Conteúdo',[['pregacoes','Pregações'],['videos','Vídeos'],['musicas','Músicas'],['series','Séries'],['jornadas','Jornadas'],['cursos','Cursos'],['material','Material de apoio']]],['comunicacao','megaphone','Comunicação',[['noticias','Notícias'],['push','Push e e-mail'],['banners','Banners'],['transmissoes','Transmissões']]]]],
- ['Gestão',[['financeiro','wallet','Financeiro',[['fvis','Visão geral'],['flanc','Lançamentos'],['fpag','Contas a pagar'],['frec','Contas a receber'],['fapr','Aprovações'],['frel','Relatórios'],['fimp','Importar e exportar'],['fdoa','Doações']]],['admin','shield','Administração',[['usuarios','Usuários e permissões'],['visitantes','Visitantes'],['superusuarios','Superusuários'],['recursos-plataforma','Recursos habilitados'],['multi','Multi-igreja'],['auditoria','Auditoria e LGPD']]]]],
+ ['Gestão',[['financeiro','wallet','Financeiro',[['fvis','Visão geral'],['flanc','Lançamentos'],['fpag','Contas a pagar'],['frec','Contas a receber'],['fapr','Aprovações'],['frel','Análises'],['fimp','Importar e exportar'],['fdoa','Doações']]],['admin','shield','Administração',[['usuarios','Usuários e permissões'],['visitantes','Visitantes'],['superusuarios','Superusuários'],['recursos-plataforma','Recursos habilitados'],['multi','Multi-igreja'],['auditoria','Auditoria e LGPD']]]]],
 ];
 const P=(n,t)=>({n,t,i:n.split(' ').map(w=>w[0]).slice(0,2).join('')});
 const WAITING=[P('Carlos Mendes','ceu'),P('Luana Souza','damasco'),P('Paulo Alves','menta')];
@@ -356,10 +356,8 @@ function members(){
  return `<header class="ph rise">
   <div><p class="eb">Pessoas</p><h1>Membros</h1><p class="lede">${tot} membros cadastrados</p></div>
   <div class="pact">
-   <div style="position:relative"><button class="btn sec" data-a="exportMenu" aria-haspopup="menu">Exportar${ic('updown',14)}</button>
-    <div class="pop" id="exportPop" role="menu" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="todos os membros">Todos os membros</button><button class="pi" data-a="export" data-v="membros aceitos">Membros aceitos</button><button class="pi" data-a="export" data-v="membros integrados">Membros integrados</button><button class="pi" data-a="export" data-v="a integração selecionada" ${S.month==='todas'?'disabled':''}>Desta integração${S.month==='todas'?'<small style="margin-left:auto;color:var(--ink-soft)">filtre um mês</small>':''}</button></div></div>
-   <div style="position:relative"><button class="btn sec" data-a="reportMenu" aria-haspopup="menu">Relatório${ic('updown',14)}</button>
-    <div class="pop" id="reportPop" role="menu" style="right:0;top:calc(100% + 6px);min-width:200px"><button class="pi" data-a="export" data-v="o relatório por família">Por família</button></div></div>
+   ${rpBtn('membros','membros')}
+   
    <button class="btn pri" data-a="addMember">${ic('plus',15,2.2)}Adicionar membro</button>
   </div>
  </header>
@@ -631,7 +629,7 @@ function mkInteg(n,date,time,total,integ,o={}){
  return {id,n,date,time,limit:o.limit||'',link:o.link||'',resp:o.resp||'',contact:o.contact||'',current:!!o.current,active:!!o.active,ppl,steps:STEPS_DEF.map((s,i)=>({id:id+'s'+i,t:s[0],w:s[1],icon:s[2],date:o.stepDates?o.stepDates[i]:''}))};
 }
 const INTEGS=[
- mkInteg('Setembro/2026','2026-09-18','08:00',34,12,{current:true,active:true,link:'https://chat.whatsapp.com/grupo-do-zap',resp:'m3',contact:'https://wa.me/5511987542201',stepDates:['2026-09-21','2026-09-28','2026-10-05','2026-10-18','2026-10-25']}),
+ mkInteg('Setembro/2026','2026-09-18','08:00',34,12,{current:true,active:true,limit:40,link:'https://chat.whatsapp.com/grupo-do-zap',resp:'m3',contact:'https://wa.me/5511987542201',stepDates:['2026-09-21','2026-09-28','2026-10-05','2026-10-18','2026-10-25']}),
  mkInteg('Agosto/2026','2026-08-18','08:00',28,21,{link:'https://chat.whatsapp.com/agosto',resp:'m10'}),
  mkInteg('Julho/2026','2026-07-18','08:00',19,19,{aceitos:0,pend:0,resp:'m12'}),
  mkInteg('Abril/2026','2026-04-17','08:00',25,23,{resp:'m10'}),
@@ -639,6 +637,11 @@ const INTEGS=[
  mkInteg('Admin_teste','2026-04-17','08:00',1,0,{aceitos:0,pend:1}),
  mkInteg('Pietra B','2026-08-19','08:00',1,0,{aceitos:0,pend:1}),
 ];
+/* regras da igreja para as integrações (valem como padrão; cada integração ainda pode mudar o seu limite) */
+const INTR={max:30,prazo:3,aceite:'manual',cert:false};
+/* fila de espera: lista da igreja (não de uma integração). Entra quem pede com a integração lotada, fora do prazo ou sem integração aberta; ordem de chegada */
+const IGFILA=[['Mariana Teixeira','(11) 98811-2034','2026-09-12','lotada'],['Gustavo Lopes','(11) 97722-3410','2026-09-15','lotada'],['Paula Menezes','(11) 98123-9087','2026-09-22','prazo'],['Rogério Alves','(11) 99144-7755','2026-09-25','prazo'],['Tatiane Duarte','(11) 96655-2218','2026-09-28','sem']].map((x,i)=>({id:'f'+(i+1),n:x[0],ph:x[1],since:x[2],why:x[3],tone:TONES[i%6]}));
+Object.assign(S,{igTop:'lista'});
 Object.assign(S,{integ:null,itab:'det',iq:'',ifilter:'todas',iedit:null,imq:'',imf:'todos'});
 const ibyId=id=>INTEGS.find(x=>x.id===id);
 const icount=(g,st)=>g.ppl.filter(p=>p.st===st).length;
@@ -651,9 +654,8 @@ const iPill=g=>g.current?`<span class="stp" style="--c:var(--st-int);--b:var(--s
 /* ---------- list ---------- */
 function integList(){
  const cur=INTEGS.find(g=>g.current);
- return `<header class="ph rise"><div><p class="eb">Pessoas</p><h1>Integração de membros</h1><p class="lede">Fluxo de integração de novos membros</p></div>
-  <div class="pact"><div style="position:relative"><button class="btn sec" data-a="iexpMenu" aria-haspopup="menu">Exportar${ic('updown',14)}</button>
-   <div class="pop" id="iexpPop" role="menu" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="todas as integrações">Exportar todas</button></div></div>
+ return `<header class="ph rise"><div><p class="eb">Pessoas</p><h1>Integração de membros</h1><p class="lede">Fluxo de integração de novos membros</p><p class="who" style="margin:6px 0 0">${INTR.max?'Até '+INTR.max+' pessoas':'Sem limite de pessoas'} · pedidos até ${INTR.prazo} ${INTR.prazo===1?'dia':'dias'} antes do início · aceite ${INTR.aceite==='auto'?'automático':'manual'}${INTR.cert?' · com certificado':''}${IGFILA.length?' · '+IGFILA.length+' na fila de espera':''}</p></div>
+  <div class="pact">${rpBtn('integracao','turmas')}<button class="btn sec" data-a="igRules">${ic('sliders',15)}Regras</button>
    <button class="btn pri" data-a="addInteg">${ic('plus',15,2.2)}Nova integração</button></div></header>
  ${cur?`<button class="card icur rise" style="--d:1" data-a="openInteg" data-v="${cur.id}">
    <div class="ic1"><span class="eb" style="margin:0">Integração atual</span><b>${cur.n}</b><span class="who">Começou em ${dLong(cur.date)} · ${cur.ppl.length}${cur.limit?' de '+cur.limit:''} pessoas</span></div>
@@ -666,6 +668,24 @@ function integList(){
   <div id="irows">${irows()}</div>
  </section>`;
 }
+/* ---------- fila de espera ---------- */
+const IGWHY={lotada:['Integração lotada','var(--st-sol)','var(--st-sol-bg)'],prazo:['Fora do prazo','var(--st-ace)','var(--st-ace-bg)'],sem:['Sem integração aberta','var(--ink-muted)','var(--surface-2)']};
+function igFree(){const cur=INTEGS.find(g=>g.current);return !cur?0:cur.limit?Math.max(0,+cur.limit-cur.ppl.length):Infinity;}
+function igCallIds(ids){const cur=INTEGS.find(g=>g.current);if(!cur)return 0;let k=0;
+ for(const id of ids){if(igFree()<=0)break;const i=IGFILA.findIndex(x=>x.id===id);if(i<0)continue;const p=IGFILA.splice(i,1)[0];cur.ppl.push({id:cur.id+'q'+p.id,n:p.n,tone:p.tone,st:'aceito',step:1,ph:p.ph});k++;}return k;}
+function igFila(){
+ const cur=INTEGS.find(g=>g.current),free=igFree(),n=Math.min(IGFILA.length,free===Infinity?IGFILA.length:free);
+ const info=!cur?'Não há integração aberta. Crie uma integração para chamar a fila.':free===Infinity?`${esc(cur.n)} está aberta, sem limite de vagas.`:free>0?`${esc(cur.n)} tem ${free} ${free===1?'vaga livre':'vagas livres'}.`:`${esc(cur.n)} está lotada. Aumente o limite ou espere a próxima integração.`;
+ return `<section class="card sx-list rise" style="--d:2" aria-label="Fila de espera"><div class="sx-bar"><span class="who" style="margin:0;display:inline-flex;align-items:center;gap:6px">${ic('info',14,2)}${info}</span>${n>0?`<button class="btn pri sm" data-a="igCallN">${ic('userplus',14)}Chamar os próximos ${n}</button>`:''}</div>
+  ${IGFILA.length?IGFILA.map((p,i)=>`<div class="sx-r static"><span class="sx-ti" style="font:700 15px/1 var(--font-display)">${i+1}º</span><span class="sx-m"><b>${esc(p.n)}</b><small>${esc(p.ph)} · na fila desde ${dBR(p.since)}</small></span><span class="sx-c">${sxPill(IGWHY[p.why][0],IGWHY[p.why][1],IGWHY[p.why][2])}</span><span class="sx-s"></span><span class="sx-ch"><button class="btn sec sm" data-a="igCall" data-v="${p.id}" ${free>0?'':'disabled'} title="${free>0?'':'Sem vaga na integração atual'}">Chamar</button><button class="ibtn sm" data-a="igRm" data-v="${p.id}" aria-label="Remover da fila" title="Remover da fila">${ic('x',15)}</button></span></div>`).join(''):`<div class="mempty"><p>Ninguém na fila.</p><span>Quando uma integração lotar ou não houver uma aberta, quem pedir entra aqui.</span></div>`}
+  <p class="sx-priv">${ic('info',13,2)} A fila é da igreja, não de uma integração. Entra quem pede com a integração lotada, fora do prazo (${INTR.prazo} ${INTR.prazo===1?'dia':'dias'} antes do início) ou sem integração aberta, por ordem de chegada. Chamar aceita a pessoa na integração atual e avisa no app${INTR.aceite==='auto'?'; com o aceite automático, a fila é chamada sozinha quando uma integração abre':''}.</p></section>`;
+}
+{const _il=integList;integList=function(){
+ const h=_il(),i=h.indexOf('<section class="card mtab rise" style="--d:2" aria-label="Integrações">');
+ /* abas depois do card de status, como em Discipulado */
+ const tabs=`<div class="utabs rise" style="--d:2;margin-top:16px" role="tablist">${[['lista','Integrações',0],['fila','Fila de espera',IGFILA.length]].map(t=>`<button role="tab" class="${S.igTop===t[0]?'on':''}" aria-selected="${S.igTop===t[0]}" data-a="igTop" data-v="${t[0]}">${t[1]}${t[2]?`<span class="bdg">${t[2]}</span>`:''}</button>`).join('')}</div>`;
+ if(i<0)return h;
+ return S.igTop==='fila'?h.slice(0,i)+tabs+igFila():h.slice(0,i)+tabs+h.slice(i);};}
 function ibar(g,noLeg){const t=g.ppl.length||1,seg=[['integrado',icount(g,'integrado')],['andamento',icount(g,'andamento')],['aceito',icount(g,'aceito')],['pendente',icount(g,'pendente')]];
  return `<div class="ibar">${seg.map(s=>s[1]?`<i style="flex-grow:${s[1]};background:${s[0]==='andamento'?'var(--seq2)':IST[s[0]][1]}" title="${IST[s[0]][0]}: ${s[1]}"></i>`:'').join('')}</div>${noLeg?`<div class="ileg"><span><i style="background:var(--seq2)"></i>Em etapas <b>${icount(g,'andamento')}</b></span><span class="soft">· ${iprog(g)}% concluído</span></div>`:''}${noLeg?'':`
  <div class="ileg">${seg.filter(s=>s[1]).map(s=>`<span><i style="background:${s[0]==='andamento'?'var(--seq2)':IST[s[0]][1]}"></i>${IST[s[0]][0]} <b>${s[1]}</b></span>`).join('')}</div>`}`;}
@@ -689,7 +709,7 @@ function integDetail(){
  return `<nav class="crumb rise"><span class="soft">Pessoas</span>${ic('chevR',13,2)}<button class="lnk back" data-a="backInteg">Integração de membros</button>${ic('chevR',13,2)}<span>${esc(g.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
   <div class="pid"><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(g.n)}</h1>${iPill(g)}</div><p>Iniciada em ${dBR(g.date)} às ${g.time.replace(':00','h').replace(/^0/,'')} · ${t} ${t===1?'membro':'membros'}${g.limit?' de '+g.limit:''}</p></div></div>
-  <div class="pact"><button class="btn sec" data-a="resend">${ic('mail',15)}Reenviar e-mail</button><button class="btn sec" data-a="export" data-v="o CSV de ${esc(g.n)}">Exportar CSV</button>
+  <div class="pact"><button class="btn sec" data-a="resend">${ic('mail',15)}Reenviar e-mail</button>${rpBtn('integracao','pessoas')}
    <div style="position:relative"><button class="ibtn" data-a="igMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="igPop" style="right:0;top:calc(100% + 6px)"><button class="pi danger" data-a="delInteg">${ic('x',17)}Excluir integração</button></div></div></div>
   <div class="ikpi">
    <div><b>${t}</b><span>Total</span></div><div><b>${icount(g,'integrado')}</b><span>Integrados</span></div><div><b>${icount(g,'aceito')}</b><span>Aceitos</span></div><div><b>${icount(g,'pendente')}</b><span>Pendentes</span></div>
@@ -792,7 +812,7 @@ const IA={
    <label class="fld wide"><span class="fl">Nome da integração</span><input name="n" value="${next}" autocomplete="off"><span class="err"></span></label>
    <label class="fld"><span class="fl">Data de início</span><input name="date" type="date" value="2026-10-16"><span class="err"></span></label>
    <label class="fld"><span class="fl">Horário</span><input name="time" type="time" value="08:00"></label>
-   <label class="fld wide"><span class="fl">Limite de membros <small>opcional</small></span><input name="limit" type="number" min="1" inputmode="numeric" placeholder="Sem limite"><span class="err"></span></label>
+   <label class="fld wide"><span class="fl">Limite de membros <small>opcional</small></span><input name="limit" type="number" min="1" inputmode="numeric" placeholder="Sem limite" value="${INTR.max||''}"><span class="err"></span></label>
    <p class="fsec wide">${ic('message',15)}Comunicação via WhatsApp</p>
    <label class="fld wide"><span class="fl">Link do grupo <small>opcional</small></span><input name="link" type="url" placeholder="https://chat.whatsapp.com/…"><span class="err"></span></label>
    <label class="fld"><span class="fl">Responsável</span><span class="selw"><select name="resp" id="igResp"><option value="">Sem responsável</option>${MEMBERS.filter(m=>m.tit&&m.ph).map(m=>`<option value="${m.id}">${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></label>
@@ -805,7 +825,7 @@ const IA={
    const n=fd.get('n').trim();if(!n)bad('n','Informe um nome');else if(INTEGS.some(g=>norm(g.n)===norm(n)))bad('n','Já existe uma integração com esse nome');
    if(!fd.get('date'))bad('date','Escolha a data');const lk=fd.get('link');if(lk&&!/^https:\/\/chat\.whatsapp\.com\//.test(lk))bad('link','Use um link de convite do WhatsApp');if(!ok)return;
    const b=f.querySelector('[type=submit]');b.classList.add('busy');
-   setTimeout(()=>{const g=mkInteg(n,fd.get('date'),fd.get('time')||'08:00',0,0,{aceitos:0,pend:0,link:lk,resp:fd.get('resp'),contact:fd.get('contact'),limit:fd.get('limit')});if(fd.get('cur')){INTEGS.forEach(x=>x.current=false);g.current=true;}INTEGS.unshift(g);closeDlg();S.integ=g.id;S.itab='det';render();toast(`${n} criada${g.current?' e definida como atual':''}`);},900);});},
+   setTimeout(()=>{const g=mkInteg(n,fd.get('date'),fd.get('time')||'08:00',0,0,{aceitos:0,pend:0,link:lk,resp:fd.get('resp'),contact:fd.get('contact'),limit:fd.get('limit')});if(fd.get('cur')){INTEGS.forEach(x=>x.current=false);g.current=true;}INTEGS.unshift(g);let called=0;const waiting=IGFILA.length;if(g.current&&waiting&&INTR.aceite==='auto')called=igCallIds(IGFILA.map(x=>x.id));closeDlg();S.integ=g.id;S.itab='det';render();toast(`${n} criada${g.current?' e definida como atual':''}.${waiting?(called?` ${called} ${called===1?'pessoa foi chamada':'pessoas foram chamadas'} da fila (aceite automático).`:g.current?` ${waiting} ${waiting===1?'pessoa espera':'pessoas esperam'} na fila: chame em Fila de espera.`:''):''}`);},900);});},
 };
 
 /* ================= Cuidado › Discipulado ================= */
@@ -848,7 +868,7 @@ function stageDots(d){if(!d.stage)return '';return `<span class="sdots" title="E
 function discList(){
  const c=k=>DISC.filter(d=>dStatus(d)===k).length;
  return `<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Discipulado</h1><p class="lede">Rede de discipulado, cadência de contato e encontros de acompanhamento</p></div>
-  <div class="pact"><button class="btn sec" data-a="export" data-v="o CSV do discipulado">Exportar CSV</button><button class="btn pri" data-a="dAdd">${ic('plus',15,2.2)}Adicionar pessoa</button></div></header>
+  <div class="pact">${rpBtn('discipulado','pares')}<button class="btn pri" data-a="dAdd">${ic('plus',15,2.2)}Adicionar pessoa</button></div></header>
  <section class="card dsum rise" style="--d:1">
   <div class="dsn"><b>${DISC.length}</b><span>pessoas na rede</span></div>
   <div class="dsbar">${['emdia','atrasado','pausado'].map(k=>c(k)?`<i style="flex-grow:${c(k)};background:${DST[k][1]}"></i>`:'').join('')}</div>
@@ -1049,7 +1069,7 @@ const ago=iso=>{const n=-inDays(iso);return n===0?'hoje':n===1?'ontem':`há ${n}
 function casesList(){
  const cnt=k=>CASES.filter(c=>c.st===k).length,act=cnt('urgente')+cnt('acompanhando');
  return `<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Acompanhamento</h1><p class="lede">Casos de cuidado pastoral, visitas e aconselhamento</p></div>
-  <div class="pact"><div style="position:relative"><button class="btn sec" data-a="cexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="cexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="todos os casos">Todos os casos</button><button class="pi" data-a="export" data-v="os casos urgentes">Casos urgentes</button></div></div>
+  <div class="pact">${rpBtn('acompanhamento','casos')}
   <button class="btn pri" data-a="cAdd">${ic('plus',15,2.2)}Adicionar caso</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Casos ativos</span><span class="kv">${act}</span><span class="kd"><b style="color:var(--st-rec)">${cnt('urgente')} urgentes</b> precisam de atenção</span></div>
@@ -1115,7 +1135,7 @@ function prayerList(){
  const act=PRAYERS.filter(p=>p.st==='ativo'),conf=act.reduce((a,p)=>a+p.count,0),mine=act.filter(p=>p.mine).length;
  const l=PRAYERS.filter(p=>S.pf==='todos'||p.st===S.pf||(S.pf==='pend'&&p.st==='ativo'&&!p.mine));
  return `<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Pedidos de oração</h1><p class="lede">Pedidos enviados pelos membros pelo app</p></div>
-  <div class="pact"><div style="position:relative"><button class="btn sec" data-a="pexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="pexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="os pedidos ativos">Pedidos ativos</button><button class="pi" data-a="export" data-v="todos os pedidos">Todos os pedidos</button></div></div></div></header>
+  <div class="pact">${rpBtn('oracao','pedidos')}</div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Pedidos ativos</span><span class="kv">${act.length}</span><span class="kd">${PRAYERS.filter(p=>p.st==='respondido').length} respondido${PRAYERS.filter(p=>p.st==='respondido').length>1?'s':''}</span></div>
   <div class="k4"><span class="kl">Pessoas orando</span><span class="kv">${conf}</span><span class="kd">confirmações “estou orando”</span></div>
@@ -1243,7 +1263,7 @@ function casasList(){
  const avg=Math.round(CASAS.reduce((a,c)=>a+cRate(c),0)/CASAS.length),prev=Math.round(CASAS.reduce((a,c)=>a+cPrev(c),0)/CASAS.length);
  const req=CASAS.reduce((a,c)=>a+c.req.length,0);
  return `<header class="ph rise"><div><p class="eb">Comunidade</p><h1>Casas de Apascentamento</h1><p class="lede">${CASAS.length} casas ativas${req?` · <b>${req} ${req>1?'pedidos':'pedido'} para entrar</b> aguardando`:''}</p></div>
-  <div class="pact"><div style="position:relative"><button class="btn sec" data-a="hexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="hexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="a lista de casas">Lista de casas</button><button class="pi" data-a="export" data-v="os participantes de todas as casas">Participantes de todas as casas</button><button class="pi" data-a="export" data-v="o relatório de presença">Relatório de presença</button></div></div>
+  <div class="pact">${rpBtn('casas','casas')}
   <button class="btn pri" data-a="hAdd">${ic('plus',15,2.2)}Nova casa</button></div></header>
  <section class="card kpis4 rise" style="--d:1">
   <div class="k4"><span class="kl">Casas</span><span class="kv">${CASAS.length}</span><span class="kd">${CASAS.filter(c=>c.min).length} ligadas a ministérios</span></div>
@@ -1279,7 +1299,7 @@ function casaDetail(){
  return `<nav class="crumb rise"><span class="soft">Comunidade</span>${ic('chevR',13,2)}<button class="lnk back" data-a="hBack">Casas de Apascentamento</button>${ic('chevR',13,2)}<span>${esc(c.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
   <div class="pid">${hTile(c,64)}<div class="pn"><h1>${esc(c.n)}</h1><p>Líder: ${esc(c.leader)} · ${c.ppl.length} participantes${c.min?` · Ministério de ${c.min}`:''}</p></div></div>
-  <div class="pact"><button class="btn sec" data-a="export" data-v="o relatório da ${esc(c.n)}">${ic('share',15)}Relatório</button>
+  <div class="pact">${rpBtn('casas','presenca')}
    <div style="position:relative"><button class="ibtn" data-a="hMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="hPop" style="right:0;top:calc(100% + 6px)"><button class="pi danger" data-a="hDel">${ic('x',17)}Excluir casa</button></div></div></div>
   <div class="ikpi hk">
    <div><b>${c.ppl.length}</b><span>Participantes</span></div><div><b>${c.total}</b><span>Encontros</span></div>
@@ -1406,7 +1426,7 @@ function redesList(){
  const q=norm(S.rq||'');const loose=CASAS.filter(c=>!casaRede(c.id));
  const l=REDES.filter(r=>!q||norm(r.n+' '+r.sup+' '+r.casas.map(h=>hById(h)?.n||'').join(' ')).includes(q));
  return `<header class="ph rise"><div><p class="eb">Comunidade</p><h1>Redes de célula</h1><p class="lede">Hierarquia de supervisão: supervisor › líder › casa</p></div>
-  <div class="pact"><div style="position:relative"><button class="btn sec" data-a="rexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="rexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="as redes de célula">Redes e casas</button></div></div>
+  <div class="pact">${rpBtn('casas','redes')}
   <button class="btn pri" data-a="rAdd">${ic('plus',15,2.2)}Nova rede</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Redes</span><span class="kv">${REDES.length}</span><span class="kd">${REDES.length} supervisores</span></div>
@@ -1478,7 +1498,7 @@ const tCount=m=>m.teams.length||m.teamsN;
 function minisList(){
  const act=MINIS.filter(m=>m.active),mem=act.reduce((a,m)=>a+m.mem,0),teams=act.reduce((a,m)=>a+tCount(m),0),max=Math.max(...MINIS.map(m=>m.mem));
  return `<header class="ph rise"><div><p class="eb">Comunidade</p><h1>Ministérios</h1><p class="lede">${act.length} ministérios ativos</p></div>
-  <div class="pact"><div style="position:relative"><button class="btn sec" data-a="mnexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="mnexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="a lista de ministérios">Lista de ministérios</button><button class="pi" data-a="export" data-v="os membros de todos os ministérios">Membros por ministério</button></div></div>
+  <div class="pact">${rpBtn('ministerios','lista')}
   <button class="btn pri" data-a="mnAdd">${ic('plus',15,2.2)}Novo ministério</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Ministérios</span><span class="kv">${act.length}</span><span class="kd">${MINIS.length-act.length} inativo${MINIS.length-act.length===1?'':'s'}</span></div>
@@ -1628,7 +1648,7 @@ function kVis(){
 
 function kSalas(){
  const act=SALAS.filter(s=>s.active),cap=act.reduce((a,s)=>a+s.cap,0),noT=SALAS.filter(s=>!s.turma).length,noTeam=SALAS.filter(s=>!s.team).length;
- return `${kHead('Salas','Espaços físicos do Ministério Infantil',`<button class="btn sec" data-a="export" data-v="o CSV das salas">Exportar CSV</button><button class="btn pri" data-a="kSala">${ic('plus',15,2.2)}Nova sala</button>`)}
+ return `${kHead('Salas','Espaços físicos do Ministério Infantil',`${rpBtn('kids','salas')}<button class="btn pri" data-a="kSala">${ic('plus',15,2.2)}Nova sala</button>`)}
  <section class="card kpis4 rise" style="--d:1">
   <div class="k4"><span class="kl">Salas ativas</span><span class="kv">${act.length}</span><span class="kd">${SALAS.length-act.length} inativa${SALAS.length-act.length===1?'':'s'}</span></div>
   <div class="k4"><span class="kl">Capacidade total</span><span class="kv">${cap}</span><span class="kd">crianças por culto</span></div>
@@ -1824,7 +1844,7 @@ function userDetail(){
 
 /* ---------- Multi-igreja ---------- */
 function multiList(){
- return `${admHead('Multi-igreja','Redes, igrejas e o perfil de cada uma no app',`<button class="btn sec" data-a="export" data-v="o CSV de redes e igrejas">Exportar CSV</button><button class="btn pri" data-a="nAdd">${ic('plus',15,2.2)}Nova rede</button>`)}
+ return `${admHead('Multi-igreja','Redes, igrejas e o perfil de cada uma no app',`${rpBtn('multi','igrejas')}<button class="btn pri" data-a="nAdd">${ic('plus',15,2.2)}Nova rede</button>`)}
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Redes</span><span class="kv">${NETS.length}</span><span class="kd">agrupam igrejas</span></div>
   <div class="k4"><span class="kl">Igrejas</span><span class="kv">${IGREJAS.length}</span><span class="kd">${IGREJAS.filter(g=>!g.rede).length} sem rede</span></div>
@@ -2240,7 +2260,7 @@ const AU={
  auPick:(v,b)=>{b.classList.add('pk-on');setTimeout(()=>{S.church=+v;S.auth=null;S.active='hoje';S.animated=false;render();window.scrollTo({top:0});toast(`Você está em ${CHURCHES[S.church].n}`);},350);},
 };
 
-/* ================= Agenda e serviço: Cultos, Eventos, Calendário, Inscrições ================= */
+/* ================= Agenda: Cultos, Eventos, Calendário, Inscrições ================= */
 const ETYPES=['Culto','Retiro','Batismo','Conferência','Evento especial'];
 const ETONE={Ensaio:'salvia',Culto:'ceu',Retiro:'lima',Batismo:'menta',Conferência:'damasco','Evento especial':'rosado'};
 let _eid=0;
@@ -2278,8 +2298,8 @@ const minOpts=v=>`<option value="">Nenhum · evento geral da igreja</option>${MI
 function evList(kind){
  const all=EVTS.filter(e=>e.kind===(kind==='cultos'?'culto':'evento')),conf=all.filter(e=>e.st==='confirmado'&&!past(e)),regs=all.reduce((a,e)=>a+e.regs.length,0),paid=all.filter(e=>e.paid);
  const isC=kind==='cultos';
- return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>${isC?'Cultos':'Eventos'}</h1><p class="lede">${isC?'Cultos recorrentes da igreja':'Eventos especiais: batismos, conferências, retiros…'}</p></div>
-  <div class="pact"><div style="position:relative"><button class="btn sec" data-a="gexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="gexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="a lista de ${isC?'cultos':'eventos'}">Lista (CSV)</button><button class="pi" data-a="export" data-v="o calendário (.ics)">Calendário (.ics)</button></div></div>
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>${isC?'Cultos':'Eventos'}</h1><p class="lede">${isC?'Cultos recorrentes da igreja':'Eventos especiais: batismos, conferências, retiros…'}</p></div>
+  <div class="pact">${rpBtn('agenda',isC?'cultos':'eventos')}<button class="btn sec" data-a="export" data-v="o calendário (.ics)">Calendário (.ics)</button>
   <button class="btn pri" data-a="evAdd" data-v="${isC?'culto':'evento'}">${ic('plus',15,2.2)}${isC?'Novo culto':'Novo evento'}</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Próximos confirmados</span><span class="kv">${conf.length}</span><span class="kd">${all.filter(e=>e.st==='previsao').length} em previsão</span></div>
@@ -2305,15 +2325,15 @@ function evRows(all){
 function evDetail(){
  const e=eById(S.evt);if(!e){S.evt=null;return calPage();}
  const pg=e.paid,cnt=e.regs.length,pd=e.regs.filter(r=>r.pay==='pago').length;
- const tabs=[['det','Detalhes'],['ins','Inscrições',cnt],...(e.checkin!=='off'&&e.st==='confirmado'?[['eic','Check-in',eiDone(e)]]:[]),...(e.st==='confirmado'&&evMoney(e)?[['fin','Financeiro']]:[]),...(pg?[['vch','Vouchers',e.vouchers.length]]:[]),['quad','Quadros',nxBdCount('evt',e.id)],['cx','Caixas',cxCount('evt',e.id)]];
+ const tabs=[['det','Detalhes'],['ins','Inscrições',cnt],...(e.checkin!=='off'&&e.st==='confirmado'?[['eic','Check-in',eiDone(e)]]:[]),...(pg?[['vch','Vouchers',e.vouchers.length]]:[]),['quad','Quadros',nxBdCount('evt',e.id)],['cx','Caixas',cxCount('evt',e.id)]];
  if(!tabs.some(t=>t[0]===S.etab))S.etab='det';
- return `<nav class="crumb rise"><span class="soft">Agenda e serviço</span>${ic('chevR',13,2)}<button class="lnk back" data-a="evBack">Calendário</button>${ic('chevR',13,2)}<span>${esc(e.t)}</span></nav>
+ return `<nav class="crumb rise"><span class="soft">Agenda</span>${ic('chevR',13,2)}<button class="lnk back" data-a="evBack">Calendário</button>${ic('chevR',13,2)}<span>${esc(e.t)}</span></nav>
  <header class="card prof rise" style="--d:1"><div class="pid">${dTile(e)}<div class="pn"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h1>${esc(e.t)}</h1>${tTag(e.type)}${sPill(e)}${vemPill(e)}</div><p>${e.st==='previsao'?`Previsto para ${e.prev}`:`${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}`}${e.min?` · Ministério de ${esc(e.min)}`:''}</p></div></div>
   <div class="pact">${e.st==='previsao'?`<button class="btn pri" data-a="evConfirm" data-v="${e.id}">Confirmar data</button>`:`<button class="btn sec" data-a="copy" data-v="https://alva.app/e/${e.id}">${ic('share',15)}Copiar link</button>`}<div style="position:relative"><button class="ibtn" data-a="evMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="evPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="evDup" data-v="${e.id}">${ic('layers',17)}Duplicar</button><hr><button class="pi danger" data-a="evDel" data-v="${e.id}">${ic('x',17)}Excluir ${e.kind==='culto'?'culto':'evento'}</button></div></div></div>
   ${e.st==='previsao'?'':`<div class="ikpi hk"><div><b>${cnt}${e.cap?`<small class="kof">/${e.cap}</small>`:''}</b><span>Inscritos</span></div>${evMoney(e)?`<div><b>R$ ${raised(e).toLocaleString('pt-BR')}</b><span>Arrecadado · ${pd} pagos</span></div><div><b>${cnt-pd}</b><span>Pagamentos pendentes</span></div>`:`<div><b>Gratuito</b><span>Inscrição</span></div>`}<div><b>${{off:'Sem check-in',inteiro:'1 código',periodo:e.periods.length+' códigos'}[e.checkin]}</b><span>Check-in</span></div></div>`}
   <div class="ptabs" role="tablist">${tabs.map(t=>`<button role="tab" class="${S.etab===t[0]?'on':''}" data-a="evTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
- <div id="etb" class="rise" style="--d:2">${({det:evDet,ins:evIns,eic:eiTab,fin:efTab,vch:evVch,quad:e=>bdTab('evt',e.id),cx:e=>cxTab('evt',e.id)})[S.etab](e)}</div>`;
+ <div id="etb" class="rise" style="--d:2">${({det:evDet,ins:evIns,eic:eiTab,vch:evVch,quad:e=>bdTab('evt',e.id),cx:e=>cxTab('evt',e.id)})[S.etab](e)}</div>`;
 }
 function evInfoRows(e){const rooms=(e.rooms||[]).map(slById).filter(Boolean),rec=e.rep&&e.rep!=='none'?(e.recTxt?e.recTxt.split(',')[0]:'Toda '+DOWF(dow(e.d))):'';
  const row=(step,icn,tone,l,main,sub)=>`<button class="evi-r" data-a="evEditAt" data-v="${step}" title="Editar ${l.toLowerCase()}"><span class="htile" style="--s:38px;background:var(--tone-${tone});color:var(--tone-${tone}-ink)">${ic(icn,17)}</span><span class="dkt"><span class="evi-l">${l}</span><b>${main}</b>${sub?`<span>${sub}</span>`:''}</span><span class="evi-e">${ic('pen',13)}</span></button>`;
@@ -2361,7 +2381,7 @@ function rgDlg(e,rid){
 }
 /* ---------- calendário ---------- */
 function calPage(){
- return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>Calendário</h1><p class="lede">${S.caltab==='igreja'?'Todos os cultos e eventos da igreja':'Suas escalas e os períodos em que você não pode servir'}</p></div><div class="pact">${S.caltab==='igreja'?`<div style="position:relative"><button class="btn sec" data-a="gexpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="gexpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="o calendário (.ics)">Calendário (.ics)</button><button class="pi" data-a="export" data-v="os eventos do mês (CSV)">Eventos do mês (CSV)</button></div></div><button class="btn pri" data-a="evAdd" data-v="evento">${ic('plus',15,2.2)}Adicionar evento</button>`:`<button class="btn pri" data-a="blkAdd">${ic('plus',15,2.2)}Bloquear período</button>`}</div></header>
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>Calendário</h1><p class="lede">${S.caltab==='igreja'?'Todos os cultos e eventos da igreja':'Suas escalas e os períodos em que você não pode servir'}</p></div><div class="pact">${S.caltab==='igreja'?`<button class="btn sec" data-a="export" data-v="o calendário (.ics)">Calendário (.ics)</button>${rpBtn('agenda','eventos')}<button class="btn pri" data-a="evAdd" data-v="evento">${ic('plus',15,2.2)}Adicionar evento</button>`:`<button class="btn pri" data-a="blkAdd">${ic('plus',15,2.2)}Bloquear período</button>`}</div></header>
  <div class="utabs rise" style="--d:1">${[['igreja','Calendário da igreja'],['minha','Minha agenda']].map(t=>`<button class="${S.caltab===t[0]?'on':''}" data-a="calTab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
  <div class="rise" style="--d:2">${S.caltab==='igreja'?calGrid():myAgenda()}</div>`;
 }
@@ -2409,7 +2429,7 @@ function inscPage(){
  const rows=EVTS.flatMap(e=>e.regs.map(r=>({...r,e}))),q=norm(S.iq);
  const l=rows.filter(r=>(S.iqf==='todos'||(S.iqf==='pago'?r.pay==='pago':S.iqf==='pendente'?r.pay==='pendente':r.pay==='—'))&&(!q||norm(r.n+' '+r.e.t).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
  const pend=rows.filter(r=>r.pay==='pendente');
- return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>Inscrições</h1><p class="lede">Todas as inscrições em cultos e eventos</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="as inscrições">Exportar CSV</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>Inscrições</h1><p class="lede">Todas as inscrições em cultos e eventos</p></div><div class="pact">${rpBtn('agenda','inscricoes')}</div></header>
  ${insSum(rows,pend)}
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="iq2" placeholder="Buscar pessoa ou evento" value="${esc(S.iq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todas'],['pendente','Pendentes'],['pago','Pagas'],['gratis','Gratuitas']].map(c=>`<button class="chipf ${S.iqf===c[0]?'on':''}" data-a="iqF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
@@ -2659,7 +2679,7 @@ const GA={
  iqF:v=>{S.iqf=v;render();},
 };
 
-/* ================= Agenda e serviço › Escalas ================= */
+/* ================= Agenda › Escalas ================= */
 const EST={criacao:['Em criação','var(--ink-muted)','var(--surface-2)'],aguardando:['Aguardando aceite','var(--st-sol)','var(--st-sol-bg)'],aprovada:['Aprovada','var(--st-int)','var(--st-int-bg)']};
 const MST={rascunho:['Não enviado','var(--ink-muted)','var(--surface)'],aguardando:['Aguardando','var(--st-sol)','var(--st-sol-bg)'],confirmado:['Confirmado','var(--st-int)','var(--st-int-bg)'],recusado:['Recusou','var(--st-rec)','var(--st-rec-bg)']};
 let _bid=0;
@@ -2709,8 +2729,8 @@ function teamsFor(min){if(min==='Kids')return KTEAMS.map(t=>({n:t.n,m:t.m}));con
 function escList(){
  const c=k=>ESCALAS.filter(x=>x.st===k).length,q=norm(S.esq);
  const l=ESCALAS.filter(x=>(S.esf==='todos'||x.st===S.esf)&&(!q||norm(x.n+' '+x.min).includes(q)));
- return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>Escalas</h1><p class="lede">Quem serve em cada culto e evento, por ministério</p></div>
-  <div class="pact"><button class="btn sec" data-a="lmOpen" data-v="lim">${ic('sliders',15)}Regras de escala</button><div style="position:relative"><button class="btn sec" data-a="esExpMenu">Exportar${ic('updown',14)}</button><div class="pop" id="esExpPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="export" data-v="as escalas (CSV)">Escalas (CSV)</button><button class="pi" data-a="export" data-v="as escalas para impressão (PDF)">Para imprimir (PDF)</button></div></div>
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>Escalas</h1><p class="lede">Quem serve em cada culto e evento, por ministério</p></div>
+  <div class="pact"><button class="btn sec" data-a="lmOpen" data-v="lim">${ic('sliders',15)}Regras de escala</button>${rpBtn('escalas','escalas')}
   <button class="btn pri" data-a="esAdd">${ic('plus',15,2.2)}Nova escala</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
   <div class="k4"><span class="kl">Aprovadas</span><span class="kv" style="color:var(--st-int)">${c('aprovada')}</span><span class="kd">todos confirmaram</span></div>
@@ -2733,7 +2753,7 @@ function escDetail(){
  const x=esById(S.esc);if(!x){S.esc=null;return escList();}
  const ms=esMembers(x),ok=ms.filter(m=>m.st==='confirmado').length,pend=ms.filter(m=>m.st==='aguardando').length,bl=x.dates.reduce((a,d)=>a+d.blocks.length,0),allOk=ms.length&&ok===ms.length;
  const act=x.st==='criacao'?`<button class="btn pri" data-a="esSend" ${ms.length?'':'disabled title="Adicione pessoas antes de enviar"'}>${ic('mail',15)}Enviar para os escalados</button>`:x.st==='aguardando'?(allOk?`<button class="btn pri" data-a="esApprove">${ic('check',15,2.4)}Aprovar escala</button>`:`<button class="btn sec" data-a="esRemind" ${pend?'':'disabled'}>${ic('bell',15)}Lembrar ${pend} pendente${pend===1?'':'s'}</button>`):'';
- return `<nav class="crumb rise"><span class="soft">Agenda e serviço</span>${ic('chevR',13,2)}<button class="lnk back" data-a="esBack">Escalas</button>${ic('chevR',13,2)}<span>${esc(x.n)}</span></nav>
+ return `<nav class="crumb rise"><span class="soft">Agenda</span>${ic('chevR',13,2)}<button class="lnk back" data-a="esBack">Escalas</button>${ic('chevR',13,2)}<span>${esc(x.n)}</span></nav>
  <header class="card prof rise" style="--d:1"><div class="pid"><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(x.n)}</h1>${esPill(x.st)}</div><p>Ministério de ${esc(x.min)}${x.desc?' · '+esc(x.desc):''}</p></div></div>
   <div class="pact">${act}<div style="position:relative"><button class="ibtn" data-a="esMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="esPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="esDup">${ic('layers',17)}Duplicar para o próximo mês</button><hr><button class="pi danger" data-a="esDel">${ic('x',17)}Excluir escala</button></div></div></div>
   ${x.st==='criacao'?`<div class="esflow"><span class="on"><i>1</i>Montar</span><b></b><span><i>2</i>Escalados confirmam</span><b></b><span><i>3</i>Aprovada</span></div>`:x.st==='aguardando'?`<div class="esflow"><span class="done"><i>${ic('check',11,3)}</i>Montar</span><b class="on"></b><span class="on"><i>2</i>Escalados confirmam</span><b></b><span><i>3</i>Aprovada</span></div>`:''}
@@ -3159,7 +3179,7 @@ CKA.ckEv=v=>{const G=ckGroups().find(g=>g.e.id===v);if(!G)return;
   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`);};
 CKA.ckGo=v=>{closeDlg();S.esc=v;S.estab='ck';S.esview='blocos';render();window.scrollTo({top:0});};
 
-/* ================= Agenda e serviço › Apresentação de Bebês ao Senhor ================= */
+/* ================= Agenda › Apresentação de Bebês ao Senhor ================= */
 const BBR={maxM:24,vagas:6,prazo:7};
 const BBD=[{id:'bd0',ev:'ev1',vagas:6,st:'fechada'},{id:'bd1',ev:'ev2',vagas:5,st:'aberta'},{id:'bd2',ev:'ev3',vagas:6,st:'aberta'}];
 let _bbid=0;const BBP_=(bebe,nasc,pais,d,st,at,extra={})=>Object.assign({id:'bp'+(++_bbid),bebe,nasc,pais,cert:bebe,d,st,at,why:'',certOk:false},extra);
@@ -3172,7 +3192,7 @@ const BBP=[
  BBP_('Maria Clara Prado','2025-12-04',['Juliana Prado'],'bd0','realizada','2026-09-05'),
  BBP_('Davi Teixeira','2026-02-18',['Lucas Teixeira'],'bd1','recusado','2026-09-20',{why:'Data já estava cheia; família vai escolher 11/out'}),
 ];
-Object.assign(S,{bbq:'',bbf:'todos',bbd:null});
+Object.assign(S,{bbq:'',bbf:'todos',bbd:null,bbdf:'prox'});
 const BBST={aguardando:['Aguardando','var(--st-sol)','var(--st-sol-bg)'],confirmado:['Confirmado','var(--st-int)','var(--st-int-bg)'],realizada:['Realizada','var(--brand-text)','var(--brand-soft)'],recusado:['Recusado','var(--st-rec)','var(--st-rec-bg)']};
 const bbPill=s=>`<span class="stp" style="--c:${BBST[s][1]};--b:${BBST[s][2]}"><i></i>${BBST[s][0]}</span>`;
 const bbD=id=>BBD.find(d=>d.id===id);
@@ -3181,61 +3201,106 @@ const bbM=(nasc,iso)=>{const a=new Date(nasc+'T12:00'),b=new Date(iso+'T12:00');
 const bbAge=m=>m<1?'recém-nascido':m<12?`${m} ${m===1?'mês':'meses'}`:(()=>{const y=Math.floor(m/12),r=m%12;return `${y} ano${y>1?'s':''}${r?` e ${r} ${r===1?'mês':'meses'}`:''}`;})();
 const bbUsed=d=>BBP.filter(p=>p.d===d.id&&(p.st==='confirmado'||p.st==='aguardando'||p.st==='realizada')).length;
 const bbOver=p=>bbM(p.nasc,bbEv(p).d)>BBR.maxM;
+/* o certificado de apresentação é emitido pela Secretaria (Atos e Documentos); aqui ele só aparece para consulta */
+const bbDoc=p=>SX_DOCS.find(d=>d.bb===p.id&&d.st==='valido')||null;
 const bbAv=n=>`<span class="bb-av" style="--h:${(n.length*37)%360}">${ic('pacifier',16,1.8)}</span>`;
 const bbMaxTx=()=>BBR.maxM%12?`${BBR.maxM} meses`:`${BBR.maxM/12} ano${BBR.maxM>12?'s':''}`;
 
+/* Apresentações: a tela principal é a lista de datas (como a lista de eventos); entrar numa data mostra os bebês dela e deixa adicionar enquanto houver vaga */
+const bdSt=d=>{const e=eById(d.ev),u=bbUsed(d);return past(e)?stpill('var(--ink-muted)','var(--surface-2)','Realizada'):u>=d.vagas?stpill('var(--st-rec)','var(--st-rec-bg)','Esgotada'):stpill('var(--st-int)','var(--st-int-bg)','Aberta');};
+const bdPast=d=>past(eById(d.ev));
+const bdAsc=(a,b)=>eById(a.ev).d<eById(b.ev).d?-1:1;
+function bbRow(p){
+ const e=bbEv(p),m=bbM(p.nasc,e.d),ov=m>BBR.maxM;
+ return `<div class="trow bb" tabindex="0" data-a="bbOpen" data-v="${p.id}">
+   <span class="tn">${bbAv(p.bebe)}<span class="hn"><b>${esc(p.bebe)}</b><span class="${ov&&p.st!=='realizada'?'bb-ov':''}">${bbAge(m)} na data${ov&&p.st!=='realizada'?` · acima de ${bbMaxTx()}`:''}</span></span></span>
+   <span class="bb-pa">${p.pais.map(n=>esc(n)).join(' e ')}</span>
+   <span class="bb-cu">${dBR(e.d)} · ${e.time}<small>${esc(e.t)}</small></span>
+   <span class="ts">${bbPill(p.st)}${p.st==='realizada'?`<span class="bb-cs ${bbDoc(p)?'ok':''}">${ic(bbDoc(p)?'check':'award',11,2.4)}${bbDoc(p)?(p.certOk?'Certificado enviado':'Certificado emitido'):'Na secretaria'}</span>`:''}</span>
+   <span class="bb-ac">${p.st==='aguardando'?`<button class="btn pri sm" data-a="bbOk" data-v="${p.id}">Confirmar</button>`:p.st==='realizada'?`<button class="btn sec sm" data-a="bbCert" data-v="${p.id}">${ic('award',13)}Certificado</button>`:p.st==='confirmado'&&!past(e)?'':p.st==='confirmado'?`<button class="btn sec sm" data-a="bbDone" data-v="${p.id}">Marcar realizada</button>`:''}${ic('chevR',16)}</span></div>`;
+}
 function bbPage(){
- const q=norm(S.bbq),c=k=>BBP.filter(p=>p.st===k).length,cert=BBP.filter(p=>p.st==='realizada'&&!p.certOk).length;
- const l=BBP.filter(p=>(S.bbf==='todos'||p.st===S.bbf)&&(!S.bbd||p.d===S.bbd)&&(!q||norm(p.bebe+' '+p.pais.join(' ')).includes(q))).sort((a,b)=>(bbEv(a).d<bbEv(b).d?-1:1));
- const fut=BBD.filter(d=>{const e=eById(d.ev);return e&&!past(e);}).sort((a,b)=>eById(a.ev).d<eById(b.ev).d?-1:1);
- return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>Apresentações</h1><p class="lede">Bebês apresentados ao Senhor no culto, com a igreja reunida · <em class="bb-ref">Lucas 2:22</em></p></div>
+ if(S.bbd&&bbD(S.bbd))return bbDatePage(bbD(S.bbd));S.bbd=null;
+ const q=norm(S.bbq),c=k=>BBP.filter(p=>p.st===k).length,cert=BBP.filter(p=>p.st==='realizada'&&!bbDoc(p)).length;
+ const all=BBD.filter(d=>eById(d.ev)),nP=all.filter(d=>!bdPast(d)).length,f=S.bbdf;
+ const hit=d=>!q||norm(eById(d.ev).t+' '+BBP.filter(p=>p.d===d.id).map(p=>p.bebe+' '+p.pais.join(' ')).join(' ')).includes(q);
+ const l=all.filter(d=>(f==='todas'||(f==='real'?bdPast(d):!bdPast(d)))&&hit(d)).sort((a,b)=>f==='prox'?bdAsc(a,b):bdAsc(b,a));
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>Apresentações</h1><p class="lede">Bebês apresentados ao Senhor no culto, com a igreja reunida · <em class="bb-ref">Lucas 2:22</em></p></div>
   <div class="pact"><button class="btn sec" data-a="bbRules">${ic('sliders',15)}Regras</button><button class="btn pri" data-a="bbOpenDate">${ic('plus',15,2.2)}Abrir data</button></div></header>
  <section class="card kpis4 rise" style="--d:1">
   <div class="k4"><span class="kl">Aguardando confirmação</span><span class="kv" style="color:var(--st-sol)">${c('aguardando')}</span><span class="kd">pedidos de famílias</span></div>
   <div class="k4"><span class="kl">Confirmados</span><span class="kv" style="color:var(--st-int)">${c('confirmado')}</span><span class="kd">nas próximas datas</span></div>
-  <div class="k4"><span class="kl">Certificados a emitir</span><span class="kv" style="color:${cert?'var(--brand-text)':'inherit'}">${cert}</span><span class="kd">de apresentações feitas</span></div>
+  <div class="k4"><span class="kl">Certificados na secretaria</span><span class="kv" style="color:${cert?'var(--brand-text)':'inherit'}">${cert}</span><span class="kd">a emitir em Secretaria › Atos</span></div>
   <div class="k4"><span class="kl">Apresentados em 2026</span><span class="kv">${c('realizada')+14}</span><span class="kd">bebês ao Senhor</span></div>
  </section>
- <section class="rise" style="--d:2"><div class="sh" style="margin:6px 0 12px"><h2 style="font:600 17px/22px var(--font-display);margin:0">Próximas datas</h2><span class="who">Até ${bbMaxTx()} · ${BBR.vagas} vagas por culto</span></div>
-  <div class="bb-dates">${fut.map(d=>{const e=eById(d.ev),u=bbUsed(d),ps=BBP.filter(p=>p.d===d.id&&p.st!=='recusado'),full=u>=d.vagas;return `<button class="card bb-dc ${S.bbd===d.id?'on':''} ${full?'full':''}" data-a="bbDate" data-v="${d.id}">
-    <div class="bb-dh">${dTile(e)}<div class="dkt"><b>${esc(e.t)}</b><span>${wd(e.d)}, ${dBR(e.d)} · ${e.time}</span></div>${full?'<span class="bb-full">Esgotada</span>':''}</div>
-    <div class="bb-seats">${Array.from({length:d.vagas},(_,i)=>{const p=ps[i];return `<i class="${p?p.st:''}" title="${p?esc(p.bebe):'Vaga livre'}">${p?ic('pacifier',12,2):''}</i>`;}).join('')}</div>
-    <div class="bb-df"><span><b>${u}</b> de ${d.vagas} vagas</span><span>${ps.filter(p=>p.st==='aguardando').length?`${ps.filter(p=>p.st==='aguardando').length} aguardando`:'tudo confirmado'}</span></div></button>`;}).join('')}
-   <button class="bb-dc add" data-a="bbOpenDate"><span>${ic('plus',18,2.2)}</span><b>Abrir data</b><small>Escolha um culto e as vagas</small></button></div></section>
+ <section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="bbq" placeholder="Buscar culto, bebê ou responsável" value="${esc(S.bbq)}" autocomplete="off"></label>
+  <div class="chips">${[['prox','Próximas',nP],['real','Realizadas',all.length-nP],['todas','Todas',all.length]].map(x=>`<button class="chipf ${f===x[0]?'on':''}" data-a="bbDF" data-v="${x[0]}">${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
+  ${l.length?`<div class="trow bd thead"><span>Culto</span><span>Vagas</span><span>Pedidos</span><span>Situação</span><span></span></div>${l.map(d=>{const e=eById(d.ev),u=bbUsed(d),ps=BBP.filter(p=>p.d===d.id),n=k=>ps.filter(p=>p.st===k).length,parts=[n('aguardando')?`<b class="bd-aw">${n('aguardando')} aguardando</b>`:'',n('confirmado')?`${n('confirmado')} ${n('confirmado')>1?'confirmados':'confirmado'}`:'',n('realizada')?`${n('realizada')} ${n('realizada')>1?'realizadas':'realizada'}`:''].filter(Boolean);
+   return `<div class="trow bd ${bdPast(d)?'off':''}" tabindex="0" data-a="bbDate" data-v="${d.id}">
+   <span class="tn">${dTile(e)}<span class="hn"><b>${esc(e.t)}</b><span>${wd(e.d)}, ${dBR(e.d)} · ${e.time}</span></span></span>
+   <span class="bd-v"><span><b>${u}</b> de ${d.vagas} vagas</span><span class="tr"><i style="width:${Math.min(100,u/d.vagas*100)}%"></i></span></span>
+   <span class="bd-p">${parts.join(' · ')||'<span class="soft">Nenhum pedido</span>'}</span><span class="ts">${bdSt(d)}</span><span class="tc">${ic('chevR',16)}</span></div>`;}).join('')}`
+  :`<div class="mempty"><p>${all.length?'Nenhuma data por aqui.':'Nenhuma data aberta.'}</p><span>${q?'Nada corresponde à busca.':f==='prox'?'Abra uma data para as famílias pedirem pelo app.':'Troque o filtro para ver outras datas.'}</span></div>`}
+  <div class="tfoot"><span>${l.length} ${l.length===1?'data':'datas'}</span><span class="who">Pedidos chegam pelo app (Mais › Apresentações)</span></div></section>`;
+}
+function bbDatePage(d){
+ const e=eById(d.ev),q=norm(S.bbq),ps=BBP.filter(p=>p.d===d.id),c=k=>ps.filter(p=>p.st===k).length,u=bbUsed(d),free=d.vagas-u,full=free<=0,pst=bdPast(d);
+ const l=ps.filter(p=>(S.bbf==='todos'||p.st===S.bbf)&&(!q||norm(p.bebe+' '+p.pais.join(' ')).includes(q))).sort((a,b)=>a.at<b.at?-1:1);
+ const act=ps.filter(p=>p.st!=='recusado'),why=pst?'Esta data já aconteceu e não recebe novos bebês.':full?'Vagas esgotadas. Aumente as vagas para adicionar mais alguém.':`${free} ${free===1?'vaga livre':'vagas livres'}.`;
+ return `<nav class="crumb rise"><span class="soft">Agenda</span>${ic('chevR',13,2)}<button class="lnk back" data-a="bbBack">Apresentações</button>${ic('chevR',13,2)}<span>${esc(e.t)} · ${dBR(e.d)}</span></nav>
+ <header class="card prof rise" style="--d:1"><div class="pid">${dTile(e)}<div class="pn"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h1>${esc(e.t)}</h1>${bdSt(d)}</div><p>${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}</p></div></div>
+  <div class="pact"><button class="btn sec" data-a="bbVagas" data-v="${d.id}">${ic('sliders',15)}Vagas</button><button class="btn pri" data-a="bbAdd" data-v="${d.id}" ${full||pst?'disabled':''} title="${esc(why)}">${ic('plus',15,2.2)}Adicionar bebê</button></div>
+  <div class="ikpi hk"><div><b>${u}<small class="kof">/${d.vagas}</small></b><span>Vagas ocupadas</span></div><div><b>${c('aguardando')}</b><span>Aguardando</span></div><div><b>${c('confirmado')}</b><span>Confirmados</span></div><div><b>${c('realizada')}</b><span>Realizadas</span></div></div>
+ </header>
+ <section class="card bb-sr rise" style="--d:2"><div class="bb-seats">${Array.from({length:d.vagas},(_,i)=>{const p=act[i];return `<i class="${p?p.st:''}" title="${p?esc(p.bebe):'Vaga livre'}">${p?ic('pacifier',12,2):''}</i>`;}).join('')}</div><span class="who">${why}</span></section>
  <section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="bbq" placeholder="Buscar bebê ou responsável" value="${esc(S.bbq)}" autocomplete="off"></label>
-  <div class="chips">${[['todos','Todos',BBP.length],['aguardando','Aguardando',c('aguardando')],['confirmado','Confirmados',c('confirmado')],['realizada','Realizadas',c('realizada')],['recusado','Recusados',c('recusado')]].map(x=>`<button class="chipf ${S.bbf===x[0]?'on':''}" data-a="bbF" data-v="${x[0]}">${x[0]!=='todos'?`<i style="background:${BBST[x[0]][1]}"></i>`:''}${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
-  ${S.bbd?`<div class="bb-filt">${ic('calendar',13,2)}Mostrando ${esc(eById(bbD(S.bbd).ev).t)}, ${dBR(eById(bbD(S.bbd).ev).d)}<button class="lnk" data-a="bbDate" data-v="${S.bbd}">Ver todas as datas</button></div>`:''}
-  ${l.length?`<div class="trow bb thead"><span>Bebê</span><span>Responsáveis</span><span>Culto</span><span>Status</span><span></span></div>${l.map(p=>{const e=bbEv(p),m=bbM(p.nasc,e.d),ov=m>BBR.maxM;return `<div class="trow bb" tabindex="0" data-a="bbOpen" data-v="${p.id}">
-   <span class="tn">${bbAv(p.bebe)}<span class="hn"><b>${esc(p.bebe)}</b><span class="${ov&&p.st!=='realizada'?'bb-ov':''}">${bbAge(m)} na data${ov&&p.st!=='realizada'?` · acima de ${bbMaxTx()}`:''}</span></span></span>
-   <span class="bb-pa">${p.pais.map(n=>esc(n)).join(' e ')}</span>
-   <span class="bb-cu">${dBR(e.d)} · ${e.time}<small>${esc(e.t)}</small></span>
-   <span class="ts">${bbPill(p.st)}${p.st==='realizada'?`<span class="bb-cs ${p.certOk?'ok':''}">${ic(p.certOk?'check':'award',11,2.4)}${p.certOk?'Certificado enviado':'Emitir certificado'}</span>`:''}</span>
-   <span class="bb-ac">${p.st==='aguardando'?`<button class="btn pri sm" data-a="bbOk" data-v="${p.id}">Confirmar</button>`:p.st==='realizada'?`<button class="btn sec sm" data-a="bbCert" data-v="${p.id}">${ic('award',13)}Certificado</button>`:p.st==='confirmado'&&!past(e)?'':p.st==='confirmado'?`<button class="btn sec sm" data-a="bbDone" data-v="${p.id}">Marcar realizada</button>`:''}${ic('chevR',16)}</span></div>`;}).join('')}`
-  :`<div class="mempty"><p>Nenhum pedido.</p><span>${q||S.bbf!=='todos'||S.bbd?'Nada corresponde a esse filtro.':'Quando uma família pedir pelo app, aparece aqui.'}</span></div>`}
-  <div class="tfoot"><span>${l.length} pedido${l.length===1?'':'s'}</span><span class="who">Pedidos chegam pelo app (Mais › Apresentações)</span></div></section>`;
+  <div class="chips">${[['todos','Todos',ps.length],['aguardando','Aguardando',c('aguardando')],['confirmado','Confirmados',c('confirmado')],['realizada','Realizadas',c('realizada')],['recusado','Recusados',c('recusado')]].map(x=>`<button class="chipf ${S.bbf===x[0]?'on':''}" data-a="bbF" data-v="${x[0]}">${x[0]!=='todos'?`<i style="background:${BBST[x[0]][1]}"></i>`:''}${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
+  ${l.length?`<div class="trow bb thead"><span>Bebê</span><span>Responsáveis</span><span>Culto</span><span>Status</span><span></span></div>${l.map(bbRow).join('')}`
+  :`<div class="mempty"><p>${ps.length?'Nenhum pedido neste filtro.':'Nenhum bebê nesta data ainda.'}</p><span>${ps.length?'Tente outro filtro ou outra busca.':pst||full?'':'Os pedidos chegam pelo app. Você também pode adicionar um bebê aqui.'}</span></div>`}
+  <div class="tfoot"><span>${l.length} ${l.length===1?'pedido':'pedidos'}</span><span class="who">${why}</span></div></section>`;
 }
 function bbAfter(){const q=$('#bbq');if(q)q.addEventListener('input',e=>{S.bbq=e.target.value;const p=e.target.selectionStart;render();const n=$('#bbq');n.focus();n.setSelectionRange(p,p);});}
 const bbRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
 
-function bbCertHTML(p){const e=bbEv(p);return `<div class="bb-cert"><div class="bb-cert-in">
+function bbCertHTML(p,doc){const e=bbEv(p),sg=doc?doc.sig.split(' — '):['Pr. Rafael Pereira','Pastor presidente'];return `<div class="bb-cert"><div class="bb-cert-in">
  <div class="bb-c-top">${logo(18,false)}<span>${esc(CHURCHES[S.church].n)}</span></div>
  <p class="bb-c-eb">Certificado de</p><h2 class="bb-c-t">Apresentação ao Senhor</h2>
  <p class="bb-c-tx">Certificamos que</p><p class="bb-c-name">${esc(p.cert)}</p>
  <p class="bb-c-tx">nascido(a) em ${dBR(p.nasc)}, filho(a) de ${p.pais.map(esc).join(' e ')}, foi apresentado(a) ao Senhor diante da igreja reunida no ${esc(e.t)} de ${dBR(e.d)}.</p>
  <blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote>
- <div class="bb-c-sig"><span><i></i>Pr. Rafael Pereira<small>Pastor presidente</small></span><span><i></i>${esc(CHURCHES[S.church].n)}<small>${dBR(e.d)}</small></span></div>
+ <div class="bb-c-sig"><span><i></i>${esc(sg[0])}<small>${esc(sg[1]||'')}</small></span><span><i></i>${esc(CHURCHES[S.church].n)}<small>${dBR(e.d)}</small></span></div>
  </div></div>`;}
 
 const BBA={
  bbF:v=>{S.bbf=v;render();},
- bbDate:v=>{S.bbd=S.bbd===v?null:v;bbRe();},
+ bbDate:v=>{S.bbd=v;S.bbf='todos';S.bbq='';render();window.scrollTo({top:0});},
+ bbBack:()=>{S.bbd=null;S.bbf='todos';S.bbq='';render();window.scrollTo({top:0});},
+ bbDF:v=>{S.bbdf=v;render();},
+ bbAdd:v=>{const d=bbD(v),e=eById(d.ev);if(bdPast(d)){toast('Esta data já aconteceu.');return;}if(bbUsed(d)>=d.vagas){toast('Sem vagas nesta data. Aumente as vagas para adicionar.');return;}
+  const ms=sxInteg().filter(m=>sxSitOf(m)==='ativo'),free=d.vagas-bbUsed(d);
+  sxDlg('Adicionar bebê',esc(e.t)+' · '+dBR(e.d)+' · '+free+(free===1?' vaga livre':' vagas livres'),
+   sxF('Nome do bebê','<input name="n" autocomplete="off">','Vira o nome no certificado. A família confirma depois, se precisar corrigir.')
+   +sxF('Data de nascimento','<input type="date" name="nasc" max="'+SX_TODAY+'">')
+   +sxF('Responsável (membro ativo)',sxSel('r1',ms.map(m=>[m.n,m.n]),ms[0].n),'Pelo menos um responsável precisa ser membro ativo.')
+   +sxF('Outro responsável (opcional)','<input name="r2" placeholder="Nome" autocomplete="off">'),sxOk('Adicionar e confirmar'));
+  const f=$('#sxF');f.onsubmit=ev=>{ev.preventDefault();sxClr(f);const n=f.n.value.trim();
+   if(!n)return sxErr(f,'n','Informe o nome do bebê');if(!f.nasc.value)return sxErr(f,'nasc','Informe a data de nascimento');if(f.nasc.value>SX_TODAY)return sxErr(f,'nasc','A data não pode ser futura');
+   if(bbUsed(d)>=d.vagas)return sxErr(f,'n','As vagas acabaram enquanto você preenchia');
+   const pais=[f.r1.value,f.r2.value.trim()].filter(Boolean),p=BBP_(n,f.nasc.value,pais,d.id,'confirmado',SX_TODAY);BBP.push(p);
+   LOG.unshift({u:'Rafael Pereira',a:'Adicionou',e:'Apresentação de bebê',x:n,det:dBR(e.d),d:SX_TODAY,t:new Date().toTimeString().slice(0,5)});
+   closeDlg();bbRe();toast(n.split(' ')[0]+' adicionado(a) e confirmado(a) em '+dBR(e.d)+(bbM(p.nasc,e.d)>BBR.maxM?'. Acima da idade da regra.':''));};},
+ bbVagas:v=>{const d=bbD(v),u=bbUsed(d);
+  sxDlg('Vagas desta data',esc(eById(d.ev).t)+' · '+dBR(eById(d.ev).d),sxF('Vagas','<input type="number" name="n" min="'+Math.max(1,u)+'" max="20" value="'+d.vagas+'">','Não pode ser menor que as '+u+' já ocupadas. Máximo de 20.'),sxOk('Salvar'));
+  const f=$('#sxF');f.onsubmit=ev=>{ev.preventDefault();sxClr(f);const n=parseInt(f.n.value,10);
+   if(!(n>=Math.max(1,u)&&n<=20))return sxErr(f,'n','Use um número entre '+Math.max(1,u)+' e 20');
+   d.vagas=n;closeDlg();bbRe();toast('Vagas desta data: '+n);};},
  bbOpen:(v,b,ev)=>{if(ev&&ev.target.closest('[data-a=bbOk],[data-a=bbCert],[data-a=bbDone]'))return;const p=BBP.find(x=>x.id===v),e=bbEv(p),m=bbM(p.nasc,e.d),ov=m>BBR.maxM&&p.st!=='realizada';
   openDlg(`${dlgHead('Pedido de apresentação',`Recebido em ${dBR(p.at)}`)}
    <div class="bb-head">${bbAv(p.bebe)}<div class="dkt"><b>${esc(p.bebe)}</b><span>Nasceu em ${dBR(p.nasc)} · ${bbAge(m)} na data</span></div>${bbPill(p.st)}</div>
    ${ov?`<p class="lm-w bad" style="margin:12px 0 0">${ic('alert',14,2.2)}<span><b>Acima da idade da regra (${bbMaxTx()})</b><br>Converse com a família antes de confirmar. Você pode confirmar mesmo assim.</span></p>`:''}
    <dl class="bb-dl"><div><dt>Culto</dt><dd>${esc(e.t)} · ${wd(e.d)}, ${dBR(e.d)} · ${e.time}</dd></div><div><dt>Responsáveis</dt><dd>${p.pais.map(n=>`${esc(n)} <span class="bb-mb">${ic('check',10,3)}membro</span>`).join('<br>')}</dd></div>${p.why?`<div><dt>Motivo da recusa</dt><dd>${esc(p.why)}</dd></div>`:''}</dl>
-   <label class="fld"><span class="fl">Nome no certificado</span><input id="bbCn" value="${esc(p.cert)}" ${p.certOk?'disabled':''} autocomplete="off"><span class="hint">${p.certOk?'Certificado já enviado à família.':'Confira com a família: é assim que sai no certificado.'}</span><span class="err"></span></label>
-   <div class="dfoot bb-ft">${p.st==='aguardando'?`<button class="btn sec" data-a="bbNo" data-v="${p.id}">Recusar</button><button class="btn pri" data-a="bbOk" data-v="${p.id}">${ov?'Confirmar mesmo assim':'Confirmar'}</button>`:p.st==='confirmado'?`<button class="btn sec" data-a="bbCancel" data-v="${p.id}">Cancelar apresentação</button>${past(e)||e.d===CKDAY?`<button class="btn pri" data-a="bbDone" data-v="${p.id}">Marcar realizada</button>`:`<button class="btn pri" data-a="bbSaveName" data-v="${p.id}">Salvar</button>`}`:p.st==='realizada'?`<button class="btn sec" data-a="bbSaveName" data-v="${p.id}" ${p.certOk?'disabled':''}>Salvar nome</button><button class="btn pri" data-a="bbCert" data-v="${p.id}">${ic('award',14)}Ver certificado</button>`:`<button class="btn sec" data-a="closeDlg">Fechar</button>`}</div>`,'sm');},
+   <label class="fld"><span class="fl">Nome no certificado</span><input id="bbCn" value="${esc(p.cert)}" ${bbDoc(p)?'disabled':''} autocomplete="off"><span class="hint">${bbDoc(p)?`Certificado nº ${bbDoc(p).num} emitido pela secretaria.`:'A secretaria emite o certificado com este nome. Confira com a família.'}</span><span class="err"></span></label>
+   <div class="dfoot bb-ft">${p.st==='aguardando'?`<button class="btn sec" data-a="bbNo" data-v="${p.id}">Recusar</button><button class="btn pri" data-a="bbOk" data-v="${p.id}">${ov?'Confirmar mesmo assim':'Confirmar'}</button>`:p.st==='confirmado'?`<button class="btn sec" data-a="bbCancel" data-v="${p.id}">Cancelar apresentação</button>${past(e)||e.d===CKDAY?`<button class="btn pri" data-a="bbDone" data-v="${p.id}">Marcar realizada</button>`:`<button class="btn pri" data-a="bbSaveName" data-v="${p.id}">Salvar</button>`}`:p.st==='realizada'?`<button class="btn sec" data-a="bbSaveName" data-v="${p.id}" ${bbDoc(p)?'disabled':''}>Salvar nome</button><button class="btn pri" data-a="bbCert" data-v="${p.id}">${ic('award',14)}Ver certificado</button>`:`<button class="btn sec" data-a="closeDlg">Fechar</button>`}</div>`,'sm');},
  bbSaveName:(v,bt)=>{const p=BBP.find(x=>x.id===v),n=$('#bbCn').value.trim();if(!n){const f=$('#bbCn').closest('.fld');f.classList.add('bad');f.querySelector('.err').textContent='Informe o nome';return;}busy(bt,500,'Salvo',()=>{p.cert=n;setTimeout(()=>{closeDlg();bbRe();toast('Nome do certificado salvo');},300);});},
  bbOk:(v,bt)=>{const p=BBP.find(x=>x.id===v),d=bbD(p.d),cn=$('#bbCn');if(cn&&cn.value.trim())p.cert=cn.value.trim();
   const conf=BBP.filter(x=>x.d===d.id&&(x.st==='confirmado'||x.st==='realizada')).length;if(conf>=d.vagas){toast(`Não há vagas confirmadas livres em ${dBR(eById(d.ev).d)}. Aumente as vagas ou recuse.`);return;}
@@ -3249,11 +3314,16 @@ const BBA={
  bbDoNo:(v,bt)=>{const w=$('#bbW .chipf.on'),m=$('#bbWm').value.trim();if(!w){const f=$('#bbWm').closest('.fld');f.classList.add('bad');f.querySelector('.err').textContent='Escolha um motivo';return;}if(w.dataset.w==='Outro'&&!m){const f=$('#bbWm').closest('.fld');f.classList.add('bad');f.querySelector('.err').textContent='Explique o motivo para a família';return;}
   const p=BBP.find(x=>x.id===v);bt.classList.add('busy');setTimeout(()=>{p.st='recusado';p.why=w.dataset.w+(m?' · '+m:'');closeDlg();bbRe();toast(`Pedido de ${p.bebe.split(' ')[0]} recusado. A família foi avisada.`,()=>{p.st='aguardando';p.why='';bbRe();});},500);},
  bbCancel:v=>{const p=BBP.find(x=>x.id===v);confirmDel({title:`Cancelar a apresentação de ${p.bebe.split(' ')[0]}?`,body:`A família é avisada no app e a vaga de ${dBR(bbEv(p).d)} volta a ficar livre.`,label:'Cancelar apresentação',onConfirm:()=>{p.st='recusado';p.why='Cancelada pela secretaria';bbRe();toast('Apresentação cancelada',()=>{p.st='confirmado';p.why='';bbRe();});}});},
- bbDone:(v,bt)=>{const p=BBP.find(x=>x.id===v);busy(bt,600,'Realizada',()=>{p.st='realizada';setTimeout(()=>{closeDlg();bbRe();toast(`Apresentação de ${p.bebe.split(' ')[0]} registrada. Emita o certificado.`);},300);});},
- bbCert:v=>{const p=BBP.find(x=>x.id===v);openDlg(`${dlgHead('Certificado de apresentação',`${esc(p.bebe)} · confira antes de enviar`)}${bbCertHTML(p)}
-  <div class="dfoot"><button class="btn sec" data-a="bbPdf" data-v="${p.id}">${ic('arrowDn',14,2)}Baixar PDF</button><button class="btn pri" data-a="bbSend" data-v="${p.id}">${ic('mail',14)}${p.certOk?'Reenviar à família':'Enviar à família'}</button></div>`,'lg bb-cdlg');},
+ bbDone:(v,bt)=>{const p=BBP.find(x=>x.id===v);busy(bt,600,'Realizada',()=>{p.st='realizada';setTimeout(()=>{closeDlg();bbRe();toast(`Apresentação de ${p.bebe.split(' ')[0]} registrada. A secretaria emite o certificado em Secretaria › Atos.`);},300);});},
+ bbCert:v=>{const p=BBP.find(x=>x.id===v),d=bbDoc(p);
+  if(!d){openDlg(`${dlgHead('Certificado de apresentação',esc(p.bebe))}<p class="fi-note">${ic('info',15)}<span>O certificado ainda não foi emitido. Quem emite é a <b>secretaria</b>, em Secretaria › Atos. Assim que for emitido, ele aparece aqui para consulta.</span></p>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="bbGoSec">Abrir em Secretaria</button></div>`,'sm');return;}
+  openDlg(`${dlgHead('Certificado de apresentação',`${esc(p.bebe)} · nº ${d.num} · emitido em ${dBR(d.d)} pela secretaria`)}${bbCertHTML(p,d)}
+  <p class="hint" style="margin:10px 0 0">${ic('info',12,2)} Consulta. A emissão e o envio à família são feitos em Secretaria.</p>
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="bbPdf" data-v="${p.id}">${ic('arrowDn',14,2)}Baixar PDF</button></div>`,'lg bb-cdlg');},
+ bbGoSec:()=>{closeDlg();A.nav('sec-atos');},
  bbPdf:v=>{const p=BBP.find(x=>x.id===v);toast(`Baixando Certificado-${p.bebe.split(' ')[0]}.pdf`);},
- bbSend:(v,bt)=>{const p=BBP.find(x=>x.id===v);busy(bt,800,'Enviado',()=>{const was=p.certOk;p.certOk=true;setTimeout(()=>{closeDlg();bbRe();toast(`${was?'Certificado reenviado':'Certificado enviado'} para ${p.pais.map(n=>n.split(' ')[0]).join(' e ')}: no app e por e-mail.`);},300);});},
+ /* bbSend saiu: o envio do certificado é feito pela Secretaria (sxBbSend) */
  bbOpenDate:()=>{const used=new Set(BBD.map(d=>d.ev)),opts=EVTS.filter(e=>e.kind==='culto'&&e.st==='confirmado'&&!past(e)&&!used.has(e.id)).sort((a,b)=>a.d<b.d?-1:1);let v=BBR.vagas;
   openDlg(`${dlgHead('Abrir data de apresentação','Escolha o culto. As famílias passam a ver a data no app.')}<div class="pick" id="bbOp">${opts.length?opts.map((e,i)=>`<label class="pk">${dTile(e)}<span><b>${esc(e.t)}</b><small>${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}</small></span><input type="radio" name="bbe" value="${e.id}" ${!i?'checked':''}></label>`).join(''):'<p class="who" style="padding:12px">Todos os cultos futuros já têm apresentação. Cadastre novos cultos em Cultos.</p>'}</div>
    <div class="fld" style="margin-top:12px"><span class="fl">Vagas neste culto</span><div class="lm2-step" style="align-self:flex-start"><button type="button" id="bbVm" aria-label="Menos">${ic('minus',16,2.4)}</button><output><b id="bbVv">${v}</b></output><button type="button" id="bbVp" aria-label="Mais">${ic('plus',16,2.4)}</button></div><span class="hint">Pedidos fecham ${BBR.prazo} dias antes do culto.</span></div>
@@ -3263,7 +3333,7 @@ const BBA={
  bbRules:()=>{let m=BBR.maxM,vg=BBR.vagas,pz=BBR.prazo;const row=(id,lab,val,sub)=>`<div class="bb-rr"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><div class="lm2-step"><button type="button" data-s="${id}|-1">${ic('minus',15,2.4)}</button><output><b id="bbR${id}">${val}</b></output><button type="button" data-s="${id}|1">${ic('plus',15,2.4)}</button></div></div>`;
   openDlg(`${dlgHead('Regras da apresentação','Valem para os pedidos feitos pelo app.')}<div class="bb-rules">${row('m','Idade máxima',m,'em meses, no dia do culto')}${row('v','Vagas por culto',vg,'padrão ao abrir uma data')}${row('p','Prazo para pedir',pz,'dias antes do culto')}
    <div class="bb-rr fixed"><div class="dkt"><b>Responsável membro</b><span>Pelo menos um dos responsáveis precisa ser membro ativo</span></div><span class="bb-lock">${ic('lock',13,2)}Sempre</span></div>
-   <div class="bb-rr fixed"><div class="dkt"><b>Certificado</b><span>Emitido depois da apresentação e enviado no app e por e-mail</span></div><span class="bb-lock">${ic('award',13,2)}Sempre</span></div></div>
+   <div class="bb-rr fixed"><div class="dkt"><b>Certificado</b><span>Emitido pela secretaria depois da apresentação e enviado no app e por e-mail</span></div><span class="bb-lock">${ic('award',13,2)}Sempre</span></div></div>
    <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="bbSaveRules">Salvar</button></div>`,'sm');
   const lim={m:[1,48],v:[1,20],p:[0,30]},val={m,v:vg,p:pz};$('.bb-rules').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;const [k,d]=b.dataset.s.split('|');val[k]=Math.max(lim[k][0],Math.min(lim[k][1],val[k]+ +d));$('#bbR'+k).textContent=val[k];});window._bbR=val;},
  bbSaveRules:(v,bt)=>{const r=window._bbR;busy(bt,500,'Salvo',()=>{Object.assign(BBR,{maxM:r.m,vagas:r.v,prazo:r.p});setTimeout(()=>{closeDlg();bbRe();toast(`Regras salvas: até ${bbMaxTx()}, ${BBR.vagas} vagas, pedidos até ${BBR.prazo} dias antes`);},300);});},
@@ -3714,7 +3784,7 @@ const cover=(n,cls='')=>{const c=ncById(n.c)||{tone:'salvia'};return `<span clas
 
 function ntPage(){
  const act=NEWS.filter(n=>ntSt(n)==='ativa'),soon=act.filter(n=>n.exp&&dIn(n.exp)<=7);
- return `<header class="ph rise"><div><p class="eb">Comunicação</p><h1>Notícias</h1><p class="lede">Avisos e comunicados que aparecem no app</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="as notícias (CSV)">Exportar CSV</button><button class="btn pri" data-a="${S.ntab==='cats'?'ncNew':'ntNew'}">${ic('plus',15,2.2)}${S.ntab==='cats'?'Nova categoria':'Nova notícia'}</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Comunicação</p><h1>Notícias</h1><p class="lede">Avisos e comunicados que aparecem no app</p></div><div class="pact">${rpBtn('comunicacao','noticias')}<button class="btn pri" data-a="${S.ntab==='cats'?'ncNew':'ntNew'}">${ic('plus',15,2.2)}${S.ntab==='cats'?'Nova categoria':'Nova notícia'}</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">No ar</span><span class="kv" style="color:var(--st-int)">${act.length}</span><span class="kd">visíveis no app agora</span></div>
   <div class="k4"><span class="kl">Saem do ar em 7 dias</span><span class="kv" style="${soon.length?'color:var(--st-sol)':''}">${soon.length}</span><span class="kd">${soon.length?esc(soon.sort((a,b)=>a.exp<b.exp?-1:1)[0].t.split(' — ')[0])+' '+relD(soon[0].exp):'nenhuma'}</span></div>
   <div class="k4"><span class="kl">Expiradas</span><span class="kv">${NEWS.length-act.length}</span><span class="kd">guardadas no histórico</span></div></section>
@@ -3793,7 +3863,7 @@ function puPage(){
  if(S.pw)return puWizard();
  const ag=PUSHES.filter(p=>p.st==='agendado'),env=PUSHES.filter(p=>p.st==='enviado'),op=env.filter(p=>p.open),rate=op.length?Math.round(op.reduce((a,p)=>a+p.open,0)/op.length):0;
  const l=PUSHES.filter(p=>S.puf==='todos'||(S.puf==='prox'?p.st==='agendado':S.puf==='env'?p.st==='enviado':p.st==='cancelado')).sort((a,b)=>(a.dt<b.dt?-1:1)*(S.puf==='prox'?1:-1));
- return `<header class="ph rise"><div><p class="eb">Comunicação</p><h1>Push e e-mail</h1><p class="lede">Avisos que chegam no celular e na caixa de entrada dos membros</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="os envios (CSV)">Exportar CSV</button><button class="btn pri" data-a="puNew">${ic('send',15)}Novo envio</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Comunicação</p><h1>Push e e-mail</h1><p class="lede">Avisos que chegam no celular e na caixa de entrada dos membros</p></div><div class="pact">${rpBtn('comunicacao','envios')}<button class="btn pri" data-a="puNew">${ic('send',15)}Novo envio</button></div></header>
  <div class="cm-pg rise" style="--d:1">
   <section class="card kpis4 k3"><div class="k4"><span class="kl">Agendados</span><span class="kv">${ag.length}</span><span class="kd">${ag.length?'próximo '+relD(ag.sort((a,b)=>a.dt<b.dt?-1:1)[0].dt.slice(0,10)):'nenhum'}</span></div><div class="k4"><span class="kl">Enviados no mês</span><span class="kv">${env.length}</span><span class="kd">${env.reduce((a,p)=>a+segOf(p.seg)[2],0).toLocaleString('pt-BR')} pessoas alcançadas</span></div><div class="k4"><span class="kl">Taxa de abertura</span><span class="kv" style="color:var(--st-int)">${rate}<small style="font-size:.55em">%</small></span><span class="kd">média dos últimos envios</span></div></section>
   <section class="card cm-auto"><div class="sh"><h2>${ic('zap',16,2)} Automáticos</h2></div>${AUTOS.map(a=>`<label class="tog cm-au"><span class="htile" style="--s:34px;background:var(--brand-soft);color:var(--brand-text)">${ic(a.icon,16)}</span><span><b>${a.n}</b><small>${a.d}</small></span><input type="checkbox" data-au="${a.id}" ${a.on?'checked':''}><span class="sw"></span></label>`).join('')}</section>
@@ -4034,7 +4104,7 @@ function pgPage(){
  if(S.preg)return pgEdit();
  const q=norm(S.pgq),l=PREGS.filter(p=>(S.pgf==='todas'||(S.pgf==='serie'?p.sr:!p.sr))&&(!S.pgSr||(NX_SERIES.find(x=>x.id===S.pgSr)||{items:[]}).items.includes(p.id))&&(!q||norm(p.t+' '+p.who+' '+p.ref+' '+(srById(p.sr)?.n||'')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
  const top=PREGS.slice().sort((a,b)=>b.views-a.views)[0];
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Pregações</h1><p class="lede">Vídeos e áudios das mensagens</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="as pregações (CSV)">Exportar CSV</button><button class="btn pri" data-a="pgNew">${ic('plus',15,2.2)}Nova pregação</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Pregações</h1><p class="lede">Vídeos e áudios das mensagens</p></div><div class="pact">${rpBtn('conteudo','pregacoes')}<button class="btn pri" data-a="pgNew">${ic('plus',15,2.2)}Nova pregação</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Pregações</span><span class="kv">${PREGS.length}</span><span class="kd">${PREGS.filter(p=>p.d>=addD(NOWD,-30)).length} no último mês</span></div><div class="k4"><span class="kl">Visualizações</span><span class="kv">${nfmt(PREGS.reduce((a,p)=>a+p.views,0))}</span><span class="kd">somando todas</span></div><div class="k4"><span class="kl">Séries</span><span class="kv">${PSERIES.length}</span><span class="kd">${PREGS.filter(p=>!p.sr).length} avulsa${PREGS.filter(p=>!p.sr).length===1?'':'s'}</span></div><div class="k4"><span class="kl">Mais assistida</span><span class="kv sp-kvt">${esc(top.t)}</span><span class="kd">${nfmt(top.views)} visualizações</span></div></section>
  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="pgq" placeholder="Buscar título, pregador ou passagem" value="${esc(S.pgq)}" autocomplete="off"></label>
   <div class="chips">${[['todas','Todas'],['serie','Em série'],['avulsa','Avulsas']].map(c=>`<button class="chipf ${S.pgf===c[0]&&!S.pgSr?'on':''}" data-a="pgF" data-v="${c[0]}">${c[1]}</button>`).join('')}<span class="ct-sep"></span>${PSERIES.map(s=>`<button class="chipf ct-src ${S.pgSr===s.id?'on':''}" data-a="pgSr" data-v="${s.id}"><i style="background:${HUES[s.h][1]}"></i>${esc(s.n)}<small>${PREGS.filter(p=>p.sr===s.id).length}</small></button>`).join('')}</div></div>
@@ -4086,7 +4156,7 @@ const SRES=[['cifra','Cifra','file'],['mp3','MP3','music'],['vs','VS','layers'],
 Object.assign(S,{sgq:'',sgf:'todas'});
 function sgPage(){
  const q=norm(S.sgq),l=SONGS.filter(s=>(S.sgf==='todas'||(S.sgf==='novideo'?!s.yt:s.cat===S.sgf))&&(!q||norm(s.n+' '+s.art).includes(q)));const nov=SONGS.filter(s=>!s.yt).length;
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Músicas</h1><p class="lede">O repertório do louvor, com tom, andamento e materiais de ensaio</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="o repertório (CSV)">Exportar CSV</button><button class="btn pri" data-a="sgNew">${ic('plus',15,2.2)}Nova música</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Músicas</h1><p class="lede">O repertório do louvor, com tom, andamento e materiais de ensaio</p></div><div class="pact">${rpBtn('conteudo','musicas')}<button class="btn pri" data-a="sgNew">${ic('plus',15,2.2)}Nova música</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Músicas</span><span class="kv">${SONGS.length}</span><span class="kd">em ${new Set(SONGS.map(s=>s.cat)).size} categorias</span></div><div class="k4"><span class="kl">Com material de ensaio</span><span class="kv">${SONGS.filter(s=>Object.keys(s.res).length>1).length}</span><span class="kd">cifra e mais algum recurso</span></div><div class="k4"><span class="kl">Sem vídeo</span><span class="kv" style="${nov?'color:var(--st-sol)':''}">${nov}</span><span class="kd">${nov?'vale adicionar uma referência':'todas com vídeo'}</span></div></section>
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="sgq" placeholder="Buscar música ou artista" value="${esc(S.sgq)}" autocomplete="off"></label><div class="chips">${[['todas','Todas'],...SCATS.map(c=>[c,c]),['novideo','Sem vídeo']].map(c=>`<button class="chipf ${S.sgf===c[0]?'on':''}" data-a="sgF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
   ${l.length?`<div class="ct-sl">${l.map((s,i)=>`<div class="ct-sr" tabindex="0" data-a="sgEdit" data-v="${s.id}">
@@ -4146,7 +4216,7 @@ function csPage(){
  if(S.jor&&S.cur)return cuDetail();
  const all=csAll(),q=norm(S.csq),n=k=>all.filter(r=>csKind(r)===k).length;
  const l=all.filter(r=>(S.csf==='todos'||csKind(r)===S.csf)&&(!q||norm(r.c.n+' '+r.c.desc+' '+(r.j.n||'')+' '+(r.j.min||'')).includes(q)));
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Cursos</h1><p class="lede">Conteúdo estruturado em aulas — avulso, em jornada ou de um ministério</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="os cursos (CSV)">Exportar CSV</button><button class="btn pri" data-a="csNew">${ic('plus',15,2.2)}Novo curso</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Cursos</h1><p class="lede">Conteúdo estruturado em aulas — avulso, em jornada ou de um ministério</p></div><div class="pact">${rpBtn('conteudo','cursos')}<button class="btn pri" data-a="csNew">${ic('plus',15,2.2)}Novo curso</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Cursos</span><span class="kv">${all.length}</span><span class="kd">${all.filter(r=>r.c.on).length} ativos</span></div><div class="k4"><span class="kl">Em jornadas</span><span class="kv">${n('jor')}</span><span class="kd">dentro de ${JORNS.filter(j=>j.courses.length).length} trilhas</span></div><div class="k4"><span class="kl">De ministérios</span><span class="kv">${n('min')}</span><span class="kd">${n('av')} avulso${n('av')===1?'':'s'}</span></div><div class="k4"><span class="kl">Aulas no total</span><span class="kv">${all.reduce((a,r)=>a+r.c.aulas.length,0)}</span><span class="kd">somando todos os cursos</span></div></section>
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="csq" placeholder="Buscar curso, jornada ou ministério" value="${esc(S.csq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos',all.length],['av','Avulsos',n('av')],['jor','Em jornada',n('jor')],['min','De ministério',n('min')]].map(c=>`<button class="chipf ${S.csf===c[0]?'on':''}" data-a="csF" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div></div>
   ${l.length?`<div class="trow cs thead"><span>Curso</span><span>Vínculo</span><span>Aulas</span><span>Progresso</span><span>Status</span><span></span></div>${l.map(r=>{const ci=r.j.courses.indexOf(r.c),pr=pAvg(r.j.people.map(p=>p.prog[ci]||0)),k=csKind(r),mn=MINIS.find(m=>m.n===r.j.min);return `<div class="trow cs ${r.c.on?'':'off'}" tabindex="0" data-a="csOpen" data-v="${r.j.id}|${r.c.id}">
@@ -4180,7 +4250,7 @@ const ring=(pct,sz=56,col)=>{const r=(sz-8)/2,c=2*Math.PI*r;return `<svg class="
 function joPage(){
  if(S.jor&&S.cur)return cuDetail();if(S.jor)return joDetail();
  const q=norm(S.jq),l=JORNS.filter(j=>(S.jf==='todas'||j.st===S.jf)&&(!q||norm(j.n).includes(q)));const act=JORNS.filter(j=>j.st==='ativa');
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Jornadas</h1><p class="lede">Trilhas de discipulado em várias semanas, curso a curso</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="as jornadas (CSV)">Exportar CSV</button><button class="btn pri" data-a="joNew">${ic('plus',15,2.2)}Nova jornada</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Jornadas</h1><p class="lede">Trilhas de discipulado em várias semanas, curso a curso</p></div><div class="pact">${rpBtn('conteudo','jornadas')}<button class="btn pri" data-a="joNew">${ic('plus',15,2.2)}Nova jornada</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Jornadas ativas</span><span class="kv">${act.length}</span><span class="kd">${JORNS.length-act.length} entre rascunho e concluídas</span></div><div class="k4"><span class="kl">Pessoas inscritas</span><span class="kv">${JORNS.reduce((a,j)=>a+jCount(j),0)}</span><span class="kd">somando todas</span></div><div class="k4"><span class="kl">Progresso médio</span><span class="kv">${Math.round(act.reduce((a,j)=>a+jProg(j),0)/Math.max(1,act.length))}<small style="font-size:.55em">%</small></span><span class="kd">nas jornadas ativas</span></div><div class="k4"><span class="kl">Certificados prontos</span><span class="kv" style="color:var(--st-int)">${JORNS.reduce((a,j)=>a+j.people.filter(p=>pAvg(p.prog)===100&&!p.cert).length,0)}</span><span class="kd">pessoas concluíram e aguardam</span></div></section>
  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="jq" placeholder="Buscar jornada" value="${esc(S.jq)}" autocomplete="off"></label><div class="chips">${[['todas','Todas'],['ativa','Ativas'],['concluida','Concluídas'],['rascunho','Rascunho']].map(c=>`<button class="chipf ${S.jf===c[0]?'on':''}" data-a="joF" data-v="${c[0]}">${c[1]}<small>${c[0]==='todas'?JORNS.length:JORNS.filter(j=>j.st===c[0]).length}</small></button>`).join('')}</div></div>
  <div class="ct-jg rise" style="--d:3">${l.map(j=>{const pr=jProg(j),au=j.courses.reduce((a,c)=>a+c.aulas.length,0);return `<article class="card ct-jc" tabindex="0" data-a="joOpen" data-v="${j.id}"><div class="ct-jh" style="background:${thumbBg(j.h)}"><span class="ct-ji">${ic(j.icon,22)}</span>${jPill(j.st)}</div>
@@ -4316,7 +4386,7 @@ function mtPage(){
  if(S.mat)return mtEdit();
  const q=norm(S.mtq),l=MATS.filter(m=>(S.mtf==='todos'||m.lk===S.mtf||(S.mtf==='min'&&m.min))&&(!q||norm(m.t+' '+m.desc+' '+mtLink(m).tx+' '+m.files.map(f=>f.n).join(' ')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
  const nf=MATS.reduce((a,m)=>a+m.files.length,0),kb=MATS.reduce((a,m)=>a+m.files.reduce((x,f)=>x+f.kb,0),0);
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Material de apoio</h1><p class="lede">Apostilas, roteiros e arquivos para jornadas, discipulado e Casas</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="os materiais (CSV)">Exportar CSV</button><button class="btn pri" data-a="mtNew">${ic('plus',15,2.2)}Novo material</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Material de apoio</h1><p class="lede">Apostilas, roteiros e arquivos para jornadas, discipulado e Casas</p></div><div class="pact">${rpBtn('conteudo','materiais')}<button class="btn pri" data-a="mtNew">${ic('plus',15,2.2)}Novo material</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Materiais</span><span class="kv">${MATS.length}</span><span class="kd">${MATS.filter(m=>m.min).length} de ministérios</span></div><div class="k4"><span class="kl">Arquivos anexados</span><span class="kv">${nf}</span><span class="kd">${fSize(kb)} no total</span></div><div class="k4"><span class="kl">Downloads no mês</span><span class="kv">${MATS.reduce((a,m)=>a+m.dl,0)}</span><span class="kd">pelos líderes no app</span></div><div class="k4"><span class="kl">Mais baixado</span><span class="kv sp-kvt">${esc(MATS.slice().sort((a,b)=>b.dl-a.dl)[0].t.split(' — ')[0])}</span><span class="kd">${MATS.slice().sort((a,b)=>b.dl-a.dl)[0].dl} downloads</span></div></section>
  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="mtq" placeholder="Buscar material ou arquivo" value="${esc(S.mtq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos'],...MLINKS.slice(0,4).map(x=>[x[0],x[1]]),['min','De ministério']].map(c=>`<button class="chipf ${S.mtf===c[0]?'on':''}" data-a="mtF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
  ${l.length?`<div class="mt-grid rise" style="--d:3">${l.map(m=>{const {L,tx}=mtLink(m);return `<article class="card mt-c" tabindex="0" data-a="mtOpen" data-v="${m.id}">
@@ -4435,7 +4505,7 @@ function fVis(){
 /* ---------- Lançamentos ---------- */
 function fLanc(){
  const q=norm(S.lq),all=LANCS.slice().sort((a,b)=>a.d<b.d?1:-1),l=all.filter(x=>(S.lf==='todos'||(S.lf==='pend'?x.st==='pend':x.tipo===S.lf&&x.st==='ok'))&&(!q||norm(x.desc+' '+x.cat).includes(q))),ok=okL();
- return fHead('Lançamentos','Entradas e saídas do caixa',`<button class="btn sec" data-a="export" data-v="os lançamentos (CSV)">Exportar CSV</button><button class="btn pri" data-a="lcNew">${ic('plus',15,2.2)}Novo lançamento</button>`)
+ return fHead('Lançamentos','Entradas e saídas do caixa',`${rpBtn('financeiro','lancamentos')}<button class="btn pri" data-a="lcNew">${ic('plus',15,2.2)}Novo lançamento</button>`)
  +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Entradas em setembro</span><span class="kv" style="color:var(--st-int)">${R$(sumT(ok,'e'))}</span><span class="kd">${ok.filter(x=>x.tipo==='e').length} lançamentos</span></div><div class="k4"><span class="kl">Saídas em setembro</span><span class="kv" style="color:var(--st-rec)">${R$(sumT(ok,'s'))}</span><span class="kd">${ok.filter(x=>x.tipo==='s').length} lançamentos</span></div><div class="k4"><span class="kl">Saldo</span><span class="kv">${R$(sumT(ok,'e')-sumT(ok,'s'))}</span><span class="kd">competência set/2026</span></div><div class="k4"><span class="kl">Aguardando aprovação</span><span class="kv" style="${LANCS.some(x=>x.st==='pend')?'color:var(--st-sol)':''}">${LANCS.filter(x=>x.st==='pend').length}</span><span class="kd">ainda não contam no saldo</span></div></section>
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="lq" placeholder="Buscar descrição ou categoria" value="${esc(S.lq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos'],['e','Entradas'],['s','Saídas'],['pend','Aguardando']].map(c=>`<button class="chipf ${S.lf===c[0]?'on':''}" data-a="lcF" data-v="${c[0]}">${c[0]==='e'?'<i style="background:var(--st-int)"></i>':c[0]==='s'?'<i style="background:var(--st-rec)"></i>':''}${c[1]}</button>`).join('')}</div></div>
   ${l.length?`<div class="trow lc thead"><span>Lançamento</span><span>Categoria</span><span>Competência</span><span>Valor</span><span></span></div>${l.map(x=>`<div class="trow lc ${x.st==='pend'?'pend':''}" tabindex="0" data-a="lcEdit" data-v="${x.id}">
@@ -4470,7 +4540,7 @@ function lcForm(id){const x=id?LANCS.find(y=>y.id===id):null,v=x?{...x}:{tipo:'e
 function fPag(){
  const open=PAGAR.filter(p=>!p.paid).sort((a,b)=>a.venc<b.venc?-1:1),late=open.filter(p=>dDays(p.venc)<0),wk=open.filter(p=>dDays(p.venc)>=0&&dDays(p.venc)<=7),lt=open.filter(p=>dDays(p.venc)>7),paid=PAGAR.filter(p=>p.paid);
  const grp=(t,l,cls)=>l.length?`<div class="fi-grp ${cls}"><p class="fi-gh"><b>${t}</b><span>${l.length} · ${R$(l.reduce((a,p)=>a+p.v,0))}</span></p>${l.map(p=>{const d=dDays(p.venc);return `<div class="fi-bill" id="${p.id}"><span class="fi-due ${cls}"><b>${+p.venc.slice(8)}</b><small>${MONTHS[+p.venc.slice(5,7)-1].slice(0,3)}</small></span><span class="dkt"><b>${esc(p.desc)}</b><span>${catTag(p.cat)} <span class="${cls==='late'?'fi-latetx':''}">${d<0?`venceu há ${-d} dia${d===-1?'':'s'}`:d===0?'vence hoje':`vence ${relD(p.venc)}`}</span></span></span><b class="fi-amt2">${R$(p.v)}</b><button class="btn ${cls==='late'?'pri':'sec'} sm" data-a="cpPay" data-v="${p.id}">${ic('check',14,2.4)}Marcar como paga</button></div>`;}).join('')}</div>`:'';
- return fHead('Contas a pagar','O que a igreja precisa pagar e quando',`<button class="btn sec" data-a="export" data-v="as contas a pagar (CSV)">Exportar CSV</button><button class="btn pri" data-a="cpNew">${ic('plus',15,2.2)}Nova conta</button>`)
+ return fHead('Contas a pagar','O que a igreja precisa pagar e quando',`${rpBtn('financeiro','pagar')}<button class="btn pri" data-a="cpNew">${ic('plus',15,2.2)}Nova conta</button>`)
  +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Em aberto</span><span class="kv">${R$(open.reduce((a,p)=>a+p.v,0))}</span><span class="kd">${open.length} contas</span></div><div class="k4"><span class="kl">Atrasadas</span><span class="kv" style="${late.length?'color:var(--st-rec)':''}">${late.length}</span><span class="kd">${late.length?R$(late.reduce((a,p)=>a+p.v,0)):'nenhuma'}</span></div><div class="k4"><span class="kl">Próximos 7 dias</span><span class="kv" style="color:var(--st-sol)">${wk.length}</span><span class="kd">${R$(wk.reduce((a,p)=>a+p.v,0))}</span></div><div class="k4"><span class="kl">Pagas no mês</span><span class="kv">${paid.length}</span><span class="kd">${R$(paid.reduce((a,p)=>a+p.v,0))}</span></div></section>
  <section class="card fi-bills rise" style="--d:2">${open.length?grp('Atrasadas',late,'late')+grp('Próximos 7 dias',wk,'soon')+grp('Depois',lt,'later'):'<div class="mempty"><p>Tudo pago 🎉</p><span>Nenhuma conta em aberto.</span></div>'}
   ${paid.length?`<details class="fi-paid"><summary>${ic('check',13,2.4)}${paid.length} paga${paid.length===1?'':'s'} este mês</summary>${paid.map(p=>`<div class="fi-bill done"><span class="fi-due"><b>${+p.venc.slice(8)}</b><small>${MONTHS[+p.venc.slice(5,7)-1].slice(0,3)}</small></span><span class="dkt"><b>${esc(p.desc)}</b><span>${catTag(p.cat)}</span></span><b class="fi-amt2">${R$(p.v)}</b><button class="btn ghost sm" data-a="cpUnpay" data-v="${p.id}">Desfazer</button></div>`).join('')}</details>`:''}</section>`;
@@ -4488,7 +4558,7 @@ function cpForm(){openDlg(`${dlgHead('Nova conta a pagar','Ela aparece na lista 
 /* ---------- Contas a receber ---------- */
 function fRec(){
  const tot=RECEB.reduce((a,r)=>a+r.v,0),got=RECEB.reduce((a,r)=>a+r.got,0);
- return fHead('Contas a receber','Valores previstos de entrada — inscrições e campanhas',`<button class="btn sec" data-a="export" data-v="as contas a receber (CSV)">Exportar CSV</button>`)
+ return fHead('Contas a receber','Valores previstos de entrada — inscrições e campanhas',`${rpBtn('financeiro','receber')}`)
  +`<section class="card fi-rh rise" style="--d:1"><div><span class="kl">Já recebido</span><b class="fi-big">${R$(got)}</b><span class="kd">de ${R$(tot)} previstos · ${Math.round(got/tot*100)}%</span></div><div class="fi-rbar"><i style="width:${got/tot*100}%"></i></div><div class="fi-two"><div><span><i class="e"></i>Recebido</span><b>${R$(got)}</b></div><div><span><i class="w"></i>Falta receber</span><b>${R$(tot-got)}</b></div><div><span>Confirmadas</span><b>${RECEB.filter(r=>r.got>=r.v).length} de ${RECEB.length}</b></div></div></section>
  <div class="fi-recs rise" style="--d:2">${RECEB.map(r=>{const p=Math.min(100,Math.round(r.got/r.v*100)),done=p>=100;return `<article class="card fi-rc"><div class="fi-rch"><span class="dkt"><b>${esc(r.desc)}</b><span>${esc(r.src)}</span></span>${done?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Confirmado</span>':'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Parcial</span>'}</div>
   <div class="fi-rcv"><b>${R$(r.got)}</b><span>de ${R$(r.v)}</span></div><span class="tr ${done?'done':''}"><i style="width:${p}%"></i></span>
@@ -4541,7 +4611,7 @@ function fImp(){const b=BANKS.find(x=>x[0]===S.fbank);
    <p class="fl">1. Banco</p><div class="fi-banks">${BANKS.map(x=>`<button class="${S.fbank===x[0]?'on':''}" data-a="fBank" data-v="${x[0]}"><span style="background:${x[2]};color:${x[3]}">${x[0]==='outro'?ic('building',14):x[1][0]}</span>${x[1]}</button>`).join('')}</div>
    <p class="fl">2. Arquivo</p>${S.ffile?`<div class="ct-file"><span class="mt-ft" style="--s:38px;height:38px;border-radius:10px;background:var(--st-sol-bg);color:var(--st-sol)">OFX</span><span class="dkt"><b>${esc(S.ffile)}</b><span>${b[1]} · 23 transações encontradas</span></span><button class="ibtn sm" data-a="fFileX" aria-label="Remover">${ic('x',13)}</button></div>`:`<div class="ct-drop" data-a="fFile">${ic('upload',18)}<span><b>Arraste o extrato aqui ou clique para escolher</b><small>OFX ou CSV exportado do internet banking</small></span></div>`}
    <div class="fi-impf"><span class="who">${ic('shield',13)} Entra como pendente em <button class="lnk" data-a="nav" data-v="fapr">Aprovações</button>. Lançamentos repetidos são ignorados.</span><button class="btn pri" data-a="fImport" ${S.ffile?'':'disabled'}>Importar</button></div></section>
-  <section class="card fi-exp"><h2>${ic('arrowDn',16,2)} Exportar</h2>${[['Lançamentos','os lançamentos (CSV)',LANCS.length+' registros','layers'],['Contas a pagar','as contas a pagar (CSV)',PAGAR.length+' contas','clock'],['Contas a receber','as contas a receber (CSV)',RECEB.length+' previsões','wallet'],['DRE do mês','o DRE (PDF)','Setembro/2026','file']].map(x=>`<button class="fi-ex" data-a="export" data-v="${x[1]}"><span class="htile" style="--s:38px;background:var(--brand-soft);color:var(--brand-text)">${ic(x[3],17)}</span><span class="dkt"><b>${x[0]}</b><span>${x[2]}</span></span><em>${x[1].includes('PDF')?'PDF':'CSV'}</em></button>`).join('')}</section></div>`;
+  <section class="card fi-exp"><h2>${ic('arrowDn',16,2)} Exportar</h2>${[['Lançamentos','financeiro|lancamentos',LANCS.length+' registros','layers'],['Contas a pagar','financeiro|pagar',PAGAR.length+' contas','clock'],['Contas a receber','financeiro|receber',RECEB.length+' previsões','wallet'],['DRE do mês','o DRE (PDF)','Setembro/2026','file']].map(x=>`<button class="fi-ex" data-a="${x[1].includes('|')?'rptGo':'export'}" data-v="${x[1]}"><span class="htile" style="--s:38px;background:var(--brand-soft);color:var(--brand-text)">${ic(x[3],17)}</span><span class="dkt"><b>${x[0]}</b><span>${x[2]}</span></span><em>${x[1].includes('PDF')?'PDF':'CSV'}</em></button>`).join('')}</section></div>`;
 }
 
 /* ---------- Doações ---------- */
@@ -4566,7 +4636,7 @@ function cmDetail(){const c=CAMPS.find(x=>x.id===S.camp);if(!c){S.camp=null;retu
   <div class="tfoot"><span>${c.donors.length} contribuições</span><span>Total <b>${R$(tot)}</b></span></div>`:'<div class="mempty"><p>Nenhuma contribuição ainda.</p><span>Assim que alguém doar pelo link, aparece aqui.</span></div>'}</section>`}</div>`;}
 
 function fDoa(){if(S.camp)return cmDetail();const act=CAMPS.filter(c=>c.st==='ativo'),got=CAMPS.reduce((a,c)=>a+c.got,0);
- return fHead('Doações','Campanhas de arrecadação com link de pagamento',`<button class="btn sec" data-a="export" data-v="as doações (CSV)">Exportar CSV</button><button class="btn pri" data-a="cmNew">${ic('plus',15,2.2)}Nova campanha</button>`)
+ return fHead('Doações','Campanhas de arrecadação com link de pagamento',`${rpBtn('doacoes','doacoes')}<button class="btn pri" data-a="cmNew">${ic('plus',15,2.2)}Nova campanha</button>`)
  +`<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Campanhas ativas</span><span class="kv">${act.length}</span><span class="kd">${CAMPS.length-act.length} concluída${CAMPS.length-act.length===1?'':'s'}</span></div><div class="k4"><span class="kl">Arrecadado</span><span class="kv" style="color:var(--st-int)">${R$(got)}</span><span class="kd">${ic('arrowUp',11,2.4)}18% vs trimestre anterior</span></div><div class="k4"><span class="kl">Falta nas ativas</span><span class="kv">${R$(act.reduce((a,c)=>a+Math.max(0,c.meta-c.got),0))}</span><span class="kd">para bater as metas</span></div></section>
  <div class="fi-camps rise" style="--d:2">${CAMPS.map(c=>{const p=Math.min(100,Math.round(c.got/c.meta*100)),done=c.st==='concluido';return `<article class="card fi-cm ${done?'done':''}" tabindex="0" data-a="cmOpen" data-v="${c.id}"><div class="fi-cmh"><b>${esc(c.n)}</b>${done?'<span class="stp" style="--c:var(--brand-text);--b:var(--brand-soft)"><i></i>Concluída</span>':'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Ativa</span>'}</div>
   <div class="fi-cmb">${ring(p,84,done?'var(--st-int)':'var(--brand)')}<div><b class="fi-cmv">${R$(c.got)}</b><span>de ${R$(c.meta)}</span><small>${done?'Meta batida':`Faltam ${R0(c.meta-c.got)}`} · ${c.donors.length} doações recentes</small></div></div>
@@ -4655,7 +4725,7 @@ const meter=it=>{const o=outOf(it),t=Math.max(1,it.total);return `<span class="a
 function axItems(){
  const q=norm(S.axq),l=ITEMS.filter(it=>(S.axf==='todos'||(S.axf==='emp'||S.axf==='cons'?it.tipo===S.axf:itSt(it)===S.axf))&&(!q||norm(it.n+' '+it.sku+' '+icat(it.cat).n).includes(q)));
  const cnt=k=>ITEMS.filter(it=>k==='emp'||k==='cons'?it.tipo===k:itSt(it)===k).length;
- return axHead('Itens','Equipamentos e materiais físicos da igreja, com empréstimos e devoluções',`<button class="btn sec" data-a="export" data-v="os itens (CSV)">Exportar CSV</button><button class="btn pri" data-a="axNew">${ic('plus',15,2.2)}Novo item</button>`)
+ return axHead('Itens','Equipamentos e materiais físicos da igreja, com empréstimos e devoluções',`${rpBtn('almoxarifado','itens')}<button class="btn pri" data-a="axNew">${ic('plus',15,2.2)}Novo item</button>`)
  +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Itens cadastrados</span><span class="kv">${ITEMS.length}</span><span class="kd">equipamentos e materiais físicos</span></div><div class="k4"><span class="kl">Unidades disponíveis</span><span class="kv" style="color:var(--st-int)">${ITEMS.reduce((a,i)=>a+avOf(i),0).toLocaleString('pt-BR')}</span><span class="kd">prontas para sair</span></div><div class="k4"><span class="kl">Fora do estoque</span><span class="kv" style="color:var(--st-sol)">${ITEMS.reduce((a,i)=>a+outOf(i),0)}</span><span class="kd">emprestadas</span></div><div class="k4"><span class="kl">Empréstimos atrasados</span><span class="kv" style="${LOANS.some(lnLate)?'color:var(--st-rec)':''}">${LOANS.filter(lnLate).length}</span><span class="kd"><button class="lnk" data-a="nav" data-v="aemp">Ver empréstimos</button></span></div></section>
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="axq" placeholder="Buscar item, código ou categoria" value="${esc(S.axq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos',ITEMS.length],['part','Parcial',cnt('part')],['out','Esgotado',cnt('out')]].map(c=>`<button class="chipf ${S.axf===c[0]?'on':''}" data-a="axF" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div></div>
   ${l.length?`<div class="trow ax thead"><span>Item</span><span>Categoria</span><span>Estoque</span><span>Status</span><span></span></div>${l.map(it=>{const c=icat(it.cat),st=itSt(it);return `<div class="trow ax" id="row-${it.id}">
@@ -4840,7 +4910,7 @@ function ajForm(id){closePops();const it=itm(id),o=outOf(it),from=it.total;let t
 const MVT={emp:['Empréstimo','undo','var(--st-sol)','var(--st-sol-bg)'],dev:['Devolução','check','var(--st-int)','var(--st-int-bg)'],dist:['Distribuição','truck','var(--brand-text)','var(--brand-soft)'],tr:['Transferência','arrowRL','#7c3aed','color-mix(in srgb,#7c3aed 14%,var(--surface))'],aj:['Ajuste','scale','var(--ink-muted)','var(--surface-2)']};
 function moves(){return [...LOANS.map(l=>({t:'emp',it:l.item,q:l.qty,d:l.from,txt:`para ${l.who}`})),...LOANS.flatMap(l=>l.back.map(b=>({t:'dev',it:l.item,q:b[0],d:b[1],txt:`de ${l.who}`}))),...DISTS.map(x=>({t:'dist',it:x.item,q:x.qty,d:x.date,txt:`estoque central → ${x.dest}`})),...DISTS.flatMap(x=>x.back.map(b=>({t:'dev',it:x.item,q:b[0],d:b[1],txt:`de ${x.dest}`}))),...DISTS.flatMap(x=>x.tr.map(t=>({t:'tr',it:x.item,q:t.qty,d:t.date,txt:`${t.from||x.dest} → ${t.to}`}))),...ADJS.map(j=>({t:'aj',it:j.item,q:j.to-j.from,d:j.date,txt:j.why}))].sort((a,b)=>a.d<b.d?1:-1);}
 function axMoves(){const all=moves(),l=all.filter(m=>S.mvf==='todos'||m.t===S.mvf);const g={};l.forEach(m=>{(g[m.d]=g[m.d]||[]).push(m);});
- return axHead('Movimentações','Tudo o que entrou, saiu e voltou — numa linha do tempo',`<button class="btn sec" data-a="export" data-v="as movimentações (CSV)">Exportar CSV</button>`)
+ return axHead('Movimentações','Tudo o que entrou, saiu e voltou — numa linha do tempo',`${rpBtn('almoxarifado','movimentacoes')}`)
  +`<div class="ax-mvk rise" style="--d:1">${Object.entries(MVT).map(([k,v])=>`<button class="card ax-mk ${S.mvf===k?'on':''}" data-a="mvF" data-v="${k}" style="--c:${v[2]};--b:${v[3]}"><span>${ic(v[1],16,2)}</span><b>${all.filter(m=>m.t===k).length}</b><small>${v[0]}${all.filter(m=>m.t===k).length===1?'':'s'}</small></button>`).join('')}</div>
  ${S.mvf!=='todos'?`<p class="rise" style="margin:0 0 10px"><button class="lnk" data-a="mvF" data-v="todos">${ic('x',12,2)} Mostrar todas</button></p>`:''}
  <section class="card ax-tline rise" style="--d:2">${Object.keys(g).length?Object.entries(g).map(([d,ms])=>`<div class="ax-day"><p class="ax-dh"><b>${+d.slice(8)}</b><span>${MONTHS[+d.slice(5,7)-1].slice(0,3)}</span><small>${wd(d)}</small></p><div class="ax-dms">${ms.map(m=>{const v=MVT[m.t],it=itm(m.it);return `<div class="ax-mv"><span class="ax-mi" style="--c:${v[2]};--b:${v[3]}">${ic(v[1],14,2)}</span><span class="dkt"><b>${esc(it?it.n:'Item removido')}</b><span>${v[0]} · ${esc(m.txt)}</span></span><span class="ax-mq ${m.t==='dev'||(m.t==='aj'&&m.q>0)?'in':m.t==='tr'?'':'out'}">${m.t==='dev'?'+':m.t==='aj'?(m.q>0?'+':''):m.t==='tr'?'':'−'}${Math.abs(m.q)}</span></div>`;}).join('')}</div></div>`).join(''):'<div class="mempty"><p>Nenhuma movimentação desse tipo.</p></div>'}</section>`;}
@@ -4848,7 +4918,7 @@ function axMoves(){const all=moves(),l=all.filter(m=>S.mvf==='todos'||m.t===S.mv
 /* ---------- Relatórios ---------- */
 function axRep(){const tot=ITEMS.reduce((a,i)=>a+i.total,0),rows=ICATS.map(c=>{const its=ITEMS.filter(i=>i.cat===c.id);return {c,n:its.length,t:its.reduce((a,i)=>a+i.total,0),a:its.reduce((a,i)=>a+avOf(i),0),o:its.reduce((a,i)=>a+outOf(i),0),its};}).filter(r=>r.n);
  const low=ITEMS.filter(i=>i.total&&avOf(i)/i.total<.35);
- return axHead('Visão geral','O almoxarifado por categoria',`<button class="btn sec" data-a="export" data-v="o relatório do almoxarifado (CSV)">Exportar CSV</button>`)
+ return axHead('Visão geral','O almoxarifado por categoria',`${rpBtn('almoxarifado','resumo')}`)
  +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Unidades no total</span><span class="kv">${tot.toLocaleString('pt-BR')}</span><span class="kd">em ${ITEMS.length} itens</span></div><div class="k4"><span class="kl">Disponíveis</span><span class="kv" style="color:var(--st-int)">${Math.round(ITEMS.reduce((a,i)=>a+avOf(i),0)/tot*100)}%</span><span class="kd">do total</span></div><div class="k4"><span class="kl">Empréstimos atrasados</span><span class="kv" style="color:var(--st-rec)">${LOANS.filter(lnLate).length}</span><span class="kd">${LOANS.filter(lnLate).reduce((a,l)=>a+lnOpen(l),0)} unidades</span></div><div class="k4"><span class="kl">Estoque baixo</span><span class="kv" style="color:var(--st-sol)">${low.length}</span><span class="kd">menos de 35% disponível</span></div></section>
  <div class="ax-rg rise" style="--d:2">${rows.map(r=>`<article class="card ax-rc" style="--k:${r.c.c}"><div class="ax-rch">${kTile(r.c,30)}<div class="dkt"><b>${esc(r.c.n)}</b><span>${r.n} ite${r.n===1?'m':'ns'} · ${r.t.toLocaleString('pt-BR')} unidades</span></div><b class="ax-rp">${Math.round(r.a/Math.max(1,r.t)*100)}%<small>disponível</small></b></div>
   ${r.its.map(i=>`<div class="ax-ri"><span>${esc(i.n)}</span><span class="ax-mb"><i style="width:${avOf(i)/Math.max(1,i.total)*100}%"></i><em style="width:${outOf(i)/Math.max(1,i.total)*100}%"></em></span><small>${avOf(i)}/${i.total}</small></div>`).join('')}</article>`).join('')}</div>`;}
@@ -5153,7 +5223,7 @@ function foodOverview(k){const st=FOOD_STORES[k],sales=foodFiltered(k),v=foodVal
 function foodSales(k){const all=foodFiltered(k),byM=all.filter(s=>S.foodMethod==='all'||s.method===S.foodMethod),q=norm(S.foodQuery);
  const list=byM.filter(s=>(S.foodStatus==='all'||s.status===S.foodStatus)&&(!q||norm(s.id+' '+s.lines.map(l=>l.name).join(' ')).includes(q))).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));const m=foodSummary(all);
  const cnt=st=>byM.filter(s=>st==='all'||s.status===st).length;
- return foodHead(k,'Vendas','Histórico do sistema de vendas. Aqui você acompanha; a venda acontece no caixa',`<button class="btn sec" data-a="export" data-v="as vendas (CSV)">Exportar CSV</button>`,foodToolbar())+
+ return foodHead(k,'Vendas','Histórico do sistema de vendas. Aqui você acompanha; a venda acontece no caixa',`${rpBtn(k,'vendas')}`,foodToolbar())+
  foodKpis([['Vendas válidas',foodMoney(m.sold),`${m.count} concluídas`],['Unidades vendidas',m.units.toLocaleString('pt-BR'),'sem canceladas e estornadas'],['Cancelamentos',all.filter(s=>s.status==='cancelled').length,'não baixam estoque',all.some(s=>s.status==='cancelled')?'var(--st-sol)':''],['Estornos',foodMoney(m.refund),'alimento não volta ao estoque',m.refund?'var(--st-rec)':'']])+
  `<section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="foodSearch" value="${esc(S.foodQuery)}" placeholder="Buscar código ou produto" autocomplete="off"></label>${foodChips('foodSt',S.foodStatus,[['all','Todas',cnt('all')],['completed','Concluídas',cnt('completed')],['cancelled','Canceladas',cnt('cancelled')],['refunded','Estornadas',cnt('refunded')]])}${foodSel('foodMethod','Meio de pagamento',[['all','Todos os meios'],['Pix','Pix'],['Cartão','Cartão'],['Dinheiro','Dinheiro']],S.foodMethod)}</div>
  ${list.length?`<div class="trow fd-sl thead"><span>Venda</span><span>Itens</span><span>Pagamento</span><span>Valor</span><span>Situação</span><span></span></div>${list.slice(0,S.foodRows).map(s=>{const p=FOOD_PAY[s.method];return `<div class="trow fd-sl" data-a="foodSale" data-v="${s.id}" tabindex="0"><span class="tn"><span class="hn"><b>${s.id}</b><span>${dBR(s.date)} · ${s.time}</span></span></span><span class="fd-c hn"><b>${esc(s.lines[0].name)}</b><span>${s.lines.length>1?`+ ${s.lines.length-1} item · `:''}${s.lines.reduce((n,l)=>n+l.qty,0)} unidades</span></span><span class="fd-c fd-pay"><span class="ax-kt" style="--k:${p[1]};--s:28px">${ic(p[0],13)}</span><span class="hn"><b>${s.method}</b><span>${s.status==='completed'?s.settled?'Recebido':'A receber':'—'}</span></span></span><b class="fd-c fd-v">${foodMoney(s.total)}</b><span class="ts">${foodStatus(s)}</span><span class="tc">${ic("chevR",15,2)}</span></div>`;}).join('')}`:foodEmpty('Nenhuma venda corresponde ao filtro.')}
@@ -5178,7 +5248,7 @@ function foodCashDetail(v){const [k,d]=v.split('|'),a=FOOD_SALES.filter(s=>s.sto
 function foodItems(k){const st=FOOD_STORES[k],q=norm(S.foodQuery),byC=st.items.filter(i=>S.foodCat==='all'||i.cat===S.foodCat);
  const list=byC.filter(i=>(S.foodItemF==='all'||foodItemSt(i)[1]===S.foodItemF)&&(!q||norm(i.name+' '+i.sku).includes(q)));
  const cnt=f=>byC.filter(i=>f==='all'||foodItemSt(i)[1]===f).length;
- return foodHead(k,'Itens','Produtos prontos para vender, com preço e saldo',`<button class="btn sec" data-a="export" data-v="os itens (CSV)">Exportar CSV</button><button class="btn pri" data-a="foodItemNew" data-v="${k}">${ic('plus',15,2.2)}Novo item</button>`)+
+ return foodHead(k,'Itens','Produtos prontos para vender, com preço e saldo',`${rpBtn(k,'itens')}<button class="btn pri" data-a="foodItemNew" data-v="${k}">${ic('plus',15,2.2)}Novo item</button>`)+
  foodKpis([['Itens cadastrados',st.items.length,`${st.items.filter(i=>i.active).length} ativos`],['Unidades disponíveis',st.items.reduce((n,i)=>n+i.stock,0).toLocaleString('pt-BR'),'prontas para vender','var(--st-int)'],['Estoque baixo',st.items.filter(i=>i.active&&i.stock>0&&i.stock<=i.min).length,'abaixo do mínimo de cada item','var(--st-sol)'],['Esgotados',st.items.filter(i=>i.active&&!i.stock).length,'precisam de reposição','var(--st-rec)']])+
  `<section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="foodSearch" placeholder="Buscar item ou código" value="${esc(S.foodQuery)}" autocomplete="off"></label>${foodChips('foodItF',S.foodItemF,[['all','Todos',cnt('all')],['warn','Estoque baixo',cnt('warn')],['bad','Esgotado',cnt('bad')]])}${foodSel('foodCategory','Categoria',[['all','Todas as categorias'],...st.cats.map(c=>[c.id,esc(c.name)])],S.foodCat)}</div>
  ${list.length?`<div class="trow fd-it thead"><span>Item</span><span>Categoria</span><span>Preço</span><span>Estoque</span><span>Situação</span><span></span></div>${list.map(i=>{const c=foodCat(k,i.cat),[sl,sk]=foodItemSt(i),cap=Math.max(i.min*3,i.stock,1);return `<div class="trow fd-it"><span class="tn">${i.photo?`<img class="fd-ph" src="${i.photo}" alt="" style="--s:38px">`:kTile(foodCatK(c))}<span class="hn"><b>${esc(i.name)}</b><span><span class="ax-sku">${esc(i.sku)}</span>${k==='shop'&&i.app?`<span class="fd-app">${ic('phone',10,2.4)}No app</span>`:''}</span></span></span><span class="fd-c fd-cat">${kChip(foodCatK(c))}</span><span class="fd-c fd-v">${foodMoney(i.price)}</span><span class="fd-c ax-m"><span class="ax-mb fd-sb" style="--c:${FOOD_ST[sk][0]}"><i style="width:${i.stock/cap*100}%"></i><u style="left:${i.min/cap*100}%"></u></span><small><b>${i.stock}</b> un. · mínimo ${i.min}</small></span><span class="ts">${foodPill(sl,sk)}</span>
@@ -5235,7 +5305,7 @@ function foodAdjustmentForm(k,id){const i=foodItem(k,id),c=foodCat(k,i.cat);open
 const FOOD_MVT={refund:['Estorno','undo','var(--st-sol)','var(--st-sol-bg)'],entry:['Entrada','arrowR','var(--st-int)','var(--st-int-bg)'],sale:['Venda','ticket','var(--brand-text)','var(--brand-soft)'],correction:['Correção','scale','var(--ink-muted)','var(--surface-2)'],loss:['Perda','alert','var(--st-rec)','var(--st-rec-bg)']};
 function foodMovements(k){const manual=FOOD_MOVES.filter(m=>m.store===k),out=FOOD_SALES.filter(s=>s.store===k&&s.status!=='cancelled').flatMap(s=>s.lines.map(l=>({id:s.id,item:l.item,date:s.date,kind:'sale',qty:-l.qty,reason:s.id})));
  const per=[...manual,...out].filter(foodPeriod),all=per.filter(m=>S.foodMv==='all'||m.kind===S.foodMv).sort((a,b)=>b.date.localeCompare(a.date)),shown=all.slice(0,S.foodRows),g={};shown.forEach(m=>{(g[m.date]=g[m.date]||[]).push(m);});
- return foodHead(k,'Movimentações','Tudo o que entrou e saiu, numa linha do tempo',`<button class="btn sec" data-a="export" data-v="as movimentações (CSV)">Exportar CSV</button>`,foodToolbar())+
+ return foodHead(k,'Movimentações','Tudo o que entrou e saiu, numa linha do tempo',`${rpBtn(k,'movimentacoes')}`,foodToolbar())+
  `<div class="ax-mvk fd-mvk rise" style="--d:1">${Object.entries(FOOD_MVT).map(([key,v])=>{const n=per.filter(m=>m.kind===key).length;return `<button class="card ax-mk ${S.foodMv===key?'on':''}" data-a="foodMv" data-v="${key}" style="--c:${v[2]};--b:${v[3]}"><span>${ic(v[1],16,2)}</span><b>${n}</b><small>${key==='sale'?'Saídas por venda':v[0]==='Correção'?'Correções':v[0]+'s'}</small></button>`;}).join('')}</div>
  ${S.foodMv!=='all'?`<p class="rise" style="margin:0 0 10px"><button class="lnk" data-a="foodMv" data-v="all">${ic('x',12,2)} Mostrar todas</button></p>`:''}
  <section class="card mtab rise" style="--d:2"><div class="ax-tline">${Object.keys(g).length?Object.entries(g).map(([d,ms])=>`<div class="ax-day"><p class="ax-dh"><b>${+d.slice(8)}</b><span>${MONTHS[+d.slice(5,7)-1].slice(0,3)}</span><small>${wd(d)}</small></p><div class="ax-dms">${ms.map(m=>{const v=FOOD_MVT[m.kind],it=foodItem(k,m.item);return `<div class="ax-mv"><span class="ax-mi" style="--c:${v[2]};--b:${v[3]}">${ic(v[1],14,2)}</span><span class="dkt"><b>${esc(it?it.name:'Item removido')}</b><span>${m.kind==='sale'?`Venda <button class="lnk" data-a="foodSale" data-v="${m.id}">${m.id}</button>`:v[0]+' · '+esc(m.reason)}</span></span><span class="ax-mq ${m.qty>0?'in':'out'}">${m.qty>0?'+':'−'}${Math.abs(m.qty)}</span></div>`;}).join('')}</div></div>`).join(''):foodEmpty('Nenhuma movimentação no período.')}</div>
@@ -5267,7 +5337,7 @@ const FOODA={foodPkMenu:()=>{const p=$('#fdPk');if(!p)return;const open=!p.class
  foodStep:v=>{if(S.foodMode==='month'){S.foodMonth=ymAdd(S.foodMonth,+v);}else{const d=new Date(S.foodDay+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+Number(v));S.foodDay=d.toISOString().slice(0,10);}S.foodRows=20;render();},foodGo:v=>{const [k,p]=v.split('|');S.foodQuery='';S.foodCat='all';S.foodStatus='all';S.foodMethod='all';S.foodItemF='all';S.foodMv='all';S.foodRows=20;closeDlg();A.nav(k+'-'+p);},foodMode:v=>{S.foodMode=v;S.foodRows=20;render();},foodMore:()=>{S.foodRows+=30;render();},foodSale:foodSaleDetail,foodCashDetail,foodDaySales:v=>{const[k,d]=v.split('|');S.foodMode='day';S.foodDay=d;FOODA.foodGo(k+'|sales');},foodItemNew:k=>foodItemForm(k),foodItemEdit:v=>foodItemForm(...v.split('|')),foodCatNew:k=>foodCategoryForm(k),foodCatEdit:v=>foodCategoryForm(...v.split('|')),foodAdjust:v=>foodAdjustmentForm(...v.split('|')),foodFin:v=>{const[k,month]=v.split('|');closeDlg();S.lq=FOOD_STORES[k].name+' · '+(month||(S.foodMode==='day'?S.foodDay.slice(0,7):S.foodMonth));S.lf='todos';A.nav('flanc');}};
 
 const A={
- nav:v=>{S.active=v;S.navOpen={};S.sala=null;S.slTab='dados';S.uEd=null;S.chp=null;S.chpEd=null;S.case=null;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
+ nav:v=>{S.active=v;S.navOpen={};S.sala=null;S.slTab='dados';S.uEd=null;S.chp=null;S.chpEd=null;S.case=null;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.bbd=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
  churchMenu:(v,b)=>{const p=$('#churchPop');closePops(p);p.classList.toggle('open');b.setAttribute('aria-expanded',p.classList.contains('open'));},
  setChurch:v=>{S.church=+v;softSide();toast(`Agora em ${CHURCHES[S.church].n}`);},
  meMenu:()=>{const p=$('#mePop');closePops(p);p.classList.toggle('open');},
@@ -5420,14 +5490,14 @@ const nxThumb=v=>{let id='';try{const u=new URL(v.url);if(u.hostname==='youtu.be
 function nxVideoList(){
  const series=NX_SERIES.filter(s=>s.type==='Vídeo'),seriesOf=v=>{const l=series.filter(s=>s.items.includes(v.id));return l.length?{id:l[0].id,n:l.map(s=>s.n).join(', ')}:undefined;},q=norm(S.nxVq||''),filter=S.nxVf||'todas';
  const list=NX_VIDEOS.filter(v=>(filter==='todas'||(filter==='serie'?seriesOf(v):!seriesOf(v)))&&(!S.nxVSr||series.some(s=>s.id===S.nxVSr&&s.items.includes(v.id)))&&(!q||norm(v.t+' '+v.desc+' '+v.tag+' '+(seriesOf(v)?.n||'')).includes(q)));
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Vídeos</h1><p class="lede">Conteúdos para conhecer, aprender e compartilhar</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="os vídeos (CSV)">Exportar CSV</button><button class="btn pri" data-a="nxVideoEdit">${ic('plus',15,2.2)}Novo vídeo</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Vídeos</h1><p class="lede">Conteúdos para conhecer, aprender e compartilhar</p></div><div class="pact">${rpBtn('conteudo','videos')}<button class="btn pri" data-a="nxVideoEdit">${ic('plus',15,2.2)}Novo vídeo</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Vídeos</span><span class="kv">${NX_VIDEOS.length}</span><span class="kd">na biblioteca</span></div><div class="k4"><span class="kl">Vídeos ativos</span><span class="kv">${NX_VIDEOS.filter(v=>v.active).length}</span><span class="kd">${NX_VIDEOS.filter(v=>!v.active).length} inativos</span></div><div class="k4"><span class="kl">Séries</span><span class="kv">${series.length}</span><span class="kd">${NX_VIDEOS.filter(v=>!seriesOf(v)).length} vídeo${NX_VIDEOS.filter(v=>!seriesOf(v)).length===1?' avulso':'s avulsos'}</span></div><div class="k4"><span class="kl">Arquivos adicionais</span><span class="kv">${NX_VIDEOS.reduce((n,v)=>n+v.files.length,0)}</span><span class="kd">vinculados aos vídeos</span></div></section>
  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="nxVq" placeholder="Buscar título, descrição ou etiqueta" value="${esc(S.nxVq||'')}" autocomplete="off"></label><div class="chips">${[['todas','Todos'],['serie','Em série'],['avulsa','Avulsos']].map(c=>`<button class="chipf ${filter===c[0]&&!S.nxVSr?'on':''}" data-a="nxVideoFilter" data-v="${c[0]}">${c[1]}</button>`).join('')}<span class="ct-sep"></span>${series.map((s,i)=>`<button class="chipf ct-src ${S.nxVSr===s.id?'on':''}" data-a="nxVideoSeriesFilter" data-v="${s.id}"><i style="background:${HUES[i%HUES.length][1]}"></i>${esc(s.n)}<small>${s.items.length}</small></button>`).join('')}</div></div>
  ${list.length?`<div class="ct-grid rise" style="--d:3">${list.map(v=>`<article class="card ct-pc" data-a="nxVideoOpen" data-v="${v.id}" tabindex="0">${pgThumb({t:v.t,ref:v.tag,sr:seriesOf(v)?.id,yt:v.url,dur:''}).replace('<em> min</em>','')}<div class="ct-pb"><b>${esc(v.t)}</b><span class="ct-who">${esc(seriesOf(v)?.n||'Vídeo avulso')}</span><div class="ct-pm"><span>${v.active?'Ativo':'Inativo'}</span>${v.tag?`<span>${esc(v.tag)}</span>`:''}${v.files.length?`<span>${ic('file',13)}${v.files.length}</span>`:''}</div></div></article>`).join('')}</div>`:'<section class="card mempty rise"><p>Nenhum vídeo aqui.</p><span>Nada corresponde a esse filtro.</span></section>'}`;
 }
 function nxSeriesList(){
  const q=norm(S.nxSq||''),filter=S.nxSf||'todas',list=NX_SERIES.filter(s=>(filter==='todas'||s.type===filter)&&(!q||norm(s.n+' '+s.desc).includes(q))),tracked=NX_SERIES,progress=s=>s.items.length&&s.people.length?Math.round(s.people.reduce((n,p)=>n+Math.min(100,p.done/s.items.length*100),0)/s.people.length):0,people=tracked.reduce((n,s)=>n+s.people.length,0),done=tracked.reduce((n,s)=>n+s.people.filter(p=>s.items.length&&p.done>=s.items.length).length,0);
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Séries</h1><p class="lede">Sequências de pregações, músicas ou vídeos</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="as séries (CSV)">Exportar CSV</button><button class="btn pri" data-a="nxSeriesEdit">${ic('plus',15,2.2)}Nova série</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Séries</h1><p class="lede">Sequências de pregações, músicas ou vídeos</p></div><div class="pact">${rpBtn('conteudo','series')}<button class="btn pri" data-a="nxSeriesEdit">${ic('plus',15,2.2)}Nova série</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Séries</span><span class="kv">${NX_SERIES.length}</span><span class="kd">${NX_SERIES.reduce((n,s)=>n+s.items.length,0)} conteúdos organizados</span></div><div class="k4"><span class="kl">Pessoas inscritas</span><span class="kv">${people}</span><span class="kd">em todas as séries</span></div><div class="k4"><span class="kl">Progresso médio</span><span class="kv">${Math.round(tracked.reduce((n,s)=>n+progress(s),0)/Math.max(1,tracked.length))}<small style="font-size:.55em">%</small></span><span class="kd">nas séries com acompanhamento</span></div><div class="k4"><span class="kl">Conclusões</span><span class="kv" style="color:var(--st-int)">${done}</span><span class="kd">em todas as séries</span></div></section>
  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="nxSq" placeholder="Buscar série" value="${esc(S.nxSq||'')}" autocomplete="off"></label><div class="chips">${[['todas','Todas'],['Pregação','Pregações'],['Música','Músicas'],['Vídeo','Vídeos']].map(c=>`<button class="chipf ${filter===c[0]?'on':''}" data-a="nxSeriesFilter" data-v="${c[0]}">${c[1]}<small>${c[0]==='todas'?NX_SERIES.length:NX_SERIES.filter(s=>s.type===c[0]).length}</small></button>`).join('')}</div></div>
  <div class="ct-jg rise" style="--d:3">${list.map((s,i)=>`<article class="card ct-jc" tabindex="0" data-a="nxSeriesOpen" data-v="${s.id}"><div class="ct-jh" style="background:${thumbBg(i%6)}${s.cover?`;background-image:url('${s.cover}');background-size:cover;background-position:center`:''}"><span class="ct-ji">${ic(s.type==='Música'?'music':s.type==='Vídeo'?'play':'book',22)}</span></div><div class="ct-jb"><b>${esc(s.n)}</b><span class="ct-jm">${s.type} · ${s.items.length} conteúdo${s.items.length===1?'':'s'}${nxSerDur(s)}</span><div class="ct-path">${s.items.length?s.items.map(id=>`<i title="${esc(nxCatalog(s.type).find(x=>x.id===id)?.t||'Conteúdo')}"></i>`).join('<em></em>'):'<span class="soft">Nenhum conteúdo ainda</span>'}</div><footer>${`${s.people.length?`<span class="avs">${s.people.slice(0,4).map(p=>avN(p.n)).join('')}</span><span class="ct-jn"><b>${s.people.length}</b> inscritos</span>`:'<span class="soft">Sem inscritos</span>'}${ring(progress(s),52,'var(--brand)')}`}</footer></div></article>`).join('')}<button class="cm-badd" data-a="nxSeriesEdit" style="min-height:300px"><span>${ic('plus',20,2)}</span><b>Nova série</b><small>Uma sequência de conteúdos</small></button></div>`;
@@ -5502,7 +5572,7 @@ function nxShopRows(sales){return nxSaleRows(sales);}
 const shThumb=(i,c,s=38)=>i.photo?`<img class="fd-ph" src="${i.photo}" alt="" style="--s:${s}px">`:kTile(foodCatK(c),s);
 function nxSaleRows(list){return `<div class="trow fd-sl thead"><span>Venda</span><span>Itens</span><span>Pagamento</span><span>Total</span><span>Situação</span><span></span></div>${list.map(s=>{const p=FOOD_PAY[s.method]||FOOD_PAY.Pix,units=s.lines.reduce((n,l)=>n+l.qty,0);return `<div class="trow fd-sl" data-a="nxSaleOpen" data-v="${s.id}" tabindex="0"><span class="tn"><span class="hn"><b>${s.id}</b><span>${dBR(s.date)} · ${s.time}${s.buyer?` · ${esc(s.buyer)}`:''}</span></span></span><span class="fd-c hn"><b>${esc(s.lines[0].name)}</b><span>${s.lines.length>1?`+ ${s.lines.length-1} produto${s.lines.length>2?'s':''} · `:''}${units} ${units===1?'unidade':'unidades'}</span></span><span class="fd-c fd-pay"><span class="ax-kt" style="--k:${p[1]};--s:28px">${ic(p[0],13)}</span><span class="hn"><b>${s.method||'Pix'}</b><span>por ${esc((s.who||'Rafael Pereira').split(' ')[0])}</span></span></span><span class="fd-c hn"><b class="fd-v">${foodMoney(s.total)}</b>${s.discount?`<span>− ${foodMoney(s.discount)} desconto</span>`:''}</span><span class="ts">${s.status==='completed'?foodPill('Concluída','ok'):foodPill('Cancelada','off')}</span><span class="tc">${ic('chevR',15,2)}</span></div>`;}).join('')}`;}
 function nxShopSales(){const all=foodFiltered('shop'),byM=all.filter(s=>S.foodMethod==='all'||s.method===S.foodMethod),q=norm(S.foodQuery),list=byM.filter(s=>(S.foodStatus==='all'||s.status===S.foodStatus)&&(!q||norm(s.id+' '+(s.buyer||'')+' '+s.lines.map(l=>l.name).join(' ')).includes(q))).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)),v=foodValid(all),cnt=k=>byM.filter(s=>k==='all'||s.status===k).length,disc=v.reduce((n,s)=>n+(s.discount||0),0);
- return foodHead('shop','Vendas','Vendas registradas no caixa da loja',`<button class="btn sec" data-a="export" data-v="as vendas da loja (CSV)">Exportar CSV</button><button class="btn pri" data-a="nxSaleNew">${ic('ticket',15)}Nova venda</button>`,foodToolbar())+
+ return foodHead('shop','Vendas','Vendas registradas no caixa da loja',`${rpBtn('shop','vendas')}<button class="btn pri" data-a="nxSaleNew">${ic('ticket',15)}Nova venda</button>`,foodToolbar())+
  foodKpis([['Vendido',foodMoney(foodAmount(v)),`${v.length} vendas concluídas`],['Itens vendidos',v.flatMap(s=>s.lines).reduce((n,l)=>n+l.qty,0),'unidades'],['Descontos',foodMoney(disc),'dados no caixa'],['Canceladas',all.filter(s=>s.status==='cancelled').length,'estoque devolvido',all.some(s=>s.status==='cancelled')?'var(--st-sol)':'']])+
  `<section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="foodSearch" value="${esc(S.foodQuery)}" placeholder="Buscar venda, produto ou comprador" autocomplete="off"></label>${foodChips('foodSt',S.foodStatus,[['all','Todas',cnt('all')],['completed','Concluídas',cnt('completed')],['cancelled','Canceladas',cnt('cancelled')]])}${foodSel('foodMethod','Pagamento',[['all','Todos os pagamentos'],['Pix','Pix'],['Cartão','Cartão'],['Dinheiro','Dinheiro']],S.foodMethod)}</div>
  ${list.length?nxSaleRows(list.slice(0,S.foodRows)):foodEmpty('Nenhuma venda corresponde ao filtro.')}${foodMore(S.foodRows,list.length,list.length===1?'venda':'vendas')}</section>`;}
@@ -5512,7 +5582,7 @@ function nxShopCash(){const a=foodFiltered('shop'),dates=[...new Set(a.map(s=>s.
  `<section class="card mtab rise" style="--d:2">${dates.length?`<div class="trow fd-cx thead"><span>Dia</span><span>Total</span><span>Como foi pago</span><span>Vendas</span><span></span></div>${dates.slice(0,S.foodRows).map(d=>{const all=a.filter(s=>s.date===d),vv=foodValid(all),c=all.length-vv.length;return `<div class="trow fd-cx" data-a="foodDaySales" data-v="shop|${d}" tabindex="0"><span class="tn"><span class="fd-dt"><b>${+d.slice(8)}</b><small>${MONTHS[+d.slice(5,7)-1].slice(0,3)}</small></span><span class="hn"><b>${foodWd(d)}</b><span>${dBR(d)}</span></span></span><b class="fd-c fd-v">${foodMoney(foodAmount(vv))}</b><span class="fd-c fd-mix">${vv.length?`<span class="ax-kst">${Object.entries(FOOD_PAY).map(([p,[,cl]])=>{const x=foodAmount(vv.filter(s=>s.method===p));return x?`<i style="flex:${x};--k:${cl}" title="${p} · ${foodMoney(x)}"></i>`:'';}).join('')}</span><small>${Object.keys(FOOD_PAY).map(p=>{const x=foodAmount(vv.filter(s=>s.method===p));return x?`${p} ${foodMoney(x)}`:'';}).filter(Boolean).join(' · ')}</small>`:'<small>Sem vendas válidas</small>'}</span><span class="ts">${foodPill(`${vv.length} concluída${vv.length===1?'':'s'}`,'ok')}${c?` ${foodPill(`${c} cancelada${c>1?'s':''}`,'off')}`:''}</span><span class="tc">${ic('chevR',15,2)}</span></div>`;}).join('')}`:foodEmpty('Nenhuma venda neste período.')}${foodMore(S.foodRows,dates.length,dates.length===1?'dia':'dias')}</section>`;}
 function nxShopMoves(){const per=FOOD_MOVES.filter(m=>m.store==='shop'&&m.date>'2026-04-01'&&foodPeriod(m)),kinds=[['entry','Entradas'],['sale','Saídas por venda'],['refund','Estornos'],['adj','Ajustes']],is=(m,k)=>k==='adj'?(m.kind==='correction'||m.kind==='loss'):m.kind===k;
  const all=per.filter(m=>S.foodMv==='all'||is(m,S.foodMv)).sort((a,b)=>b.date.localeCompare(a.date)),shown=all.slice(0,S.foodRows),g={};shown.forEach(m=>{(g[m.date]=g[m.date]||[]).push(m);});
- return foodHead('shop','Movimentações','Tudo o que entrou e saiu do estoque, numa linha do tempo',`<button class="btn sec" data-a="export" data-v="as movimentações da loja (CSV)">Exportar CSV</button><button class="btn pri" data-a="foodGo" data-v="shop|items">${ic('plus',15,2.2)}Registrar entrada</button>`,foodToolbar())+
+ return foodHead('shop','Movimentações','Tudo o que entrou e saiu do estoque, numa linha do tempo',`${rpBtn('shop','movimentacoes')}<button class="btn pri" data-a="foodGo" data-v="shop|items">${ic('plus',15,2.2)}Registrar entrada</button>`,foodToolbar())+
  `<div class="ax-mvk fd-mvk rise" style="--d:1">${kinds.map(([k,l])=>{const v=FOOD_MVT[k==='adj'?'correction':k],n=per.filter(m=>is(m,k)).length;return `<button class="card ax-mk ${S.foodMv===k?'on':''}" data-a="foodMv" data-v="${k}" style="--c:${v[2]};--b:${v[3]}"><span>${ic(v[1],16,2)}</span><b>${n}</b><small>${l}</small></button>`;}).join('')}</div>
  ${S.foodMv!=='all'?`<p class="rise" style="margin:0 0 10px"><button class="lnk" data-a="foodMv" data-v="all">${ic('x',12,2)} Mostrar todas</button></p>`:''}
  <section class="card mtab rise" style="--d:2"><div class="ax-tline">${Object.keys(g).length?Object.entries(g).map(([d,ms])=>`<div class="ax-day"><p class="ax-dh"><b>${+d.slice(8)}</b><span>${MONTHS[+d.slice(5,7)-1].slice(0,3)}</span><small>${wd(d)}</small></p><div class="ax-dms">${ms.map(m=>{const v=FOOD_MVT[m.kind]||FOOD_MVT.correction,it=foodItem('shop',m.item),ref=String(m.reason||''),sid=ref.split(' ')[0];return `<div class="ax-mv"><span class="ax-mi" style="--c:${v[2]};--b:${v[3]}">${ic(v[1],14,2)}</span><span class="dkt"><b>${esc(it?it.name:'Produto removido')}</b><span>${m.kind==='sale'||m.kind==='refund'?`${v[0]} · <button class="lnk" data-a="nxSaleOpen" data-v="${esc(sid)}">${esc(sid)}</button>${ref.includes(' · ')?' · '+esc(ref.split(' · ').slice(1).join(' · ')):''}`:v[0]+' · '+esc(ref)}</span></span><span class="ax-mq ${m.qty>0?'in':'out'}">${m.qty>0?'+':'−'}${Math.abs(m.qty)}</span></div>`;}).join('')}</div></div>`).join(''):foodEmpty('Nenhuma movimentação no período.')}</div>
@@ -5614,7 +5684,7 @@ csPage=function(){
   return '<article class="card ct-jc '+(r.c.on?'':'off')+'" tabindex="0" data-a="csOpen" data-v="'+r.j.id+'|'+r.c.id+'"><div class="ct-jh" style="background:'+thumbBg(hue)+'"><span class="ct-ji">'+ic(ico,22)+'</span>'+st+'</div>'
    +'<div class="ct-jb"><b>'+esc(r.c.n)+'</b><span class="ct-jm">'+au+' aula'+(au===1?'':'s')+' · '+link+'</span><p class="ct-jd">'+esc(r.c.desc)+'</p>'
    +'<footer>'+(r.j.people.length?'<span class="avs">'+r.j.people.slice(0,4).map(p=>avN(p.n)).join('')+'</span><span class="ct-jn"><b>'+(r.j.people.length+(r.j.more||0))+'</b> inscritos</span>':'<span class="soft">Sem inscritos</span>')+ring(pr,52,r.c.on?'var(--brand)':'var(--ink-muted)')+'</footer></div></article>';};
- return '<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Cursos</h1><p class="lede">Conteúdo estruturado em aulas — avulso, em jornada ou de um ministério</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="os cursos (CSV)">Exportar CSV</button><button class="btn pri" data-a="csNew">'+ic('plus',15,2.2)+'Novo curso</button></div></header>'
+ return '<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Cursos</h1><p class="lede">Conteúdo estruturado em aulas — avulso, em jornada ou de um ministério</p></div><div class="pact">'+rpBtn('conteudo','cursos')+'<button class="btn pri" data-a="csNew">'+ic('plus',15,2.2)+'Novo curso</button></div></header>'
  +'<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Cursos</span><span class="kv">'+all.length+'</span><span class="kd">'+all.filter(r=>r.c.on).length+' ativos</span></div><div class="k4"><span class="kl">Em jornadas</span><span class="kv">'+n('jor')+'</span><span class="kd">dentro de '+JORNS.filter(j=>j.courses.length).length+' trilhas</span></div><div class="k4"><span class="kl">De ministérios</span><span class="kv">'+n('min')+'</span><span class="kd">'+n('av')+' avulso'+(n('av')===1?'':'s')+'</span></div><div class="k4"><span class="kl">Aulas no total</span><span class="kv">'+all.reduce((a,r)=>a+r.c.aulas.length,0)+'</span><span class="kd">somando todos os cursos</span></div></section>'
  +'<div class="ct-bar rise" style="--d:2"><label class="sbox">'+ic('search',16)+'<input id="csq" placeholder="Buscar curso, jornada ou ministério" value="'+esc(S.csq)+'" autocomplete="off"></label><div class="chips">'+[['todos','Todos',all.length],['av','Avulsos',n('av')],['jor','Em jornada',n('jor')],['min','De ministério',n('min')]].map(c=>'<button class="chipf '+(S.csf===c[0]?'on':'')+'" data-a="csF" data-v="'+c[0]+'">'+c[1]+'<small>'+c[2]+'</small></button>').join('')+'</div></div>'
  +(l.length?'<div class="ct-jg rise" style="--d:3">'+l.map(card).join('')+'<button class="cm-badd" data-a="csNew" style="min-height:300px"><span>'+ic('plus',20,2)+'</span><b>Novo curso</b><small>Avulso, em jornada ou de um ministério</small></button></div>':'<section class="card mempty rise"><p>Nenhum curso aqui.</p><span>Nada corresponde a esse filtro.</span></section>');
@@ -5745,7 +5815,7 @@ multiList=function(){
   +'<div class="rsupbar"><div class="rsup">'+(n.sup?'<span class="av" style="background:var(--tone-'+n.tone+');color:var(--tone-'+n.tone+'-ink)">'+initials(n.sup)+'</span><span><b>'+esc(n.sup)+'</b><small>Supervisor</small></span>':'<span><b class="soft">Sem supervisor</b><small>Define quem acompanha os líderes</small></span>')+'</div><button class="btn sec sm" data-a="seOpen" data-v="net|'+n.id+'">'+ic('calendar',14)+'Encontros'+(n.meets.some(m=>!m.done&&!m.cancelled)?' <small>('+n.meets.filter(m=>!m.done&&!m.cancelled).length+')</small>':'')+'</button></div>'
   +'<div class="glist">'+(gs.map(churchRow).join('')||'<p class="who" style="margin:0">Nenhuma igreja n'+(L.art==='a'?'esta':'este')+' '+L.lo+'.</p>')+'</div></article>';};
  const single=()=>{const gs=netChurches(main);return '<article class="card rc"><div class="rc1"><div><b>Igrejas</b><span>'+gs.length+' '+(gs.length===1?'igreja':'igrejas')+' · todas n'+(L.art==='a'?'a':'o')+' '+esc(main.n)+', '+L.art+' '+L.lo+' principal</span></div>'+menu(main)+'</div><div class="glist">'+gs.map(churchRow).join('')+'</div></article>';};
- return admHead('Multi-igreja',esc(ORG.n)+' · organização, '+L.plo+' e igrejas','<button class="btn sec" data-a="export" data-v="o CSV de '+L.plo+' e igrejas">Exportar CSV</button><button class="btn sec" data-a="nAdd">'+ic('plus',15,2.2)+L.nova+' '+L.lo+'</button><button class="btn pri" data-a="gAdd" data-v="'+main.id+'">'+ic('plus',15,2.2)+'Nova igreja</button>')
+ return admHead('Multi-igreja',esc(ORG.n)+' · organização, '+L.plo+' e igrejas',''+rpBtn('multi','igrejas')+'<button class="btn sec" data-a="nAdd">'+ic('plus',15,2.2)+L.nova+' '+L.lo+'</button><button class="btn pri" data-a="gAdd" data-v="'+main.id+'">'+ic('plus',15,2.2)+'Nova igreja</button>')
   +'<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Igrejas</span><span class="kv">'+IGREJAS.length+'</span><span class="kd">na organização</span></div><div class="k4"><span class="kl">'+L.p+'</span><span class="kv">'+NETS.length+'</span><span class="kd">'+(multi?'agrupam as igrejas':'só '+L.art+' principal')+'</span></div><div class="k4"><span class="kl">Administradores da organização</span><span class="kv">'+admins.length+'</span><span class="kd">veem todas as igrejas</span></div></section>'
   +'<section class="card pc rise" style="--d:2"><div class="sh"><div><h2>'+esc(ORG.n)+'</h2><p class="who" style="margin:4px 0 0">Organização · tudo o que está abaixo pertence a ela. O agrupamento de igrejas se chama “'+ORG.label+'”.</p></div><button class="btn sec sm" data-a="orgEdit">'+ic('pen',14)+'Configurar</button></div>'
   +'<div class="gglob" style="border-top:0;padding-top:0"><span class="fl">Administradores da organização</span><div class="kmem">'+admins.map(u=>'<span class="kmc">'+uAv(u)+esc(u.n)+'</span>').join('')+'<button class="kmc add" data-a="orgUsers">Gerenciar em Usuários e permissões</button></div></div></section>'
@@ -5891,7 +5961,7 @@ function feelCard(f){
 }
 function feelList(){
  const l=FEELS.filter(f=>S.ff==='todos'||f.mood===S.ff),cnt=m=>FEELS.filter(f=>f.mood===m).length,top=FEEL_L.map(m=>[m,cnt(m)]).sort((a,b)=>b[1]-a[1])[0],need=cnt('Preciso de oração');
- return '<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Como estou me sentindo</h1><p class="lede">Como os membros dizem que estão, pelo app. Cada envio é um registro novo e não pode ser editado nem apagado.</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="os registros de sentimento (CSV)">Exportar CSV</button></div></header>'
+ return '<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Como estou me sentindo</h1><p class="lede">Como os membros dizem que estão, pelo app. Cada envio é um registro novo e não pode ser editado nem apagado.</p></div><div class="pact"></div></header>'
   +'<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Registros</span><span class="kv">'+FEELS.length+'</span><span class="kd">nos últimos 7 dias</span></div><div class="k4"><span class="kl">Mais frequente</span><span class="kv" style="font-size:22px">'+top[0]+'</span><span class="kd">'+top[1]+' registro'+(top[1]===1?'':'s')+'</span></div><div class="k4"><span class="kl">Preciso de oração</span><span class="kv" style="'+(need?'color:var(--st-sol)':'')+'">'+need+'</span><span class="kd">'+FEELS.filter(f=>f.prayer).length+' viraram pedido de oração</span></div></section>'
   +'<div class="chips rise" style="--d:2">'+[['todos','Todos',FEELS.length]].concat(FEEL_L.map(m=>[m,m,cnt(m)])).map(c=>'<button class="chipf '+(S.ff===c[0]?'on':'')+'" data-a="fFilter" data-v="'+c[0]+'">'+c[1]+'<small>'+c[2]+'</small></button>').join('')+'</div>'
   +'<div class="pgrid2 rise" style="--d:3">'+(l.length?l.map(feelCard).join(''):'<div class="card mempty" style="grid-column:1/-1"><p>Nenhum registro aqui.</p><span>Ninguém registrou este sentimento nos últimos dias.</span></div>')+'</div>';
@@ -6812,7 +6882,7 @@ evDet=function(e){
    ${e.checkin==='periodo'?`<div class="fld ckc"><span class="fl">Períodos <small>cada um gera seu próprio código</small></span>
     ${e.periods.length?`<div class="pers">${e.periods.map((p,i)=>`<div class="per"><span class="pn">${esc(p)}</span><span class="mono">${codeOf(e,p)}</span><button class="ibtn sm" data-a="copy" data-v="${codeOf(e,p)}" aria-label="Copiar código de ${esc(p)}" title="Copiar">${ic('clipboard',14)}</button><button class="ibtn sm" data-a="evPerDel" data-v="${i}" aria-label="Remover ${esc(p)}" title="Remover">${ic('x',14)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0">Nenhum período ainda. Adicione o primeiro, ex.: Sábado.</p>'}
     <form class="perF" id="perF"><input placeholder="Ex.: Sábado" aria-label="Novo período" autocomplete="off"><button class="btn sec sm" type="submit">${ic('plus',13,2.2)}Adicionar período</button></form></div>`:''}</section>`;
- return base+insc+tkCard+`</div><div class="col">${ckCard}${itCard}${vemCard(e)}</div></div>`;
+ return base+evFinDet(e)+insc+tkCard+`</div><div class="col">${ckCard}${itCard}${vemCard(e)}</div></div>`;
 };
 
 /* ---------- inscrições do evento ---------- */
@@ -7025,29 +7095,41 @@ function eiTab(e){
   <div id="eirows">${eiRows(e)}</div></section>`;
 }
 
-/* ---------- Financeiro do evento ---------- */
-function efTab(e){
+/* ---------- Financeiro do evento: três números em Detalhes; o detalhamento está em Relatórios › Agenda e eventos ---------- */
+function evFinSum(e){
  evEnsure(e);const paid=e.regs.filter(r=>r.pay==='pago'),pend=e.regs.filter(r=>r.pay==='pendente');
- const gross=paid.reduce((a,r)=>a+regTot(e,r),0),fees=paid.reduce((a,r)=>a+regFee(e,r),0),net=gross-fees,toRec=pend.reduce((a,r)=>a+regTot(e,r),0);
- const byTk=e.tickets.map(t=>{const rs=e.regs.filter(r=>r.tk===t.id),pg=rs.filter(r=>r.pay==='pago');return {t,n:rs.length,pg:pg.length,v:pg.reduce((a,r)=>a+(+r.val||0),0)};}).filter(x=>x.n);
- const byIt=e.items.map(it=>{const rs=e.regs.filter(r=>(r.buy||[]).includes(it.id)),pg=rs.filter(r=>r.pay==='pago');return {it,n:rs.length,pg:pg.length,v:pg.length*(+it.price||0)};}).filter(x=>x.n);
- const vcs=e.vouchers.map(v=>{const rs=e.regs.filter(r=>r.vch===v.code),dsc=rs.reduce((a,r)=>{const t=tkOf(e,r);return a+Math.max(0,(t?tkPrice(e,t):(+e.price||0))-(+r.val||0));},0);return {v,n:rs.length,dsc};}).filter(x=>x.n);
- const dscT=vcs.reduce((a,x)=>a+x.dsc,0);
- const meth=['pix','cartao'].map(m=>{const rs=paid.filter(r=>payM(r)===m);return {m,n:rs.length,v:rs.reduce((a,r)=>a+regTot(e,r),0),fee:rs.reduce((a,r)=>a+regFee(e,r),0)};}).filter(x=>x.n);
- const row=(l,sub,v)=>`<div class="ef-r"><span><b>${l}</b>${sub?`<small>${sub}</small>`:''}</span><b class="mono">${v}</b></div>`;
- return `<section class="card kpis4 rise" style="--d:1">
-  <div class="k4"><span class="kl">Arrecadado (bruto)</span><span class="kv sm">${brl2(gross)}</span><span class="kd">${paid.length} ${paid.length===1?'pagamento':'pagamentos'} confirmados</span></div>
-  <div class="k4"><span class="kl">Taxas de pagamento</span><span class="kv sm">− ${brl2(fees)}</span><span class="kd">Pix e cartão</span></div>
-  <div class="k4"><span class="kl">Líquido</span><span class="kv sm" style="color:var(--st-int)">${brl2(net)}</span><span class="kd">o que entra no Financeiro</span></div>
-  <div class="k4"><span class="kl">A receber</span><span class="kv sm" style="${toRec?'color:var(--st-sol)':''}">${brl2(toRec)}</span><span class="kd">${pend.length} ${pend.length===1?'pagamento pendente':'pagamentos pendentes'}</span></div></section>
- <div class="pgrid" style="margin-top:16px"><div class="col">
-  <section class="card pc"><div class="sh"><h2>Vendas por ingresso</h2></div>${byTk.length?byTk.map(x=>row(esc(x.t.n),`${x.pg} pagos de ${x.n} inscritos`,brl2(x.v))).join(''):'<p class="who" style="margin:0">Nenhuma venda ainda.</p>'}</section>
-  <section class="card pc"><div class="sh"><h2>Compras adicionais</h2></div>${byIt.length?byIt.map(x=>row(esc(itLabel(x.it)),`${x.pg} pagas de ${x.n} compras`,brl2(x.v))).join(''):'<p class="who" style="margin:0">Nenhuma compra adicional ainda.</p>'}</section></div>
- <div class="col">
-  <section class="card pc"><div class="sh"><h2>Taxas por forma de pagamento</h2></div>${meth.length?meth.map(x=>row(PAYFEE[x.m].n,`${x.n} ${x.n===1?'pagamento':'pagamentos'} · ${brl2(x.v)}`,'− '+brl2(x.fee))).join(''):'<p class="who" style="margin:0">Nenhum pagamento confirmado.</p>'}
-   <p class="hint" style="margin:12px 0 0">${ic('shield',13,2)} Taxas conforme a configuração de pagamentos da sua igreja no Alva.</p></section>
-  ${vcs.length?`<section class="card pc"><div class="sh"><h2>Descontos concedidos</h2><b class="mono">− ${brl2(dscT)}</b></div>${vcs.map(x=>row(`<span class="mono">${esc(x.v.code)}</span>`,`${x.n} ${x.n===1?'uso':'usos'}`,'− '+brl2(x.dsc))).join('')}</section>`:''}
-  <section class="card pc"><div class="sh"><h2>Entrada no Financeiro</h2></div><div class="ef-fin">${ic(past(e)?'check':'mail',16)}<span>${past(e)?`Líquido de <b>${brl2(net)}</b> lançado em Receitas após o evento.`:`O líquido de <b>${brl2(net)}</b> até agora entra em Receitas depois do evento${e.d?`, previsto para ${dBR(e.d)}`:''}.`}</span></div></section></div></div>`;
+ const gross=paid.reduce((a,r)=>a+regTot(e,r),0),fees=paid.reduce((a,r)=>a+regFee(e,r),0);
+ return {paid,pend,gross,fees,net:gross-fees,toRec:pend.reduce((a,r)=>a+regTot(e,r),0)};
+}
+function evFinDet(e){
+ if(!evMoney(e))return '';const f=evFinSum(e);
+ return `<section class="card pc"><div class="sh"><h2>Financeiro</h2><button class="btn sec sm" data-a="evFinRep" data-v="${e.id}">${ic('clipboard',14)}Detalhamento</button></div>
+  <div class="ef3"><div><span>Arrecadado</span><b>${brl2(f.gross)}</b><small>${f.paid.length} ${f.paid.length===1?'pagamento confirmado':'pagamentos confirmados'}</small></div>
+   <div><span>Líquido</span><b style="color:var(--st-int)">${brl2(f.net)}</b><small>depois das taxas de pagamento</small></div>
+   <div><span>A receber</span><b style="${f.toRec?'color:var(--st-sol)':''}">${brl2(f.toRec)}</b><small>${f.pend.length} ${f.pend.length===1?'pendente':'pendentes'}</small></div></div>
+  <div class="ef-fin">${ic(past(e)?'check':'mail',16)}<span>${past(e)?`Líquido de <b>${brl2(f.net)}</b> lançado em Receitas após o evento.`:`O líquido entra em Receitas depois do evento${e.d?`, previsto para ${dBR(e.d)}`:''}.`}</span></div>
+  <p class="who" style="margin:12px 0 0">O detalhe por ingresso, compra adicional, forma de pagamento e desconto está em <button class="lnk" data-a="evFinRep" data-v="${e.id}">Relatórios › Agenda e eventos</button>.</p></section>`;
+}
+/* linhas do relatório: cada recorte (ingresso, compra, forma de pagamento, desconto) mostra o mesmo dinheiro por um ângulo; a taxa de cada pagamento é repartida entre o ingresso e as compras dele */
+function evFinRepRows(){
+ const out=[];
+ EVTS.filter(e=>e.st==='confirmado'&&evMoney(e)&&e.regs.length).forEach(e=>{
+  evEnsure(e);const acc={};
+  const add=(g,id,lab,o)=>{const k=g+'|'+id,x=acc[k]||(acc[k]={e,g,lab,q:0,gross:0,fee:0,rec:0});x.q+=o.q||0;x.gross+=o.gross||0;x.fee+=o.fee||0;x.rec+=o.rec||0;};
+  e.regs.forEach(r=>{
+   const tk=tkOf(e,r),parts=[{g:'ing',id:tk?tk.id:'base',lab:tk?tk.n:'Inscrição',v:+r.val||0},...buyOf(e,r).map(i=>({g:'buy',id:i.id,lab:itLabel(i),v:+i.price||0}))],tot=regTot(e,r);
+   if(r.pay==='pago'){
+    let left=regFee(e,r);
+    parts.forEach((p,i)=>{const fee=i===parts.length-1?left:Math.round(regFee(e,r)*(tot?p.v/tot:0)*100)/100;left=Math.round((left-fee)*100)/100;add(p.g,p.id,p.lab,{q:1,gross:p.v,fee});});
+    const m=payM(r);add('pay',m,PAYFEE[m].n,{q:1,gross:tot,fee:regFee(e,r)});
+   }else if(r.pay==='pendente'){parts.forEach(p=>add(p.g,p.id,p.lab,{rec:p.v}));const m=payM(r);add('pay',m,PAYFEE[m].n,{rec:tot});}
+  });
+  e.vouchers.forEach(v=>{const rs=e.regs.filter(r=>r.vch===v.code);if(!rs.length)return;
+   const dsc=rs.reduce((a,r)=>{const t=tkOf(e,r);return a+Math.max(0,(t?tkPrice(e,t):(+e.price||0))-(+r.val||0));},0);add('dsc',v.code,'Voucher '+v.code,{q:rs.length,gross:-dsc});});
+  Object.values(acc).forEach(x=>{x.fee=Math.round(x.fee*100)/100;out.push(x);});
+ });
+ const ord={ing:0,buy:1,pay:2,dsc:3};
+ return out.sort((a,b)=>a.e.d<b.e.d?1:a.e.d>b.e.d?-1:ord[a.g]-ord[b.g]);
 }
 
 /* ---------- Divulgação no VEM ---------- */
@@ -7087,7 +7169,7 @@ inscPage=function(){
   &&(!q||norm(r.n+' '+r.e.t).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
  const pend=rows.filter(r=>r.pay==='pendente');
  const sel=(id,val,opts)=>`<span class="selw"><select id="${id}" aria-label="${id}">${opts.map(([v,t])=>`<option value="${esc(v)}" ${val===v?'selected':''}>${esc(t)}</option>`).join('')}</select>${ic('updown',14)}</span>`;
- return `<header class="ph rise"><div><p class="eb">Agenda e serviço</p><h1>Inscrições</h1><p class="lede">Todas as inscrições em cultos e eventos</p></div><div class="pact"><button class="btn sec" data-a="export" data-v="as inscrições, com ingresso, compras, pagamento e check-in">Exportar CSV</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>Inscrições</h1><p class="lede">Todas as inscrições em cultos e eventos</p></div><div class="pact">${rpBtn('agenda','inscricoes')}</div></header>
  ${insSum(rows,pend)}
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="iq2" placeholder="Buscar pessoa ou evento" value="${esc(S.iq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todas'],['pendente','Pendentes'],['pago','Pagas'],['gratis','Gratuitas']].map(c=>`<button class="chipf ${S.iqf===c[0]?'on':''}" data-a="iqF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>
@@ -7155,6 +7237,871 @@ function evFinCard(){
   <button class="lnk" data-a="evFinGo">Ver eventos ${ic('arrowR',13)}</button></div>`;
 }
 {const _v=fVis;fVis=()=>{evRecebSync();return _v();};const _r=fRec;fRec=()=>{evRecebSync();return _r();};}
-Object.assign(A,{evFinGo:()=>{S.etype='todos';S.ef='todos';A.nav('eventos');}});
+Object.assign(A,{evFinGo:()=>{const f=S.rpSt['agenda/financeiro'];if(f)f.f.ev='todos';A.rptGo('agenda|financeiro');},
+ evFinRep:v=>{rpState('agenda','financeiro').f.ev=v;A.rptGo('agenda|financeiro');}});
+
+
+/* ---------- Integração › fila de espera (ações) ---------- */
+Object.assign(A,{
+ igTop:v=>{S.igTop=v;render();},
+ igCall:v=>{const p=IGFILA.find(x=>x.id===v),cur=INTEGS.find(g=>g.current);if(!cur){toast('Não há integração aberta. Crie uma nova integração.');return;}if(!igCallIds([v])){toast('Integração lotada: aumente o limite ou espere a próxima.');return;}render();toast(`${p.n.split(' ')[0]} chamado(a) para ${cur.n}. A pessoa recebe o aviso no app.`);},
+ igCallN:()=>{const cur=INTEGS.find(g=>g.current);if(!cur){toast('Não há integração aberta.');return;}const k=igCallIds(IGFILA.map(x=>x.id));render();toast(k?`${k} ${k===1?'pessoa chamada':'pessoas chamadas'} para ${cur.n}.`:'Sem vaga na integração atual.');},
+ igRm:v=>{const p=IGFILA.find(x=>x.id===v);confirmDel({title:`Remover ${p.n.split(' ')[0]} da fila?`,body:'A pessoa é avisada no app e pode entrar na fila de novo.',label:'Remover',onConfirm:()=>{IGFILA.splice(IGFILA.indexOf(p),1);render();toast('Removido(a) da fila');}});}
+});
+/* ---------- Integração › Regras ---------- */
+Object.assign(A,{
+ igRules:()=>{const v={max:INTR.max,prazo:INTR.prazo,aceite:INTR.aceite,cert:INTR.cert?'sim':'nao'};window._igR=v;
+  const step=(id,lab,sub,val)=>`<div class="bb-rr"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><div class="lm2-step"><button type="button" data-s="${id}|-1">${ic('minus',15,2.4)}</button><output><b id="igR${id}">${val}</b></output><button type="button" data-s="${id}|1">${ic('plus',15,2.4)}</button></div></div>`;
+  const ch=(id,lab,sub,opts)=>`<div class="bb-rr"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><div class="chips" data-ch="${id}">${opts.map(o=>`<button type="button" class="chipf ${v[id]===o[0]?'on':''}" data-v="${o[0]}">${o[1]}</button>`).join('')}</div></div>`;
+  const fx=(lab,sub,icn)=>`<div class="bb-rr fixed"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><span class="bb-lock">${ic(icn||'lock',13,2)}Sempre</span></div>`;
+  openDlg(`${dlgHead('Regras da integração','Valem para os pedidos feitos pelo app.')}<div class="bb-rules">
+   ${step('max','Limite de pessoas','padrão ao criar uma integração; ∞ é sem limite',v.max||'∞')}${step('prazo','Prazo para pedir','dias antes do início; depois, o pedido vai para a próxima integração',v.prazo)}
+   ${ch('aceite','Aceite dos pedidos','automático aceita sozinho enquanto houver vaga',[['manual','Manual'],['auto','Automático']])}${ch('cert','Certificado de conclusão','se ligado, a secretaria pode emitir o certificado de integração',[['nao','Não'],['sim','Sim']])}
+   ${fx('Só a integração concluída habilita membro','Convite de acesso nunca transforma pessoa em membro')}${fx('Uma integração atual por igreja','Os pedidos novos entram nela; ao lotar, não aceita mais e o pedido vai para a fila de espera')}${fx('Fila de espera','Quem pede com a integração lotada, fora do prazo ou sem integração aberta entra na fila, por ordem de chegada','clock')}${fx('Quem recebe os pedidos','O responsável da integração aceita ou recusa (no aceite manual)')}</div>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="igRulesSave">Salvar</button></div>`,'sm');
+  const lim={max:[0,200,5],prazo:[0,30,1]};
+  $('.bb-rules').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){const [k,d]=b.dataset.s.split('|');v[k]=Math.max(lim[k][0],Math.min(lim[k][1],v[k]+ +d*lim[k][2]));$('#igR'+k).textContent=k==='max'&&!v[k]?'∞':v[k];return;}
+   const c=e.target.closest('[data-ch] .chipf');if(c){const g=c.parentElement;v[g.dataset.ch]=c.dataset.v;g.querySelectorAll('.chipf').forEach(z=>z.classList.toggle('on',z===c));}});},
+ igRulesSave:()=>{const v=window._igR;Object.assign(INTR,{max:v.max,prazo:v.prazo,aceite:v.aceite,cert:v.cert==='sim'});closeDlg();render();toast('Regras da integração salvas');}
+});
+
+/* ================= Secretaria ================= */
+/* Menu Secretaria (Visão geral, Atos, Documentos, Cargos e mandatos, Relatórios), situação do membro em Pessoas › Membros,
+   Disciplina em Cuidado e informe de contribuições em Financeiro › Relatórios. Tudo sobre dados fixos de exemplo. */
+Object.assign(I,{
+ file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+ download:'<path d="M12 4v11M7.5 11 12 15.5 16.5 11M5 20h14"/>',
+ upload:'<path d="M12 16V5M7.5 9 12 4.5 16.5 9M5 20h14"/>',
+ folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+ idcard:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="M6.5 16c.6-1.6 1.7-2.3 2.5-2.3s1.9.7 2.5 2.3M14.5 10h4M14.5 13.5h3"/>',
+ scale:'<path d="M12 4v16M6 20h12M5 8h14"/><path d="M5 8l-2.5 6a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0z"/>'});
+const SX_TODAY='2026-09-30';
+const sxDays=(a,b)=>Math.round((Date.parse(b)-Date.parse(a))/864e5);
+const sxShort=d=>{const [,m,dd]=d.split('-');return +dd+' '+MONTHS[+m-1].slice(0,3);};
+const sxMem=n=>MEMBERS.find(m=>m.n===n&&m.st==='integrado');
+const sxInteg=()=>MEMBERS.filter(m=>m.st==='integrado');
+const sxMe='Rafael Pereira';
+const sxLog=(a,e,x,det)=>LOG.unshift({u:sxMe,a,e,x,det:det||'',d:SX_TODAY,t:'14:'+String(10+LOG.length%40).padStart(2,'0')});
+ACOL.Consultou='var(--ink-muted)';ACOL.Registrou='var(--st-int)';ACOL.Encerrou='var(--st-rec)';ACOL.Emitiu='var(--st-int)';
+const sxF=(l,body,hint)=>`<label class="fld"><span class="fl">${l}</span>${body}${hint?`<span class="hint">${hint}</span>`:''}<span class="err"></span></label>`;
+const sxSel=(name,opts,v,id)=>`<span class="selw"><select name="${name}" ${id?`id="${id}"`:''}>${opts.map(o=>{const [k,t]=Array.isArray(o)?o:[o,o];return `<option value="${esc(k)}" ${k===v?'selected':''}>${esc(t)}</option>`;}).join('')}</select>${ic('updown',14)}</span>`;
+const sxErr=(f,name,msg)=>{const el=f.elements[name];const fl=el&&(el.closest?el.closest('.fld'):null);if(fl){fl.classList.add('bad');fl.querySelector('.err').textContent=msg;}return false;};
+const sxClr=f=>$$('.fld.bad',f).forEach(x=>{x.classList.remove('bad');const e=x.querySelector('.err');if(e)e.textContent='';});
+const sxDlg=(title,sub,body,foot,cls)=>openDlg(dlgHead(title,sub)+`<form class="fgrid one" id="sxF" novalidate>${body}<div class="dfoot">${foot}</div></form>`,'sc-dlg '+(cls||''));
+const sxOk=(label)=>`<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${label}</button>`;
+const sxHead=(eb,t,lede,act)=>`<header class="ph rise"><div><p class="eb">${eb}</p><h1>${t}</h1><p class="lede">${lede}</p></div><div class="pact">${act||''}</div></header>`;
+const sxKpis=(l)=>`<section class="card kpis4 rise${l.length===3?' k3':''}" style="--d:1">${l.map(k=>`<div class="k4"><span class="kl">${k[0]}</span><span class="kv" ${k[3]?`style="color:${k[3]}"`:''}>${k[1]}</span><span class="kd">${k[2]}</span></div>`).join('')}</section>`;
+const sxSeg=(act,items,cur)=>`<div class="segc up-tabs rise" style="--d:2" role="tablist">${items.map(t=>`<button data-a="${act}" data-v="${t[0]}" aria-pressed="${cur===t[0]}">${t[1]}${t[2]!==undefined?`<small class="cm-n">${t[2]}</small>`:''}</button>`).join('')}</div>`;
+const sxAv=n=>`<span class="av" style="background:var(--tone-${TONES[n.length%6]});color:var(--tone-${TONES[n.length%6]}-ink)">${initials(n)}</span>`;
+const sxPill=(t,c,b)=>`<span class="stp" style="--c:${c};--b:${b}"><i></i>${t}</span>`;
+const sxOpenMember=id=>{closeDlg();S.member=id;S.tab='geral';S.active='membros';render();window.scrollTo(0,0);};
+Object.assign(S,{sxSit:'todas',sxAto:'todos',sxDocT:'emitidos',sxArq:'todas',sxArqQ:'',sxCg:'mandatos',sxRel:'mov',sxMes:'10',sxDi:'todos',sxIc:'2026'});
+
+/* ---------- permissões e menu ---------- */
+(()=>{
+ const g=NAV.find(x=>x[0]==='Gestão')[1];
+ g.unshift(['secretaria','file','Secretaria',[['sec-vis','Visão geral'],['sec-atos','Atos'],['sec-docs','Documentos'],['sec-cargos','Cargos e mandatos'],['sec-ana','Análises']]]);
+ NAV.find(x=>x[0]==='Geral')[1].find(n=>n[0]==='cuidado')[3].push(['disciplina','Disciplina']);
+ SAREAS.push(['Secretaria','file']);
+ ['Secretaria','Disciplina'].forEach(k=>MODS.push(k));
+ Object.keys(RPERM).forEach(r=>{RPERM[r].Secretaria=r==='Administrador'||r==='Secretaria'?ACTS.slice():r==='Pastor'?['Ver','Criar','Editar']:[];RPERM[r].Disciplina=r==='Administrador'||r==='Pastor'?ACTS.slice():[];});
+})();
+
+/* ---------- situação do membro ---------- */
+const SX_SITS={
+ ativo:['Ativo','var(--st-int)','var(--st-int-bg)','Volta às listas, escalas e ao app.'],
+ afastado:['Afastado','var(--st-sol)','var(--st-sol-bg)','Continua com acesso ao app; fica marcado como afastado e entra no acompanhamento.'],
+ transferido:['Transferido','var(--st-ace)','var(--st-ace-bg)','Saiu para outra igreja. O acesso ao painel e ao app é encerrado.'],
+ desligado:['Desligado','var(--st-rec)','var(--st-rec-bg)','Deixou de ser membro. O acesso é encerrado e os mandatos vigentes terminam.'],
+ falecido:['Falecido','var(--ink-muted)','var(--surface-2)','Registro de falecimento. O acesso é encerrado e os mandatos vigentes terminam.']};
+const SX_BLOCK=['transferido','desligado','falecido'];
+const SX_SIT={};
+const sxSitOf=m=>m.st!=='integrado'?null:(SX_SIT[m.id]?SX_SIT[m.id].s:'ativo');
+const sxSitPill=s=>sxPill(SX_SITS[s][0],SX_SITS[s][1],SX_SITS[s][2]);
+function sxSetSit(m,s,o){
+ const r=SX_SIT[m.id]||(SX_SIT[m.id]={s:'ativo',h:[]});
+ r.h.unshift({d:o.d||SX_TODAY,s,from:r.s,why:o.why||'',dest:o.dest||'',by:sxMe});r.s=s;
+ if(SX_BLOCK.includes(s)){sxEndMands(m);if(m.app&&m.app.st==='ativo')m.app.st='suspensa';const u=USERS.find(x=>x.n===m.n);if(u)u.revoked=true;}
+ else if(s==='ativo'&&m.app&&m.app.st==='suspensa')m.app.st='ativo';
+ sxLog('Alterou','Membro',m.n,'Situação: '+SX_SITS[r.h[0].from][0]+' → '+SX_SITS[s][0]);
+}
+[['Elisa Moura','afastado','2026-08-12','Mudança temporária de cidade por trabalho',''],['Patrícia Oliveira Nunes','transferido','2026-07-03','Mudou de cidade','Igreja de fora · Comunidade Esperança, Curitiba'],['Bruno Reis','desligado','2026-06-20','Pedido do próprio membro',''],['Diego Faria','falecido','2026-05-02','Falecimento comunicado pela família','']].forEach(([n,s,d,why,dest])=>{const m=sxMem(n);if(m){SX_SIT[m.id]={s,h:[{d,s,from:'ativo',why,dest,by:sxMe}]};if(SX_BLOCK.includes(s)&&m.app&&m.app.st==='ativo')m.app.st='suspensa';}});
+{const _f=filtered;filtered=()=>_f().filter(m=>S.sxSit==='todas'||sxSitOf(m)===S.sxSit);}
+{const _row=row;row=m=>{const h=_row(m),s=sxSitOf(m);if(!s||s==='ativo')return h;const sp=stPill(m.st);return h.replace(sp+'</span>',sp+sxSitPill(s)+'</span>');};}
+{const _m=members;members=()=>{const h=_m(),c=k=>sxInteg().filter(m=>sxSitOf(m)===k).length;
+ const bar=`<div class="sx-sitbar rise" style="--d:2"><span class="sx-sl">Situação</span><div class="chips" role="tablist" aria-label="Situação do membro">${[['todas','Todas',null],...Object.keys(SX_SITS).map(k=>[k,SX_SITS[k][0],c(k)])].map(x=>`<button role="tab" class="chipf ${S.sxSit===x[0]?'on':''}" data-a="sxSitF" data-v="${x[0]}" aria-selected="${S.sxSit===x[0]}">${x[0]!=='todas'?`<i style="background:${SX_SITS[x[0]][1]}"></i>`:''}${x[1]}${x[2]!==null?`<small>${x[2]}</small>`:''}</button>`).join('')}</div></div>`;
+ return h.replace('<section class="card mtab rise" style="--d:3"',bar+'<section class="card mtab rise" style="--d:3"');};}
+{const _p=profile;profile=()=>{let h=_p();const m=byId(S.member);if(!m||m.st!=='integrado')return h;const s=sxSitOf(m),r=SX_SIT[m.id];
+ h=h.replace('<div class="pchips">','<div class="pchips"><span class="chip st" style="--c:'+SX_SITS[s][1]+';--b:'+SX_SITS[s][2]+'"><i></i>'+SX_SITS[s][0]+'</span>');
+ h=h.replace('<button class="pi" data-a="inactivate">'+ic('pause',17)+'Inativar cadastro</button>','<button class="pi" data-a="sxSitDlg">'+ic('swap',17)+'Alterar situação</button>');
+ if(s!=='ativo'&&r){const l=r.h[0];h=h.replace('<div id="ptab" class="rise" style="--d:2">','<div class="sx-note rise" style="--d:1;--c:'+SX_SITS[s][1]+'">'+ic(SX_BLOCK.includes(s)?'lock':'info',17,2)+'<span><b>'+SX_SITS[s][0]+' desde '+dBR(l.d)+'</b>'+(l.why?' · '+esc(l.why):'')+(l.dest?' · '+esc(l.dest):'')+'<br><small>'+SX_SITS[s][3]+'</small></span><button class="btn sec" data-a="sxSitDlg" data-v="ativo">Voltar a ativo</button></div><div id="ptab" class="rise" style="--d:2">');}
+ return h;};}
+{const _h=history;history=m=>{const h=_h(m),r=SX_SIT[m.id];
+ if(r)r.h.slice().reverse().forEach(x=>h.push(['Situação: '+SX_SITS[x.s][0]+(x.why?' — '+x.why:''),x.by,'rp',sxShort(x.d)]));
+ sxAtosOf(m).forEach(a=>h.push([SX_ATO_T[a.t][0]+(a.st==='informado'?' (informado, outra igreja)':a.st==='previsto'?' previsto':''),a.of||'Secretaria','rp',sxShort(a.d)]));
+ SX_DOCS.filter(d=>d.mid===m.id).forEach(d=>h.push(['Emitido(a): '+d.t+' nº '+d.num,d.by,'rp',sxShort(d.d)]));
+ return h;};}
+Object.assign(A,{
+ sxSitF:v=>{S.sxSit=v;render();},
+ sxSitDlg:v=>{closePops();const m=byId(S.member);if(!m||m.st!=='integrado')return;const cur=sxSitOf(m);
+  const opts=Object.keys(SX_SITS).filter(k=>k!==cur).map(k=>[k,SX_SITS[k][0]]),first=v&&v!==cur?v:opts[0][0];
+  sxDlg('Alterar situação',esc(m.n)+' · hoje '+SX_SITS[cur][0].toLowerCase(),
+   sxF('Nova situação',sxSel('s',opts,first,'sxS'))+`<p class="sx-eff" id="sxEff"></p>`
+   +`<div id="sxDest" hidden>${sxF('Para onde',sxSel('dk',[['int','Outra igreja da organização (usa Trocar igreja)'],['out','Igreja de fora']],'out'))}<div id="sxDestN">${sxF('Nome da igreja de destino','<input name="dn" placeholder="Ex.: Comunidade Esperança, Curitiba" autocomplete="off">')}</div></div>`
+   +sxF('Data',`<input type="date" name="d" value="${SX_TODAY}" max="${SX_TODAY}">`)+sxF('Motivo','<input name="why" placeholder="Obrigatório, exceto ao voltar a ativo" autocomplete="off">'),
+   sxOk('Salvar situação'));
+  const f=$('#sxF'),upd=()=>{const s=f.s.value;$('#sxEff').innerHTML=ic(SX_BLOCK.includes(s)?'lock':'info',14,2)+' '+SX_SITS[s][3];$('#sxDest').hidden=s!=='transferido';$('#sxDestN').hidden=f.dk.value!=='out';};
+  f.s.onchange=upd;f.dk.onchange=upd;upd();
+  f.onsubmit=e=>{e.preventDefault();sxClr(f);const s=f.s.value;
+   if(s==='transferido'&&f.dk.value==='int'){closeDlg();toast('A transferência dentro da organização é feita em Trocar igreja');A.idMemberChurch();return;}
+   if(s!=='ativo'&&!f.why.value.trim())return sxErr(f,'why','Informe o motivo');
+   if(s==='transferido'&&!f.dn.value.trim())return sxErr(f,'dn','Informe a igreja de destino');
+   if(!f.d.value)return sxErr(f,'d','Informe a data');
+   const dest=s==='transferido'?'Igreja de fora · '+f.dn.value.trim():'';
+   sxSetSit(m,s,{d:f.d.value,why:f.why.value.trim(),dest});closeDlg();render();toast(m.n.split(' ')[0]+': situação alterada para '+SX_SITS[s][0].toLowerCase());
+   if(s==='transferido')setTimeout(()=>sxDocDlg({mid:m.id,t:'Carta de transferência',dest:f.dn.value.trim()}),350);};}
+});
+
+/* ---------- atos ---------- */
+const SX_ATO_T={batismo:['Batismo','bucket'],casamento:['Casamento','heart'],consagracao:['Consagração','flame'],apresentacao:['Apresentação','pacifier']};
+const SX_ATOS=[
+ {id:'at1',t:'batismo',st:'realizado',d:'2026-06-14',loc:'Chácara Alva',of:'Pr. Marcos Souza',ppl:['Ana Clara Lima','Helena Duarte','Larissa Pires'],obs:'Batismo nas águas, domingo à tarde.'},
+ {id:'at2',t:'batismo',st:'previsto',d:'2026-10-18',loc:'Chácara Alva',of:'Pr. Marcos Souza',ppl:['Juliana Costa Ferreira','Pedro Costa Ferreira','Elisa Moura'],obs:''},
+ {id:'at3',t:'casamento',st:'realizado',d:'2026-05-09',loc:'Templo',of:'Pr. Marcos Souza',ppl:['Thiago Barros','Renata Campos'],obs:''},
+ {id:'at4',t:'consagracao',st:'realizado',d:'2026-04-12',loc:'Templo',of:'Pr. Marcos Souza',ppl:['Larissa Pires'],obs:'Consagração ao diaconato.'},
+ {id:'at5',t:'batismo',st:'informado',d:'2024-11-10',loc:'Outra igreja (informado pelo membro)',of:'',ppl:['Clara Nunes'],obs:''}];
+const sxBBP=()=>typeof BBP==='undefined'?[]:BBP.filter(p=>p.st==='realizada').map(p=>({id:'bb'+p.id,t:'apresentacao',st:'realizado',d:bbEv(p).d,loc:bbEv(p).t,of:'',ppl:[p.bebe],ro:true,obs:'Responsáveis: '+p.pais.join(' e ')}));
+const sxAtoAll=()=>[...SX_ATOS,...sxBBP()].sort((a,b)=>a.d<b.d?1:-1);
+const sxAtosOf=m=>SX_ATOS.filter(a=>a.ppl.includes(m.n));
+const sxAtoPill=s=>s==='realizado'?sxPill('Realizado','var(--st-int)','var(--st-int-bg)'):s==='previsto'?sxPill('Previsto','var(--st-sol)','var(--st-sol-bg)'):sxPill('Informado','var(--ink-muted)','var(--surface-2)');
+function secAtos(){
+ const all=sxAtoAll(),f=S.sxAto,l=all.filter(a=>f==='todos'||a.t===f),c=k=>all.filter(a=>a.t===k).length;
+ const done=all.filter(a=>a.st==='realizado'&&a.d.startsWith('2026')),pp=done.reduce((n,a)=>n+a.ppl.length,0),prev=all.filter(a=>a.st==='previsto');
+ return sxHead('Secretaria','Atos','Batismos, casamentos, consagrações e apresentações registrados pela igreja. Alimentam a ficha do membro e as certidões.',`<button class="btn pri" data-a="sxAtoNew">${ic('plus',15,2.2)}Registrar ato</button>`)
+ +sxKpis([['Realizados em 2026',done.length,pp+' pessoas envolvidas'],['Previstos',prev.length,prev.length?'próximo: '+dBR(prev.sort((a,b)=>a.d<b.d?-1:1)[0].d):'nenhum agendado',prev.length?'var(--st-sol)':''],['Batismos',c('batismo'),'registrados'],['Casamentos e consagrações',c('casamento')+c('consagracao'),'registrados']])
+ +sxSeg('sxAtoF',[['todos','Todos',all.length],['batismo','Batismos',c('batismo')],['casamento','Casamentos',c('casamento')],['consagracao','Consagrações',c('consagracao')],['apresentacao','Apresentações',c('apresentacao')]],f)
+ +`<section class="card sx-list rise" style="--d:3">${l.length?l.map(a=>`<button class="sx-r" data-a="sxAtoOpen" data-v="${a.id}"><span class="sx-ti">${ic(SX_ATO_T[a.t][1],20)}</span><span class="sx-m"><b>${SX_ATO_T[a.t][0]} · ${a.ppl.length} ${a.ppl.length>1?'pessoas':'pessoa'}</b><small>${a.ppl.slice(0,3).map(esc).join(', ')}${a.ppl.length>3?' e mais '+(a.ppl.length-3):''}</small></span><span class="sx-c">${dBR(a.d)}<small>${esc(a.loc||'—')}</small></span><span class="sx-s">${sxAtoPill(a.st)}</span><span class="sx-ch">${ic('chevR',16)}</span></button>`).join(''):'<div class="mempty"><p>Nenhum ato por aqui.</p><span>Registre o primeiro em “Registrar ato”.</span></div>'}</section>`;
+}
+function sxAtoView(id){
+ const a=sxAtoAll().find(x=>x.id===id);if(!a)return;sxLog('Consultou','Ato',SX_ATO_T[a.t][0]+' de '+dBR(a.d));
+ const can=['batismo','casamento','consagracao'].includes(a.t)&&a.st!=='previsto';
+ openDlg(dlgHead(SX_ATO_T[a.t][0]+' · '+dBR(a.d),(a.loc?esc(a.loc)+' · ':'')+sxAtoPill(a.st).replace(/<[^>]*>/g,'').trim())+`
+  ${a.of?`<p class="sx-kv"><span>Quem oficiou</span><b>${esc(a.of)}</b></p>`:''}${a.obs?`<p class="sx-kv"><span>Observação</span><b>${esc(a.obs)}</b></p>`:''}
+  <div class="sx-people">${a.ppl.map(n=>{if(a.t==='apresentacao'){const p=BBP.find(x=>'bb'+x.id===a.id),d=p&&bbDoc(p);return `<div class="sx-pr">${sxAv(n)}<span class="sx-m"><b>${esc(n)}</b><small>Bebê apresentado${d?' · certificado nº '+d.num+(p.certOk?', enviado à família':', ainda não enviado'):' · certificado ainda não emitido'}</small></span>${d?`<button class="btn sec sm" data-a="sxDocOpen" data-v="${d.id}">${ic('file',14)}Ver certificado</button>`:`<button class="btn pri sm" data-a="sxBbCert" data-v="${p.id}">${ic('file',14)}Emitir certificado</button>`}</div>`;}
+   const m=MEMBERS.find(x=>x.n===n&&x.st==='integrado');return `<div class="sx-pr">${sxAv(n)}<span class="sx-m"><b>${esc(n)}</b><small>${m?'Membro':'Fora da igreja / sem ficha'}</small></span>${m?`<button class="lnk" data-a="sxOpenM" data-v="${m.id}">Ficha</button>`:''}${m&&can?`<button class="btn sec sm" data-a="sxDocFromAto" data-v="${m.id}|${a.t}">${ic('file',14)}Emitir certidão</button>`:''}</div>`;}).join('')}</div>
+  ${a.ro?`<p class="fi-note">${ic('info',15)}<span>Pedido, vaga e confirmação ficam em <b>Agenda › Apresentações</b>. <b>O certificado é emitido aqui, pela secretaria</b>; lá ele aparece só para consulta.</span></p>`:''}
+  <div class="dfoot">${a.st==='previsto'?`<button class="btn sec" data-a="sxAtoCancel" data-v="${a.id}">Cancelar ato</button><button class="btn pri" data-a="sxAtoDone" data-v="${a.id}">Concluir ato</button>`:a.ro?`<button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="sxGoBebes">Abrir em Apresentações</button>`:`<button class="btn pri" data-a="closeDlg">Fechar</button>`}</div>`,'sc-dlg');
+}
+function sxAtoNew(){
+ const people=sxInteg().filter(m=>!SX_BLOCK.includes(sxSitOf(m)));
+ sxDlg('Registrar ato','Atos de apresentação ficam em Agenda › Apresentações.',
+  sxF('Tipo',sxSel('t',[['batismo','Batismo'],['casamento','Casamento'],['consagracao','Consagração']],'batismo'))
+  +`<div class="fgrid" style="gap:14px">${sxF('Data',`<input type="date" name="d" value="${SX_TODAY}">`,'Data futura = ato previsto')}${sxF('Local','<input name="loc" placeholder="Ex.: Chácara Alva" autocomplete="off">')}</div>`
+  +sxF('Quem oficiou','<input name="of" placeholder="Ex.: Pr. Marcos Souza" autocomplete="off">')
+  +`<label class="chk3"><input type="checkbox" name="inf"><span>Aconteceu em outra igreja (só informar, sem celebrar aqui)</span></label>`
+  +sxF('Pessoas',`<input type="search" id="sxPq" placeholder="Filtrar membros" autocomplete="off" data-scq="pick"><div class="sx-pick" id="sxPick" tabindex="-1">${people.map(m=>`<label data-n="${esc(norm(m.n))}"><input type="checkbox" name="p" value="${m.id}"><span>${sxAv(m.n)}<b>${esc(m.n)}</b></span></label>`).join('')}</div>`)
+  +sxF('Pessoas de fora (opcional)','<input name="ext" placeholder="Nomes separados por vírgula" autocomplete="off">','Para quem não tem ficha na igreja, como o cônjuge de um casamento.')
+  +sxF('Observação (opcional)','<input name="obs" autocomplete="off">'),sxOk('Registrar'),'sc-wide');
+ const f=$('#sxF');
+ f.onsubmit=e=>{e.preventDefault();sxClr(f);
+  const ids=[...f.querySelectorAll('input[name=p]:checked')].map(x=>x.value),ext=f.ext.value.split(',').map(s=>s.trim()).filter(Boolean),t=f.t.value,inf=f.inf.checked;
+  if(!f.d.value)return sxErr(f,'d','Informe a data');
+  if(inf&&f.d.value>SX_TODAY)return sxErr(f,'d','Ato informado já aconteceu: use uma data passada');
+  const ppl=[...ids.map(i=>byId(i).n),...ext];
+  if(!ppl.length)return sxErr(f,'ext','Escolha ao menos uma pessoa');
+  if(t==='casamento'&&ppl.length!==2)return sxErr(f,'ext','Casamento tem duas pessoas (ficha ou de fora)');
+  const st=inf?'informado':f.d.value>SX_TODAY?'previsto':'realizado';
+  const a={id:'at'+Date.now(),t,st,d:f.d.value,loc:inf?(f.loc.value.trim()||'Outra igreja (informado)'):f.loc.value.trim(),of:f.of.value.trim(),ppl,obs:f.obs.value.trim()};
+  SX_ATOS.unshift(a);if(t==='batismo'&&st!=='previsto')ids.forEach(i=>{byId(i).bap=true;});
+  sxLog('Registrou','Ato',SX_ATO_T[t][0]+' · '+ppl.length+' '+(ppl.length>1?'pessoas':'pessoa'),dBR(a.d));
+  closeDlg();render();toast(SX_ATO_T[t][0]+(st==='previsto'?' previsto registrado':' registrado'));};
+}
+Object.assign(A,{
+ sxAtoF:v=>{S.sxAto=v;render();},sxAtoOpen:v=>sxAtoView(v),sxAtoNew:()=>sxAtoNew(),sxOpenM:v=>sxOpenMember(v),sxGoBebes:()=>{closeDlg();A.nav('bebes');},
+ sxAtoCancel:v=>{const i=SX_ATOS.findIndex(x=>x.id===v);const a=SX_ATOS[i];SX_ATOS.splice(i,1);sxLog('Encerrou','Ato',SX_ATO_T[a.t][0]+' previsto',dBR(a.d));closeDlg();render();toast('Ato previsto cancelado');},
+ sxAtoDone:v=>{const a=SX_ATOS.find(x=>x.id===v);
+  sxDlg('Concluir ato',SX_ATO_T[a.t][0]+' previsto para '+dBR(a.d),sxF('Aconteceu em',`<input type="date" name="d" value="${SX_TODAY}" max="${SX_TODAY}">`,a.t==='batismo'?'Os batizados passam a constar como batizados na ficha.':''),sxOk('Concluir'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.d.value)return sxErr(f,'d','Informe a data');a.d=f.d.value;a.st='realizado';
+   if(a.t==='batismo')a.ppl.forEach(n=>{const m=MEMBERS.find(x=>x.n===n&&x.st==='integrado');if(m)m.bap=true;});
+   sxLog('Registrou','Ato',SX_ATO_T[a.t][0]+' concluído',dBR(a.d));closeDlg();render();toast('Ato concluído e fichas atualizadas');};},
+ sxBbCert:v=>{closeDlg();setTimeout(()=>sxDocDlg({t:'Certificado de apresentação',bb:v}),200);},
+ sxBbSend:v=>{const d=SX_DOCS.find(x=>x.id===v),p=BBP.find(x=>x.id===d.bb),was=p.certOk;p.certOk=true;sxLog('Enviou','Documento',d.t+' nº '+d.num,p.pais.join(' e '));closeDlg();render();toast(`${was?'Certificado reenviado':'Certificado enviado'} para ${p.pais.map(n=>n.split(' ')[0]).join(' e ')}: no app e por e-mail.`);},
+ sxDocFromAto:v=>{const [id,t]=v.split('|');closeDlg();setTimeout(()=>sxDocDlg({mid:id,t:t==='batismo'?'Certidão de batismo':t==='casamento'?'Certidão de casamento':'Certificado de consagração'}),200);}
+});
+
+/* ---------- documentos emitidos ---------- */
+const sxAtoOf=(m,t)=>sxAtosOf(m).find(a=>a.t===t&&a.st!=='previsto');
+const SX_DOC_T={
+ 'Certidão de batismo':{ic:'bucket',need:m=>sxAtoOf(m,'batismo')||m.bap?'':'Sem registro de batismo. Registre o ato (ou informe o batismo em outra igreja) antes de emitir.',
+  txt:m=>{const a=sxAtoOf(m,'batismo');return `Certificamos que ${m.n} foi batizado(a) nas águas${a?` em ${dBR(a.d)}${a.loc?', em '+a.loc:''}${a.st==='informado'?', conforme informado pelo(a) membro':''}`:''}, conforme o livro de atos desta igreja.`;}},
+ 'Certidão de casamento':{ic:'heart',need:m=>sxAtosOf(m).some(a=>a.t==='casamento'&&a.st==='realizado')?'':'Sem registro de casamento celebrado na igreja.',
+  txt:m=>{const a=sxAtosOf(m).find(a=>a.t==='casamento'&&a.st==='realizado'),o=a.ppl.filter(n=>n!==m.n);return `Certificamos que ${m.n}${o.length?' e '+o.join(' e '):''} contraíram matrimônio em ${dBR(a.d)}${a.loc?', em '+a.loc:''}, celebrado por ${a.of||'ministro desta igreja'}, conforme o livro de atos.`;}},
+ 'Certificado de consagração':{ic:'flame',need:m=>sxAtosOf(m).some(a=>a.t==='consagracao'&&a.st==='realizado')?'':'Sem registro de consagração.',
+  txt:m=>{const a=sxAtosOf(m).find(a=>a.t==='consagracao'&&a.st==='realizado');return `Certificamos que ${m.n} foi consagrado(a) em ${dBR(a.d)}${a.obs?' — '+a.obs.replace(/\.$/,''):''}, conforme o livro de atos desta igreja.`;}},
+ 'Certificado de apresentação':{ic:'pacifier',bb:true,need:b=>b.bbp.st==='realizada'?'':'A apresentação ainda não foi realizada.',
+  txt:b=>{const p=b.bbp,e=bbEv(p);return `Certificamos que ${b.n}, nascido(a) em ${dBR(p.nasc)}, filho(a) de ${p.pais.join(' e ')}, foi apresentado(a) ao Senhor diante da igreja reunida no ${e.t} de ${dBR(e.d)}.`;}},
+ 'Certificado de integração':{ic:'check',need:m=>!INTR.cert?'O certificado de integração está desligado em Pessoas › Integração › Regras.':m.int?'':'Sem integração concluída.',
+  txt:m=>`Certificamos que ${m.n} concluiu a integração desta igreja em ${MONTHS[+m.int.slice(5)-1]} de ${m.int.slice(0,4)}, conforme os registros de integração.`},
+ 'Declaração de membro':{ic:'idcard',need:m=>sxSitOf(m)==='ativo'?'':'Só membros ativos recebem declaração.',
+  txt:m=>`Declaramos que ${m.n} é membro ativo desta igreja desde ${MONTHS[+m.int.slice(5)-1]} de ${m.int.slice(0,4)}, em plena comunhão.`},
+ 'Carta de recomendação':{ic:'mail',dest:true,need:m=>sxSitOf(m)==='ativo'?'':'Só membros ativos recebem carta de recomendação.',
+  txt:(m,o)=>`Recomendamos ${m.n}, membro ativo desta igreja, ${o.dest?'à comunidade '+o.dest:'a quem possa interessar'}, para participar da vida e do serviço da igreja que o(a) receber.`},
+ 'Carta de transferência':{ic:'swap',dest:true,need:m=>['ativo','transferido'].includes(sxSitOf(m))?'':'A carta de transferência é emitida para membro ativo ou já transferido.',
+  txt:(m,o)=>`Informamos que ${m.n} foi membro desta igreja em plena comunhão e está sendo transferido(a)${o.dest?' para '+o.dest:''}, com a nossa recomendação.`}};
+const SX_DOCS=[];
+/* modelos dos documentos: uma pasta de versões por tipo; a mais nova é a ativa */
+const SX_MOD={};
+const sxModFile=t=>'modelo-'+norm(t).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'.docx';
+const sxModOf=t=>SX_MOD[t]||(SX_MOD[t]=[{v:1,file:sxModFile(t),by:'Marcos Souza Ramos',d:'2026-03-02',sz:'36 KB',note:'Modelo inicial'}]);
+const sxCode=n=>'AV'+(10000+n*7919%90000)+'KQXMR'[n%5];
+const sxNewDoc=(t,m,o)=>{const n=SX_DOCS.length+1,T=SX_DOC_T[t];const d={id:'dc'+n,num:'2026-'+String(n).padStart(4,'0'),t,mid:m.id,bb:m.bbp?m.bbp.id:'',pessoa:m.n,d:o.d||SX_TODAY,by:o.by||sxMe,sig:o.sig||'Marcos Souza Ramos — Pastor presidente',dest:o.dest||'',obs:o.obs||'',st:'valido',code:sxCode(n),text:T.txt(m,o),mv:T.fin?0:sxModOf(t)[0].v};SX_DOCS.push(d);return d;};
+[['Certidão de batismo','Ana Clara Lima','2026-06-20'],['Certidão de batismo','Helena Duarte','2026-06-20'],['Declaração de membro','Juliana Costa Ferreira','2026-08-04'],['Carta de transferência','Patrícia Oliveira Nunes','2026-07-03','Comunidade Esperança, Curitiba'],['Carta de recomendação','Thiago Barros','2026-09-12','Igreja Batista Central'],['Certificado de consagração','Larissa Pires','2026-04-15'],['Declaração de membro','Bruno Reis','2026-05-10']].forEach(([t,n,d,dest])=>{const m=sxMem(n);if(m)sxNewDoc(t,m,{d,dest});});
+{const x=SX_DOCS[SX_DOCS.length-1];if(x){x.st='revogado';x.why='Membro desligado em 20/06/2026';}}
+BBP.filter(p=>p.certOk).forEach(p=>sxNewDoc('Certificado de apresentação',{id:'bb'+p.id,n:p.cert,bbp:p},{d:'2026-09-06'}));
+/* modelos: a versão mais nova de cada tipo é a ativa */
+Object.keys(SX_DOC_T).forEach(t=>{if(!SX_DOC_T[t].fin)sxModOf(t);});
+['Certidão de batismo','Declaração de membro'].forEach(t=>SX_MOD[t].unshift({v:2,file:sxModFile(t),by:'Thiago Barros',d:'2026-08-20',sz:'38 KB',note:'Ajuste na linha de assinatura'}));
+function sxRevokeDocs(m){SX_DOCS.filter(d=>d.mid===m.id&&d.st==='valido'&&['Declaração de membro','Carta de recomendação'].includes(d.t)).forEach(d=>{d.st='revogado';d.why='Membro '+SX_SITS[sxSitOf(m)][0].toLowerCase()+' em '+dBR(SX_SIT[m.id].h[0].d);});}
+const sxSigners=()=>SX_MAND.filter(x=>sxMandSt(x)==='vigente'&&['Pastor presidente','Secretário(a)'].includes(sxCargo(x.cg).n)).map(x=>[x.pessoa+' — '+sxCargo(x.cg).n,x.pessoa+' — '+sxCargo(x.cg).n]);
+function sxDocDlg(pre){
+ pre=pre||{};const sig=sxSigners(),ms=sxInteg().filter(m=>sxSitOf(m)!=='falecido'),bbs=BBP.filter(p=>p.st==='realizada').sort((a,b)=>bbEv(a).d<bbEv(b).d?1:-1);
+ sxDlg('Emitir documento','Certidões, declarações e cartas com número e código de validação.',
+  sxF('Tipo',sxSel('t',Object.keys(SX_DOC_T),pre.t||'Certidão de batismo','sxT'))
+  +`<div id="sxPw">${sxF('Pessoa',sxSel('m',ms.map(m=>[m.id,m.n+(sxSitOf(m)!=='ativo'?' · '+SX_SITS[sxSitOf(m)][0].toLowerCase():'')]),pre.mid||ms[0].id))}</div>`
+  +`<div id="sxBw" hidden>${sxF('Bebê apresentado',sxSel('bb',bbs.map(p=>[p.id,p.cert+' · '+dBR(bbEv(p).d)+(bbDoc(p)?' · já emitido':'')]),pre.bb||(bbs[0]||{}).id),bbs.length?'Só apresentações realizadas. O nome é o que a família confirmou em Agenda › Apresentações.':'Nenhuma apresentação realizada ainda.')}</div>`
+  +`<div id="sxDw" hidden>${sxF('Igreja ou comunidade de destino','<input name="dest" placeholder="Opcional na recomendação" autocomplete="off" value="'+esc(pre.dest||'')+'">')}</div>`
+  +sxF('Assinado por',sig.length?sxSel('sig',sig,sig[0][0]):'<input name="sig" disabled value="Sem signatário vigente">',sig.length?'Vem dos mandatos vigentes (Pastor presidente e Secretário).':'Cadastre o mandato do Pastor presidente em Cargos e mandatos.')
+  +sxF('Observação (opcional)','<input name="obs" autocomplete="off">')+'<div id="sxPv"></div>',sxOk('Emitir documento'));
+ const f=$('#sxF'),upd=()=>{const T=SX_DOC_T[f.t.value];$('#sxDw').hidden=!T.dest;$('#sxPw').hidden=!!T.bb;$('#sxBw').hidden=!T.bb;};const pv=()=>{const t=f.t.value,T=SX_DOC_T[t];let m;if(T.bb){const p=BBP.find(x=>x.id===f.bb.value);m=p&&{id:'bb'+p.id,n:p.cert,bbp:p};}else m=byId(f.m.value);
+  const box=$('#sxPv');if(!m){box.innerHTML='';return;}const why=T.need(m);
+  box.innerHTML=why?`<p class="fi-note">${ic('alert',15)}<span><b>Ainda não dá para emitir.</b> ${esc(why)}</span></p>`:`<div class="sx-pv"><span class="fl">Prévia do documento</span><div class="sx-paper"><h2>${esc(t.toUpperCase())}</h2><p>${esc(T.txt(m,{dest:f.dest.value.trim()}))}</p><p class="sx-city">São Paulo, ${dBR(SX_TODAY)}.</p></div><span class="hint">O texto é fixado na emissão. Número, assinatura e código de validação são gerados ao emitir.</span></div>`;};
+ f.t.onchange=()=>{upd();pv();};f.m.onchange=pv;f.bb.onchange=pv;f.dest.oninput=pv;upd();pv();
+ f.onsubmit=e=>{e.preventDefault();sxClr(f);const t=f.t.value,T=SX_DOC_T[t];let m,fld='m';
+  if(T.bb){fld='bb';const p=BBP.find(x=>x.id===f.bb.value);if(!p)return sxErr(f,'bb','Escolha a apresentação');const ja=SX_DOCS.find(x=>x.bb===p.id&&x.st==='valido');if(ja)return sxErr(f,'bb','Já existe o certificado nº '+ja.num+'. Revogue-o para emitir outro.');m={id:'bb'+p.id,n:p.cert,bbp:p};}else m=byId(f.m.value);
+  const why=T.need(m);if(why)return sxErr(f,fld,why);
+  if(!sig.length)return sxErr(f,'sig','Sem signatário: cadastre o mandato do Pastor presidente.');
+  if(t==='Carta de transferência'&&!f.dest.value.trim())return sxErr(f,'dest','Informe a igreja de destino');
+  const d=sxNewDoc(t,m,{dest:f.dest.value.trim(),sig:f.sig.value,obs:f.obs.value.trim()});sxLog('Emitiu','Documento',t+' nº '+d.num,m.n);
+  closeDlg();render();toast(t+' nº '+d.num+' emitido(a)');setTimeout(()=>sxDocView(d.id),250);};
+}
+function sxDocView(id){
+ const d=SX_DOCS.find(x=>x.id===id),m=byId(d.mid);if(!d)return;sxLog('Consultou','Documento',d.t+' nº '+d.num,d.pessoa);
+ const [sn,sc]=d.sig.split(' — ');
+ openDlg(dlgHead(d.t,'Nº '+d.num+' · emitido em '+dBR(d.d)+' por '+esc(d.by)+(d.mv?' · modelo v'+d.mv:''))+`<div class="sx-paper ${d.st==='revogado'?'rev':''}">${d.st==='revogado'?'<span class="sx-stamp">Revogado</span>':''}
+  <div class="sx-ph">${sunMark(18)}<b>Alva Sede</b><small>Av. Paulista, 1200 · São Paulo, SP</small></div><h2>${esc(d.t.toUpperCase())}</h2><p>${esc(d.text)}</p>${d.obs?`<p class="sx-obs">${esc(d.obs)}</p>`:''}<p class="sx-city">São Paulo, ${dBR(d.d)}.</p>
+  <div class="sx-sg"><div class="sx-sig"><span></span><b>${esc(sn)}</b><small>${esc(sc||'')}</small></div><div class="sx-val">${qrSvg(parseInt(d.num.replace('-','')))}<span>Código de validação<br><b>${d.code}</b></span></div></div></div>
+  ${d.st==='revogado'?`<p class="fi-note">${ic('alert',15)}<span><b>Documento revogado.</b> ${esc(d.why||'')}</span></p>`:''}
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button>${d.st==='valido'?`<button class="btn sec" data-a="sxDocRevoke" data-v="${d.id}">Revogar</button>`:''}<button class="btn sec" data-a="sxToast" data-v="PDF gerado e baixado (simulado)">${ic('download',15)}Baixar PDF</button>${d.bb?`<button class="btn pri" data-a="sxBbSend" data-v="${d.id}" ${d.st==='valido'?'':'disabled'}>${ic('mail',15)}${BBP.find(x=>x.id===d.bb).certOk?'Reenviar à família':'Enviar à família'}</button>`:`<button class="btn pri" data-a="${m&&m.e?'sxToast':''}" data-v="${m&&m.e?'Enviado para '+esc(m.e)+' (simulado)':''}" ${m&&m.e?'':'disabled title="Sem e-mail cadastrado"'}>${ic('mail',15)}Enviar por e-mail</button>`}</div>`,'sc-dlg sc-wide');
+}
+function sxValidate(){
+ openDlg(dlgHead('Validar documento','Qualquer pessoa pode conferir o código impresso, sem entrar no sistema.')+`<form id="sxF" class="fgrid one" novalidate>${sxF('Código de validação','<input name="c" placeholder="Ex.: AV25919K" autocomplete="off">')}<div id="sxRes"></div><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Fechar</button><button type="submit" class="btn pri">Validar</button></div></form>`,'sc-dlg');
+ const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();const c=f.c.value.trim().toUpperCase(),d=SX_DOCS.find(x=>x.code===c),r=$('#sxRes');
+  r.innerHTML=!c?'':!d?`<div class="sx-vr bad">${ic('x',18,2.2)}<span><b>Código não encontrado</b><small>Confira o código ou peça outra via à secretaria.</small></span></div>`
+  :d.st==='revogado'?`<div class="sx-vr bad">${ic('alert',18,2)}<span><b>Documento revogado</b><small>${esc(d.t)} nº ${d.num} · ${esc(d.why||'')}</small></span></div>`
+  :`<div class="sx-vr ok">${ic('check',18,2.4)}<span><b>Documento válido</b><small>${esc(d.t)} nº ${d.num} · ${esc(d.pessoa.split(' ')[0]+' '+d.pessoa.split(' ').slice(-1)[0][0])}. · emitido em ${dBR(d.d)} por Alva Sede</small></span></div>`;};
+}
+
+/* ---------- arquivo da secretaria ---------- */
+const SX_CATS=['Estatuto e registro','Atas','Contratos e certidões','Outros'],SX_ACC=['Secretaria','Administradores','Liderança'];
+const SX_ARQ=[
+ {id:'ar1',n:'Estatuto social registrado',cat:'Estatuto e registro',d:'2019-03-12',acc:'Administradores',sz:'1,8 MB'},
+ {id:'ar2',n:'Cartão CNPJ e certidões negativas',cat:'Contratos e certidões',d:'2026-08-20',acc:'Secretaria',sz:'640 KB'},
+ {id:'ar3',n:'Ata da assembleia geral ordinária 2026',cat:'Atas',sub:'Assembleia',d:'2026-03-15',acc:'Secretaria',sz:'920 KB'},
+ {id:'ar4',n:'Ata da eleição da diretoria 2025',cat:'Atas',sub:'Eleição',d:'2024-12-08',acc:'Secretaria',sz:'880 KB'},
+ {id:'ar5',n:'Ata da reunião de diretoria — setembro/2026',cat:'Atas',sub:'Diretoria',d:'2026-09-14',acc:'Administradores',sz:'310 KB'},
+ {id:'ar6',n:'Contrato de locação — Chácara Alva',cat:'Contratos e certidões',d:'2025-02-01',acc:'Administradores',sz:'2,4 MB'}];
+const sxAtas=()=>SX_ARQ.filter(x=>x.cat==='Atas');
+const sxAccPill=a=>sxPill(a,a==='Administradores'?'var(--st-rec)':a==='Liderança'?'var(--st-ace)':'var(--ink-muted)',a==='Administradores'?'var(--st-rec-bg)':a==='Liderança'?'var(--st-ace-bg)':'var(--surface-2)');
+function sxDocList(){
+ const q=norm(S.sxDocQ||'');
+ const l=SX_DOCS.slice().sort((a,b)=>a.d===b.d?SX_DOCS.indexOf(b)-SX_DOCS.indexOf(a):a.d<b.d?1:-1).filter(d=>!q||norm(d.pessoa+' '+d.t+' '+d.num+' '+d.code).includes(q));
+ return l.length?l.map(d=>`<button class="sx-r" data-a="sxDocOpen" data-v="${d.id}"><span class="sx-ti">${ic(SX_DOC_T[d.t].ic,20)}</span><span class="sx-m"><b>${esc(d.t)}</b><small>${esc(d.pessoa)} · nº ${d.num}</small></span><span class="sx-c">${dBR(d.d)}<small>${esc(d.sig.split(' — ')[0])}</small></span><span class="sx-s">${d.st==='valido'?sxPill('Válido','var(--st-int)','var(--st-int-bg)'):sxPill('Revogado','var(--st-rec)','var(--st-rec-bg)')}</span><span class="sx-ch">${ic('chevR',16)}</span></button>`).join(''):'<div class="mempty"><p>Nenhum documento encontrado.</p><span>Emita o primeiro em “Emitir documento”.</span></div>';
+}
+function sxArqList(){
+ const q=norm(S.sxArqQ),c=S.sxArq;
+ const l=SX_ARQ.filter(x=>(c==='todas'||x.cat===c)&&(!q||norm(x.n+' '+x.cat+' '+(x.sub||'')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
+ return l.length?l.map(x=>`<div class="sx-r static"><span class="sx-ti">${ic('folder',20)}</span><span class="sx-m"><b>${esc(x.n)}</b><small>${esc(x.cat)}${x.sub?' · '+esc(x.sub):''} · ${x.sz}</small></span><span class="sx-c">${dBR(x.d)}<small>${esc(x.by||sxMe)}</small></span><span class="sx-s"><button class="sx-acc" data-a="sxArqAcc" data-v="${x.id}" title="Quem pode abrir">${ic('lock',12,2.2)}${sxAccPill(x.acc)}</button></span><span class="sx-ch"><button class="btn sec sm" data-a="sxArqOpen" data-v="${x.id}">Abrir</button></span></div>`).join(''):'<div class="mempty"><p>Nenhum arquivo por aqui.</p><span>Envie estatutos, atas, contratos e certidões em “Enviar arquivo”.</span></div>';
+}
+/* ---------- modelos dos documentos (upload versionado; o Alva só preenche os campos) ---------- */
+const SX_VARS={'Certidão de batismo':['nome','data do batismo','local do batismo','quem oficiou'],'Certidão de casamento':['nome','nome do cônjuge','data do casamento','local do casamento','quem celebrou'],'Certificado de consagração':['nome','data da consagração','observação'],
+ 'Certificado de apresentação':['nome do bebê','data de nascimento','responsáveis','data da apresentação','culto'],'Certificado de integração':['nome','mês e ano da integração'],'Declaração de membro':['nome','membro desde'],'Carta de recomendação':['nome','destino'],'Carta de transferência':['nome','destino']};
+const SX_VARS_ALL=['igreja','cidade','data de emissão','signatário','cargo do signatário','número','código de validação'];
+function sxModList(){
+ const n=t=>SX_DOCS.filter(d=>d.t===t).length;
+ return Object.keys(SX_DOC_T).map(t=>{const T=SX_DOC_T[t];
+  if(T.fin)return `<div class="sx-r static"><span class="sx-ti">${ic(T.ic,20)}</span><span class="sx-m"><b>${esc(t)}</b><small>Modelo do sistema, com o layout exigido para o informe. Não é enviado pela igreja.</small></span><span class="sx-c">${n(t)} ${n(t)===1?'emitido':'emitidos'}</span><span class="sx-s"><span class="bb-lock">${ic('lock',13,2)}Fixo</span></span><span class="sx-ch"></span></div>`;
+  const a=sxModOf(t)[0];
+  return `<div class="sx-r static"><span class="sx-ti">${ic(T.ic,20)}</span><span class="sx-m"><b>${esc(t)}</b><small>${esc(a.file)} · v${a.v} · ${dBR(a.d)} por ${esc(a.by)}</small></span><span class="sx-c">${n(t)} ${n(t)===1?'emitido':'emitidos'}</span><span class="sx-s">${sxPill('Ativa v'+a.v,'var(--st-int)','var(--st-int-bg)')}</span><span class="sx-ch"><button class="btn sec sm" data-a="sxModHist" data-v="${esc(t)}">Histórico</button><button class="btn sec sm" data-a="sxModNew" data-v="${esc(t)}">${ic('upload',14,2)}Nova versão</button></span></div>`;}).join('');
+}
+Object.assign(A,{
+ sxModDl:v=>toast('Baixando '+v+' (simulado)'),
+ sxModNew:t=>{const a=sxModOf(t)[0],vs=[...SX_VARS_ALL,...(SX_VARS[t]||[])];
+  sxDlg('Nova versão do modelo',esc(t)+' · hoje v'+a.v,
+   sxF('Arquivo Word (.docx) ou PDF','<input type="file" name="fi" accept=".docx,.pdf">','Opcional no protótipo. O arquivo vale como v'+(a.v+1)+' nas próximas emissões; o que já foi emitido não muda.')
+   +sxF('O que mudou (opcional)','<input name="note" placeholder="Ex.: novo texto de assinatura" autocomplete="off">')
+   +`<div class="fld"><span class="fl">Campos que o arquivo pode usar</span><div class="sx-vars">${vs.map(x=>`<code>{{${esc(x)}}}</code>`).join('')}</div><span class="hint">Escreva o campo exatamente assim no Word; o Alva troca pelo dado do registro. Número, assinatura do mandato vigente, código e QR entram sozinhos.</span></div>`
+   +`<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sec sm" data-a="sxModDl" data-v="${esc(a.file)}">${ic('download',14,2)}Baixar o modelo atual</button><button type="button" class="btn sec sm" data-a="sxModDl" data-v="${esc(sxModFile(t).replace('.docx','-exemplo.docx'))}">${ic('download',14,2)}Baixar um exemplo</button></div>`,sxOk('Enviar nova versão'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);const fl=f.fi.files[0];
+   if(fl&&!/\.(docx|pdf)$/i.test(fl.name))return sxErr(f,'fi','Envie um arquivo Word (.docx) ou PDF');
+   const x={v:a.v+1,file:fl?fl.name:sxModFile(t),by:sxMe,d:SX_TODAY,sz:fl?(fl.size>1048576?(fl.size/1048576).toFixed(1).replace('.',',')+' MB':Math.max(1,Math.round(fl.size/1024))+' KB'):'38 KB',note:f.note.value.trim()};
+   SX_MOD[t].unshift(x);sxLog('Enviou','Modelo',t+' v'+x.v,x.file);closeDlg();render();toast('Modelo de '+t.toLowerCase()+' atualizado: v'+x.v+' está ativa');};},
+ sxModHist:t=>{const l=sxModOf(t);
+  openDlg(dlgHead('Histórico do modelo',esc(t))+`<div class="sx-people">${l.map((x,i)=>`<div class="sx-pr"><span class="sx-m"><b>v${x.v} · ${esc(x.file)}</b><small>${dBR(x.d)} por ${esc(x.by)} · ${x.sz}${x.note?' · '+esc(x.note):''} · ${SX_DOCS.filter(d=>d.t===t&&d.mv===x.v).length} emitidos</small></span>${i===0?sxPill('Ativa','var(--st-int)','var(--st-int-bg)'):`<button class="btn sec sm" data-a="sxModRe" data-v="${esc(t)}|${x.v}">Reativar</button>`}<button class="ibtn sm" data-a="sxModDl" data-v="${esc(x.file)}" aria-label="Baixar" title="Baixar">${ic('download',15)}</button></span></div>`).join('')}</div>
+  <p class="hint" style="margin:12px 0 0">${ic('info',12,2)} Reativar cria uma versão nova com o mesmo arquivo. Nada é apagado, e os documentos já emitidos mantêm o texto e a versão que usaram.</p>
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`,'sc-dlg');},
+ sxModRe:v=>{const [t,n]=v.split('|'),o=sxModOf(t).find(x=>x.v===+n),x={v:sxModOf(t)[0].v+1,file:o.file,by:sxMe,d:SX_TODAY,sz:o.sz,note:'Reativação da v'+o.v};SX_MOD[t].unshift(x);sxLog('Enviou','Modelo',t+' v'+x.v,'Reativou a v'+o.v);closeDlg();render();toast('v'+x.v+' ativa (a mesma da v'+o.v+')');}
+});
+function secDocs(){
+ const t=S.sxDocT,val=SX_DOCS.filter(d=>d.st==='valido').length;
+ const act=t==='emitidos'?`<button class="btn sec" data-a="sxValidate">${ic('check',15,2.2)}Validar código</button><button class="btn pri" data-a="sxDocNew">${ic('plus',15,2.2)}Emitir documento</button>`:t==='modelos'?'':`<button class="btn pri" data-a="sxArqNew">${ic('upload',15,2)}Enviar arquivo</button>`;
+ return sxHead('Secretaria','Documentos','Documentos emitidos, o arquivo da secretaria (estatuto, atas, contratos) e os modelos usados para gerar os documentos.',act)
+ +sxSeg('sxDocTab',[['emitidos','Emitidos',SX_DOCS.length],['arquivo','Arquivo',SX_ARQ.length],['modelos','Modelos',Object.keys(SX_DOC_T).length]],t)
+ +(t==='modelos'?`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('info',17,2)}<span><b>Um modelo por tipo de documento.</b> <small>Você envia um arquivo Word (.docx) ou PDF com campos como {{nome}}; ele vira uma versão nova e passa a valer nas próximas emissões. Documentos já emitidos guardam o texto e a versão que usaram. Enviar versão exige Editar ou Administrar em Secretaria e fica na auditoria.</small></span></div><section class="card sx-list rise" style="--d:3">${sxModList()}</section>`:'')
+ +(t==='modelos'?'':t==='emitidos'?`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><label class="sbox">${ic('search',16)}<input data-scq="doc" placeholder="Buscar por pessoa, tipo, número ou código" value="${esc(S.sxDocQ||'')}" autocomplete="off"></label><span class="who">${val} válidos · ${SX_DOCS.length-val} revogados</span></div><div id="sxDl">${sxDocList()}</div></section>`
+ :`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><label class="sbox">${ic('search',16)}<input data-scq="arq" placeholder="Buscar arquivo" value="${esc(S.sxArqQ)}" autocomplete="off"></label><div class="chips">${['todas',...SX_CATS].map(c=>`<button class="chipf ${S.sxArq===c?'on':''}" data-a="sxArqCat" data-v="${c}">${c==='todas'?'Todas':c}<small>${c==='todas'?SX_ARQ.length:SX_ARQ.filter(x=>x.cat===c).length}</small></button>`).join('')}</div></div><p class="sx-priv">${ic('lock',13,2)} Cada arquivo diz quem pode abrir: Secretaria, Administradores ou Liderança. Aberturas ficam na auditoria.</p><div id="sxAl">${sxArqList()}</div></section>`);
+}
+Object.assign(A,{
+ sxDocTab:v=>{S.sxDocT=v;render();},sxDocNew:()=>sxDocDlg(),sxDocOpen:v=>sxDocView(v),sxValidate:()=>sxValidate(),sxToast:v=>toast(v),
+ sxDocRevoke:v=>{const d=SX_DOCS.find(x=>x.id===v);sxDlg('Revogar documento','Nº '+d.num+' · '+d.t+' · '+d.pessoa,sxF('Motivo','<input name="w" placeholder="Ex.: Emitido com dado incorreto" autocomplete="off">','O documento passa a aparecer como inválido na validação.'),sxOk('Revogar'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.w.value.trim())return sxErr(f,'w','Informe o motivo');d.st='revogado';d.why=f.w.value.trim();sxLog('Encerrou','Documento','Revogou '+d.t+' nº '+d.num,d.why);closeDlg();render();toast('Documento revogado');};},
+ sxArqCat:v=>{S.sxArq=v;render();},
+ sxArqOpen:v=>{const x=SX_ARQ.find(a=>a.id===v);sxLog('Consultou','Arquivo',x.n,x.acc);toast('Abrindo “'+x.n+'” (simulado)');},
+ sxArqAcc:v=>{const x=SX_ARQ.find(a=>a.id===v);sxDlg('Quem pode abrir',esc(x.n),sxF('Acesso',sxSel('a',SX_ACC,x.acc),'Administradores: só o papel Administrador. Liderança: pastores e líderes. Secretaria: o papel Secretaria e acima.'),sxOk('Salvar'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();x.acc=f.a.value;sxLog('Editou','Arquivo',x.n,'Acesso: '+x.acc);closeDlg();render();toast('Acesso atualizado');};},
+ sxArqNew:()=>{
+  sxDlg('Enviar arquivo','Estatuto, atas, contratos e certidões da igreja.',
+   sxF('Arquivo (opcional no protótipo)','<input type="file" name="fi">')+sxF('Nome','<input name="n" placeholder="Ex.: Ata da assembleia de outubro" autocomplete="off">')
+   +`<div class="fgrid" style="gap:14px">${sxF('Categoria',sxSel('c',SX_CATS,'Atas','sxCat'))}<div id="sxSubW">${sxF('Tipo de ata',sxSel('s',['Assembleia','Diretoria','Eleição','Outra'],'Assembleia'))}</div></div>`
+   +`<div class="fgrid" style="gap:14px">${sxF('Data do documento',`<input type="date" name="d" value="${SX_TODAY}" max="${SX_TODAY}">`)}${sxF('Quem pode abrir',sxSel('a',SX_ACC,'Secretaria'))}</div>`,sxOk('Enviar'));
+  const f=$('#sxF'),upd=()=>{$('#sxSubW').hidden=f.c.value!=='Atas';};f.c.onchange=upd;upd();
+  f.fi.onchange=()=>{if(f.fi.files[0]&&!f.n.value)f.n.value=f.fi.files[0].name.replace(/\.[^.]+$/,'');};
+  f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.n.value.trim())return sxErr(f,'n','Informe o nome');if(!f.d.value)return sxErr(f,'d','Informe a data');
+   const fl=f.fi.files[0],x={id:'ar'+Date.now(),n:f.n.value.trim(),cat:f.c.value,d:f.d.value,acc:f.a.value,sz:fl?(fl.size>1048576?(fl.size/1048576).toFixed(1).replace('.',',')+' MB':Math.max(1,Math.round(fl.size/1024))+' KB'):'240 KB'};
+   if(x.cat==='Atas')x.sub=f.s.value;SX_ARQ.unshift(x);sxLog('Adicionou','Arquivo',x.n,x.cat);S.sxArq='todas';closeDlg();render();toast('Arquivo enviado');};}
+});
+
+/* ---------- cargos e mandatos ---------- */
+const SX_CARGOS=[
+ {id:'cg1',n:'Pastor presidente',desc:'Representa a igreja e preside a diretoria.',ac:null},
+ {id:'cg2',n:'Secretário(a)',desc:'Guarda os livros, as atas e os documentos da igreja.',ac:{area:'Secretaria',perm:'Editar'}},
+ {id:'cg3',n:'Tesoureiro(a)',desc:'Responde pelas contas e pelos relatórios financeiros.',ac:{area:'Financeiro',perm:'Editar'}},
+ {id:'cg4',n:'Diácono(a)',desc:'Serve no cuidado e na ordem da igreja.',ac:null},
+ {id:'cg5',n:'Presbítero(a)',desc:'Auxilia na liderança e no governo da igreja.',ac:null},
+ {id:'cg6',n:'Conselho fiscal',desc:'Confere as contas e os relatórios da tesouraria.',ac:{area:'Financeiro',perm:'Visualizar'}}];
+const sxCargo=id=>SX_CARGOS.find(c=>c.id===id)||{n:'—',ac:null};
+const SX_MAND=[
+ {id:'md1',cg:'cg1',pessoa:'Marcos Souza Ramos',ini:'2020-02-01',fim:'',ata:'',sc:''},
+ {id:'md2',cg:'cg2',pessoa:'Thiago Barros',ini:'2024-10-01',fim:'2026-10-31',ata:'ar4',sc:'+'},
+ {id:'md3',cg:'cg3',pessoa:'Helena Duarte',ini:'2025-03-01',fim:'2027-02-28',ata:'ar4',sc:'+'},
+ {id:'md4',cg:'cg4',pessoa:'Larissa Pires',ini:'2025-01-01',fim:'2026-12-31',ata:'',sc:''},
+ {id:'md5',cg:'cg6',pessoa:'Clara Nunes',ini:'2026-01-01',fim:'2026-12-31',ata:'ar3',sc:'+'},
+ {id:'md6',cg:'cg5',pessoa:'Bruno Reis',ini:'2022-01-01',fim:'2025-12-31',ata:'',sc:''}];
+const sxMandSt=x=>x.enc?'encerrado':x.ini>SX_TODAY?'agendado':x.fim&&x.fim<SX_TODAY?'encerrado':'vigente';
+function sxGrant(x){const c=sxCargo(x.cg);if(!c.ac)return;const s=SC(c.ac.area,x.pessoa,c.ac.perm);s.via='mandato';s.mid=x.id;SCOPES.push(s);x.sc=s.id;}
+function sxRevoke(x){if(!x.sc)return;const i=SCOPES.findIndex(s=>s.id===x.sc);if(i>=0)SCOPES.splice(i,1);x.sc='';}
+SX_MAND.forEach(x=>{if(x.sc==='+'){x.sc='';sxGrant(x);}});
+function sxEndMands(m){SX_MAND.filter(x=>x.pessoa===m.n&&sxMandSt(x)!=='encerrado').forEach(x=>{sxRevoke(x);x.fim=x.ini>SX_TODAY?x.ini:SX_TODAY;x.enc=1;sxLog('Encerrou','Mandato',sxCargo(x.cg).n+' · '+x.pessoa,'Encerrado pela situação do membro');});sxRevokeDocs(m);}
+{const _s=scopeTab;scopeTab=o=>{let h=_s(o);SCOPES.filter(x=>x.via).forEach(x=>{const md=SX_MAND.find(y=>y.id===x.mid);h=h.replace(new RegExp('(id="'+x.id+'">[\\s\\S]*?<b>[^<]*</b><span>)([^<]*)(</span>)'),(a,p,t,s)=>p+t+' · via mandato'+(md?' de '+sxCargo(md.cg).n:'')+s);});return h;};}
+function secCargos(){
+ const t=S.sxCg,vig=SX_MAND.filter(x=>sxMandSt(x)==='vigente'),soon=vig.filter(x=>x.fim&&sxDays(SX_TODAY,x.fim)<=90);
+ const l=SX_MAND.slice().filter(x=>S.sxMdF==='todos'||sxMandSt(x)!=='encerrado').sort((a,b)=>((sxMandSt(a)==='encerrado')-(sxMandSt(b)==='encerrado'))||((a.fim||'9')<(b.fim||'9')?-1:1));
+ const pill=x=>{const s=sxMandSt(x);if(s==='encerrado')return sxPill('Encerrado','var(--ink-muted)','var(--surface-2)');if(s==='agendado')return sxPill('Começa em '+dBR(x.ini),'var(--st-ace)','var(--st-ace-bg)');const d=x.fim?sxDays(SX_TODAY,x.fim):null;return d!==null&&d<=90?sxPill('Vence em '+d+' dias','var(--st-sol)','var(--st-sol-bg)'):sxPill('Vigente','var(--st-int)','var(--st-int-bg)');};
+ const acc=x=>{const c=sxCargo(x.cg);return x.sc?`<span class="sx-via">${ic('key',12,2)}${esc(c.ac.area)} · ${c.ac.perm==='Visualizar'?'Ver':c.ac.perm}<small>via mandato</small></span>`:c.ac&&sxMandSt(x)==='vigente'?'<span class="sx-via off">Acesso não concedido</span>':'<span class="sx-via off">—</span>';};
+ return sxHead('Secretaria','Cargos e mandatos','Quem ocupa cada cargo da igreja, por quanto tempo e com que acesso ao sistema.',t==='mandatos'?`<button class="btn pri" data-a="sxMdNew">${ic('plus',15,2.2)}Novo mandato</button>`:`<button class="btn pri" data-a="sxCgNew">${ic('plus',15,2.2)}Novo cargo</button>`)
+ +sxKpis([['Mandatos vigentes',vig.length,'em '+new Set(vig.map(x=>x.cg)).size+' cargos'],['Vencem em 90 dias',soon.length,soon.length?'renovar ou encerrar':'nenhum vencendo',soon.length?'var(--st-sol)':''],['Com acesso ao sistema',vig.filter(x=>x.sc).length,'concedido pelo mandato'],['Cargos cadastrados',SX_CARGOS.length,'no catálogo da igreja']])
+ +sxSeg('sxCgTab',[['mandatos','Mandatos',SX_MAND.length],['cargos','Cargos',SX_CARGOS.length]],t)
+ +(t==='mandatos'?`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><div class="chips">${[['vigentes','Vigentes e futuros'],['todos','Todos, com encerrados']].map(c=>`<button class="chipf ${(S.sxMdF||'vigentes')===c[0]?'on':''}" data-a="sxMdF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
+   ${l.map(x=>{const ata=SX_ARQ.find(a=>a.id===x.ata);return `<div class="sx-r static"><span class="sx-ti">${sxAv(x.pessoa)}</span><span class="sx-m"><b>${esc(x.pessoa)}</b><small>${esc(sxCargo(x.cg).n)}${ata?' · Ata: '+esc(ata.n):''}</small></span><span class="sx-c">${dBR(x.ini)} → ${x.fim?dBR(x.fim):'sem prazo'}<small>${acc(x)}</small></span><span class="sx-s">${pill(x)}</span><span class="sx-ch">${sxMandSt(x)==='encerrado'?'':`<button class="btn sec sm" data-a="sxMdEnd" data-v="${x.id}">Encerrar</button>`}</span></div>`;}).join('')}</section>`
+ :`<div class="sx-cg rise" style="--d:3">${SX_CARGOS.map(c=>{const n=vig.filter(x=>x.cg===c.id);return `<article class="card sx-cgc"><div class="sx-cgh"><b>${esc(c.n)}</b><small>${n.length?n.map(x=>esc(x.pessoa)).join(', '):'Sem ocupante vigente'}</small></div><p>${esc(c.desc)}</p><div class="sx-cgf">${c.ac?`<span class="sx-via">${ic('key',12,2)}Acesso sugerido: ${esc(c.ac.area)} · ${c.ac.perm==='Visualizar'?'Ver':c.ac.perm}</span>`:'<span class="sx-via off">Sem acesso sugerido</span>'}<button class="lnk" data-a="sxCgEdit" data-v="${c.id}">Editar</button></div></article>`;}).join('')}</div>`);
+}
+function sxCgDlg(id){
+ const c=id?sxCargo(id):null,areas=['Secretaria','Financeiro','Integração','Almoxarifado','Ministério de Louvor','Ministério Infantil'];
+ sxDlg(c?'Editar cargo':'Novo cargo','O acesso sugerido é uma ajuda ao conceder o mandato: nunca é automático.',
+  sxF('Nome do cargo',`<input name="n" value="${esc(c?c.n:'')}" placeholder="Ex.: Tesoureiro(a)" autocomplete="off">`)+sxF('Descrição',`<input name="ds" value="${esc(c?c.desc:'')}" autocomplete="off">`)
+  +`<div class="fgrid" style="gap:14px">${sxF('Acesso sugerido (área)',sxSel('ar',[['','Sem acesso sugerido'],...areas],c&&c.ac?c.ac.area:''))}${sxF('Nível',sxSel('pm',[['Visualizar','Ver'],['Editar','Editar'],['Admin','Administrar']],c&&c.ac?c.ac.perm:'Editar'))}</div>`,sxOk(c?'Salvar':'Criar cargo'));
+ const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.n.value.trim())return sxErr(f,'n','Informe o nome do cargo');
+  if(SX_CARGOS.some(x=>x.id!==id&&norm(x.n)===norm(f.n.value)))return sxErr(f,'n','Já existe um cargo com esse nome');
+  const o={n:f.n.value.trim(),desc:f.ds.value.trim(),ac:f.ar.value?{area:f.ar.value,perm:f.pm.value}:null};
+  if(c)Object.assign(c,o);else SX_CARGOS.push({id:'cg'+Date.now(),...o});sxLog(c?'Editou':'Adicionou','Cargo',o.n);closeDlg();render();toast(c?'Cargo atualizado':'Cargo criado');};
+}
+function sxMdDlg(){
+ const cs=SX_CARGOS,ms=sxInteg().filter(m=>!SX_BLOCK.includes(sxSitOf(m))),atas=sxAtas();
+ sxDlg('Novo mandato','O mandato liga a pessoa ao cargo e pode conceder o acesso sugerido ao sistema.',
+  sxF('Cargo',sxSel('cg',cs.map(c=>[c.id,c.n]),cs[0].id,'sxCg'))+sxF('Pessoa',sxSel('p',ms.map(m=>[m.n,m.n]),ms[0].n))
+  +`<div class="fgrid" style="gap:14px">${sxF('Início',`<input type="date" name="i" value="${SX_TODAY}">`)}${sxF('Fim (opcional)','<input type="date" name="e">','Em branco = sem prazo')}</div>`
+  +`<label class="chk3" id="sxGW"><input type="checkbox" name="g" checked><span id="sxGT"></span></label><p class="hint" id="sxGH"></p>`
+  +sxF('Ata da eleição ou nomeação (opcional)',sxSel('a',[['','Sem ata'],...atas.map(a=>[a.id,a.n+' · '+dBR(a.d)])],'')),sxOk('Criar mandato'));
+ const f=$('#sxF'),upd=()=>{const c=sxCargo(f.cg.value);$('#sxGW').hidden=!c.ac;$('#sxGH').hidden=!c.ac;if(c.ac){$('#sxGT').textContent='Conceder '+c.ac.area+' · '+(c.ac.perm==='Visualizar'?'Ver':c.ac.perm)+' durante o mandato';$('#sxGH').textContent=USERS.some(u=>u.n===f.p.value)?'O acesso sai sozinho quando o mandato termina.':'Esta pessoa ainda não tem usuário no painel. O acesso aparece em Acessos por área e vale quando ela for convidada em Usuários e permissões.';}};
+ f.cg.onchange=upd;f.p.onchange=upd;upd();
+ f.onsubmit=e=>{e.preventDefault();sxClr(f);
+  if(!f.i.value)return sxErr(f,'i','Informe o início');
+  if(f.e.value&&f.e.value<f.i.value)return sxErr(f,'e','O fim não pode ser antes do início');
+  if(SX_MAND.some(x=>x.cg===f.cg.value&&x.pessoa===f.p.value&&sxMandSt(x)!=='encerrado'))return sxErr(f,'p','Essa pessoa já tem esse cargo vigente');
+  const x={id:'md'+Date.now(),cg:f.cg.value,pessoa:f.p.value,ini:f.i.value,fim:f.e.value,ata:f.a.value,sc:''};SX_MAND.push(x);
+  if(f.g.checked&&!$('#sxGW').hidden&&sxMandSt(x)!=='encerrado')sxGrant(x);
+  sxLog('Adicionou','Mandato',sxCargo(x.cg).n+' · '+x.pessoa,x.sc?'Acesso concedido: '+sxCargo(x.cg).ac.area:'');closeDlg();render();toast('Mandato criado'+(x.sc?' e acesso concedido':''));};
+}
+Object.assign(A,{
+ sxCgTab:v=>{S.sxCg=v;render();},sxMdF:v=>{S.sxMdF=v;render();},sxMdNew:()=>sxMdDlg(),sxCgNew:()=>sxCgDlg(),sxCgEdit:v=>sxCgDlg(v),
+ sxMdEnd:v=>{const x=SX_MAND.find(y=>y.id===v);sxDlg('Encerrar mandato',esc(x.pessoa)+' · '+esc(sxCargo(x.cg).n),`<p class="sx-eff">${ic('info',14,2)} O mandato termina hoje.${x.sc?' O acesso '+esc(sxCargo(x.cg).ac.area)+' concedido por ele é retirado.':''}</p>`,sxOk('Encerrar mandato'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxRevoke(x);x.fim=x.ini>SX_TODAY?x.ini:SX_TODAY;x.enc=1;sxLog('Encerrou','Mandato',sxCargo(x.cg).n+' · '+x.pessoa);closeDlg();render();toast('Mandato encerrado');};}
+});
+
+/* ---------- análises da secretaria (os relatórios de lista ficam em Relatórios) ---------- */
+function secAna(){
+ const t=S.sxRel==='perfil'?'perfil':'mov',integ=sxInteg(),on=integ.filter(m=>!SX_BLOCK.includes(sxSitOf(m)));
+ let body='';
+ if(t==='mov'){
+  const ms=['01','02','03','04','05','06','07','08','09'],ent=ms.map(k=>integ.filter(m=>m.int==='2026-'+k).length),sai=ms.map(k=>integ.filter(m=>{const r=SX_SIT[m.id];return r&&SX_BLOCK.includes(r.s)&&r.h[0].d.slice(0,7)==='2026-'+k;}).length),mx=Math.max(1,...ent,...sai);
+  body=`<section class="card rise" style="--d:3;padding:20px"><div class="sh"><h2>Entradas e saídas em 2026</h2><span class="who"><i class="sx-lg in"></i>Integrações <i class="sx-lg out"></i>Transferências, desligamentos e falecimentos</span></div>
+   <div class="sx-bars">${ms.map((k,i)=>`<div class="sx-bc"><div class="sx-bb"><i class="in" style="height:${ent[i]/mx*100}%" title="${ent[i]} entradas"></i><i class="out" style="height:${sai[i]/mx*100}%" title="${sai[i]} saídas"></i></div><small>${MONTHS[i].slice(0,3)}</small><b>${ent[i]}${sai[i]?` · −${sai[i]}`:''}</b></div>`).join('')}</div>
+   <p class="who" style="margin-top:10px">Entradas: ${ent.reduce((a,b)=>a+b,0)} · Saídas: ${sai.reduce((a,b)=>a+b,0)} · Saldo: ${ent.reduce((a,b)=>a+b,0)-sai.reduce((a,b)=>a+b,0)}. A lista de quem saiu está em <button class="lnk" data-a="rptGo" data-v="membros|membros">Relatórios › Membros</button>.</p></section>`;
+ }else{
+  const dist=(f,keys)=>keys.map(k=>[k,on.filter(m=>f(m)===k).length]),fx=m=>{const a=age(m.nasc);return a<13?'0 a 12':a<18?'13 a 17':a<30?'18 a 29':a<45?'30 a 44':a<60?'45 a 59':'60 ou mais';};
+  const blocks=[['Faixa etária',dist(fx,['0 a 12','13 a 17','18 a 29','30 a 44','45 a 59','60 ou mais'])],['Estado civil',dist(m=>m.civil,[...new Set(on.map(m=>m.civil))])],['Gênero',dist(m=>m.gen,[...new Set(on.map(m=>m.gen))])],['Batismo',[['Batizados',on.filter(m=>m.bap).length],['Ainda não batizados',on.filter(m=>!m.bap).length]]]];
+  body=`<div class="sx-dist rise" style="--d:3">${blocks.map(b=>{const mx=Math.max(1,...b[1].map(x=>x[1]));return `<section class="card" style="padding:18px 20px"><div class="sh"><h2>${b[0]}</h2><span class="who">${on.length} membros</span></div>${b[1].map(x=>`<div class="sx-hb"><span>${esc(x[0])}</span><span class="sx-hbb"><i style="width:${x[1]/mx*100}%"></i></span><b>${x[1]}</b></div>`).join('')}</section>`;}).join('')}</div>`;
+ }
+ return sxHead('Secretaria','Análises','Números da vida da igreja: entradas e saídas de membros e o perfil de quem está na igreja.','')+sxSeg('sxRelTab',[['mov','Entradas e saídas'],['perfil','Perfil']],t)+body;
+}
+Object.assign(A,{sxRelTab:v=>{S.sxRel=v;render();}});
+
+/* ---------- visão geral da secretaria ---------- */
+function secVis(){
+ const integ=sxInteg(),ativos=integ.filter(m=>sxSitOf(m)==='ativo'),afast=integ.filter(m=>sxSitOf(m)==='afastado');
+ const docs30=SX_DOCS.filter(d=>sxDays(d.d,SX_TODAY)<=30&&d.st==='valido').length;
+ const vig=SX_MAND.filter(x=>sxMandSt(x)==='vigente'&&x.fim&&sxDays(SX_TODAY,x.fim)<=90).sort((a,b)=>a.fim<b.fim?-1:1);
+ const prev=SX_ATOS.filter(a=>a.st==='previsto'&&sxDays(SX_TODAY,a.d)<=30);
+ const semCert=[];SX_ATOS.filter(a=>a.t==='batismo'&&a.st==='realizado').forEach(a=>a.ppl.forEach(n=>{const m=sxMem(n);if(m&&!SX_DOCS.some(d=>d.mid===m.id&&d.t==='Certidão de batismo'&&d.st==='valido'))semCert.push(m);}));
+ const semBb=BBP.filter(p=>p.st==='realizada'&&!bbDoc(p));
+ const semInt=INTR.cert?ativos.filter(m=>m.int&&m.int>='2026-09'&&!SX_DOCS.some(d=>d.mid===m.id&&d.t==='Certificado de integração'&&d.st==='valido')):[];
+ const long=afast.filter(m=>sxDays(SX_SIT[m.id].h[0].d,SX_TODAY)>=30);
+ const items=[
+  ...vig.map(x=>({ic:'key',t:`Mandato de <b>${esc(x.pessoa)}</b> (${esc(sxCargo(x.cg).n)}) vence em ${dBR(x.fim)}`,s:`${sxDays(SX_TODAY,x.fim)} dias${x.sc?' · o acesso '+esc(sxCargo(x.cg).ac.area)+' sai junto':''}`,a:'sxGo',v:'sec-cargos',l:'Ver mandatos'})),
+  ...prev.map(a=>({ic:SX_ATO_T[a.t][1],t:`${SX_ATO_T[a.t][0]} previsto em ${dBR(a.d)}: <b>${a.ppl.length} pessoas</b>`,s:esc(a.loc||''),a:'sxAtoOpen',v:a.id,l:'Abrir ato'})),
+  ...(semBb.length?[{ic:'pacifier',t:`<b>${semBb.length}</b> ${semBb.length===1?'apresentação':'apresentações'} sem certificado emitido`,s:semBb.slice(0,3).map(p=>esc(p.cert)).join(', '),a:'sxBbCert',v:semBb[0].id,l:'Emitir certificado'}]:[]),
+  ...(semInt.length?[{ic:'check',t:`<b>${semInt.length}</b> ${semInt.length===1?'integrado(a) sem':'integrados sem'} certificado de integração`,s:semInt.slice(0,3).map(m=>esc(m.n)).join(', '),a:'sxDocNew',v:'',l:'Emitir certificado'}]:[]),
+  ...(semCert.length?[{ic:'file',t:`<b>${semCert.length}</b> ${semCert.length===1?'batizado(a) sem':'batizados sem'} certidão emitida`,s:semCert.slice(0,3).map(m=>esc(m.n)).join(', '),a:'sxDocNew',v:'',l:'Emitir certidão'}]:[]),
+  ...long.map(m=>({ic:'care',t:`<b>${esc(m.n)}</b> está afastado(a) há ${sxDays(SX_SIT[m.id].h[0].d,SX_TODAY)} dias`,s:'Vale uma conversa para rever a situação',a:'sxOpenM',v:m.id,l:'Abrir ficha'}))];
+ const bd=ativos.filter(m=>m.nasc).map(m=>{const [,mo,da]=m.nasc.split('-'),d=`2026-${mo}-${da}`,n=sxDays(SX_TODAY,d);return {m,d,n};}).filter(x=>x.n>=0&&x.n<=7).sort((a,b)=>a.n-b.n);
+ return sxHead('Secretaria','Visão geral','O que a secretaria precisa acompanhar: situação dos membros, atos, documentos e mandatos.',`<button class="btn sec" data-a="sxAtoNew">${ic('plus',15,2.2)}Registrar ato</button><button class="btn pri" data-a="sxDocNew">${ic('file',15)}Emitir documento</button>`)
+ +sxKpis([['Membros ativos',ativos.length,integ.length+' integrados no total'],['Afastados',afast.length,afast.length?'acompanhe de perto':'nenhum afastado',afast.length?'var(--st-sol)':''],['Documentos nos últimos 30 dias',docs30,'emitidos e válidos'],['Mandatos vencendo',vig.length,'em até 90 dias',vig.length?'var(--st-sol)':'']])
+ +`<div class="sx-two"><section class="card rise" style="--d:2;padding:18px 20px"><div class="sh"><h2>Precisa da sua atenção <span class="pill">${items.length}</span></h2></div>${items.length?items.map(i=>`<div class="sx-ai"><span class="sx-ti">${ic(i.ic,18)}</span><span class="sx-m"><b>${i.t}</b><small>${i.s}</small></span><button class="btn sec sm" data-a="${i.a}" data-v="${i.v}">${i.l}</button></div>`).join(''):'<div class="mempty"><p>Tudo em dia.</p><span>Nada pedindo a sua atenção agora.</span></div>'}</section>
+  <div class="sx-col"><section class="card rise" style="--d:3;padding:18px 20px"><div class="sh"><h2>Aniversariantes da semana</h2><button class="lnk" data-a="rptGo" data-v="membros|aniv">Ver mês</button></div>${bd.length?bd.map(x=>`<button class="sx-bd" data-a="sxOpenM" data-v="${x.m.id}">${mav(x.m)}<span class="sx-m"><b>${esc(x.m.n)}</b><small>faz ${2026-+x.m.nasc.slice(0,4)} anos</small></span><span class="who">${x.n===0?'hoje':sxShort(x.d)}</span></button>`).join(''):'<p class="who" style="margin:8px 0 0">Ninguém nesta semana.</p>'}</section>
+  <section class="card rise" style="--d:4;padding:18px 20px"><div class="sh"><h2>Atalhos</h2></div><div class="sx-sc">${[['sec-atos','bucket','Atos'],['sec-docs','file','Documentos'],['sec-cargos','key','Cargos e mandatos'],['rp-secretaria','clipboard','Relatórios']].map(x=>`<button data-a="sxGo" data-v="${x[0]}">${ic(x[1],18)}<span>${x[2]}</span></button>`).join('')}</div></section></div></div>`;
+}
+Object.assign(A,{sxGo:v=>A.nav(v)});
+
+/* ---------- disciplina (Cuidado) ---------- */
+const SX_DISC_T={adm:['Admoestação','var(--st-sol)','var(--st-sol-bg)'],afa:['Afastamento temporário','var(--st-ace)','var(--st-ace-bg)'],des:['Desligamento','var(--st-rec)','var(--st-rec-bg)']};
+const SX_DISC=[
+ {id:'ds1',m:'Otávio Lins',t:'adm',d:'2026-07-15',rev:'2026-10-15',resp:'Pr. Marcos Souza',obs:'Conversa pastoral registrada. Acompanhar em 90 dias.',st:'vigente',h:[['2026-07-15','Registro criado']]},
+ {id:'ds2',m:'Juliana Prado',t:'afa',d:'2026-08-30',rev:'2026-09-20',resp:'Pr. Marcos Souza',obs:'Afastamento acordado com a liderança, com revisão no fim do prazo.',st:'vigente',h:[['2026-08-30','Registro criado']]},
+ {id:'ds3',m:'Clara Nunes',t:'adm',d:'2026-03-10',rev:'',resp:'Pr. Rafael Pereira',obs:'Orientação feita e aceita. Caso encerrado.',st:'encerrada',h:[['2026-03-10','Registro criado'],['2026-04-02','Encerrado']]}];
+{const m=sxMem('Juliana Prado');if(m&&!SX_SIT[m.id])SX_SIT[m.id]={s:'afastado',h:[{d:'2026-08-30',s:'afastado',from:'ativo',why:'Afastamento a pedido da liderança',dest:'',by:sxMe}]};}
+const sxRevDue=x=>x.st==='vigente'&&x.rev&&x.rev<SX_TODAY;
+function discPage(){
+ const f=S.sxDi,l=SX_DISC.filter(x=>f==='todos'||(f==='vigente'?x.st==='vigente':x.st!=='vigente')).sort((a,b)=>a.d<b.d?1:-1),vig=SX_DISC.filter(x=>x.st==='vigente');
+ return sxHead('Cuidado','Disciplina','Registro pastoral de admoestações, afastamentos e desligamentos. Acesso super restrito.',`<button class="btn pri" data-a="sxDiNew">${ic('plus',15,2.2)}Novo registro</button>`)
+ +`<div class="sx-lock rise" style="--d:1">${ic('lock',20,2)}<span><b>Área restrita</b> · só o papel Administrador e o Pastor com acesso a Disciplina. Cada consulta e cada alteração vai para a auditoria. Estes registros <b>não aparecem</b> em buscas, listas, exportações, no app nem em avisos, e nunca são mostrados ao próprio membro.</span></div>`
+ +sxKpis([['Em vigor',vig.length,'registros abertos'],['Revisão vencida',vig.filter(sxRevDue).length,'pedem uma conversa',vig.some(sxRevDue)?'var(--st-rec)':''],['Encerrados',SX_DISC.length-vig.length,'no histórico']])
+ +`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><div class="chips">${[['todos','Todos'],['vigente','Em vigor'],['encerrada','Encerrados']].map(c=>`<button class="chipf ${f===c[0]?'on':''}" data-a="sxDiF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
+  ${l.length?l.map(x=>{const m=sxMem(x.m);return `<button class="sx-r" data-a="sxDiOpen" data-v="${x.id}"><span class="sx-ti">${m?mav(m):sxAv(x.m)}</span><span class="sx-m"><b>${esc(x.m)}</b><small>${esc(SX_DISC_T[x.t][0])} · desde ${dBR(x.d)} · ${esc(x.resp)}</small></span><span class="sx-c">${x.rev?'Revisar até '+dBR(x.rev):'Sem revisão'}<small>${sxRevDue(x)?'<span style="color:var(--st-rec)">revisão vencida</span>':x.st==='vigente'?'em vigor':'encerrado'}</small></span><span class="sx-s">${sxPill(SX_DISC_T[x.t][0],SX_DISC_T[x.t][1],SX_DISC_T[x.t][2])}</span><span class="sx-ch">${ic('chevR',16)}</span></button>`;}).join(''):'<div class="mempty"><p>Nenhum registro.</p><span>Os registros aparecem aqui.</span></div>'}</section>`;
+}
+function sxDiView(id){
+ const x=SX_DISC.find(y=>y.id===id);sxLog('Consultou','Disciplina',x.m,SX_DISC_T[x.t][0]);
+ openDlg(dlgHead('Registro de disciplina',esc(x.m)+' · '+SX_DISC_T[x.t][0])+`<div class="sx-lock sm">${ic('lock',16,2)}<span>Consulta registrada na auditoria.</span></div>
+  <p class="sx-kv"><span>Desde</span><b>${dBR(x.d)}</b></p><p class="sx-kv"><span>Responsável</span><b>${esc(x.resp)}</b></p><p class="sx-kv"><span>Revisão</span><b>${x.rev?dBR(x.rev)+(sxRevDue(x)?' (vencida)':''):'—'}</b></p><p class="sx-kv"><span>Observação restrita</span><b>${esc(x.obs)}</b></p>
+  <h4 class="sx-h4">Histórico</h4><ol class="sx-hist">${x.h.slice().reverse().map(h=>`<li><span>${dBR(h[0])}</span>${esc(h[1])}</li>`).join('')}</ol>
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button>${x.st==='vigente'?`<button class="btn sec" data-a="sxDiRev" data-v="${x.id}">Registrar revisão</button><button class="btn pri" data-a="sxDiEnd" data-v="${x.id}">Encerrar registro</button>`:''}</div>`,'sc-dlg');
+}
+Object.assign(A,{
+ sxDiF:v=>{S.sxDi=v;render();},sxDiOpen:v=>sxDiView(v),
+ sxDiNew:()=>{const ms=sxInteg().filter(m=>!SX_BLOCK.includes(sxSitOf(m)));
+  sxDlg('Novo registro de disciplina','Acesso restrito. Registre só o necessário.',
+   sxF('Membro',sxSel('m',ms.map(m=>[m.id,m.n]),ms[0].id))+sxF('Tipo',sxSel('t',Object.keys(SX_DISC_T).map(k=>[k,SX_DISC_T[k][0]]),'adm','sxDt'))
+   +`<div class="fgrid" style="gap:14px">${sxF('Data',`<input type="date" name="d" value="${SX_TODAY}" max="${SX_TODAY}">`)}${sxF('Revisar até',`<input type="date" name="r" value="${D_PLUS(90)}">`,'Obrigatório em afastamento')}</div>`
+   +sxF('Responsável',sxSel('rp',['Pr. Marcos Souza','Pr. Rafael Pereira'],'Pr. Marcos Souza'))
+   +sxF('Observação restrita','<textarea name="o" rows="3" placeholder="Só o necessário. Só quem tem acesso a Disciplina vê."></textarea>')
+   +`<label class="chk3" id="sxSw"><input type="checkbox" name="sw" checked><span id="sxSt"></span></label><p class="hint" id="sxSh">No cadastro do membro aparece só a situação, com um texto genérico: o detalhe fica aqui.</p>`,sxOk('Registrar'));
+  const f=$('#sxF'),upd=()=>{const t=f.t.value;$('#sxSw').hidden=t==='adm';$('#sxSh').hidden=t==='adm';$('#sxSt').textContent=t==='des'?'Alterar a situação do membro para Desligado':'Alterar a situação do membro para Afastado';};f.t.onchange=upd;upd();
+  f.onsubmit=e=>{e.preventDefault();sxClr(f);const m=byId(f.m.value),t=f.t.value;
+   if(!f.d.value)return sxErr(f,'d','Informe a data');if(t==='afa'&&!f.r.value)return sxErr(f,'r','Informe a data de revisão');if(f.r.value&&f.r.value<f.d.value)return sxErr(f,'r','A revisão não pode ser antes do registro');
+   if(!f.o.value.trim())return sxErr(f,'o','Escreva a observação');
+   const x={id:'ds'+Date.now(),m:m.n,t,d:f.d.value,rev:f.r.value,resp:f.rp.value,obs:f.o.value.trim(),st:'vigente',h:[[f.d.value,'Registro criado']]};SX_DISC.unshift(x);
+   if(t!=='adm'&&f.sw.checked)sxSetSit(m,t==='des'?'desligado':'afastado',{d:f.d.value,why:t==='des'?'Desligamento pela liderança':'Afastamento a pedido da liderança'});
+   sxLog('Registrou','Disciplina',m.n,SX_DISC_T[t][0]);closeDlg();render();toast('Registro criado');};},
+ sxDiRev:v=>{const x=SX_DISC.find(y=>y.id===v);sxDlg('Registrar revisão',esc(x.m),sxF('Como foi a conversa','<input name="n" autocomplete="off" placeholder="Resumo curto">')+sxF('Próxima revisão (opcional)',`<input type="date" name="r" value="${D_PLUS(60)}">`),sxOk('Registrar revisão'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.n.value.trim())return sxErr(f,'n','Escreva o resumo');x.h.push([SX_TODAY,'Revisão: '+f.n.value.trim()]);x.rev=f.r.value;sxLog('Editou','Disciplina',x.m,'Revisão registrada');closeDlg();render();toast('Revisão registrada');};},
+ sxDiEnd:v=>{const x=SX_DISC.find(y=>y.id===v),m=sxMem(x.m),back=m&&sxSitOf(m)==='afastado'&&x.t==='afa';
+  sxDlg('Encerrar registro',esc(x.m)+' · '+SX_DISC_T[x.t][0],sxF('Motivo do encerramento','<input name="n" autocomplete="off" placeholder="Ex.: Restauração concluída">')+(back?'<label class="chk3"><input type="checkbox" name="bk" checked><span>Voltar o membro à situação Ativo</span></label>':''),sxOk('Encerrar'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.n.value.trim())return sxErr(f,'n','Informe o motivo');x.st='encerrada';x.rev='';x.h.push([SX_TODAY,'Encerrado: '+f.n.value.trim()]);if(back&&f.bk&&f.bk.checked)sxSetSit(m,'ativo',{why:'Retorno após revisão'});sxLog('Encerrou','Disciplina',x.m);closeDlg();render();toast('Registro encerrado');};}
+});
+function D_PLUS(n){const d=new Date(Date.parse(SX_TODAY)+n*864e5);return d.toISOString().slice(0,10);}
+
+/* ---------- informe de contribuições (Financeiro › Relatórios) ---------- */
+SX_DOC_T['Informe de contribuições']={ic:'wallet',fin:true,need:()=>'',txt:(m,o)=>`Informamos que ${m.n}, CPF ${o.cpf}, contribuiu com esta igreja, no ano-calendário de ${o.year}, o valor total de ${brl2(o.total)}, em ${o.qt} ${o.qt>1?'contribuições identificadas':'contribuição identificada'}, conforme os registros da tesouraria. Valores de doações anônimas não constam deste informe.`};
+{const _n=sxDocDlg;sxDocDlg=pre=>{_n(pre);const s=$('#sxT');if(s)[...s.options].forEach(o=>{if(SX_DOC_T[o.value].fin)o.remove();});};}
+const sxCpf=m=>'***.'+String(400+(m.n.length*37)%500)+'.***-'+String(10+(m.n.length*7)%80);
+function sxDonors(y){const by={};CAMPS.forEach(c=>c.donors.forEach(d=>{if(d[0]==='Anônimo'||!d[2].startsWith(y))return;const o=by[d[0]]||(by[d[0]]={n:d[0],v:0,qt:0});o.v+=d[1];o.qt++;}));
+ return Object.values(by).map(o=>{const m=MEMBERS.find(x=>x.n===o.n&&x.st==='integrado');return {...o,m,doc:m?SX_DOCS.find(d=>d.mid===m.id&&d.t==='Informe de contribuições'&&d.st==='valido'&&d.text.includes('ano-calendário de '+y)):null};}).sort((a,b)=>b.v-a.v);}
+function sxInforme(){
+ const y=S.sxIc,l=sxDonors(y),ok=l.filter(x=>x.m),todo=ok.filter(x=>!x.doc);
+ return `<section class="card sx-list rise" style="--d:3;margin-top:16px"><div class="sx-bar" style="padding-top:18px"><div><h2 class="sx-h2">Informe anual de contribuições</h2><p class="who" style="margin:4px 0 0">Total doado por pessoa no ano-calendário, para a declaração de imposto de renda. Só entram doadores identificados, com cadastro e CPF; doações anônimas ficam de fora.</p></div>
+   <div class="pact"><label class="fld sx-mes"><span class="selw"><select data-scs="ic">${['2026','2025'].map(a=>`<option ${y===a?'selected':''}>${a}</option>`).join('')}</select>${ic('updown',14)}</span></label><button class="btn pri" data-a="sxInfAll" ${todo.length?'':'disabled'}>${ic('file',15)}Gerar todos${todo.length?' ('+todo.length+')':''}</button></div></div>
+  ${l.length?`<div class="sx-t inf thead"><span>Doador</span><span>Contribuições</span><span>Total no ano</span><span>CPF</span><span></span></div>${l.map(x=>`<div class="sx-t inf"><span class="sx-n">${x.m?mav(x.m):sxAv(x.n)}<b>${esc(x.n)}</b></span><span>${x.qt}</span><span><b>${brl2(x.v)}</b></span><span>${x.m?sxPill('Informado','var(--st-int)','var(--st-int-bg)'):sxPill('Sem cadastro','var(--st-sol)','var(--st-sol-bg)')}</span><span>${!x.m?'<small class="who">Cadastre a pessoa para emitir</small>':x.doc?`<button class="btn sec sm" data-a="sxDocOpen" data-v="${x.doc.id}">Ver informe</button>`:`<button class="btn pri sm" data-a="sxInfOne" data-v="${esc(x.n)}">Gerar informe</button>`}</span></div>`).join('')}`:`<div class="mempty"><p>Sem doações identificadas em ${y}.</p><span>${y==='2025'?'Os dados de exemplo estão em 2026.':'Quando houver doações com cadastro, elas aparecem aqui.'}</span></div>`}</section>`;
+}
+function sxInfEmit(x,y){const sig=SX_MAND.find(z=>sxMandSt(z)==='vigente'&&sxCargo(z.cg).n==='Tesoureiro(a)');
+ const d=sxNewDoc('Informe de contribuições',x.m,{total:x.v,qt:x.qt,year:y,cpf:sxCpf(x.m),sig:sig?sig.pessoa+' — Tesoureiro(a)':'Tesouraria',by:sxMe});
+ sxLog('Emitiu','Documento','Informe de contribuições '+y+' nº '+d.num,x.n);return d;}
+Object.assign(A,{
+ sxInfOne:v=>{const x=sxDonors(S.sxIc).find(o=>o.n===v);if(!x||!x.m)return;const d=sxInfEmit(x,S.sxIc);render();toast('Informe nº '+d.num+' gerado');setTimeout(()=>sxDocView(d.id),250);},
+ sxInfAll:()=>{const l=sxDonors(S.sxIc).filter(x=>x.m&&!x.doc);l.forEach(x=>sxInfEmit(x,S.sxIc));render();toast(l.length+' informes gerados');}
+});
+{const _fr=fRel;fRel=()=>_fr().replace('<h1>Relatórios</h1>','<h1>Análises</h1>').replace('DRE por categoria e fluxo de caixa','DRE, fluxo de caixa e informe de contribuições')+sxInforme();}
+
+/* ---------- ligações e eventos ---------- */
+{const _ph=placeholder;placeholder=id=>{const f={'sec-vis':secVis,'sec-atos':secAtos,'sec-docs':secDocs,'sec-cargos':secCargos,'sec-ana':secAna,disciplina:discPage}[id];return f?f():_ph(id);};}
+document.addEventListener('input',e=>{const t=e.target,k=t&&t.dataset&&t.dataset.scq;if(!k)return;
+ if(k==='doc'){S.sxDocQ=t.value;$('#sxDl').innerHTML=sxDocList();}
+ else if(k==='arq'){S.sxArqQ=t.value;$('#sxAl').innerHTML=sxArqList();}
+ else if(k==='pick'){const q=norm(t.value);$$('#sxPick label').forEach(l=>{l.hidden=!!q&&!l.dataset.n.includes(q);});}});
+document.addEventListener('change',e=>{const t=e.target,k=t&&t.dataset&&t.dataset.scs;if(!k)return;if(k==='mes'){S.sxMes=t.value;render();}else if(k==='ic'){S.sxIc=t.value;render();}});
+
+[['Marina Costa','1992-09-30'],['Felipe Andrade','1988-10-01'],['Juliana Prado','1995-10-03'],['Otávio Lins','1990-10-04']].forEach(([n,d])=>{const m=sxMem(n);if(m)m.nasc=d;});
+
+
+/* ================= Relatórios (listas por domínio) ================= */
+/* Menu Relatórios (Gestão) com um submenu por domínio. Cada submenu abre a mesma página: abas com os relatórios disponíveis,
+   chips de situação do domínio, busca e filtros, tabela, escolha de colunas e exportação em CSV e PDF só do que está filtrado.
+   Os botões "Exportar" dos módulos viraram o atalho "Relatórios", que abre o relatório do domínio. Análises (DRE, perfil,
+   entradas e saídas) são outra coisa e ficam fora daqui. Exportar exige Editar ou Administrar no módulo (regra da documentação). */
+const RP={},RP_ORDER=[];
+function rpDef(key,l,lede,tabs){RP[key]={key,l,lede,tabs};RP_ORDER.push(key);}
+const rpYes=b=>b?'Sim':'Não';
+const rpD=d=>d?dBR(String(d).slice(0,10)):'—';
+const rpCh=(k,l,c,b)=>[k,l,c||'var(--ink-muted)',b||'var(--surface-2)'];
+const rpOk=['var(--st-int)','var(--st-int-bg)'],rpWarn=['var(--st-sol)','var(--st-sol-bg)'],rpBad=['var(--st-rec)','var(--st-rec-bg)'],rpOff=['var(--ink-muted)','var(--surface-2)'],rpInfo=['var(--st-ace)','var(--st-ace-bg)'];
+const rpC=(k,l,t)=>rpCh(k,l,t[0],t[1]);
+Object.assign(S,{rpTab:{},rpSt:{}});
+const rpState=(d,t)=>S.rpSt[d+'/'+t]||(S.rpSt[d+'/'+t]={chip:'todos',q:'',f:{},hide:null,sort:null});
+const rpTabOf=d=>RP[d].tabs.find(t=>t.k===S.rpTab[d])||RP[d].tabs[0];
+const rpHidden=(T,st)=>st.hide||T.cols.filter(c=>c.off).map(c=>c.k);
+const rpCols=(D,T)=>{const h=rpHidden(T,rpState(D.key,T.k));return T.cols.filter(c=>!h.includes(c.k));};
+const rpFv=(st,f)=>st.f[f.k]!==undefined?st.f[f.k]:(f.def?f.def():'todos');
+/* linhas depois dos filtros e da busca (sem o chip), usadas para contar os chips */
+function rpBase(D,T){
+ const st=rpState(D.key,T.k);let rows=T.rows();
+ (T.fl||[]).forEach(f=>{const v=rpFv(st,f);if(v!==''&&v!=='todos')rows=rows.filter(r=>f.ok(r,v));});
+ const q=norm(st.q||'');if(q){const cs=rpCols(D,T);rows=rows.filter(r=>norm(cs.map(c=>c.v(r)).join(' ')).includes(q));}
+ return rows;
+}
+function rpFinal(D,T){
+ const st=rpState(D.key,T.k);let rows=rpBase(D,T);
+ if(T.chip&&st.chip!=='todos')rows=rows.filter(r=>T.chip.by(r)===st.chip);
+ const so=st.sort||T.sort;
+ if(so){const c=T.cols.find(x=>x.k===so.k);if(c){const key=r=>c.raw?c.raw(r):c.v(r);rows=rows.slice().sort((a,b)=>{const x=key(a),y=key(b);return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y),'pt-BR',{numeric:true}))*so.d;});}}
+ return rows;
+}
+const rpChipItems=(T,base)=>!T.chip?[]:typeof T.chip.items==='function'?T.chip.items(base):T.chip.items;
+function rpFilterText(D,T){
+ const st=rpState(D.key,T.k),p=[];
+ if(T.chip&&st.chip!=='todos'){const it=rpChipItems(T,T.rows()).find(x=>x[0]===st.chip);p.push((T.chip.l||'Situação')+': '+(it?it[1]:st.chip));}
+ (T.fl||[]).forEach(f=>{const v=rpFv(st,f);if(v!==''&&v!=='todos'){const o=f.opts().find(x=>String(x[0])===String(v));p.push(f.l+': '+(o?o[1]:v));}});
+ if(st.q)p.push('Busca: “'+st.q+'”');
+ return p.length?p.join(' · '):'Nenhum filtro (todos os registros)';
+}
+function rpBody(D,T){
+ const rows=rpFinal(D,T),cols=rpCols(D,T),st=rpState(D.key,T.k),total=T.rows().length,so=st.sort||T.sort,show=rows.slice(0,200);
+ const grid='grid-template-columns:'+cols.map(c=>c.n?'minmax(92px,.55fr)':'minmax(130px,1fr)').join(' ')+';min-width:'+cols.length*132+'px';
+ return `<p class="rp-sum"><b>${rows.length}</b> de ${total} ${total===1?'registro':'registros'} · ${cols.length} ${cols.length===1?'coluna':'colunas'} <span>${esc(rpFilterText(D,T))}</span></p>
+  ${rows.length?`<div class="rp-tw"><div class="rp-r head" style="${grid}">${cols.map(c=>`<button class="rp-th ${so&&so.k===c.k?'on':''} ${c.n?'num':''}" data-a="rptSort" data-v="${c.k}">${esc(c.l)}${so&&so.k===c.k?`<span class="sd ${so.d<0?'dn':''}">${ic('chevR',11,2.4)}</span>`:''}${c.s?`<i class="rp-lk" title="Dado pessoal">${ic('lock',10,2.4)}</i>`:''}</button>`).join('')}</div>
+   ${show.map(r=>`<div class="rp-r" style="${grid}">${cols.map(c=>`<span class="${c.n?'num':''}" title="${esc(String(c.v(r)))}">${c.pill?c.pill(r):esc(String(c.v(r)))}</span>`).join('')}</div>`).join('')}</div>
+   ${rows.length>200?`<p class="rp-more">Mostrando 200 de ${rows.length}. O arquivo exportado leva todos os ${rows.length}.</p>`:''}`
+  :`<div class="mempty"><p>Nada por aqui.</p><span>Nenhum registro com esses filtros. <button class="lnk" data-a="rptClear">Limpar filtros</button></span></div>`}`;
+}
+function rpPage(key){
+ const D=RP[key],T=rpTabOf(key),st=rpState(key,T.k),base=rpBase(D,T);
+ const items=rpChipItems(T,T.rows());
+ return sxHead('Relatórios',D.l,D.lede,`<button class="btn sec" data-a="rptCols">${ic('sliders',15)}Colunas</button><button class="btn sec" data-a="rptPdf">${ic('file',15)}Gerar PDF</button><button class="btn pri" data-a="rptCsv">${ic('download',15)}Exportar CSV</button>`)
+ +(D.tabs.length>1?sxSeg('rptTab',D.tabs.map(t=>[t.k,t.l]),T.k):'')
+ +`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('shield',17,2)}<span><b>Escopo: toda a igreja.</b> <small>Quem tem acesso só a uma Casa ou a um ministério vê, filtra e exporta só o que é dele. ${esc(T.note||'Exportar PDF e CSV exige Editar ou Administrar neste módulo.')}</small></span></div>`
+ +`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><label class="sbox">${ic('search',16)}<input data-rpq placeholder="Buscar nos campos mostrados" value="${esc(st.q||'')}" autocomplete="off"></label>
+   ${(T.fl||[]).map(f=>`<label class="fld sx-mes"><span class="selw"><select data-rps="${f.k}" aria-label="${esc(f.l)}"><option value="todos">${esc(f.l)}: todos</option>${f.opts().map(o=>`<option value="${esc(o[0])}" ${String(rpFv(st,f))===String(o[0])?'selected':''}>${esc(o[1])}</option>`).join('')}</select>${ic('updown',14)}</span></label>`).join('')}</div>
+  ${T.chip?`<div class="sx-bar" style="padding-top:0"><div class="chips">${[['todos','Todos',null,null],...items].map(it=>`<button class="chipf ${st.chip===it[0]?'on':''}" data-a="rptChip" data-v="${it[0]}">${it[0]!=='todos'?`<i style="background:${it[2]}"></i>`:''}${esc(it[1])}<small>${it[0]==='todos'?base.length:base.filter(r=>T.chip.by(r)===it[0]).length}</small></button>`).join('')}</div></div>`:''}
+  <div id="rpBody">${rpBody(D,T)}</div></section>`;
+}
+/* exportações: CSV de verdade (baixa no navegador) e PDF em pré-visualização; os dois levam só o que está filtrado e as colunas escolhidas */
+const rpAct=()=>{const k=S.active.slice(3),D=RP[k];return {D,T:rpTabOf(k)};};
+const rpNum=n=>String(n).replace('.',',');
+function rpLogExp(D,T,kind,n,cols){const sens=cols.some(c=>c.s);sxLog('Exportou','Relatório',D.l+' · '+T.l,kind+' · '+n+' linhas, '+cols.length+' colunas'+(sens?' (com dados pessoais)':''));}
+function rpCsv(){
+ const {D,T}=rpAct(),rows=rpFinal(D,T),cols=rpCols(D,T);
+ const q=v=>{const s=String(v);return /[;"\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+ const lines=[cols.map(c=>q(c.l)).join(';'),...rows.map(r=>cols.map(c=>q(c.raw&&typeof c.raw(r)==='number'?rpNum(c.raw(r)):c.v(r))).join(';'))];
+ const name=`relatorio-${D.key}-${T.k}-${SX_TODAY}.csv`;
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},600);}catch(e){}
+ rpLogExp(D,T,'CSV',rows.length,cols);toast(`CSV gerado: ${rows.length} linhas e ${cols.length} colunas (${name})`);
+}
+function rpPdf(){
+ const {D,T}=rpAct(),rows=rpFinal(D,T),cols=rpCols(D,T),pages=Math.max(1,Math.ceil(rows.length/28)),show=rows.slice(0,14);
+ const ch=CHURCHES[S.church];
+ openDlg(dlgHead('Pré-visualização do PDF',`${esc(D.l)} · ${esc(T.l)} · ${rows.length} ${rows.length===1?'linha':'linhas'}`)
+  +`<div class="sx-paper rp-paper"><div class="rp-ph"><span>${sunMark(16)}<b>${esc(ch.n)}</b></span><small>Gerado em ${dBR(SX_TODAY)} por ${esc(sxMe)}</small></div>
+   <h2>${esc(D.l.toUpperCase())} · ${esc(T.l.toUpperCase())}</h2><p class="rp-fl">${esc(rpFilterText(D,T))}</p>
+   <div class="rp-pt"><div class="rp-pr h" style="grid-template-columns:repeat(${cols.length},1fr)">${cols.map(c=>`<b>${esc(c.l)}</b>`).join('')}</div>${show.map(r=>`<div class="rp-pr" style="grid-template-columns:repeat(${cols.length},1fr)">${cols.map(c=>`<span>${esc(String(c.v(r)))}</span>`).join('')}</div>`).join('')}</div>
+   ${rows.length>show.length?`<p class="rp-pm">… e mais ${rows.length-show.length} linhas nas ${pages} páginas do arquivo.</p>`:''}
+   <div class="rp-pf"><span>${esc(ch.n)} · relatório de lista</span><span>Página 1 de ${pages}</span></div></div>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="rptPdfGo">${ic('download',15)}Baixar PDF</button></div>`,'sc-dlg sc-wide');
+}
+function rpColsDlg(){
+ const {D,T}=rpAct(),h=rpHidden(T,rpState(D.key,T.k));
+ sxDlg('Colunas do relatório','Valem para a tela, o CSV e o PDF.',
+  `<div class="rp-cl">${T.cols.map(c=>`<label class="chk3"><input type="checkbox" name="c" value="${c.k}" ${h.includes(c.k)?'':'checked'}><span>${esc(c.l)}${c.s?` <em class="rp-sens">${ic('lock',11,2.2)}dado pessoal</em>`:''}</span></label>`).join('')}</div>
+   <p class="hint">Dados pessoais, como telefone, e-mail, endereço e nascimento, vêm desmarcados. Marque só o que o relatório precisa mostrar.</p>`,
+  `<button type="button" class="btn sec" id="rpColsReset">Restaurar padrão</button>${sxOk('Aplicar')}`);
+ const f=$('#sxF');
+ $('#rpColsReset').onclick=()=>{rpState(D.key,T.k).hide=null;closeDlg();render();};
+ f.onsubmit=e=>{e.preventDefault();const on=[...f.querySelectorAll('input[name=c]:checked')].map(x=>x.value);if(!on.length){toast('Escolha ao menos uma coluna');return;}rpState(D.key,T.k).hide=T.cols.map(c=>c.k).filter(k=>!on.includes(k));closeDlg();render();};
+}
+function rpBtn(dom,tab,label){return `<button class="btn sec" data-a="rptGo" data-v="${dom}|${tab||''}">${ic('clipboard',15)}${label||'Relatórios'}</button>`;}
+Object.assign(A,{
+ rptGo:v=>{const [d,t]=v.split('|');if(!RP[d])return;if(t&&RP[d].tabs.some(x=>x.k===t))S.rpTab[d]=t;A.nav('rp-'+d);},
+ rptTab:v=>{const k=S.active.slice(3);S.rpTab[k]=v;render();},
+ rptChip:v=>{const {D,T}=rpAct();rpState(D.key,T.k).chip=v;render();},
+ rptSort:v=>{const {D,T}=rpAct(),st=rpState(D.key,T.k),c=st.sort||T.sort;st.sort=c&&c.k===v?{k:v,d:-c.d}:{k:v,d:1};render();},
+ rptClear:()=>{const {D,T}=rpAct(),st=rpState(D.key,T.k);st.chip='todos';st.q='';st.f={};(T.fl||[]).forEach(f=>{st.f[f.k]='todos';});render();},
+ rptCols:()=>rpColsDlg(),rptCsv:()=>rpCsv(),rptPdf:()=>rpPdf(),
+ rptPdfGo:()=>{const {D,T}=rpAct(),rows=rpFinal(D,T),cols=rpCols(D,T);rpLogExp(D,T,'PDF',rows.length,cols);closeDlg();toast(`PDF gerado: ${rows.length} linhas (simulado)`);}
+});
+ACOL.Exportou='var(--st-sol)';ACOL.Enviou='var(--st-int)';
+document.addEventListener('input',e=>{const t=e.target;if(!t||!t.hasAttribute||!t.hasAttribute('data-rpq')||!S.active||S.active.slice(0,3)!=='rp-')return;const {D,T}=rpAct();rpState(D.key,T.k).q=t.value;$('#rpBody').innerHTML=rpBody(D,T);});
+document.addEventListener('change',e=>{const t=e.target;if(!t||!t.dataset||t.dataset.rps===undefined||!S.active||S.active.slice(0,3)!=='rp-')return;const {D,T}=rpAct();rpState(D.key,T.k).f[t.dataset.rps]=t.value;render();});
+
+/* ---------- definições dos relatórios, por domínio ---------- */
+const rpCol=(k,l,v,o)=>Object.assign({k,l,v},o||{});
+const rpMonths=()=>MONTHS.map((n,i)=>[String(i+1),n[0].toUpperCase()+n.slice(1)]);
+const rpUniq=(l)=>[...new Set(l.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR')).map(x=>[x,x]);
+const rpAddr=a=>a?[a.rua,a.num,a.bairro,a.cid&&a.uf?a.cid+'/'+a.uf:''].filter(Boolean).join(', '):'—';
+const rpDays=d=>d?-inDays(String(d).slice(0,10)):null;
+const rpPres=c=>{const l=c.meets.slice(0,4);if(!l.length||!c.ppl.length)return 0;const t=l.reduce((n,m)=>n+c.ppl.filter(p=>m.pres[p.id]).length,0);return Math.round(t/(l.length*c.ppl.length)*100);};
+
+rpDef('membros','Membros','Lista de membros com situação, integração e ministérios. Filtre e gere PDF ou CSV só do que você precisa.',[
+ {k:'membros',l:'Membros',rows:()=>MEMBERS.slice(),
+  chip:{l:'Situação',by:r=>sxSitOf(r)||'nao',items:[...Object.keys(SX_SITS).map(k=>rpCh(k,SX_SITS[k][0],SX_SITS[k][1])),rpCh('nao','Não integrados','var(--st-ace)')]},
+  fl:[{k:'min',l:'Ministério',opts:()=>MIN_ALL.map(m=>[m,m]),ok:(r,v)=>r.min.includes(v)},{k:'bap',l:'Batismo',opts:()=>[['s','Batizados'],['n','Não batizados']],ok:(r,v)=>v==='s'?r.bap:!r.bap},{k:'int',l:'Integração',opts:()=>[...new Set(MEMBERS.map(m=>m.int))].sort().reverse().map(k=>[k,monthLabel(k)]),ok:(r,v)=>r.int===v}],
+  cols:[rpCol('n','Nome',r=>r.n),rpCol('sit','Situação',r=>sxSitOf(r)?SX_SITS[sxSitOf(r)][0]:'Em integração'),rpCol('st','Integração',r=>ST[r.st].l),rpCol('int','Integrada em',r=>monthLabel(r.int)),rpCol('min','Ministérios',r=>r.min.join(', ')||'—'),rpCol('bap','Batizado',r=>rpYes(r.bap)),rpCol('tit','Titular',r=>rpYes(r.tit),{off:true}),rpCol('e','E-mail',r=>r.e||'—',{s:1,off:true}),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true}),rpCol('nasc','Nascimento',r=>rpD(r.nasc),{s:1,off:true})]},
+ {k:'aniv',l:'Aniversariantes',rows:()=>MEMBERS.filter(m=>m.nasc&&['ativo','afastado'].includes(sxSitOf(m))),sort:{k:'dia',d:1},
+  fl:[{k:'mes',l:'Mês',def:()=>'9',opts:rpMonths,ok:(r,v)=>+r.nasc.slice(5,7)===+v}],
+  cols:[rpCol('n','Nome',r=>r.n),rpCol('dia','Dia',r=>r.nasc.slice(8)+'/'+r.nasc.slice(5,7),{raw:r=>+r.nasc.slice(5,7)*100+ +r.nasc.slice(8)}),rpCol('idade','Faz',r=>(2026-+r.nasc.slice(0,4))+' anos',{n:1,raw:r=>2026-+r.nasc.slice(0,4)}),rpCol('min','Ministérios',r=>r.min.join(', ')||'—'),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true})]},
+ {k:'familia',l:'Por família',rows:()=>MEMBERS.filter(m=>m.tit&&m.st==='integrado'),
+  cols:[rpCol('n','Titular',r=>r.n),rpCol('fam','Familiares',r=>r.fam.map(f=>(byId(f[0])?byId(f[0]).n:'—')+' ('+f[1]+')').join('; ')||'—'),rpCol('q','Pessoas',r=>1+r.fam.length,{n:1}),rpCol('addr','Endereço',r=>rpAddr(r.addr),{s:1,off:true}),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true})]}
+]);
+
+rpDef('integracao','Integração','Pessoas em integração e as turmas, com a etapa de cada uma.',[
+ {k:'pessoas',l:'Pessoas',rows:()=>INTEGS.flatMap(i=>i.ppl.map(p=>Object.assign({turma:i.n},p))),
+  chip:{l:'Situação',by:r=>r.st,items:['pendente','aceito','andamento','integrado'].map(k=>rpCh(k,IST[k][0],IST[k][1]))},
+  fl:[{k:'turma',l:'Integração',opts:()=>INTEGS.map(i=>[i.n,i.n]),ok:(r,v)=>r.turma===v}],
+  cols:[rpCol('n','Nome',r=>r.n),rpCol('turma','Integração',r=>r.turma),rpCol('st','Situação',r=>IST[r.st][0]),rpCol('step','Etapa',r=>r.step+' de 5',{raw:r=>r.step}),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true})]},
+ {k:'turmas',l:'Integrações',rows:()=>INTEGS.slice(),
+  cols:[rpCol('n','Integração',r=>r.n),rpCol('date','Data',r=>rpD(r.date)),rpCol('time','Horário',r=>r.time||'—'),rpCol('q','Pessoas',r=>r.ppl.length,{n:1}),rpCol('ok','Integradas',r=>r.ppl.filter(p=>p.st==='integrado').length,{n:1}),rpCol('and','Em etapas',r=>r.ppl.filter(p=>p.st==='andamento').length,{n:1}),rpCol('lim','Limite',r=>r.limit||'—',{n:1}),rpCol('resp','Responsável',r=>{const m=byId(r.resp);return m?m.n:'—';}),rpCol('cur','Atual',r=>rpYes(r.current))]}
+]);
+
+rpDef('discipulado','Discipulado','Quem discipula quem, o ritmo de contato e o último encontro.',[
+ {k:'pares',l:'Discípulos e discipuladores',rows:()=>DISC.filter(d=>d.parent),
+  chip:{l:'Situação',by:r=>dStatus(r),items:['emdia','atrasado','pausado'].map(k=>rpCh(k,DST[k][0],DST[k][1]))},
+  fl:[{k:'par',l:'Discipulador',opts:()=>rpUniq(DISC.filter(d=>d.parent).map(d=>(DISC.find(x=>x.id===d.parent)||{}).n)),ok:(r,v)=>(DISC.find(x=>x.id===r.parent)||{}).n===v}],
+  cols:[rpCol('n','Discípulo',r=>r.n.replace('Pr. ','')),rpCol('par','Discipulador',r=>(DISC.find(x=>x.id===r.parent)||{n:'—'}).n),rpCol('role','Papel',r=>r.role),rpCol('stage','Etapa',r=>r.stage?TRILHA[r.stage-1]:'—'),rpCol('rhy','Ritmo',r=>RHY[r.rhythm]||'—'),rpCol('last','Último contato',r=>dLbl(r.last),{raw:r=>r.last}),rpCol('enc','Encontros',r=>r.meets.length,{n:1}),rpCol('st','Situação',r=>DST[dStatus(r)][0])]}
+]);
+
+rpDef('acompanhamento','Acompanhamento','Casos de acompanhamento pastoral: quem cuida, desde quando e o último contato.',[
+ {k:'casos',l:'Casos',rows:()=>CASES.slice(),note:'Descrição e anotações do caso nunca entram no relatório.',
+  chip:{l:'Situação',by:r=>r.st,items:['urgente','acompanhando','resolvido'].map(k=>rpCh(k,CST[k][0],CST[k][1]))},
+  fl:[{k:'resp',l:'Responsável',opts:()=>rpUniq(CASES.map(c=>c.resp)),ok:(r,v)=>r.resp===v},{k:'tipo',l:'Tipo',opts:()=>rpUniq(CASES.map(c=>c.type)),ok:(r,v)=>r.type===v}],
+  cols:[rpCol('n','Pessoa',r=>r.n),rpCol('type','Tipo',r=>r.type),rpCol('st','Situação',r=>CST[r.st][0]),rpCol('resp','Responsável',r=>r.resp),rpCol('op','Aberto em',r=>rpD(r.opened),{raw:r=>r.opened}),rpCol('last','Último contato',r=>rpD(r.meets[0]&&r.meets[0].d),{raw:r=>r.meets[0]?r.meets[0].d:''}),rpCol('q','Encontros',r=>r.meets.length,{n:1}),rpCol('rs','Restrito',r=>rpYes(r.restr))]}
+]);
+
+rpDef('oracao','Pedidos de oração','Pedidos de oração e quantas pessoas estão intercedendo. O texto do pedido não entra no relatório.',[
+ {k:'pedidos',l:'Pedidos',rows:()=>PRAYERS.slice(),note:'O texto do pedido nunca entra no relatório.',
+  chip:{l:'Situação',by:r=>r.st,items:rows=>[...new Set(rows.map(r=>r.st))].map(k=>rpCh(k,k==='ativo'?'Em oração':k==='respondido'?'Respondido':k[0].toUpperCase()+k.slice(1),k==='respondido'?'var(--st-int)':'var(--st-sol)'))},
+  cols:[rpCol('n','Solicitante',r=>r.priv?'Pedido privado':r.n),rpCol('when','Há',r=>r.when===0?'hoje':r.when+' dias',{raw:r=>r.when}),rpCol('cnt','Intercessores',r=>r.count,{n:1}),rpCol('st','Situação',r=>r.st==='ativo'?'Em oração':r.st==='respondido'?'Respondido':r.st),rpCol('priv','Privado',r=>rpYes(r.priv))]}
+]);
+
+rpDef('casas','Casas de Apascentamento','Casas, participantes, presença nos últimos encontros e redes de célula.',[
+ {k:'casas',l:'Casas',rows:()=>CASAS.slice(),
+  chip:{l:'Encontros',by:r=>(rpDays(r.meets[0]&&r.meets[0].d)||0)>21?'atrasada':'emdia',items:[rpC('emdia','Em dia (até 21 dias)',rpOk),rpC('atrasada','Sem encontro há mais de 21 dias',rpWarn)]},
+  fl:[{k:'rede',l:'Rede',opts:()=>REDES.map(r=>[r.n,r.n]),ok:(r,v)=>{const x=casaRede(r.id);return x&&x.n===v;}}],
+  cols:[rpCol('n','Casa',r=>r.n),rpCol('leader','Líder',r=>r.leader),rpCol('host','Anfitrião',r=>r.host),rpCol('q','Participantes',r=>r.ppl.length,{n:1}),rpCol('enc','Encontros',r=>r.meets.length,{n:1}),rpCol('last','Último encontro',r=>rpD(r.meets[0]&&r.meets[0].d),{raw:r=>r.meets[0]?r.meets[0].d:''}),rpCol('pr','Presença média',r=>rpPres(r)+'%',{n:1,raw:r=>rpPres(r)}),rpCol('rede','Rede',r=>{const x=casaRede(r.id);return x?x.n:'—';}),rpCol('addr','Endereço',r=>r.addr||'—',{s:1,off:true}),rpCol('ph','Telefone',r=>r.phone||'—',{s:1,off:true})]},
+ {k:'participantes',l:'Participantes',rows:()=>CASAS.flatMap(c=>c.ppl.map(p=>Object.assign({casa:c.n,c},p))),
+  chip:{l:'Função',by:r=>r.role,items:['Líder','Anfitrião','Participante'].map(k=>rpCh(k,k))},
+  fl:[{k:'casa',l:'Casa',opts:()=>CASAS.map(c=>[c.n,c.n]),ok:(r,v)=>r.casa===v}],
+  cols:[rpCol('n','Nome',r=>r.n),rpCol('casa','Casa',r=>r.casa),rpCol('role','Função',r=>r.role),rpCol('since','Desde',r=>r.since||'—'),rpCol('pr','Presença (8 encontros)',r=>{const l=r.c.meets;return l.length?Math.round(l.filter(m=>m.pres[r.id]).length/l.length*100)+'%':'—';},{n:1,raw:r=>{const l=r.c.meets;return l.length?Math.round(l.filter(m=>m.pres[r.id]).length/l.length*100):0;}})]},
+ {k:'presenca',l:'Últimos encontros',rows:()=>CASAS.flatMap(c=>c.meets.slice(0,4).map(m=>({casa:c.n,m,c}))).sort((a,b)=>a.m.d<b.m.d?1:-1),
+  fl:[{k:'casa',l:'Casa',opts:()=>CASAS.map(c=>[c.n,c.n]),ok:(r,v)=>r.casa===v}],
+  cols:[rpCol('d','Data',r=>rpD(r.m.d),{raw:r=>r.m.d}),rpCol('casa','Casa',r=>r.casa),rpCol('desc','Assunto',r=>r.m.desc||'—'),rpCol('pres','Presentes',r=>r.c.ppl.filter(p=>r.m.pres[p.id]).length+' de '+r.c.ppl.length),rpCol('pc','Presença',r=>Math.round(r.c.ppl.filter(p=>r.m.pres[p.id]).length/Math.max(1,r.c.ppl.length)*100)+'%',{n:1,raw:r=>Math.round(r.c.ppl.filter(p=>r.m.pres[p.id]).length/Math.max(1,r.c.ppl.length)*100)})]},
+ {k:'redes',l:'Redes',rows:()=>REDES.slice(),
+  cols:[rpCol('n','Rede',r=>r.n),rpCol('sup','Supervisor',r=>r.sup),rpCol('q','Casas',r=>r.casas.length,{n:1}),rpCol('p','Participantes',r=>r.casas.reduce((n,h)=>n+(hById(h)?hById(h).ppl.length:0),0),{n:1}),rpCol('cs','Casas da rede',r=>r.casas.map(h=>hById(h)?hById(h).n:'').filter(Boolean).join('; '))]}
+]);
+
+rpDef('ministerios','Ministérios','Ministérios, líderes, times e membros por ministério.',[
+ {k:'lista',l:'Ministérios',rows:()=>MINIS.slice(),
+  chip:{l:'Situação',by:r=>r.active?'on':'off',items:[rpC('on','Ativos',rpOk),rpC('off','Inativos',rpOff)]},
+  cols:[rpCol('n','Ministério',r=>r.n),rpCol('lead','Líder',r=>r.lead),rpCol('mem','Membros',r=>r.mem,{n:1}),rpCol('teams','Times',r=>r.teamsN,{n:1}),rpCol('st','Situação',r=>r.active?'Ativo':'Inativo'),rpCol('ph','Telefone',r=>r.phone,{off:true})]},
+ {k:'membros',l:'Membros por ministério',rows:()=>MEMBERS.flatMap(m=>m.min.map(x=>({m,min:x}))),
+  fl:[{k:'min',l:'Ministério',opts:()=>MIN_ALL.map(x=>[x,x]),ok:(r,v)=>r.min===v}],
+  cols:[rpCol('min','Ministério',r=>r.min),rpCol('n','Membro',r=>r.m.n),rpCol('role','Função',r=>r.m.role),rpCol('since','Desde',r=>r.m.since),rpCol('ph','Telefone',r=>r.m.ph||'—',{s:1,off:true})]}
+]);
+
+rpDef('kids','Kids','Salas do Ministério Infantil, ocupação e equipes.',[
+ {k:'salas',l:'Salas',rows:()=>SALAS.slice(),
+  chip:{l:'Situação',by:r=>r.active?'on':'off',items:[rpC('on','Ativas',rpOk),rpC('off','Inativas',rpOff)]},
+  cols:[rpCol('n','Sala',r=>r.n),rpCol('t','Turma',r=>(tById(r.turma)||{n:'—'}).n),rpCol('age','Faixa etária',r=>{const t=tById(r.turma);return t?t.min+' a '+t.max+' anos':'—';}),rpCol('cap','Capacidade',r=>r.cap,{n:1}),rpCol('pres','Presentes hoje',r=>r.pres,{n:1}),rpCol('oc','Ocupação',r=>Math.round(r.pres/Math.max(1,r.cap)*100)+'%',{n:1,raw:r=>Math.round(r.pres/Math.max(1,r.cap)*100)}),rpCol('mon','Monitor',r=>r.mon||'—'),rpCol('team','Equipe',r=>(kById(r.team)||{n:'—'}).n)]}
+]);
+
+const rpEvRows=k=>EVTS.filter(e=>k==='culto'?e.kind==='culto':e.kind!=='culto');
+const rpEvCols=()=>[rpCol('t','Título',r=>r.t),rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('time','Horário',r=>r.time||'—'),rpCol('place','Local',r=>r.place||'—'),rpCol('type','Tipo',r=>r.type||'—'),rpCol('min','Ministério',r=>r.min||'—'),rpCol('st','Situação',r=>r.st||'—'),rpCol('regs','Inscritos',r=>r.regs.length,{n:1}),rpCol('cap','Vagas',r=>r.cap||'—',{n:1}),rpCol('price','Valor',r=>r.paid?brl2(r.price):'Gratuito',{n:1,raw:r=>r.paid?r.price:0})];
+rpDef('agenda','Agenda e eventos','Cultos, eventos, inscrições e o financeiro de cada evento.',[
+ {k:'cultos',l:'Cultos',rows:()=>rpEvRows('culto'),chip:{l:'Situação',by:r=>r.st,items:rows=>rpUniq(rows.map(r=>r.st)).map(x=>rpCh(x[0],x[0][0].toUpperCase()+x[0].slice(1)))},cols:rpEvCols()},
+ {k:'eventos',l:'Eventos',rows:()=>rpEvRows('evento'),chip:{l:'Situação',by:r=>r.st,items:rows=>rpUniq(rows.map(r=>r.st)).map(x=>rpCh(x[0],x[0][0].toUpperCase()+x[0].slice(1)))},fl:[{k:'type',l:'Tipo',opts:()=>rpUniq(rpEvRows('evento').map(e=>e.type)),ok:(r,v)=>r.type===v}],cols:rpEvCols()},
+ {k:'inscricoes',l:'Inscrições',rows:()=>EVTS.flatMap(e=>e.regs.map(r=>Object.assign({e},r))),
+  chip:{l:'Pagamento',by:r=>r.pay,items:[rpC('pago','Pagas',rpOk),rpC('pendente','Pendentes',rpWarn),rpC('—','Gratuitas',rpOff)]},
+  fl:[{k:'ev',l:'Evento',opts:()=>EVTS.filter(e=>e.regs.length).map(e=>[e.id,e.t]),ok:(r,v)=>r.e.id===v}],
+  cols:[rpCol('n','Inscrito',r=>r.n),rpCol('ev','Evento',r=>r.e.t),rpCol('ed','Data do evento',r=>rpD(r.e.d),{raw:r=>r.e.d}),rpCol('d','Inscrição em',r=>rpD(r.d),{raw:r=>r.d}),rpCol('pay','Pagamento',r=>r.pay==='pago'?'Pago':r.pay==='pendente'?'Pendente':'Gratuita'),rpCol('val','Valor',r=>brl2(r.val),{n:1,raw:r=>r.val}),rpCol('vch','Voucher',r=>r.vch||'—')]},
+ {k:'financeiro',l:'Financeiro do evento',note:'Cada recorte mostra o mesmo dinheiro por um ângulo: ingressos mais compras adicionais somam o mesmo total de Forma de pagamento; Descontos mostra o quanto foi abatido. Exportar PDF e CSV exige Editar ou Administrar neste módulo.',
+  rows:()=>evFinRepRows(),
+  chip:{l:'Recorte',by:r=>r.g,items:[rpC('ing','Por ingresso',rpOk),rpC('buy','Compras adicionais',rpInfo),rpC('pay','Forma de pagamento',rpWarn),rpC('dsc','Descontos',rpOff)]},
+  fl:[{k:'ev',l:'Evento',def:()=>{const l=evFinRepRows();return l.length?l[0].e.id:'todos';},opts:()=>[...new Map(evFinRepRows().map(r=>[r.e.id,r.e.t])).entries()],ok:(r,v)=>r.e.id===v}],
+  cols:[rpCol('ev','Evento',r=>r.e.t),rpCol('g','Recorte',r=>({ing:'Ingresso',buy:'Compra adicional',pay:'Forma de pagamento',dsc:'Desconto'})[r.g]),rpCol('lab','Item',r=>r.lab),rpCol('q','Quantidade',r=>r.q,{n:1}),rpCol('gross','Bruto',r=>r.gross<0?'− '+brl2(-r.gross):brl2(r.gross),{n:1,raw:r=>r.gross}),rpCol('fee','Taxa',r=>r.g==='dsc'?'—':brl2(r.fee),{n:1,raw:r=>r.g==='dsc'?'':r.fee}),rpCol('net','Líquido',r=>r.g==='dsc'?'—':brl2(r.gross-r.fee),{n:1,raw:r=>r.g==='dsc'?'':Math.round((r.gross-r.fee)*100)/100}),rpCol('rec','A receber',r=>r.g==='dsc'?'—':brl2(r.rec),{n:1,raw:r=>r.g==='dsc'?'':r.rec})]}
+]);
+S.rpSt['agenda/financeiro']={chip:'ing',q:'',f:{},hide:null,sort:null};
+
+rpDef('escalas','Escalas','Escalas por ministério, datas e pessoas escaladas.',[
+ {k:'escalas',l:'Escalas',rows:()=>ESCALAS.slice(),
+  chip:{l:'Situação',by:r=>r.st,items:rows=>rpUniq(rows.map(r=>r.st)).map(x=>rpCh(x[0],x[0][0].toUpperCase()+x[0].slice(1)))},
+  fl:[{k:'min',l:'Ministério',opts:()=>rpUniq(ESCALAS.map(e=>e.min)),ok:(r,v)=>r.min===v}],
+  cols:[rpCol('n','Escala',r=>r.n),rpCol('min','Ministério',r=>r.min),rpCol('st','Situação',r=>r.st),rpCol('dt','Datas',r=>r.dates.length,{n:1}),rpCol('per','Período',r=>{const l=r.dates.map(d=>(EVTS.find(e=>e.id===d.ev)||{}).d).filter(Boolean).sort();return l.length?rpD(l[0])+(l.length>1?' a '+rpD(l[l.length-1]):''):'—';}),rpCol('ppl','Pessoas escaladas',r=>new Set(r.dates.flatMap(d=>d.blocks.flatMap(b=>b.members.map(m=>m.n)))).size,{n:1})]},
+ {k:'impressao',l:'Para imprimir',note:'Escala por data e bloco, pronta para o PDF impresso.',sort:{k:'d',d:1},rows:()=>ESCALAS.flatMap(e=>e.dates.flatMap(d=>d.blocks.map(b=>({e,d,b})))),
+  fl:[{k:'e',l:'Escala',opts:()=>ESCALAS.map(e=>[e.id,e.n]),ok:(r,v)=>r.e.id===v}],
+  cols:[rpCol('d','Data',r=>rpD((EVTS.find(x=>x.id===r.d.ev)||{}).d),{raw:r=>(EVTS.find(x=>x.id===r.d.ev)||{}).d||''}),rpCol('ev','Culto ou evento',r=>(EVTS.find(x=>x.id===r.d.ev)||{t:'—'}).t),rpCol('e','Escala',r=>r.e.n),rpCol('b','Bloco',r=>r.b.label||'—'),rpCol('eq','Equipe',r=>r.b.members.map(m=>m.n+(m.role?' ('+m.role+')':'')).join('; ')||'—'),rpCol('c','Repertório e materiais',r=>r.b.content.map(c=>c.t+(c.d?' · '+c.d:'')).join('; ')||'—')]},
+ {k:'pessoas',l:'Pessoas escaladas',rows:()=>ESCALAS.flatMap(e=>e.dates.flatMap(d=>d.blocks.flatMap(b=>b.members.map(m=>({e,d,b,m}))))),
+  chip:{l:'Resposta',by:r=>r.m.st,items:rows=>rpUniq(rows.map(r=>r.m.st)).map(x=>rpCh(x[0],x[0][0].toUpperCase()+x[0].slice(1)))},
+  fl:[{k:'e',l:'Escala',opts:()=>ESCALAS.map(e=>[e.id,e.n]),ok:(r,v)=>r.e.id===v}],
+  cols:[rpCol('n','Pessoa',r=>r.m.n),rpCol('role','Função',r=>r.m.role||'—'),rpCol('e','Escala',r=>r.e.n),rpCol('d','Data',r=>rpD((EVTS.find(x=>x.id===r.d.ev)||{}).d),{raw:r=>(EVTS.find(x=>x.id===r.d.ev)||{}).d||''}),rpCol('b','Bloco',r=>r.b.label||'—'),rpCol('st','Resposta',r=>r.m.st)]}
+]);
+
+rpDef('espacos','Espaços','Reservas de salas e espaços.',[
+ {k:'reservas',l:'Reservas',rows:()=>RESERVAS.slice(),
+  chip:{l:'Situação',by:r=>r.st,items:rows=>rpUniq(rows.map(r=>r.st)).map(x=>rpCh(x[0],x[0][0].toUpperCase()+x[0].slice(1)))},
+  fl:[{k:'s',l:'Sala',opts:()=>ESPS.map(s=>[s.id,s.n]),ok:(r,v)=>r.s===v}],
+  cols:[rpCol('s','Sala',r=>(ESPS.find(x=>x.id===r.s)||{n:'—'}).n),rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('f','Início',r=>r.f),rpCol('t','Fim',r=>r.t),rpCol('p','Pessoas',r=>r.p,{n:1}),rpCol('who','Solicitante',r=>r.who),rpCol('why','Finalidade',r=>r.why||'—'),rpCol('st','Situação',r=>r.st),rpCol('reason','Motivo',r=>r.reason||'—',{off:true})]}
+]);
+
+const rpLoanDone=l=>l.back.reduce((n,b)=>n+b[0],0);
+rpDef('almoxarifado','Almoxarifado','Itens, empréstimos e movimentações do estoque.',[
+ {k:'itens',l:'Itens',rows:()=>ITEMS.slice(),
+  fl:[{k:'cat',l:'Categoria',opts:()=>ICATS.map(c=>[c.id,c.n]),ok:(r,v)=>r.cat===v}],
+  cols:[rpCol('n','Item',r=>r.n),rpCol('sku','Código',r=>r.sku||'—'),rpCol('cat','Categoria',r=>(ICATS.find(c=>c.id===r.cat)||{n:'—'}).n),rpCol('tipo','Tipo',r=>r.tipo==='emp'?'Emprestável':'Consumível'),rpCol('tot','Total',r=>r.total,{n:1}),rpCol('out','Emprestados',r=>LOANS.filter(l=>l.item===r.id).reduce((n,l)=>n+l.qty-rpLoanDone(l),0),{n:1}),rpCol('av','Disponíveis',r=>r.total-LOANS.filter(l=>l.item===r.id).reduce((n,l)=>n+l.qty-rpLoanDone(l),0),{n:1})]},
+ {k:'emprestimos',l:'Empréstimos',rows:()=>LOANS.slice(),
+  chip:{l:'Situação',by:r=>rpLoanDone(r)>=r.qty?'dev':r.due<SX_TODAY?'atr':'ab',items:[rpC('ab','Em aberto',rpWarn),rpC('atr','Atrasados',rpBad),rpC('dev','Devolvidos',rpOk)]},
+  cols:[rpCol('it','Item',r=>(itm(r.item)||{n:'—'}).n),rpCol('q','Quantidade',r=>r.qty,{n:1}),rpCol('who','Quem',r=>r.who),rpCol('from','Saída',r=>rpD(r.from),{raw:r=>r.from}),rpCol('due','Prazo',r=>rpD(r.due),{raw:r=>r.due}),rpCol('back','Devolvido',r=>rpLoanDone(r)+' de '+r.qty,{n:1}),rpCol('st','Situação',r=>rpLoanDone(r)>=r.qty?'Devolvido':r.due<SX_TODAY?'Atrasado':'Em aberto')]},
+ {k:'movimentacoes',l:'Movimentações',rows:()=>moves(),
+  chip:{l:'Tipo',by:r=>r.t,items:Object.keys(MVT).map(k=>rpCh(k,MVT[k][0],MVT[k][2],MVT[k][3]))},
+  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('t','Tipo',r=>MVT[r.t][0]),rpCol('it','Item',r=>(itm(r.it)||{n:'Item removido'}).n),rpCol('q','Quantidade',r=>r.q,{n:1}),rpCol('txt','Detalhe',r=>r.txt||'—')]},
+ {k:'resumo',l:'Por categoria',rows:()=>ICATS.slice(),
+  cols:[rpCol('n','Categoria',r=>r.n),rpCol('it','Itens',r=>ITEMS.filter(i=>i.cat===r.id).length,{n:1}),rpCol('u','Unidades',r=>ITEMS.filter(i=>i.cat===r.id).reduce((n,i)=>n+i.total,0),{n:1}),rpCol('o','Emprestadas',r=>ITEMS.filter(i=>i.cat===r.id).reduce((n,i)=>n+LOANS.filter(l=>l.item===i.id).reduce((m,l)=>m+l.qty-rpLoanDone(l),0),0),{n:1})]}
+]);
+
+const rpFoodSt={completed:['Concluída',rpOk],cancelled:['Cancelada',rpBad],refunded:['Estornada',rpWarn]};
+const rpFoodKind={entry:'Entrada',sale:'Venda',loss:'Perda',correction:'Correção',refund:'Estorno'};
+function rpFood(key,label,lede){
+ const st=()=>FOOD_STORES[key],it=id=>(st().items.find(x=>x.id===id)||{name:'Item removido'});
+ rpDef(key,label,lede,[
+  {k:'vendas',l:'Vendas',rows:()=>FOOD_SALES.filter(s=>s.store===key).slice().sort((a,b)=>(a.date+a.time)<(b.date+b.time)?1:-1),
+   chip:{l:'Situação',by:r=>r.status,items:Object.keys(rpFoodSt).map(k=>rpC(k,rpFoodSt[k][0],rpFoodSt[k][1]))},
+   fl:[{k:'method',l:'Pagamento',opts:()=>[['Pix','Pix'],['Cartão','Cartão'],['Dinheiro','Dinheiro']],ok:(r,v)=>r.method===v},{k:'mes',l:'Mês',opts:()=>['04','05','06','07','08','09'].map(m=>[m,MONTHS[+m-1][0].toUpperCase()+MONTHS[+m-1].slice(1)]),ok:(r,v)=>r.date.slice(5,7)===v}],
+   cols:[rpCol('id','Venda',r=>r.id),rpCol('d','Data',r=>rpD(r.date)+' '+r.time,{raw:r=>r.date+r.time}),rpCol('it','Itens',r=>r.lines.map(l=>l.qty+'× '+l.name).join('; ')),rpCol('m','Pagamento',r=>r.method),rpCol('tot','Total',r=>foodMoney(r.total),{n:1,raw:r=>r.total/100}),rpCol('fee','Taxa',r=>foodMoney(r.fee||0),{n:1,raw:r=>(r.fee||0)/100}),rpCol('st','Situação',r=>rpFoodSt[r.status]?rpFoodSt[r.status][0]:r.status),rpCol('who','Quem vendeu',r=>r.seller||r.who||'—',{off:true})]},
+  {k:'itens',l:'Itens e estoque',rows:()=>st().items.slice(),
+   chip:{l:'Estoque',by:r=>r.stock<=r.min?'baixo':'ok',items:[rpC('ok','Normal',rpOk),rpC('baixo','No mínimo ou abaixo',rpWarn)]},
+   fl:[{k:'cat',l:'Categoria',opts:()=>st().cats.map(c=>[c.id,c.name]),ok:(r,v)=>r.cat===v}],
+   cols:[rpCol('sku','Código',r=>r.sku||'—'),rpCol('n','Item',r=>r.name),rpCol('cat','Categoria',r=>(st().cats.find(c=>c.id===r.cat)||{name:'—'}).name),rpCol('p','Preço',r=>foodMoney(r.price),{n:1,raw:r=>r.price/100}),rpCol('s','Estoque',r=>r.stock,{n:1}),rpCol('min','Mínimo',r=>r.min,{n:1}),rpCol('a','Situação',r=>r.active?'Ativo':'Inativo')]},
+  {k:'movimentacoes',l:'Movimentações',rows:()=>FOOD_MOVES.filter(m=>m.store===key).slice().sort((a,b)=>a.date<b.date?1:-1),
+   chip:{l:'Tipo',by:r=>r.kind,items:rows=>[...new Set(rows.map(r=>r.kind))].map(k=>rpCh(k,rpFoodKind[k]||k))},
+   cols:[rpCol('d','Data',r=>rpD(r.date),{raw:r=>r.date}),rpCol('k','Tipo',r=>rpFoodKind[r.kind]||r.kind),rpCol('it','Item',r=>it(r.item).name),rpCol('q','Quantidade',r=>r.qty,{n:1}),rpCol('why','Motivo',r=>r.reason||'—')]}
+ ]);
+}
+rpFood('cafe','Cafeteria','Vendas, itens e movimentações de estoque da cafeteria.');
+rpFood('rest','Restaurante','Vendas, itens e movimentações de estoque do restaurante.');
+rpFood('shop','Loja','Vendas, itens e movimentações de estoque da loja.');
+
+rpDef('conteudo','Conteúdo','Catálogo de pregações, músicas, vídeos, séries, jornadas, cursos e materiais.',[
+ {k:'pregacoes',l:'Pregações',rows:()=>PREGS.slice(),fl:[{k:'who',l:'Pregador',opts:()=>rpUniq(PREGS.map(p=>p.who)),ok:(r,v)=>r.who===v}],
+  cols:[rpCol('t','Título',r=>r.t),rpCol('who','Pregador',r=>r.who),rpCol('sr','Série',r=>(PSERIES.find(s=>s.id===r.sr)||{n:'—'}).n),rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('dur','Duração',r=>r.dur+' min',{n:1,raw:r=>r.dur}),rpCol('ref','Referência',r=>r.ref||'—'),rpCol('v','Visualizações',r=>r.views,{n:1})]},
+ {k:'musicas',l:'Músicas',rows:()=>SONGS.slice(),chip:{l:'Categoria',by:r=>r.cat,items:()=>SCATS.map(c=>rpCh(c,c))},
+  cols:[rpCol('n','Música',r=>r.n),rpCol('art','Artista',r=>r.art),rpCol('key','Tom',r=>r.key),rpCol('bpm','BPM',r=>r.bpm,{n:1}),rpCol('cat','Categoria',r=>r.cat),rpCol('min','Ministério',r=>r.min||'—'),rpCol('yt','Vídeo',r=>rpYes(r.yt))]},
+ {k:'videos',l:'Vídeos',rows:()=>NX_VIDEOS.slice(),chip:{l:'Visibilidade',by:r=>r.visibility,items:['Público','Interno','Restrito'].map(v=>rpCh(v,v))},
+  cols:[rpCol('t','Vídeo',r=>r.t),rpCol('tag','Tema',r=>r.tag||'—'),rpCol('vis','Visibilidade',r=>r.visibility),rpCol('min','Ministério',r=>r.min||'—'),rpCol('f','Arquivos',r=>(r.files||[]).length,{n:1}),rpCol('a','Situação',r=>r.active?'Ativo':'Inativo')]},
+ {k:'series',l:'Séries',rows:()=>NX_SERIES.slice(),chip:{l:'Visibilidade',by:r=>r.visibility,items:['Público','Interno','Restrito'].map(v=>rpCh(v,v))},
+  cols:[rpCol('n','Série',r=>r.n),rpCol('type','Tipo',r=>r.type),rpCol('q','Itens',r=>r.items.length,{n:1}),rpCol('p','Pessoas acompanhando',r=>r.people.length,{n:1}),rpCol('vis','Visibilidade',r=>r.visibility)]},
+ {k:'jornadas',l:'Jornadas',rows:()=>JORNS.filter(j=>!j.solo),chip:{l:'Situação',by:r=>r.st,items:rows=>rpUniq(rows.map(r=>r.st)).map(x=>rpCh(x[0],x[0][0].toUpperCase()+x[0].slice(1)))},
+  cols:[rpCol('n','Jornada',r=>r.n),rpCol('c','Cursos',r=>r.courses.length,{n:1}),rpCol('wk','Semanas',r=>r.wk,{n:1}),rpCol('p','Pessoas',r=>r.people.length+(r.more||0),{n:1}),rpCol('st','Situação',r=>r.st)]},
+ {k:'cursos',l:'Cursos',rows:()=>[...JORNS.filter(j=>!j.solo).flatMap(j=>j.courses.map(c=>({c,o:'Jornada: '+j.n,p:j.people.length+(j.more||0)}))),...CSOLO.flatMap(s=>s.courses.map(c=>({c,o:s.min?'Avulso · '+s.min:'Avulso',p:s.people.length+(s.more||0)})))],
+  fl:[{k:'o',l:'Origem',opts:()=>rpUniq([...JORNS.filter(j=>!j.solo).map(j=>'Jornada: '+j.n),'Avulso']),ok:(r,v)=>v==='Avulso'?r.o.startsWith('Avulso'):r.o===v}],
+  cols:[rpCol('n','Curso',r=>r.c.n),rpCol('o','Origem',r=>r.o),rpCol('a','Aulas',r=>r.c.aulas.length,{n:1}),rpCol('p','Pessoas',r=>r.p,{n:1}),rpCol('on','Situação',r=>r.c.on?'Ativo':'Inativo')]},
+ {k:'materiais',l:'Materiais de apoio',rows:()=>MATS.slice(),
+  cols:[rpCol('t','Material',r=>r.t),rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('f','Arquivos',r=>r.files.length,{n:1}),rpCol('min','Ministério',r=>r.min||'—'),rpCol('dl','Downloads no mês',r=>r.dl,{n:1})]}
+]);
+
+rpDef('comunicacao','Comunicação','Notícias e envios de push e e-mail.',[
+ {k:'noticias',l:'Notícias',rows:()=>NEWS.slice(),
+  chip:{l:'Situação',by:r=>r.exp&&r.exp<SX_TODAY?'exp':r.pub>SX_TODAY?'ag':'no',items:[rpC('no','No ar',rpOk),rpC('ag','Agendadas',rpInfo),rpC('exp','Expiradas',rpOff)]},
+  cols:[rpCol('t','Notícia',r=>r.t),rpCol('c','Categoria',r=>(NCATS.find(c=>c.id===r.c)||{n:'—'}).n),rpCol('pub','Publicação',r=>rpD(r.pub),{raw:r=>r.pub}),rpCol('exp','Expira em',r=>rpD(r.exp)),rpCol('st','Situação',r=>r.exp&&r.exp<SX_TODAY?'Expirada':r.pub>SX_TODAY?'Agendada':'No ar')]},
+ {k:'envios',l:'Envios',rows:()=>PUSHES.slice(),
+  chip:{l:'Situação',by:r=>r.st,items:rows=>rpUniq(rows.map(r=>r.st)).map(x=>rpCh(x[0],x[0][0].toUpperCase()+x[0].slice(1)))},
+  cols:[rpCol('t','Envio',r=>r.t),rpCol('seg','Público',r=>r.seg),rpCol('type','Tipo',r=>r.type),rpCol('ch','Canais',r=>(r.ch||[]).join(', ')),rpCol('dt','Data',r=>r.dt||'—'),rpCol('st','Situação',r=>r.st),rpCol('open','Abertura',r=>r.open===null||r.open===undefined?'—':r.open+'%',{n:1})]}
+]);
+
+rpDef('doacoes','Doações','Doações por campanha, com doador, valor e forma de pagamento.',[
+ {k:'doacoes',l:'Doações',rows:()=>CAMPS.flatMap(c=>c.donors.map(d=>({c,n:d[0],v:d[1],d:d[2],m:d[3],pend:!!d[4]}))).sort((a,b)=>a.d<b.d?1:-1),
+  chip:{l:'Doador',by:r=>r.n==='Anônimo'?'anon':'id',items:[rpC('id','Identificados',rpOk),rpC('anon','Anônimas',rpOff)]},
+  fl:[{k:'c',l:'Campanha',opts:()=>CAMPS.map(c=>[c.id,c.n]),ok:(r,v)=>r.c.id===v},{k:'m',l:'Forma',opts:()=>[['PIX','Pix'],['Cartão','Cartão'],['Boleto','Boleto']],ok:(r,v)=>r.m===v}],
+  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('n','Doador',r=>r.n),rpCol('c','Campanha',r=>r.c.n),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('m','Forma',r=>r.m),rpCol('p','Situação',r=>r.pend?'Pendente':'Confirmada')]}
+]);
+
+rpDef('financeiro','Financeiro','Lançamentos, contas a pagar e contas a receber. DRE e fluxo de caixa ficam em Análises.',[
+ {k:'lancamentos',l:'Lançamentos',rows:()=>LANCS.slice().sort((a,b)=>a.d<b.d?1:-1),
+  chip:{l:'Tipo',by:r=>r.tipo,items:[rpC('e','Entradas',rpOk),rpC('s','Saídas',rpBad)]},
+  fl:[{k:'comp',l:'Competência',opts:()=>[...new Set(LANCS.map(l=>l.comp))].sort().reverse().map(k=>[k,monthName(k)]),ok:(r,v)=>r.comp===v},{k:'cat',l:'Categoria',opts:()=>rpUniq(LANCS.map(l=>l.cat)),ok:(r,v)=>r.cat===v}],
+  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('comp','Competência',r=>monthName(r.comp)),rpCol('desc','Descrição',r=>r.desc),rpCol('cat','Categoria',r=>r.cat),rpCol('tipo','Tipo',r=>r.tipo==='e'?'Entrada':'Saída'),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>r.st==='ok'?'Aprovado':r.st),rpCol('who','Lançado por',r=>r.who||'—',{off:true})]},
+ {k:'pagar',l:'Contas a pagar',rows:()=>PAGAR.slice().sort((a,b)=>a.venc<b.venc?-1:1),
+  chip:{l:'Situação',by:r=>r.paid?'pg':r.venc<SX_TODAY?'ven':'ab',items:[rpC('ab','A vencer',rpWarn),rpC('ven','Vencidas',rpBad),rpC('pg','Pagas',rpOk)]},
+  cols:[rpCol('desc','Conta',r=>r.desc),rpCol('cat','Categoria',r=>r.cat),rpCol('venc','Vencimento',r=>rpD(r.venc),{raw:r=>r.venc}),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>r.paid?'Paga':r.venc<SX_TODAY?'Vencida':'A vencer')]},
+ {k:'receber',l:'Contas a receber',rows:()=>RECEB.slice(),
+  cols:[rpCol('desc','Descrição',r=>r.desc),rpCol('prev','Previsão',r=>rpD(r.prev),{raw:r=>r.prev||''}),rpCol('v','Valor previsto',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('got','Recebido',r=>brl2(r.got||0),{n:1,raw:r=>r.got||0}),rpCol('src','Origem',r=>r.src||'—')]}
+]);
+
+rpDef('secretaria','Secretaria','Atos, documentos emitidos e mandatos da igreja.',[
+ {k:'atos',l:'Atos',rows:()=>sxAtoAll(),
+  chip:{l:'Situação',by:r=>r.st,items:[rpC('realizado','Realizados',rpOk),rpC('previsto','Previstos',rpWarn),rpC('informado','Informados',rpOff)]},
+  fl:[{k:'t',l:'Tipo',opts:()=>Object.keys(SX_ATO_T).map(k=>[k,SX_ATO_T[k][0]]),ok:(r,v)=>r.t===v}],
+  cols:[rpCol('t','Tipo',r=>SX_ATO_T[r.t][0]),rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('loc','Local',r=>r.loc||'—'),rpCol('of','Quem oficiou',r=>r.of||'—'),rpCol('p','Pessoas',r=>r.ppl.join('; ')),rpCol('st','Situação',r=>r.st==='realizado'?'Realizado':r.st==='previsto'?'Previsto':'Informado')]},
+ {k:'documentos',l:'Documentos emitidos',rows:()=>SX_DOCS.slice().reverse(),
+  chip:{l:'Situação',by:r=>r.st,items:[rpC('valido','Válidos',rpOk),rpC('revogado','Revogados',rpBad)]},
+  fl:[{k:'t',l:'Tipo',opts:()=>Object.keys(SX_DOC_T).map(k=>[k,k]),ok:(r,v)=>r.t===v}],
+  cols:[rpCol('num','Número',r=>r.num),rpCol('t','Documento',r=>r.t),rpCol('p','Pessoa',r=>r.pessoa),rpCol('d','Emissão',r=>rpD(r.d),{raw:r=>r.d}),rpCol('sig','Assinado por',r=>r.sig),rpCol('st','Situação',r=>r.st==='valido'?'Válido':'Revogado')]},
+ {k:'mandatos',l:'Cargos e mandatos',rows:()=>SX_MAND.slice(),
+  chip:{l:'Situação',by:r=>sxMandSt(r),items:[rpC('vigente','Vigentes',rpOk),rpC('agendado','Agendados',rpInfo),rpC('encerrado','Encerrados',rpOff)]},
+  fl:[{k:'cg',l:'Cargo',opts:()=>SX_CARGOS.map(c=>[c.id,c.n]),ok:(r,v)=>r.cg===v}],
+  cols:[rpCol('p','Pessoa',r=>r.pessoa),rpCol('cg','Cargo',r=>sxCargo(r.cg).n),rpCol('i','Início',r=>rpD(r.ini),{raw:r=>r.ini}),rpCol('f','Fim',r=>r.fim?rpD(r.fim):'Sem prazo'),rpCol('st','Situação',r=>({vigente:'Vigente',agendado:'Agendado',encerrado:'Encerrado'})[sxMandSt(r)]),rpCol('ac','Acesso concedido',r=>r.sc?(sxCargo(r.cg).ac.area+' · '+sxCargo(r.cg).ac.perm):'—')]}
+]);
+
+rpDef('multi','Multi-igreja','Regionais e igrejas da organização.',[
+ {k:'igrejas',l:'Igrejas',rows:()=>IGREJAS.slice(),fl:[{k:'rede',l:'Regional',opts:()=>NETS.map(n=>[n.id,n.n]),ok:(r,v)=>r.rede===v}],
+  cols:[rpCol('n','Igreja',r=>r.n),rpCol('rede','Regional',r=>(NETS.find(n=>n.id===r.rede)||{n:'—'}).n),rpCol('lead','Responsável',r=>r.lead||'—')]},
+ {k:'redes',l:'Regionais',rows:()=>NETS.slice(),
+  cols:[rpCol('n','Regional',r=>r.n),rpCol('sup','Supervisor',r=>r.sup||'—'),rpCol('q','Igrejas',r=>IGREJAS.filter(g=>g.rede===r.id).length,{n:1}),rpCol('main','Principal',r=>rpYes(r.main))]}
+]);
+
+/* menu Relatórios e roteamento */
+(()=>{const g=NAV.find(x=>x[0]==='Gestão')[1],i=g.findIndex(n=>n[0]==='admin');g.splice(i<0?g.length:i,0,['relatorios','clipboard','Relatórios',RP_ORDER.map(k=>['rp-'+k,RP[k].l])]);})();
+{const _ph2=placeholder;placeholder=id=>typeof id==='string'&&id.slice(0,3)==='rp-'&&RP[id.slice(3)]?rpPage(id.slice(3)):_ph2(id);}
 
 render();

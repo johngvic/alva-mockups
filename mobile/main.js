@@ -383,7 +383,7 @@ V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tab
   </nav>
   <section class="pad stack g3">
    <div class="row g3" style="align-items:stretch">
-    ${S.role==='visitante'?`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Quero fazer parte</h3><p>Conheça o caminho para ser membro</p></div><button class="btn dark md" data-a="wantMember">Começar</button></div>`:`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Contribuir</h3><p>Dízimos, ofertas e missões</p></div><button class="btn dark md" data-a="give">Contribuir</button></div>`}
+    ${S.role==='visitante'?`<div class="cta gr-lima grow" style="color:#010f12">${S.igFila?`<div><h3>Você está na fila</h3><p>${S.igFila}º para a próxima integração</p></div><button class="btn dark md" data-a="igLeave">Sair da fila</button>`:`<div><h3>Quero fazer parte</h3><p>Conheça o caminho para ser membro</p></div><button class="btn dark md" data-a="wantMember">Começar</button>`}</div>`:`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Contribuir</h3><p>Dízimos, ofertas e missões</p></div><button class="btn dark md" data-a="give">Contribuir</button></div>`}
     <div class="cta gr-vinho grow" style="color:#fff"><div><h3>Pedido de oração</h3><p>Nossa equipe ora por você</p></div><button class="btn onmedia md" data-a="prayer">Pedir oração</button></div>
    </div>
    <div class="card row g3" style="padding:16px;border-radius:var(--r-md)"><span class="iconbox" style="${tone('salvia')}">${ic('message',22)}</span><div class="grow stack" style="gap:2px"><span class="it-title">Assistente no WhatsApp</span><span class="it-sub">Tire dúvidas a qualquer hora</span></div><button class="btn secondary sm" data-a="whats">Conversar</button></div>
@@ -518,7 +518,7 @@ V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).leng
  return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
  <div class="pad stack g8" style="padding-top:16px">
   ${grp('Você',row('Meus dados','meusDados',miss?miss+' dados faltando':'')+row('Notificações','notifs',nN?nN+(nN>1?' novas':' nova'):'',nN>0)+row('Privacidade e dados','privacidade',''))}
-  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria','Primeiros passos'):row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
+  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Carteirinha de membro','carteirinha','Ativa')+row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
   ${['lider','admin'].includes(S.role)?grp('Liderança',row('Acompanhamentos','urgentes',URG.length+' urgentes',true)):''}
   ${grp('A igreja',row('Quem somos','quemSomos','')+row('Fale com a secretaria','secretaria','Seg a sex')+row('Assistente no WhatsApp','assistente',''))}
   <section class="stack g3">
@@ -547,7 +547,7 @@ function dawnSky(on){
 function render(dir){
  clearInterval(playTimer);S.cu.playing=S.screen==='curso'?S.cu.playing:false;
  const out=V[S.screen]();const view=$('#view');
- const AMB={home:'home',agenda:'agenda',grupos:'grupos',cursos:'cursos',curso:'cursos',mais:'mais',church:'church',contribuir:'grupos',aoVivo:'home',quemSomos:'home',meusMin:'cursos',tarefas:'cursos',inscricoes:'home',assistente:'grupos',secretaria:'agenda',privacidade:'agenda'};
+ const AMB={home:'home',agenda:'agenda',grupos:'grupos',cursos:'cursos',curso:'cursos',mais:'mais',church:'church',contribuir:'grupos',aoVivo:'home',quemSomos:'home',meusMin:'cursos',tarefas:'cursos',inscricoes:'home',assistente:'grupos',secretaria:'agenda',privacidade:'agenda',carteirinha:'mais',documentos:'mais'};
  view.innerHTML=`<div data-amb="${out.amb||AMB[S.screen]||(out.tabs==='mais'?'mais':'auth')}" class="screen ${out.tabs?'has-tabs':''} ${dir==='back'?'enter-back':dir==='none'?'':dir==='tab'?'enter-tab':'enter'}" id="scr">${out.html}</div>`;
  const sbar=$('.statusbar');sbar.style.setProperty('--sb',out.sb||'var(--ink)');sbar.style.setProperty('--sbbg','transparent');const scr=$('#scr');if(out.tabs)scr.addEventListener('scroll',()=>{sbar.style.setProperty('--sbbg',scr.scrollTop>40?'var(--glass)':'transparent');sbar.style.backdropFilter=scr.scrollTop>40?'blur(20px)':'none';},{passive:true});else sbar.style.backdropFilter='none';
  $('#tabbarSlot').innerHTML=out.tabs?`<nav class="tabbar" aria-label="Navegação principal">${tabsFor().map(t=>`<button class="tab" data-a="tab" data-v="${t[0]}" ${out.tabs===t[0]?'aria-current="page"':''}>${ic(t[1],24,out.tabs===t[0]?2.25:1.75)}${t[2]}</button>`).join('')}</nav>`:'';
@@ -919,7 +919,7 @@ try{const t=localStorage.getItem('alva-theme');if(t==='dia'){S.theme='dia';phone
 /* =========================================================
    MAIS › sub-telas
    ========================================================= */
-const SUBS=['tarefas','meusDados','notifs','quemSomos','cuidado','contribuir','inscricoes','aoVivo','meusMin','oracao','secretaria','assistente','privacidade'];
+const SUBS=['carteirinha','documentos','tarefas','meusDados','notifs','quemSomos','cuidado','contribuir','inscricoes','aoVivo','meusMin','oracao','secretaria','assistente','privacidade'];
 APP.push(...SUBS);
 const brl=n=>'R$ '+Number(n).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 Object.assign(S,{
@@ -1109,6 +1109,26 @@ V.assistente=()=>sub('Assistente no WhatsApp','Um jeito rápido de resolver algu
   <p class="foot" style="margin:0;text-align:center">Protótipo ilustrativo: as respostas acima são simuladas.</p>`);
 
 /* 12. Privacidade */
+/* carteirinha digital do membro: QR de validação, vale enquanto a situação for Ativo ou Afastado (Secretaria no Alva Web) */
+V.carteirinha=()=>{const nm=S.user.name,num='AV-2026-'+String(1000+nm.split('').reduce((a,c)=>(a*31+c.charCodeAt(0))%9000,7)).slice(-4);
+ if(S.role==='visitante')return sub('Carteirinha de membro','Disponível para quem já é membro da igreja.',`<p class="callout" style="margin:0">Peça para ser membro em <b>Mais › Quero ser membro</b>. Depois da integração, a sua carteirinha aparece aqui.</p>`);
+ return sub('Carteirinha de membro','Sua identificação na igreja. Mostre na entrada de eventos e quando pedirem a sua membresia.',`
+  <section class="cc" aria-label="Carteirinha de membro">
+   <div class="cc-top"><span class="cc-ch">${S.church.name}</span><span class="cc-st"><i></i>Ativo</span></div>
+   <div class="cc-nm"><small>Membro</small><b>${esc(nm)}</b></div>
+   <div class="cc-mid"><div class="cc-qr">${qrSVG(num)}</div></div>
+   <div class="cc-ft"><span><small>Número</small><b>${num}</b></span><span><small>Membro desde</small><b>mar/2023</b></span></div>
+  </section>
+  <p class="callout" style="margin:4px 0 0">O QR confere, na hora, se você é membro. Ele mostra só o nome e se a carteirinha está válida. Se a situação mudar para <b>transferido</b>, <b>desligado</b> ou <b>falecido</b>, ela deixa de valer.</p>`);};
+/* meus documentos: o que a secretaria emitiu para a pessoa (e certificados de curso). Só consulta e download; o app não edita nem gera nada */
+const IG_FILA=5; /* pessoas já na fila da integração (igual ao protótipo web) */
+const MYDOCS=[{t:'Certidão de batismo',n:'2026-0002',d:'2026-06-20',i:'bucket'},{t:'Declaração de membro',n:'2026-0014',d:'2026-08-04',i:'clipboard'},{t:'Certificado de apresentação',n:'2026-0008',d:'2026-09-06',i:'pacifier',who:'Lucas Pereira'},{t:'Certificado do curso Fundamentos da fé',d:'2026-07-12',i:'award',src:'Cursos'}];
+V.documentos=()=>{
+ if(S.role==='visitante')return sub('Meus documentos','Certidões, declarações e certificados emitidos para você.',`<p class="callout" style="margin:0">Quando você for membro, os documentos que a igreja emitir para você aparecem aqui, prontos para baixar.</p>`);
+ return sub('Meus documentos','Certidões, declarações e certificados emitidos para você. É só baixar.',`
+  <section class="stack g3"><div class="list">${MYDOCS.map((x,i)=>`<div class="item" style="cursor:default"><span class="avatar" style="${tone('ceu')}">${ic(x.i,18,1.8)}</span><span class="grow stack" style="gap:2px"><span class="it-title">${esc(x.t)}</span><span class="it-sub">${x.who?esc(x.who)+' · ':''}Emitido em ${x.d.split('-').reverse().join('/')}${x.n?' · nº '+x.n:''}</span></span><button type="button" class="btn outline sm" data-a="docDl" data-v="${i}" aria-label="Baixar PDF de ${esc(x.t)}">Baixar</button></div>`).join('')}</div></section>
+  <p class="callout" style="margin:4px 0 0">Precisa de uma declaração ou carta? Peça à secretaria: ela emite e o documento aparece aqui. O app só mostra e baixa; não edita nem gera documentos.</p>
+  <button class="btn outline block" data-a="sub" data-v="secretaria">Fale com a secretaria</button>`);};
 V.privacidade=()=>sub('Privacidade e dados','Você controla o que a igreja vê e guarda sobre você (LGPD).',`
   <section class="stack g3"><p class="eb2">Visibilidade</p><div class="list">${[['aniv','Mostrar meu aniversário','Para sua Casa e ministérios'],['lista','Aparecer na lista de membros','Outros membros podem te encontrar'],['fotos','Usar minha foto em divulgação','Fotos de eventos nas redes da igreja']].map(r=>`<div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">${r[1]}</span><span class="it-sub">${r[2]}</span></span><button type="button" class="switch" role="switch" aria-checked="${S.priv[r[0]]}" aria-label="${r[1]}" data-a="privSw" data-v="${r[0]}"></button></div>`).join('')}</div></section>
   <section class="stack g3"><p class="eb2">Seus dados</p><div class="list">
@@ -1129,7 +1149,11 @@ function playerSheet(v){sheet(`<div class="stack g4"><div class="player gr-${v.g
 
 /* ---------- actions ---------- */
 Object.assign(A,{
- wantMember:async(v,el)=>{if(el)await busy(el,600,null,'Enviado');toast('success','Que alegria!','A secretaria vai te chamar para a integração. Enquanto isso, que tal visitar uma Casa?');},
+ /* integração lotada: ninguém é aceito além do limite; a pessoa entra na fila de espera da igreja (ordem de chegada) */
+ wantMember:async(v,el)=>{
+  if(S.igFila){toast('info','Você já está na fila','Você é o '+S.igFila+'º. Avisamos aqui quando a próxima integração abrir.');return;}
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">A integração está lotada</h3><p class="callout">As vagas desta integração acabaram. Entre na fila de espera: você é chamado(a) quando a próxima abrir, na ordem de chegada. Você seria o ${IG_FILA+1}º.</p></div><div class="stack g3"><button type="button" class="btn primary block" id="igQ">Entrar na fila de espera</button><button type="button" class="tlink" data-a="closeSheet">Agora não</button></div></div>`,sh=>{$('#igQ',sh).addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Na fila');S.igFila=IG_FILA+1;await closeSheet();softRender();toast('success','Você está na fila','Você é o '+S.igFila+'º. Avisamos aqui quando a próxima integração abrir.');});});},
+ igLeave:()=>{S.igFila=null;softRender();toast('info','Você saiu da fila','Dá para entrar de novo quando quiser.');},
  sub:v=>{ensureChurch();if(v==='cuidado'&&S.role!=='visitante'){S.ag.tab='Acompanhamento';A.tab('agenda');return;}go(v);},
  give:()=>{ensureChurch();go('contribuir');},prayer:()=>{ensureChurch();go('oracao');},whats:()=>go('assistente'),
  mood:(v,el)=>{S.moodLog=S.moodLog||[];S.moodLog.push({m:v,at:Date.now()});S.mood=v;$$('#moods .moodt').forEach(c=>c.setAttribute('aria-checked',c.dataset.v===S.mood));const a=$('#moodAfter');a.innerHTML=moodAfter();a.classList.remove('swap');void a.offsetWidth;a.classList.add('swap');},
@@ -1226,7 +1250,7 @@ const _login=F.login;F.login=async function(f){await _login(f);const e=(S.email|
  if(e==='renan.ferreira@email.com'&&!S.insc.mine.length)S.insc.mine.push({id:'i1',st:'ok',method:'-'});
  if(e==='giovanna.martins@email.com'&&!S.give.hist.length)S.give.hist.push({v:350,dest:'Contribuição livre',m:'Pix',d:'05/09/2026',st:'ok'},{v:350,dest:'Contribuição livre',m:'Pix',d:'05/08/2026',st:'ok'},{v:120,dest:'Retiro de Jovens 2026',m:'Cartão',d:'20/07/2026',st:'ok'});
  if(S.user&&S.user.name)S.me.nome=S.user.name;};
-RAIL.push(...[['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
+RAIL.push(...[['carteirinha','Mais › Carteirinha de membro'],['documentos','Mais › Meus documentos'],['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
 $('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
 /* ---------- cenários por tipo de usuário ---------- */
@@ -1350,7 +1374,7 @@ Object.assign(A,{
 S.apb={max:24,prazo:7,
  datas:[{id:'bd1',y:2026,m:10,d:4,h:'10h',t:'Culto de Celebração',vagas:5,used:2},{id:'bd2',y:2026,m:10,d:11,h:'10h',t:'Culto de Celebração',vagas:6,used:2},{id:'bd4',y:2026,m:10,d:25,h:'10h',t:'Culto de Celebração',vagas:6,used:6},{id:'bd5',y:2026,m:11,d:8,h:'10h',t:'Culto de Celebração',vagas:6,used:1}],
  kids:[{id:'k1',n:'Helena Pereira',nasc:'2026-02-10'},{id:'k2',n:'Lucas Pereira',nasc:'2023-05-02'}],
- pedidos:[{id:'ap1',kid:'k2',bebe:'Lucas Pereira',cert:'Lucas Pereira',pais:['Rafael Pereira','Camila Pereira'],when:'Dom, 14 mai 2023 · 10h',culto:'Culto de Celebração',st:'realizada'}],
+ pedidos:[{id:'ap1',kid:'k2',bebe:'Lucas Pereira',cert:'Lucas Pereira',pais:['Rafael Pereira','Camila Pereira'],when:'Dom, 14 mai 2023 · 10h',culto:'Culto de Celebração',st:'realizada',emit:true}],
  f:null};
 const APB_ST={aguardando:['warning','Aguardando'],confirmado:['success','Confirmado'],realizada:['success','Realizada'],recusado:['danger','Recusado'],cancelado:['danger','Cancelado']};
 const apbM=(nasc,y,m,d)=>{const a=new Date(nasc+'T12:00'),b=new Date(y,m-1,d,12);let n=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());if(b.getDate()<a.getDate())n--;return Math.max(0,n);};
@@ -1366,8 +1390,8 @@ V.bebes=()=>{const P=S.apb.pedidos,open=S.apb.datas.filter(d=>apbDays(d)>=S.apb.
  <div class="pad stack g6" style="padding-bottom:24px">
   <section class="apb-hero"><span class="apb-hi">${ic('pacifier',22,1.8)}</span><blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote><p>Os pais trazem o bebê à frente no culto, a igreja ora pela família e vocês recebem o certificado no app.</p></section>
   ${P.length?`<section class="stack g3"><p class="eb2">Seus pedidos</p>${P.map(p=>{const s=APB_ST[p.st];return `<article class="card apb-p ${p.st}"><div class="row g3" style="align-items:flex-start"><span class="apb-av">${ic('pacifier',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${esc(p.bebe)}</span><span class="it-sub">${p.culto} · ${p.when}</span></div>${status(s[0],s[1])}</div>
-   ${p.st==='aguardando'?`<p class="apb-note">${ic('clock',14,2)}A secretaria confirma em até 3 dias úteis. Você recebe um aviso aqui no app.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Cancelar pedido</button>`:p.st==='confirmado'?`<p class="apb-note ok">${ic('check',14,2.4)}Chegue 20 minutos antes e procure a recepção. Vocês serão chamados à frente.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Não vamos conseguir</button>`:p.st==='realizada'?`<button class="btn outline md block" data-a="apbCert" data-v="${p.id}">${ic('award',16,2)}Ver certificado</button>`:p.why?`<p class="apb-note bad">${ic('info',14,2)}${esc(p.why)}</p>`:''}</article>`;}).join('')}</section>`:''}
-  <section class="stack g3"><p class="eb2">Como funciona</p><ol class="steps"><li>Escolha um dos cultos com apresentação.</li><li>A secretaria confirma o pedido.</li><li>No culto, vocês apresentam o bebê à frente.</li><li>O certificado chega aqui no app.</li></ol>
+   ${p.st==='aguardando'?`<p class="apb-note">${ic('clock',14,2)}A secretaria confirma em até 3 dias úteis. Você recebe um aviso aqui no app.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Cancelar pedido</button>`:p.st==='confirmado'?`<p class="apb-note ok">${ic('check',14,2.4)}Chegue 20 minutos antes e procure a recepção. Vocês serão chamados à frente.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Não vamos conseguir</button>`:p.st==='realizada'?(p.emit?`<button class="btn outline md block" data-a="apbCert" data-v="${p.id}">${ic('award',16,2)}Ver certificado</button>`:`<p class="apb-note">${ic('clock',14,2)}A secretaria está preparando o certificado. Você recebe um aviso aqui quando estiver pronto.</p>`):p.why?`<p class="apb-note bad">${ic('info',14,2)}${esc(p.why)}</p>`:''}</article>`;}).join('')}</section>`:''}
+  <section class="stack g3"><p class="eb2">Como funciona</p><ol class="steps"><li>Escolha um dos cultos com apresentação.</li><li>A secretaria confirma o pedido.</li><li>No culto, vocês apresentam o bebê à frente.</li><li>A secretaria emite o certificado, que chega aqui no app e em Meus documentos.</li></ol>
    <p class="foot">Para bebês de até ${apbMaxTx()}. Pelo menos um dos responsáveis precisa ser membro. Pedidos até ${S.apb.prazo} dias antes do culto.</p></section>
  </div>
  <div class="apb-dock"><button class="btn primary block" data-a="apbNew" ${open.length?'':'disabled'}>${open.length?'Agendar apresentação':'Sem datas abertas no momento'}</button></div>`};};
@@ -1414,6 +1438,7 @@ Object.assign(A,{
   S.hist=S.hist.filter(h=>h!=='bebeNovo');S.screen='bebes';render('back');toast('success','Pedido enviado','Avisamos aqui quando a secretaria confirmar.');},
  apbCancel:v=>{const p=S.apb.pedidos.find(x=>x.id===v);sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${p.st==='confirmado'?'Cancelar a apresentação?':'Cancelar o pedido?'}</h3><p class="callout">${esc(p.bebe)} · ${p.when}. A vaga volta a ficar livre para outra família.</p></div><div class="stack g3"><button type="button" class="btn primary block danger" id="apbX">Cancelar ${p.st==='confirmado'?'apresentação':'pedido'}</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{$('#apbX',sh).addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Cancelado');p.st='cancelado';p.why='Cancelado por você. Dá para pedir outra data quando quiser.';const d=S.apb.datas.find(x=>p.when.startsWith(fmtK(K(x.y,x.m,x.d))));if(d)d.used--;await closeSheet();softRender();toast('info','Cancelado','A secretaria foi avisada.');});});},
  apbCert:v=>{S.apb.cert=v;go('bebeCert');},
+ docDl:v=>toast('success','Baixando o documento',MYDOCS[+v].t+'.pdf'),
  apbFromEv:async v=>{await closeSheet();A.apbNew();if(S.apb.f){S.apb.f.date=v;}},
  apbPdf:(v,el)=>toast('success',v==='pdf'?'Baixando o certificado':'Compartilhando',v==='pdf'?'Certificado-'+S.apb.pedidos.find(x=>x.id===S.apb.cert).bebe.split(' ')[0]+'.pdf':'Escolha onde enviar.'),
 });
