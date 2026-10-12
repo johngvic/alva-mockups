@@ -517,8 +517,9 @@ V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).leng
  const grp=(t,rows)=>`<section class="mgrp"><p class="eb2">${t}</p>${rows}</section>`;
  return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
  <div class="pad stack g8" style="padding-top:16px">
+  ${S.role==='visitante'?'':ccMini()}
   ${grp('Você',row('Meus dados','meusDados',miss?miss+' dados faltando':'')+row('Notificações','notifs',nN?nN+(nN>1?' novas':' nova'):'',nN>0)+row('Privacidade e dados','privacidade',''))}
-  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Carteirinha de membro','carteirinha','Ativa')+row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
+  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
   ${['lider','admin'].includes(S.role)?grp('Liderança',row('Acompanhamentos','urgentes',URG.length+' urgentes',true)):''}
   ${grp('A igreja',row('Quem somos','quemSomos','')+row('Fale com a secretaria','secretaria','Seg a sex')+row('Assistente no WhatsApp','assistente',''))}
   <section class="stack g3">
@@ -1110,16 +1111,21 @@ V.assistente=()=>sub('Assistente no WhatsApp','Um jeito rápido de resolver algu
 
 /* 12. Privacidade */
 /* carteirinha digital do membro: QR de validação, vale enquanto a situação for Ativo ou Afastado (Secretaria no Alva Web) */
-V.carteirinha=()=>{const nm=S.user.name,num='AV-2026-'+String(1000+nm.split('').reduce((a,c)=>(a*31+c.charCodeAt(0))%9000,7)).slice(-4);
+const ccNum=()=>'AV-2026-'+String(1000+S.user.name.split('').reduce((a,c)=>(a*31+c.charCodeAt(0))%9000,7)).slice(-4);
+const ccMini=()=>`<button class="ccm" data-a="sub" data-v="carteirinha" aria-label="Abrir carteirinha de membro"><span class="ccm-qr">${ic('qr',22,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="ccm-k">Carteirinha</span><span class="ccm-n">Membro · ${ccNum()}</span></span><span class="ccm-st"><i></i>Ativa</span><span class="ccm-a" aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
+V.carteirinha=()=>{const nm=S.user.name,num=ccNum();
  if(S.role==='visitante')return sub('Carteirinha de membro','Disponível para quem já é membro da igreja.',`<p class="callout" style="margin:0">Peça para ser membro em <b>Mais › Quero ser membro</b>. Depois da integração, a sua carteirinha aparece aqui.</p>`);
  return sub('Carteirinha de membro','Sua identificação na igreja. Mostre na entrada de eventos e quando pedirem a sua membresia.',`
   <section class="cc" aria-label="Carteirinha de membro">
-   <div class="cc-top"><span class="cc-ch">${S.church.name}</span><span class="cc-st"><i></i>Ativo</span></div>
-   <div class="cc-nm"><small>Membro</small><b>${esc(nm)}</b></div>
-   <div class="cc-mid"><div class="cc-qr">${qrSVG(num)}</div></div>
+   <div class="cc-top"><span class="cc-ch"><span class="cc-lg">${ic('church',14,2)}</span>${S.church.name}</span><span class="cc-st"><i></i>Ativo</span></div>
+   <div class="cc-mid"><div class="cc-qr">${qrSVG(num)}</div><div class="cc-nm"><small>Membro</small><b>${esc(nm)}</b></div></div>
    <div class="cc-ft"><span><small>Número</small><b>${num}</b></span><span><small>Membro desde</small><b>mar/2023</b></span></div>
   </section>
-  <p class="callout" style="margin:4px 0 0">O QR confere, na hora, se você é membro. Ele mostra só o nome e se a carteirinha está válida. Se a situação mudar para <b>transferido</b>, <b>desligado</b> ou <b>falecido</b>, ela deixa de valer.</p>`);};
+  <section class="cci" aria-label="Como funciona">
+   <div class="cci-r"><span class="cci-i">${ic('qr',18,2)}</span><span><b>Confere na hora</b><small>Quem lê o QR vê se você é membro, sem precisar de documento.</small></span></div>
+   <div class="cci-r"><span class="cci-i">${ic('eyeOff',18,2)}</span><span><b>Mostra só o essencial</b><small>Aparecem apenas o seu nome e se a carteirinha está válida.</small></span></div>
+   <div class="cci-r"><span class="cci-i warn">${ic('info',18,2)}</span><span><b>Quando deixa de valer</b><small>Se a sua situação mudar para <b>transferido</b>, <b>desligado</b> ou <b>falecido</b>.</small></span></div>
+  </section>`);};
 /* meus documentos: o que a secretaria emitiu para a pessoa (e certificados de curso). Só consulta e download; o app não edita nem gera nada */
 const IG_FILA=5; /* pessoas já na fila da integração (igual ao protótipo web) */
 const MYDOCS=[{t:'Certidão de batismo',n:'2026-0002',d:'2026-06-20',i:'bucket'},{t:'Declaração de membro',n:'2026-0014',d:'2026-08-04',i:'clipboard'},{t:'Certificado de apresentação',n:'2026-0008',d:'2026-09-06',i:'pacifier',who:'Lucas Pereira'},{t:'Certificado do curso Fundamentos da fé',d:'2026-07-12',i:'award',src:'Cursos'}];
@@ -1250,7 +1256,7 @@ const _login=F.login;F.login=async function(f){await _login(f);const e=(S.email|
  if(e==='renan.ferreira@email.com'&&!S.insc.mine.length)S.insc.mine.push({id:'i1',st:'ok',method:'-'});
  if(e==='giovanna.martins@email.com'&&!S.give.hist.length)S.give.hist.push({v:350,dest:'Contribuição livre',m:'Pix',d:'05/09/2026',st:'ok'},{v:350,dest:'Contribuição livre',m:'Pix',d:'05/08/2026',st:'ok'},{v:120,dest:'Retiro de Jovens 2026',m:'Cartão',d:'20/07/2026',st:'ok'});
  if(S.user&&S.user.name)S.me.nome=S.user.name;};
-RAIL.push(...[['carteirinha','Mais › Carteirinha de membro'],['documentos','Mais › Meus documentos'],['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
+RAIL.push(...[['carteirinha','Mais › Você › Carteirinha de membro'],['documentos','Mais › Meus documentos'],['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
 $('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
 /* ---------- cenários por tipo de usuário ---------- */
@@ -1793,4 +1799,4 @@ S.insc.mine.push({id:'i3',rid:'r-i3',st:'ok',method:'Cartão',tk:'t2',buy:[],vch
 
 showSplash();
 
-})();
+})();
