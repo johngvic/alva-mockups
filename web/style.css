@@ -5189,3 +5189,8 @@ mark{background:color-mix(in srgb,var(--st-sol-bg) 85%,transparent);color:inheri
 .au-sky.still .au-tl em{animation:auShimmer 3.2s linear infinite}
 @media (max-width:900px){.au-tl{white-space:normal;text-wrap:balance}}
 @media (prefers-reduced-motion:reduce){.au-tl em{animation:none!important}}
+
+.mn-f{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+.axlt .tbar .chips:first-child{margin-left:0}
+.fd-pf{display:flex;align-items:center;justify-content:space-between;gap:12px}

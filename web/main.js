@@ -1513,14 +1513,15 @@ function mnRows(max){
  max=max||Math.max(...MINIS.map(m=>m.mem));const q=norm(S.mnq);
  const l=MINIS.filter(m=>(S.mnf==='todos'||(S.mnf==='ativos')===m.active)&&(!q||norm(m.n+' '+m.lead).includes(q))).sort((a,b)=>b.mem-a.mem);
  if(!l.length)return `<div class="mempty"><p>Nenhum ministério.</p><span>Nada corresponde a esse filtro.</span></div>`;
+ const sig=S.mnq+'|'+S.mnf;if(S.mnSig!==sig){S.mnSig=sig;S.mnpg=1;}const pp=S.mnpp||8,P=Math.max(1,Math.ceil(l.length/pp));S.mnpg=Math.min(Math.max(1,S.mnpg||1),P);const c=S.mnpg,pg=l.slice((c-1)*pp,c*pp);
  return `<div class="trow mn thead"><span>Ministério</span><span>Líder</span><span>Membros</span><span>Times</span><span>Status</span><span></span></div>
- ${l.map(m=>`<div class="trow mn ${m.active?'':'off'}" tabindex="0" data-a="mnOpen" data-v="${m.id}"><span class="tn">${mTile(m)}<span class="hn"><b>${esc(m.n)}</b><span>Ministério de ${esc(m.n)}</span></span></span>
+ ${pg.map(m=>`<div class="trow mn ${m.active?'':'off'}" tabindex="0" data-a="mnOpen" data-v="${m.id}"><span class="tn">${mTile(m)}<span class="hn"><b>${esc(m.n)}</b><span>Ministério de ${esc(m.n)}</span></span></span>
   <span class="hl"><span class="av" style="background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${initials(m.lead)}</span>${esc(m.lead)}</span>
   <span class="mnm"><span class="tr"><i style="width:${Math.round(m.mem/max*100)}%"></i></span><b>${m.mem}</b></span>
   <span class="mnt"><b>${tCount(m)}</b> ${tCount(m)===1?'time':'times'}</span>
   <span class="ts">${m.active?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Ativo</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Inativo</span>'}</span>
   <span class="tc">${ic('chevR',16)}</span></div>`).join('')}
- <div class="tfoot"><span>${l.length} ministérios</span></div>`;
+ <div class="tfoot mn-f"><span>${P>1?`${(c-1)*pp+1}–${Math.min(l.length,c*pp)} de ${l.length} ministérios`:`${l.length} ${l.length===1?'ministério':'ministérios'}`}</span>${P>1?(()=>{const n=[];for(let i=1;i<=P;i++){if(i===1||i===P||Math.abs(i-c)<=1)n.push(i);else if(n[n.length-1]!=='…')n.push('…');}return `<div class="mpg" role="navigation" aria-label="Páginas"><button class="ibtn sm" data-a="mnPg" data-v="${c-1}" ${c===1?'disabled':''} aria-label="Página anterior">${ic('chevL',14,2)}</button>${n.map(i=>i==='…'?'<span class="mpg-e">…</span>':`<button class="mpg-n ${i===c?'on':''}" data-a="mnPg" data-v="${i}">${i}</button>`).join('')}<button class="ibtn sm" data-a="mnPg" data-v="${c+1}" ${c===P?'disabled':''} aria-label="Próxima página">${ic('chevR',14,2)}</button></div>`;})():''}</div>`;
 }
 function miniDetail(){
  const m=mnById(S.mini);if(!m){S.mini=null;return minisList();}
@@ -9108,5 +9109,42 @@ function axTrList(){const T=DISTS.flatMap(d=>d.tr.map(t=>({it:itm(d.item),from:t
 {const _t=axTrans;axTrans=function(){let h=_t.apply(this,arguments);const i=h.indexOf('<section class="card ax-feed rise"');if(i<0)return h;const j=h.indexOf('</section>',i)+10;
  return h.slice(0,i)+`<section class="card mtab axlt rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="trq" placeholder="Buscar item ou destino" value="${esc(S.trq)}" autocomplete="off"></label></div><div id="trL">${axTrList()}</div><div class="tfoot"><span>Repasses feitos a partir de Distribuições, sem passar pelo estoque central.</span></div></section>`+h.slice(j);};}
 document.addEventListener('input',e=>{const id=e.target&&e.target.id;if(id==='mvq'){S.mvq=e.target.value;$('#mvL').innerHTML=axMvList();}else if(id==='trq'){S.trq=e.target.value;$('#trL').innerHTML=axTrList();}});
+
+/* ---------- Ministérios: paginação que cabe na tela ---------- */
+Object.assign(A,{mnPg:v=>{S.mnpg=+v;const b=$('#mnrows');if(b){b.innerHTML=mnRows();b.closest('.mtab').scrollIntoView({block:'nearest',behavior:'smooth'});}}});
+function mnFit(){const box=$('#mnrows');if(!box||S.active!=='ministerios'||S.mini)return;const r=box.querySelector('.trow.mn:not(.thead)');if(!r)return;
+ const top=box.getBoundingClientRect().top+window.scrollY,head=(box.querySelector('.thead')||{}).offsetHeight||0,foot=(box.querySelector('.tfoot')||{}).offsetHeight||52;
+ const avail=window.innerHeight-Math.min(top,window.innerHeight*.55)-head-foot-28,pp=Math.max(4,Math.min(30,Math.floor(avail/r.offsetHeight)));
+ if(pp!==(S.mnpp||8)){const first=((S.mnpg||1)-1)*(S.mnpp||8);S.mnpp=pp;S.mnpg=Math.floor(first/pp)+1;box.innerHTML=mnRows();}}
+{const base=render;render=function(){const x=base.apply(this,arguments);requestAnimationFrame(mnFit);return x;};}
+window.addEventListener('resize',()=>{clearTimeout(window._mnT);window._mnT=setTimeout(mnFit,150);});
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='mnq')requestAnimationFrame(mnFit);});
+
+/* ---------- Lojas: paginação de Itens e Vendas ---------- */
+const fdPagedPage=()=>/^(cafe|rest|shop)-(items|sales)$/.test(S.active);
+{const base=foodPage;foodPage=function(){if(!fdPagedPage())return base.apply(this,arguments);const keep=S.foodRows;S.foodRows=1e9;const h=base.apply(this,arguments);S.foodRows=keep;return h;};}
+function fdPaginate(){if(!fdPagedPage())return;const sec=$('#main .mtab');if(!sec)return;const rows=[...sec.querySelectorAll('.trow:not(.thead)')];if(!rows.length)return;
+ const sig=[S.active,S.foodQuery,S.foodStatus,S.foodMethod,S.foodCat,S.foodItemF,S.foodMode,S.foodMonth,S.foodDay,rows.length].join('|');if(S.fdSig!==sig){S.fdSig=sig;S.fdPg=1;}
+ rows.forEach(r=>r.style.display='');const rh=rows[0].offsetHeight||60,top=rows[0].getBoundingClientRect().top+window.scrollY;
+ const avail=window.innerHeight-Math.min(top,window.innerHeight*.6)-60-28,pp=Math.max(4,Math.min(30,Math.floor(avail/rh))),P=Math.max(1,Math.ceil(rows.length/pp));S.fdPg=Math.min(Math.max(1,S.fdPg||1),P);const c=S.fdPg;
+ rows.forEach((r,i)=>{r.style.display=i>=(c-1)*pp&&i<c*pp?'':'none';});
+ const noun=S.active.endsWith('sales')?['venda','vendas']:['item','itens'],n=[];for(let i=1;i<=P;i++){if(i===1||i===P||Math.abs(i-c)<=1)n.push(i);else if(n[n.length-1]!=='…')n.push('…');}
+ let f=sec.querySelector(':scope > .tfoot');if(!f){f=document.createElement('div');f.className='tfoot';sec.appendChild(f);}f.classList.add('fd-pf');
+ f.innerHTML=`<span>${P>1?`${(c-1)*pp+1}–${Math.min(rows.length,c*pp)} de ${rows.length} ${noun[1]}`:`${rows.length} ${rows.length===1?noun[0]:noun[1]}`}</span>${P>1?`<div class="mpg" role="navigation" aria-label="Páginas"><button class="ibtn sm" data-a="fdPg" data-v="${c-1}" ${c===1?'disabled':''} aria-label="Página anterior">${ic('chevL',14,2)}</button>${n.map(i=>i==='…'?'<span class="mpg-e">…</span>':`<button class="mpg-n ${i===c?'on':''}" data-a="fdPg" data-v="${i}">${i}</button>`).join('')}<button class="ibtn sm" data-a="fdPg" data-v="${c+1}" ${c===P?'disabled':''} aria-label="Próxima página">${ic('chevR',14,2)}</button></div>`:''}`;}
+Object.assign(A,{fdPg:v=>{S.fdPg=+v;fdPaginate();$('#main .mtab')?.scrollIntoView({block:'nearest',behavior:'smooth'});}});
+{const base=render;render=function(){const x=base.apply(this,arguments);requestAnimationFrame(fdPaginate);return x;};}
+window.addEventListener('resize',()=>{clearTimeout(window._fdT);window._fdT=setTimeout(fdPaginate,150);});
+/* ---------- Lojas: movimentações em cadeia de eventos ---------- */
+function fdLog(k,all,shown,kinds,cnt,label,more){const g={};shown.forEach(m=>(g[m.date]=g[m.date]||[]).push(m));
+ return `<section class="card mtab axlt rise" style="--d:1"><div class="tbar"><div class="chips">${[['all','Todas',cnt('all')],...kinds.map(([kk,l])=>[kk,l,cnt(kk)])].map(x=>`<button class="chipf ${S.foodMv===x[0]?'on':''}" data-a="foodMv" data-v="${x[0]}">${x[0]!=='all'?`<i style="background:${(FOOD_MVT[x[0]==='adj'?'correction':x[0]]||FOOD_MVT.correction)[2]}"></i>`:''}${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
+  ${Object.keys(g).length?Object.keys(g).sort().reverse().map(d=>`<div class="mgh" style="position:static"><span>${d===FOOD_DATE?'Hoje':wd(d)+', '+fmtD(d)}</span></div><ol class="alog axl">${g[d].map(m=>{const v=FOOD_MVT[m.kind]||FOOD_MVT.correction,it=foodItem(k,m.item);return `<li><span class="at axq ${m.qty>0?'in':'out'}">${m.qty>0?'+':'−'}${Math.abs(m.qty)}</span><span class="adot" style="background:${v[2]}"></span><span class="ab"><span><b>${esc(it?(it.name||it.n):label)}</b> · <span class="aa" style="color:${v[2]}">${v[0].toLowerCase()}</span> <span class="soft">${m.html}</span></span></span></li>`;}).join('')}</ol>`).join(''):foodEmpty('Nenhuma movimentação no período.')}
+  ${more}</section>`;}
+foodMovements=function(k){const manual=FOOD_MOVES.filter(m=>m.store===k),out=FOOD_SALES.filter(s=>s.store===k&&s.status!=='cancelled').flatMap(s=>s.lines.map(l=>({id:s.id,item:l.item,date:s.date,kind:'sale',qty:-l.qty,reason:s.id})));
+ const per=[...manual,...out].filter(foodPeriod),all=per.filter(m=>S.foodMv==='all'||m.kind===S.foodMv).sort((a,b)=>b.date.localeCompare(a.date)),shown=all.slice(0,S.foodRows).map(m=>({...m,html:m.kind==='sale'?`<button class="lnk" data-a="foodSale" data-v="${m.id}">${m.id}</button>`:esc(m.reason||'')}));
+ const kinds=Object.keys(FOOD_MVT).filter(x=>per.some(m=>m.kind===x)).map(x=>[x,x==='sale'?'Vendas':FOOD_MVT[x][0]==='Correção'?'Correções':FOOD_MVT[x][0]+'s']),cnt=x=>x==='all'?per.length:per.filter(m=>m.kind===x).length;
+ return foodHead(k,'Movimentações','Tudo o que entrou e saiu, numa linha do tempo',`${rpBtn(k,'movimentacoes')}`,foodToolbar())+fdLog(k,all,shown,kinds,cnt,'Item removido',foodMore(S.foodRows,all.length,all.length===1?'movimentação':'movimentações'));};
+nxShopMoves=function(){const per=FOOD_MOVES.filter(m=>m.store==='shop'&&m.date>'2026-04-01'&&foodPeriod(m)),kinds=[['entry','Entradas'],['sale','Vendas'],['refund','Estornos'],['adj','Ajustes']],is=(m,x)=>x==='adj'?(m.kind==='correction'||m.kind==='loss'):m.kind===x;
+ const all=per.filter(m=>S.foodMv==='all'||is(m,S.foodMv)).sort((a,b)=>b.date.localeCompare(a.date)),shown=all.slice(0,S.foodRows).map(m=>{const ref=String(m.reason||''),sid=ref.split(' ')[0];return {...m,html:m.kind==='sale'||m.kind==='refund'?`<button class="lnk" data-a="nxSaleOpen" data-v="${esc(sid)}">${esc(sid)}</button>${ref.includes(' · ')?' · '+esc(ref.split(' · ').slice(1).join(' · ')):''}`:esc(ref)};}),cnt=x=>x==='all'?per.length:per.filter(m=>is(m,x)).length;
+ return foodHead('shop','Movimentações','Tudo o que entrou e saiu do estoque, numa linha do tempo',`${rpBtn('shop','movimentacoes')}<button class="btn pri" data-a="foodGo" data-v="shop|items">${ic('plus',15,2.2)}Registrar entrada</button>`,foodToolbar())+fdLog('shop',all,shown,kinds,cnt,'Produto removido',foodMore(S.foodRows,all.length,all.length===1?'movimentação':'movimentações'));};
 
 render();
