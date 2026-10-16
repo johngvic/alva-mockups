@@ -1356,3 +1356,37 @@ article.lim-ov{background:linear-gradient(165deg,color-mix(in srgb,var(--danger-
 .cc-mid{display:flex;justify-content:center;padding:6px 0}
 .cc-qr{padding:10px;border-radius:18px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}.cc-qr svg{display:block;width:176px;height:176px}
 .cc-ft{display:flex;justify-content:space-between;gap:12px}.cc-ft span{display:flex;flex-direction:column;gap:5px}.cc-ft b{font:600 15px/18px var(--font-text);font-variant-numeric:tabular-nums}
+
+/* carteirinha: atalho na seção Você + refinos do cartão */
+.ccm{appearance:none;border:0;width:100%;display:flex;align-items:center;gap:12px;margin:0;padding:14px 16px 14px 14px;border-radius:20px;color:#fff;text-align:left;cursor:pointer;font-family:var(--font-text);background:linear-gradient(135deg,#0b5f8f 0%,#07486e 60%,#05324d 100%);box-shadow:0 10px 24px rgba(5,50,77,.28),inset 0 1px 0 rgba(255,255,255,.18);position:relative;overflow:hidden;transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+.ccm::after{content:"";position:absolute;right:-40px;top:-50px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%);pointer-events:none}
+.ccm:hover,.ccm:focus-visible{transform:translateY(-1px);box-shadow:0 14px 30px rgba(5,50,77,.34),inset 0 1px 0 rgba(255,255,255,.18)}
+.ccm:active{transform:scale(.985)}
+.ccm-qr{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:#fff;color:#05324d;box-shadow:0 4px 10px rgba(0,0,0,.2)}
+.ccm-k{font:600 17px/22px var(--font-display);letter-spacing:-.01em}
+.ccm-n{font:500 12px/16px var(--font-text);opacity:.75;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ccm-st{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:99px;background:rgba(255,255,255,.16);font:600 12px/1 var(--font-text)}
+.ccm-st i,.cc-live i{width:7px;height:7px;border-radius:50%;background:#7be08a;box-shadow:0 0 0 3px rgba(123,224,138,.22)}
+.ccm-a{flex:none;opacity:.7;display:flex}
+.cc{gap:16px;background:radial-gradient(120% 80% at 0% 100%,rgba(70,170,220,.35),transparent 60%),linear-gradient(155deg,#0b5f8f 0%,#07486e 55%,#05324d 100%)}
+.cc::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 2px,transparent 2px 14px);pointer-events:none}
+.cc>*{position:relative}
+.cc-ch{display:inline-flex;align-items:center;gap:8px}
+.cc-lg{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.16)}
+.cc-id{display:flex;align-items:center;gap:12px}
+.cc-av{width:48px;height:48px;font-size:17px;flex:none;color:#05324d;background:linear-gradient(140deg,#fff,#d6ecf7);box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+.cc-mid{flex-direction:column;align-items:center;gap:14px;padding:4px 0 2px}
+.cc-mid .cc-nm{align-items:center;text-align:center}
+.cc-live{display:inline-flex;align-items:center;gap:7px;font:600 12px/1 var(--font-text);opacity:.9}
+.cc-live i{animation:ccPulse 2s ease-in-out infinite}
+@keyframes ccPulse{50%{box-shadow:0 0 0 6px rgba(123,224,138,0)}}
+.cc-ft{padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
+.cc-ft span:last-child{text-align:right;align-items:flex-end}
+.cci{display:flex;flex-direction:column;gap:2px;padding:6px;border-radius:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--brand) 7%,var(--surface-raised)),var(--surface-raised));border:1px solid var(--line)}
+.cci-r{display:flex;gap:12px;align-items:flex-start;padding:10px}
+.cci-r+.cci-r{border-top:1px solid var(--line)}
+.cci-r>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cci-r b{font:600 15px/20px var(--font-text);color:var(--ink)}
+.cci-r small{font:400 13px/18px var(--font-text);color:var(--ink-muted)}.cci-r small b{font-size:13px;line-height:18px}
+.cci-i{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:var(--brand-text);background:linear-gradient(140deg,color-mix(in srgb,var(--brand) 18%,transparent),color-mix(in srgb,var(--brand) 8%,transparent))}
+.cci-i.warn{color:#b4521a;background:linear-gradient(140deg,rgba(232,130,60,.22),rgba(232,130,60,.08))}

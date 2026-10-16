@@ -1,10 +1,12 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import includePlugin from './vite-include.js';
 
 const page = (p) => fileURLToPath(new URL(p, import.meta.url));
 
 // Site com várias páginas: cada protótipo é uma entrada do build.
 export default defineConfig({
+  plugins: [includePlugin()],
   build: {
     outDir: 'dist',
     emptyOutDir: true,

@@ -517,8 +517,9 @@ V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).leng
  const grp=(t,rows)=>`<section class="mgrp"><p class="eb2">${t}</p>${rows}</section>`;
  return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
  <div class="pad stack g8" style="padding-top:16px">
+  ${S.role==='visitante'?'':ccMini()}
   ${grp('Você',row('Meus dados','meusDados',miss?miss+' dados faltando':'')+row('Notificações','notifs',nN?nN+(nN>1?' novas':' nova'):'',nN>0)+row('Privacidade e dados','privacidade',''))}
-  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Carteirinha de membro','carteirinha','Ativa')+row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
+  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')+row('Batismo','batismo',S.bat.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
   ${['lider','admin'].includes(S.role)?grp('Liderança',row('Acompanhamentos','urgentes',URG.length+' urgentes',true)):''}
   ${grp('A igreja',row('Quem somos','quemSomos','')+row('Fale com a secretaria','secretaria','Seg a sex')+row('Assistente no WhatsApp','assistente',''))}
   <section class="stack g3">
@@ -1110,16 +1111,21 @@ V.assistente=()=>sub('Assistente no WhatsApp','Um jeito rápido de resolver algu
 
 /* 12. Privacidade */
 /* carteirinha digital do membro: QR de validação, vale enquanto a situação for Ativo ou Afastado (Secretaria no Alva Web) */
-V.carteirinha=()=>{const nm=S.user.name,num='AV-2026-'+String(1000+nm.split('').reduce((a,c)=>(a*31+c.charCodeAt(0))%9000,7)).slice(-4);
+const ccNum=()=>'AV-2026-'+String(1000+S.user.name.split('').reduce((a,c)=>(a*31+c.charCodeAt(0))%9000,7)).slice(-4);
+const ccMini=()=>`<button class="ccm" data-a="sub" data-v="carteirinha" aria-label="Abrir carteirinha de membro"><span class="ccm-qr">${ic('qr',22,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="ccm-k">Carteirinha</span><span class="ccm-n">Membro · ${ccNum()}</span></span><span class="ccm-st"><i></i>Ativa</span><span class="ccm-a" aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
+V.carteirinha=()=>{const nm=S.user.name,num=ccNum();
  if(S.role==='visitante')return sub('Carteirinha de membro','Disponível para quem já é membro da igreja.',`<p class="callout" style="margin:0">Peça para ser membro em <b>Mais › Quero ser membro</b>. Depois da integração, a sua carteirinha aparece aqui.</p>`);
  return sub('Carteirinha de membro','Sua identificação na igreja. Mostre na entrada de eventos e quando pedirem a sua membresia.',`
   <section class="cc" aria-label="Carteirinha de membro">
-   <div class="cc-top"><span class="cc-ch">${S.church.name}</span><span class="cc-st"><i></i>Ativo</span></div>
-   <div class="cc-nm"><small>Membro</small><b>${esc(nm)}</b></div>
-   <div class="cc-mid"><div class="cc-qr">${qrSVG(num)}</div></div>
+   <div class="cc-top"><span class="cc-ch"><span class="cc-lg">${ic('church',14,2)}</span>${S.church.name}</span><span class="cc-st"><i></i>Ativo</span></div>
+   <div class="cc-mid"><div class="cc-qr">${qrSVG(num)}</div><div class="cc-nm"><small>Membro</small><b>${esc(nm)}</b></div></div>
    <div class="cc-ft"><span><small>Número</small><b>${num}</b></span><span><small>Membro desde</small><b>mar/2023</b></span></div>
   </section>
-  <p class="callout" style="margin:4px 0 0">O QR confere, na hora, se você é membro. Ele mostra só o nome e se a carteirinha está válida. Se a situação mudar para <b>transferido</b>, <b>desligado</b> ou <b>falecido</b>, ela deixa de valer.</p>`);};
+  <section class="cci" aria-label="Como funciona">
+   <div class="cci-r"><span class="cci-i">${ic('qr',18,2)}</span><span><b>Confere na hora</b><small>Quem lê o QR vê se você é membro, sem precisar de documento.</small></span></div>
+   <div class="cci-r"><span class="cci-i">${ic('eyeOff',18,2)}</span><span><b>Mostra só o essencial</b><small>Aparecem apenas o seu nome e se a carteirinha está válida.</small></span></div>
+   <div class="cci-r"><span class="cci-i warn">${ic('info',18,2)}</span><span><b>Quando deixa de valer</b><small>Se a sua situação mudar para <b>transferido</b>, <b>desligado</b> ou <b>falecido</b>.</small></span></div>
+  </section>`);};
 /* meus documentos: o que a secretaria emitiu para a pessoa (e certificados de curso). Só consulta e download; o app não edita nem gera nada */
 const IG_FILA=5; /* pessoas já na fila da integração (igual ao protótipo web) */
 const MYDOCS=[{t:'Certidão de batismo',n:'2026-0002',d:'2026-06-20',i:'bucket'},{t:'Declaração de membro',n:'2026-0014',d:'2026-08-04',i:'clipboard'},{t:'Certificado de apresentação',n:'2026-0008',d:'2026-09-06',i:'pacifier',who:'Lucas Pereira'},{t:'Certificado do curso Fundamentos da fé',d:'2026-07-12',i:'award',src:'Cursos'}];
@@ -1250,7 +1256,7 @@ const _login=F.login;F.login=async function(f){await _login(f);const e=(S.email|
  if(e==='renan.ferreira@email.com'&&!S.insc.mine.length)S.insc.mine.push({id:'i1',st:'ok',method:'-'});
  if(e==='giovanna.martins@email.com'&&!S.give.hist.length)S.give.hist.push({v:350,dest:'Contribuição livre',m:'Pix',d:'05/09/2026',st:'ok'},{v:350,dest:'Contribuição livre',m:'Pix',d:'05/08/2026',st:'ok'},{v:120,dest:'Retiro de Jovens 2026',m:'Cartão',d:'20/07/2026',st:'ok'});
  if(S.user&&S.user.name)S.me.nome=S.user.name;};
-RAIL.push(...[['carteirinha','Mais › Carteirinha de membro'],['documentos','Mais › Meus documentos'],['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
+RAIL.push(...[['carteirinha','Mais › Você › Carteirinha de membro'],['documentos','Mais › Meus documentos'],['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
 $('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
 /* ---------- cenários por tipo de usuário ---------- */
@@ -1372,7 +1378,7 @@ Object.assign(A,{
 
 /* ================= Apresentação de Bebês ao Senhor (membro) ================= */
 S.apb={max:24,prazo:7,
- datas:[{id:'bd1',y:2026,m:10,d:4,h:'10h',t:'Culto de Celebração',vagas:5,used:2},{id:'bd2',y:2026,m:10,d:11,h:'10h',t:'Culto de Celebração',vagas:6,used:2},{id:'bd4',y:2026,m:10,d:25,h:'10h',t:'Culto de Celebração',vagas:6,used:6},{id:'bd5',y:2026,m:11,d:8,h:'10h',t:'Culto de Celebração',vagas:6,used:1}],
+ datas:[{id:'bd1',y:2026,m:10,d:4,h:'10h',t:'Apresentação de bebês',vagas:5,used:2},{id:'bd2',y:2026,m:10,d:11,h:'10h',t:'Apresentação de bebês',vagas:6,used:2},{id:'bd4',y:2026,m:10,d:25,h:'10h',t:'Apresentação de bebês',vagas:6,used:6},{id:'bd5',y:2026,m:11,d:8,h:'10h',t:'Apresentação de bebês',vagas:6,used:1}],
  kids:[{id:'k1',n:'Helena Pereira',nasc:'2026-02-10'},{id:'k2',n:'Lucas Pereira',nasc:'2023-05-02'}],
  pedidos:[{id:'ap1',kid:'k2',bebe:'Lucas Pereira',cert:'Lucas Pereira',pais:['Rafael Pereira','Camila Pereira'],when:'Dom, 14 mai 2023 · 10h',culto:'Culto de Celebração',st:'realizada',emit:true}],
  f:null};
@@ -1383,7 +1389,7 @@ const apbMaxTx=()=>S.apb.max%12?`${S.apb.max} meses`:`${S.apb.max/12} anos`;
 const apbDays=dt=>Math.round((new Date(dt.y,dt.m-1,dt.d,12)-new Date(TODAY.y,TODAY.m-1,TODAY.d,12))/864e5);
 const apbKidNow=k=>apbM(k.nasc,TODAY.y,TODAY.m,TODAY.d);
 const apbActive=kid=>S.apb.pedidos.find(p=>p.kid===kid&&['aguardando','confirmado','realizada'].includes(p.st));
-function apbCertHTML(p){return `<div class="apb-cert"><div class="apb-cert-in"><span class="apb-c-eb">Certificado de</span><h2 class="apb-c-t">Apresentação ao Senhor</h2><p class="apb-c-tx">Certificamos que</p><p class="apb-c-n">${esc(p.cert)}</p><p class="apb-c-tx">filho(a) de ${p.pais.map(esc).join(' e ')}, foi apresentado(a) ao Senhor diante da igreja reunida no ${esc(p.culto)}, ${p.when.split(' · ')[0].replace(/^\w+, /,'')}.</p><blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote><div class="apb-c-sig"><span><i></i>Pr. Rafael Pereira</span><span><i></i>${esc(S.church.name||'Alva Sede')}</span></div></div></div>`;}
+function apbCertHTML(p){return `<div class="apb-cert"><div class="apb-cert-in"><span class="apb-c-eb">Certificado de</span><h2 class="apb-c-t">Apresentação ao Senhor</h2><p class="apb-c-tx">Certificamos que</p><p class="apb-c-n">${esc(p.cert)}</p><p class="apb-c-tx">filho(a) de ${p.pais.map(esc).join(' e ')}, foi apresentado(a) ao Senhor diante da igreja reunida em ${p.when.split(' · ')[0].replace(/^\w+, /,'')}.</p><blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote><div class="apb-c-sig"><span><i></i>Pr. Rafael Pereira</span><span><i></i>${esc(S.church.name||'Alva Sede')}</span></div></div></div>`;}
 
 V.bebes=()=>{const P=S.apb.pedidos,open=S.apb.datas.filter(d=>apbDays(d)>=S.apb.prazo&&d.used<d.vagas);
  return {sb:'var(--ink)',html:`${subHead('Apresentações','Seu bebê apresentado ao Senhor no culto, com a igreja reunida.')}
@@ -1391,21 +1397,21 @@ V.bebes=()=>{const P=S.apb.pedidos,open=S.apb.datas.filter(d=>apbDays(d)>=S.apb.
   <section class="apb-hero"><span class="apb-hi">${ic('pacifier',22,1.8)}</span><blockquote>“Levaram-no a Jerusalém, para o apresentarem ao Senhor.”<cite>Lucas 2:22</cite></blockquote><p>Os pais trazem o bebê à frente no culto, a igreja ora pela família e vocês recebem o certificado no app.</p></section>
   ${P.length?`<section class="stack g3"><p class="eb2">Seus pedidos</p>${P.map(p=>{const s=APB_ST[p.st];return `<article class="card apb-p ${p.st}"><div class="row g3" style="align-items:flex-start"><span class="apb-av">${ic('pacifier',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${esc(p.bebe)}</span><span class="it-sub">${p.culto} · ${p.when}</span></div>${status(s[0],s[1])}</div>
    ${p.st==='aguardando'?`<p class="apb-note">${ic('clock',14,2)}A secretaria confirma em até 3 dias úteis. Você recebe um aviso aqui no app.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Cancelar pedido</button>`:p.st==='confirmado'?`<p class="apb-note ok">${ic('check',14,2.4)}Chegue 20 minutos antes e procure a recepção. Vocês serão chamados à frente.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="apbCancel" data-v="${p.id}">Não vamos conseguir</button>`:p.st==='realizada'?(p.emit?`<button class="btn outline md block" data-a="apbCert" data-v="${p.id}">${ic('award',16,2)}Ver certificado</button>`:`<p class="apb-note">${ic('clock',14,2)}A secretaria está preparando o certificado. Você recebe um aviso aqui quando estiver pronto.</p>`):p.why?`<p class="apb-note bad">${ic('info',14,2)}${esc(p.why)}</p>`:''}</article>`;}).join('')}</section>`:''}
-  <section class="stack g3"><p class="eb2">Como funciona</p><ol class="steps"><li>Escolha um dos cultos com apresentação.</li><li>A secretaria confirma o pedido.</li><li>No culto, vocês apresentam o bebê à frente.</li><li>A secretaria emite o certificado, que chega aqui no app e em Meus documentos.</li></ol>
-   <p class="foot">Para bebês de até ${apbMaxTx()}. Pelo menos um dos responsáveis precisa ser membro. Pedidos até ${S.apb.prazo} dias antes do culto.</p></section>
+  <section class="stack g3"><p class="eb2">Como funciona</p><ol class="steps"><li>Escolha uma das datas de apresentação.</li><li>A secretaria confirma o pedido.</li><li>No culto, vocês apresentam o bebê à frente.</li><li>A secretaria emite o certificado, que chega aqui no app e em Meus documentos.</li></ol>
+   <p class="foot">Para bebês de até ${apbMaxTx()}. Pelo menos um dos responsáveis precisa ser membro. Pedidos até ${S.apb.prazo} dias antes da data.</p></section>
  </div>
  <div class="apb-dock"><button class="btn primary block" data-a="apbNew" ${open.length?'':'disabled'}>${open.length?'Agendar apresentação':'Sem datas abertas no momento'}</button></div>`};};
 
 V.bebeNovo=()=>{const F=S.apb.f,st=F.step;
  const steps=['Bebê','Data','Confirmar'];
  let body='';
- if(st===1){const pd=F.date&&S.apb.datas.find(x=>x.id===F.date);body=`${pd?`<div class="apb-evb"><span class="apb-av">${ic('calendar',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${pd.t}</span><span class="it-sub">${fmtK(K(pd.y,pd.m,pd.d))} · ${pd.h} · culto escolhido</span></div></div>`:''}<div class="stack g3"><p class="eb2">Quem será apresentado?</p>${S.apb.kids.map(k=>{const n=apbKidNow(k),done=apbActive(k.id),ov=n>S.apb.max,dis=done||ov;return `<button class="apb-k ${F.kid===k.id?'on':''}" data-a="apbKid" data-v="${k.id}" ${dis?'disabled':''}><span class="apb-av">${ic('pacifier',18,1.8)}</span><span class="grow stack" style="gap:2px;align-items:flex-start"><span class="it-title">${esc(k.n)}</span><span class="it-sub">${apbAge(n)}${done?` · ${done.st==='realizada'?'já apresentado(a)':'já tem pedido'}`:ov?` · acima de ${apbMaxTx()}`:''}</span></span>${dis?ic('lock',16,2):`<span class="apb-rd"></span>`}</button>`;}).join('')}
+ if(st===1){const pd=F.date&&S.apb.datas.find(x=>x.id===F.date);body=`${pd?`<div class="apb-evb"><span class="apb-av">${ic('calendar',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${pd.t}</span><span class="it-sub">${fmtK(K(pd.y,pd.m,pd.d))} · ${pd.h} · data escolhida</span></div></div>`:''}<div class="stack g3"><p class="eb2">Quem será apresentado?</p>${S.apb.kids.map(k=>{const n=apbKidNow(k),done=apbActive(k.id),ov=n>S.apb.max,dis=done||ov;return `<button class="apb-k ${F.kid===k.id?'on':''}" data-a="apbKid" data-v="${k.id}" ${dis?'disabled':''}><span class="apb-av">${ic('pacifier',18,1.8)}</span><span class="grow stack" style="gap:2px;align-items:flex-start"><span class="it-title">${esc(k.n)}</span><span class="it-sub">${apbAge(n)}${done?` · ${done.st==='realizada'?'já apresentado(a)':'já tem pedido'}`:ov?` · acima de ${apbMaxTx()}`:''}</span></span>${dis?ic('lock',16,2):`<span class="apb-rd"></span>`}</button>`;}).join('')}
    ${S.apb.kids.some(k=>apbKidNow(k)>S.apb.max&&!apbActive(k.id))?`<p class="foot">${ic('info',13,2)} Criança acima de ${apbMaxTx()}? Fale com a secretaria.</p>`:''}
    <button class="apb-add ${F.adding?'on':''}" data-a="apbAddKid">${ic('plus',18,2.2)}Cadastrar outro bebê</button>
    ${F.adding?`<div class="stack g4 apb-nk">${field({id:'apbN',label:'Nome completo do bebê',ph:'Como no registro',val:F.nk.n})}${field({id:'apbD',label:'Data de nascimento',type:'date',val:F.nk.d})}<button class="btn outline md block" data-a="apbSaveKid">Adicionar à família</button></div>`:''}</div>`;}
- if(st===2){const k=S.apb.kids.find(x=>x.id===F.kid);body=`<div class="stack g3"><p class="eb2">Em qual culto?</p>${S.apb.datas.map(d=>{const dd=apbDays(d),full=d.used>=d.vagas,late=dd<S.apb.prazo,m=apbM(k.nasc,d.y,d.m,d.d),ov=m>S.apb.max,dis=full||late||ov,left=d.vagas-d.used;
+ if(st===2){const k=S.apb.kids.find(x=>x.id===F.kid);body=`<div class="stack g3"><p class="eb2">Em qual data?</p>${S.apb.datas.map(d=>{const dd=apbDays(d),full=d.used>=d.vagas,late=dd<S.apb.prazo,m=apbM(k.nasc,d.y,d.m,d.d),ov=m>S.apb.max,dis=full||late||ov,left=d.vagas-d.used;
    return `<button class="apb-d ${F.date===d.id?'on':''}" data-a="apbDate" data-v="${d.id}" ${dis?'disabled':''}><span class="apb-dt"><b>${d.d}</b>${MONTHS[d.m-1].slice(0,3)}</span><span class="grow stack" style="gap:2px;align-items:flex-start"><span class="it-title">${d.t}</span><span class="it-sub">${fmtK(K(d.y,d.m,d.d)).split(',')[0]} · ${d.h} · ${esc(k.n.split(' ')[0])} com ${apbAge(m)}</span></span><span class="apb-v ${dis?'x':left<=2?'few':''}">${full?'Esgotado':late?'Prazo encerrado':ov?'Acima da idade':left===1?'1 vaga':left+' vagas'}</span></button>`;}).join('')}
-   <p class="foot">Os pedidos fecham ${S.apb.prazo} dias antes de cada culto.</p></div>`;}
+   <p class="foot">Os pedidos fecham ${S.apb.prazo} dias antes de cada data.</p></div>`;}
  if(st===3){const k=S.apb.kids.find(x=>x.id===F.kid),d=S.apb.datas.find(x=>x.id===F.date);body=`<div class="stack g5"><div class="apb-sum"><span class="apb-av lg">${ic('pacifier',22,1.8)}</span><div class="stack" style="gap:2px"><span class="it-title">${esc(k.n)}</span><span class="it-sub">${d.t} · ${fmtK(K(d.y,d.m,d.d))} · ${d.h}</span></div></div>
    ${field({id:'apbC',label:'Nome no certificado',val:F.cert,hint:'Confira a grafia: é assim que sai no certificado.'})}
    <div class="stack g2"><span class="eb2">Responsáveis</span><div class="apb-r"><span class="it-title">Rafael Pereira</span><span class="apb-mb">${ic('check',11,3)}Membro</span></div></div>
@@ -1442,7 +1448,47 @@ Object.assign(A,{
  apbFromEv:async v=>{await closeSheet();A.apbNew();if(S.apb.f){S.apb.f.date=v;}},
  apbPdf:(v,el)=>toast('success',v==='pdf'?'Baixando o certificado':'Compartilhando',v==='pdf'?'Certificado-'+S.apb.pedidos.find(x=>x.id===S.apb.cert).bebe.split(' ')[0]+'.pdf':'Escolha onde enviar.'),
 });
-RAIL.push(['bebes','Membro › Apresentações']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
+RAIL.push(['bebes','Membro › Apresentações'],['batismo','Membro › Batismo']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
+
+/* ================= Batismo (membro): pedido de participação =================
+   Pelo app só a apresentação e o batismo têm pedido. Consagração e casamento não: quem decide e registra é a secretaria. */
+S.bat={datas:[{id:'bt1',y:2026,m:10,d:18,h:'16h',t:'Batismo nas águas',place:'Chácara Alva'},{id:'bt2',y:2026,m:11,d:22,h:'16h',t:'Batismo nas águas',place:'Chácara Alva'}],
+ pessoas:[{id:'pe1',n:'Rafael Pereira',bap:'12/05/2019'},{id:'pe2',n:'Camila Pereira',bap:''}],pedidos:[]};
+const BAT_ST={aguardando:['warning','Aguardando'],confirmado:['success','Confirmado'],realizado:['success','Realizado'],cancelado:['danger','Cancelado']};
+const batDate=d=>fmtK(K(d.y,d.m,d.d))+' · '+d.h;
+const batActive=pid=>S.bat.pedidos.find(p=>p.pessoa===pid&&['aguardando','confirmado','realizado'].includes(p.st));
+V.batismo=()=>{
+ if(S.role==='visitante')return sub('Batismo','Disponível para quem já é membro da igreja.',`<p class="callout" style="margin:0">Quando você for membro, dá para pedir o batismo por aqui. Antes disso, fale com a secretaria.</p>`);
+ const P=S.bat.pedidos,open=S.bat.datas.filter(d=>apbDays(d)>=0);
+ return {sb:'var(--ink)',html:`${subHead('Batismo','Seu batismo nas águas, com a igreja reunida.')}
+ <div class="pad stack g6" style="padding-bottom:24px">
+  <section class="apb-hero"><span class="apb-hi">${ic('bucket',22,1.8)}</span><blockquote>“Quem crer e for batizado será salvo.”<cite>Marcos 16:16</cite></blockquote><p>Você pode pedir para você ou para alguém da sua família. A secretaria confirma e avisa por aqui.</p></section>
+  ${P.length?`<section class="stack g3"><p class="eb2">Seus pedidos</p>${P.map(p=>{const s=BAT_ST[p.st];return `<article class="card apb-p ${p.st}"><div class="row g3" style="align-items:flex-start"><span class="apb-av">${ic('bucket',18,1.8)}</span><div class="grow stack" style="gap:2px"><span class="it-title">${esc(p.n)}</span><span class="it-sub">${esc(p.t)} · ${p.when}</span></div>${status(s[0],s[1])}</div>
+   ${p.st==='aguardando'?`<p class="apb-note">${ic('clock',14,2)}A secretaria confirma em até 3 dias úteis. Você recebe um aviso aqui no app.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="batCancel" data-v="${p.id}">Cancelar pedido</button>`:p.st==='confirmado'?`<p class="apb-note ok">${ic('check',14,2.4)}Confirmado. Chegue 30 minutos antes e leve uma muda de roupa.</p><button class="tlink" style="align-self:flex-start;padding:0" data-a="batCancel" data-v="${p.id}">Não vou conseguir</button>`:''}</article>`;}).join('')}</section>`:''}
+  <section class="stack g3"><p class="eb2">Como funciona</p><ol class="steps"><li>Escolha quem vai ser batizado(a) e uma das datas.</li><li>A secretaria confirma o pedido.</li><li>No dia, a igreja celebra o batismo nas águas.</li><li>A secretaria emite a certidão, que chega aqui em Meus documentos.</li></ol>
+   <p class="foot">Consagração e casamento não têm pedido pelo app: a secretaria decide e registra.</p></section>
+ </div>
+ <div class="apb-dock"><button class="btn primary block" data-a="batNew" ${open.length?'':'disabled'}>${open.length?'Pedir batismo':'Sem datas abertas no momento'}</button></div>`};};
+APP.push('batismo');SUBS.push('batismo');
+Object.assign(A,{
+ batNew:()=>{if(S.role==='visitante'){toast('error','Só para membros','Fale com a secretaria para pedir o batismo.');return;}const F={pe:null,dt:null};
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Pedir batismo</h3><p class="callout">Escolha quem vai ser batizado(a) e a data.</p></div>
+   <div class="stack g3"><p class="eb2">Quem</p>${S.bat.pessoas.map(p=>{const dis=!!p.bap||!!batActive(p.id);return `<button type="button" class="apb-k" data-pe="${p.id}" ${dis?'disabled':''}><span class="apb-av">${ic('bucket',18,1.8)}</span><span class="grow stack" style="gap:2px;align-items:flex-start"><span class="it-title">${esc(p.n)}</span><span class="it-sub">${p.bap?'já batizado(a) em '+p.bap:batActive(p.id)?'já tem pedido':'ainda não batizado(a)'}</span></span>${dis?ic('lock',16,2):'<span class="apb-rd"></span>'}</button>`;}).join('')}</div>
+   <div class="stack g3"><p class="eb2">Data</p>${S.bat.datas.filter(d=>apbDays(d)>=0).map(d=>`<button type="button" class="apb-d" data-dt="${d.id}"><span class="apb-dt"><b>${d.d}</b>${MONTHS[d.m-1].slice(0,3)}</span><span class="grow stack" style="gap:2px;align-items:flex-start"><span class="it-title">${esc(d.t)}</span><span class="it-sub">${batDate(d)} · ${esc(d.place)}</span></span></button>`).join('')}</div>
+   <div class="stack g3"><button type="button" class="btn primary block" id="btGo" disabled>Enviar pedido</button><button type="button" class="tlink" data-a="closeSheet">Agora não</button></div></div>`,sh=>{
+   const go=$('#btGo',sh),upd=()=>{go.disabled=!(F.pe&&F.dt);};
+   sh.addEventListener('click',e=>{const a=e.target.closest('[data-pe]'),b=e.target.closest('[data-dt]');
+    if(a&&!a.disabled){F.pe=a.dataset.pe;$$('[data-pe]',sh).forEach(x=>x.classList.toggle('on',x===a));upd();}
+    if(b){F.dt=b.dataset.dt;$$('[data-dt]',sh).forEach(x=>x.classList.toggle('on',x===b));upd();}});
+   go.addEventListener('click',async e=>{await busy(e.currentTarget,700,null,'Pedido enviado');const p=S.bat.pessoas.find(x=>x.id===F.pe),d=S.bat.datas.find(x=>x.id===F.dt);
+    S.bat.pedidos.unshift({id:'bp'+Date.now(),pessoa:p.id,n:p.n,t:d.t,when:batDate(d),st:'aguardando'});
+    S.notifs.unshift({id:'n'+Date.now(),t:'Pedido de batismo enviado: '+p.n.split(' ')[0],s:d.t+' · '+batDate(d)+'. A secretaria confirma em até 3 dias.',when:'Agora',grp:'Hoje',tone:'ceu',i:'bucket',go:'batismo',unread:true});
+    await closeSheet();softRender();toast('success','Pedido enviado','Avisamos aqui quando a secretaria confirmar.');});});},
+ batCancel:v=>{const p=S.bat.pedidos.find(x=>x.id===v);
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${p.st==='confirmado'?'Cancelar a participação?':'Cancelar o pedido?'}</h3><p class="callout">${esc(p.n)} · ${p.when}. A secretaria é avisada e você pode pedir outra data quando quiser.</p></div><div class="stack g3"><button type="button" class="btn primary block danger" id="btX">Cancelar pedido</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
+   $('#btX',sh).addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Cancelado');p.st='cancelado';await closeSheet();softRender();toast('info','Cancelado','A secretaria foi avisada.');});});}
+});
+
 
 render('none');
 /* ================= Splash screen ================= */
@@ -1793,4 +1839,4 @@ S.insc.mine.push({id:'i3',rid:'r-i3',st:'ok',method:'Cartão',tk:'t2',buy:[],vch
 
 showSplash();
 
-})();
+})();
