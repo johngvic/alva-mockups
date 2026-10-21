@@ -20,7 +20,7 @@
 | `screens-acompanhamento.js` | 1046–1121 | Cuidado › Acompanhamento |
 | `screens-oracao.js` | 1122–1230 | Cuidado › Pedidos de oração |
 | `screens-casas.js` | 1231–1418 | Comunidade › Casas |
-| `screens-redes.js` | 1419–1466 | Comunidade › Redes de célula |
+| `screens-redes.js` | 1419–1466 | Comunidade › Redes de casa |
 | `screens-ministerios.js` | 1467–1612 | Comunidade › Ministérios |
 | `screens-kids.js` | 1613–1738 | Kids |
 | `screens-admin.js` | 1739–2197 | Administração |

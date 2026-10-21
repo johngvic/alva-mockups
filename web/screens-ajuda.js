@@ -10,7 +10,7 @@ const AJ=[
  {id:'pessoas',n:'Pessoas',ic:'users',go:'membros',lede:'Cadastro e situação dos membros.',f:[
   ['Como cadastro uma pessoa?','Em Pessoas › Membros, use o botão para adicionar, informe nome e contato e salve. A pessoa só passa a ser membro integrado depois de concluir a Integração.','cadastrar novo membro adicionar pessoa'],
   ['Por que alguém não aparece como membro?','Porque a integração é obrigatória: só quem conclui a integração vira membro. Convite de acesso ao sistema nunca transforma uma pessoa em membro.','membro integrado integração visitante'],
-  ['Como altero a situação de um membro (afastado, transferido…)?','Na lista ou na ficha, use Alterar situação. Data e motivo são obrigatórios, exceto ao voltar a Ativo. Transferido, Desligado e Falecido encerram o acesso e os mandatos da pessoa.','situação afastado transferido desligado falecido ativo'],
+  ['Como altero a situação de um membro (afastado, transferido…)?','Na lista ou na ficha, use Alterar situação. Data e motivo são obrigatórios, exceto ao voltar a Ativo. Afastado suspende o acesso ao app até voltar a Ativo. Afastado, Transferido, Desligado e Falecido encerram o acesso e os mandatos da pessoa; o Afastado pode ser reativado sem nova integração, mas volta sem nada. Antes de confirmar, você vê o impacto no Cuidado. Antes de confirmar, você vê o impacto no Cuidado.','situação afastado transferido desligado falecido ativo'],
   ['Como tiro a lista de membros em PDF ou planilha?','Vá em Relatórios › Membros, filtre o que precisa e use Gerar PDF ou Exportar CSV. Só sai o que está filtrado e as colunas escolhidas.','exportar lista planilha csv pdf relatório membros']]},
  {id:'integ',n:'Integração',ic:'users',go:'integracao',lede:'O caminho de quem chega até virar membro.',f:[
   ['Como crio uma integração?','Em Pessoas › Integração, clique em Nova integração e informe nome, data e horário, limite (opcional), grupo de WhatsApp e responsável. Marque “atual” para ela receber os pedidos novos.','criar nova integração turma'],
@@ -23,12 +23,12 @@ const AJ=[
   ['Pausar um vínculo cancela os encontros?','Não. Pausar o vínculo e cancelar um encontro são coisas separadas. Cancelar tira o encontro da agenda e avisa os participantes, mantendo o histórico.','pausar vínculo cancelar encontro'],
   ['Como abro um caso de acompanhamento?','O pastor escolhe a pessoa e cadastra o caso, com tipo, descrição, urgência (normal ou urgente) e responsável. O próprio membro também pode pedir ajuda pelo app.','caso pastoral acompanhamento urgência'],
   ['Quem vê os pedidos de oração?','Os intercessores. Qualquer pessoa pode pedir oração, até sem conta. Quem ora registra, e o pedido pode ser marcado como respondido ou reaberto.','pedido oração intercessor respondido'],
-  ['Quem vê a Disciplina?','Só quem tem a permissão própria, por padrão Administrador e Pastor. O registro é invisível ao membro e às buscas, e todo acesso é auditado.','disciplina admoestação afastamento restrito'],
-  ['Quem vê o “Como estou me sentindo”?','Apenas quem tem acesso ao módulo Cuidado. Para os demais, a página mostra que não há acesso.','sentimento como estou me sentindo']]},
- {id:'comunidade',n:'Comunidade',ic:'home',go:'casas',lede:'Casas de Apascentamento, redes de célula e ministérios.',f:[
+  ['Quem vê a Disciplina?','Só quem tem a permissão própria: de início, o Administrador; a igreja concede aos demais. O registro é invisível ao membro e às buscas, e todo acesso é auditado. Afastamento e desligamento chegam à Secretaria como um pendente para confirmar, sem a observação. Afastamento e desligamento chegam à Secretaria como um pendente para confirmar, sem a observação.','disciplina admoestação afastamento restrito'],
+  ['Quem vê o “Como estou me sentindo”?','Apenas quem tem acesso ao módulo Como estou me sentindo (pastores, pelos papéis). Para os demais, a página mostra que não há acesso.','sentimento como estou me sentindo']]},
+ {id:'comunidade',n:'Comunidade',ic:'home',go:'casas',lede:'Casas de Apascentamento, redes de casa e ministérios.',f:[
   ['Como agendo um encontro da Casa e faço a chamada?','Na Casa, agende o encontro com data, hora e modalidade. Depois do encontro, registre a chamada marcando quem esteve presente e o motivo de quem faltou.','casa encontro chamada presença'],
   ['Como uma pessoa entra numa Casa?','Um membro integrado pede para participar. O pedido fica Pendente até o líder aceitar ou recusar; aceitar cria o vínculo.','casa participar pedido aceitar'],
-  ['Rede de células é a mesma coisa que rede de discipulado?','Não. Rede de células apenas agrupa Casas, com um supervisor, normalmente regional. Rede de discipulado é outra coisa e fica em Cuidado.','rede célula discipulado supervisor'],
+  ['Rede de casa é a mesma coisa que rede de discipulado?','Não. Rede de casa apenas agrupa Casas, com um supervisor, normalmente regional. Rede de discipulado é outra coisa e fica em Cuidado.','rede célula discipulado supervisor'],
   ['Como monto um time de ministério?','Em Ministérios, abra o ministério e crie o time, escolhendo os membros e as funções de cada um. O time pode ser reutilizado nas escalas.','ministério time membros funções'],
   ['Como uma pessoa passa a servir num ministério?','Conversando com o líder, que a adiciona ao time. Não existe pedido obrigatório de voluntariado, e entrar num time não dá acesso de gestão.','servir voluntário time líder']]},
  {id:'kids',n:'Kids',ic:'baby',go:'kvis',lede:'Salas, turmas e times do ministério infantil.',f:[
@@ -70,7 +70,7 @@ const AJ=[
   ['Posso excluir um material que já foi usado?','O melhor é inativar. Novos vínculos ficam bloqueados e os existentes são preservados; dá para consultar onde o material é usado.','excluir inativar material usado'],
   ['Onde o membro baixa o certificado de um curso?','No app, em Mais › Meus documentos, junto com as certidões e os certificados emitidos pela igreja. Tudo é PDF.','certificado curso baixar pdf app']]},
  {id:'comunicacao',n:'Comunicação',ic:'megaphone',go:'noticias',lede:'Notícias, push, e-mail, banners e transmissões.',f:[
-  ['Como envio um push ou e-mail?','Em Push e e-mail, escolha o conteúdo, o público, os canais e se envia agora ou agendado, e revise antes de enviar. Um envio agendado pode ser cancelado, e reenviar cria uma nova execução.','push email enviar agendar público'],
+  ['Como envio um push ou e-mail?','Em Notificações, ligue as automações, escolha os canais e as antecedências, edite os modelos e acompanhe os envios; ninguém dispara aviso à mão. Para revisar antes de enviar. Um envio agendado pode ser cancelado, e reenviar cria uma nova execução.','push email enviar agendar público'],
   ['Como publico uma notícia?','Em Notícias, informe título, corpo, imagem, link, categoria e a data em que ela expira. Dá para publicar, editar, duplicar, renovar e retirar.','notícia publicar expirar'],
   ['O Alva mostra quem abriu o e-mail ou push?','Não. Não há rastreamento de abertura nem recibo de leitura; a auditoria de envio é só técnica.','abertura leitura rastreamento']]},
  {id:'fin',n:'Financeiro',ic:'wallet',go:'fvis',lede:'Lançamentos, contas e análises.',f:[
@@ -142,7 +142,7 @@ const AJ_GUIDE={
   warn:'O conteúdo do caso é pastoral e restrito: só quem tem acesso vê.'},
  'cuidado|Quem vê os pedidos de oração?':{steps:[
   ['Abra **Cuidado › Pedidos de oração**.'],
-  ['Para avisar que você está orando, clique em **Estou orando** no pedido. O botão passa a mostrar **Você está orando**.','cuidado-oracao'],
+  ['Para avisar que você está orando, clique em **Estou orando** no pedido. O botão passa a mostrar **Você está orando** e não volta atrás. Quem pediu é avisado, com o seu nome: “Pr. Fulano está orando por você”.','cuidado-oracao'],
   ['Quando o pedido for atendido, use **Marcar como respondido**. Se precisar, ele pode ser reaberto.']]},
  'agenda|Como crio um evento pago?':{steps:[
   ['Abra **Agenda › Eventos** e clique em **Novo evento**.'],
@@ -194,7 +194,7 @@ const AJ_GUIDE={
   ['Em **Séries**, escolha uma ou mais (opcional). Em **Vínculo**, deixe **Avulsa** ou escolha um ministério.'],
   ['Escolha a **Visibilidade** (pública, interna ou restrita) e salve. Depois você adiciona vídeo, passagem e arquivos.']]},
  'comunicacao|Como envio um push ou e-mail?':{steps:[
-  ['Abra **Comunicação › Push e e-mail** e clique em **Novo envio**.'],
+  ['Abra **Comunicação › Notificações** e use as abas **Automações**, **Modelos** e **Envios**.'],
   ['No passo **Conteúdo**, escolha **Push no app** ou **E-mail**, escreva o **Título** e a **Mensagem** e, se quiser, escolha **Ao tocar, abrir**. A prévia no celular mostra como vai chegar.','com-push','O novo envio, com a prévia da notificação.'],
   ['No passo **Público**, escolha quem recebe. O contador mostra quantas pessoas.'],
   ['No passo **Quando**, escolha enviar agora ou agendar.'],

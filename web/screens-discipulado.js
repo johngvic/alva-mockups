@@ -4,7 +4,7 @@ const RHY={7:'Semanal',14:'Quinzenal',30:'Mensal'};
 const TODAY=new Date(2026,8,30);
 const addDays=(n)=>{const d=new Date(TODAY);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
 let _did=0;
-const DN=(n,parent,o={})=>({id:'d'+(++_did),n,parent,tone:o.tone||TONES[_did%6],role:o.role||'Membro',rhythm:o.rhythm||14,last:o.last,stage:o.stage||0,paused:!!o.paused,notes:o.notes||'',meets:o.meets||[],open:true});
+const DN=(n,parent,o={})=>({id:'d'+(++_did),n,parent,tone:o.tone||TONES[_did%6],role:o.role||'Membro',rhythm:o.rhythm||14,last:o.last,stage:o.stage||0,paused:!!o.paused,gone:!!o.gone,notes:o.notes||'',meets:o.meets||[],open:true});
 const MT=(d,type,o={})=>({id:'e'+Math.random().toString(36).slice(2,8),d,type,content:o.c||'',mode:o.mode||'Presencial',link:o.link||'',time:o.t||'19:30',note:o.note||'',mat:o.mat||'',parts:o.parts});
 const DISC=[
  DN('Pr. Rafael Pereira',null,{role:'Pastor',rhythm:30,last:29,tone:'ceu'}),
@@ -12,7 +12,7 @@ const DISC=[
  DN('Gabriel Souza','d2',{rhythm:7,last:22,stage:3,tone:'menta',meets:[MT(addDays(-22),'done',{c:'Fundamentos: graça e fé. Conversamos sobre como aplicar o estudo na rotina e reservamos um momento para dúvidas.',mat:'Trilha · Fundamentos',note:'Retomar no próximo encontro as dúvidas sobre a leitura da semana.'}),MT(addDays(-36),'done',{c:'Vida de oração: rotina diária'}),MT(addDays(3),'sched',{t:'20:00',mode:'Remoto',link:'https://meet.google.com/abc-defg-hij'})]}),
  DN('Pedro Almeida','d3',{rhythm:7,last:12,stage:1,tone:'damasco',meets:[MT(addDays(5),'sched',{t:'19:00'})]}),
  DN('Isabela Rocha','d2',{rhythm:7,last:13,stage:5,tone:'rosado',meets:[MT(addDays(-13),'done',{c:'Caráter cristão: perdão'}),MT(addDays(-27),'done',{c:'Vida na Palavra: leitura devocional'})]}),
- DN('Marcos Souza Ramos','d1',{role:'Líder',rhythm:14,last:18,tone:'salvia'}),
+ DN('Marcos Souza Ramos','d1',{role:'Líder',rhythm:14,last:18,gone:true,tone:'salvia'}),
  DN('Lucas Mendes','d6',{rhythm:14,last:51,stage:2,paused:true,tone:'lima',notes:'Pausou por mudança de turno no trabalho. Retomar em novembro.',meets:[MT(addDays(-51),'done',{c:'Vida de oração: ACTS'})]}),
  DN('Fernanda Lima','d6',{rhythm:14,last:26,stage:6,tone:'damasco',meets:[MT(addDays(-26),'done',{c:'Missão e chamado: dons'}),MT(addDays(9),'sched',{t:'10:00'})]}),
 ];
@@ -32,7 +32,9 @@ const inDays=iso=>Math.round((new Date(iso+'T12:00')-new Date(2026,8,30,12))/864
 
 function cadence(d){const pct=Math.min(100,Math.round(d.last/d.rhythm*100)),over=d.last>d.rhythm;
  return `<span class="cad ${d.paused?'pz':over?'over':''}" title="${RHY[d.rhythm]} · último contato ${dLbl(d.last)}"><span class="cadt"><i style="width:${pct}%"></i></span><span class="cadl">${dLbl(d.last)}</span></span>`;}
-function stageDots(d){if(!d.stage)return '';return `<span class="sdots" title="Etapa ${d.stage} de 6 · ${TRILHA[d.stage-1]}">${TRILHA.map((_,i)=>`<i class="${i<d.stage?'on':''}"></i>`).join('')}</span>`;}
+function dProg(d){const t=dTrail(d),c=t.reduce((a,x)=>a+x.c,0),n=t.reduce((a,x)=>a+x.done,0);return {c,n,p:c?Math.round(n/c*100):0};}
+function dProgTxt(d){const g=dProg(d);return g.c?`${g.n} de ${g.c} ${g.c===1?'etapa':'etapas'} · ${g.p}%`:'Sem trilha';}
+function stageDots(d){if(!d.stage)return '';const g=dProg(d);return `<span class="tp" style="width:48px" title="${dProgTxt(d)}"><i style="width:${g.p}%"></i></span>`;}
 
 /* ---------- list ---------- */
 function discList(){
@@ -51,13 +53,13 @@ function dRede(){
  const q=norm(S.dq);const match=d=>(S.df==='todos'||dStatus(d)===S.df)&&(!q||norm(d.n).includes(q));
  const visible=d=>match(d)||desc(d.id).some(match);
  const node=(d,depth)=>{const ch=kids(d.id).filter(visible),base=desc(d.id).length,dim=!match(d);
-  return `<li class="dn ${dim?'dim':''}" style="--dep:${depth}">
+  return `<li class="dn ${dim?'dim':''} ${d.gone?'gone':''}" style="--dep:${depth}">
    <div class="drow" tabindex="0" data-a="dOpen" data-v="${d.id}">
     ${ch.length?`<button class="dtog ${d.open?'open':''}" data-a="dToggle" data-v="${d.id}" aria-label="${d.open?'Recolher':'Expandir'}" aria-expanded="${d.open}">${ic('chevR',14,2.2)}</button>`:'<span class="dtog nil"></span>'}
     ${dAv(d)}
-    <span class="dtx"><span class="dt1"><b>${esc(d.n)}</b>${d.role!=='Membro'?`<em class="tag">${d.role}</em>`:''}${dPill(d)}</span>
-     <span class="dt2">${d.stage?`${stageDots(d)}<span>Etapa ${d.stage}/6 · ${TRILHA[d.stage-1]}</span>`:`<span>${RHY[d.rhythm]}</span>`}${base?`<span class="sep">·</span><span>${base} na base</span>`:''}${d.meets.filter(m=>m.type==='done').length?`<span class="sep">·</span><span>${d.meets.filter(m=>m.type==='done').length} encontro${d.meets.filter(m=>m.type==='done').length>1?'s':''}</span>`:''}</span></span>
-    <span class="dr">${cadence(d)}${ic('chevR',16)}</span>
+    <span class="dtx"><span class="dt1"><b>${d.gone?'Vaga · antes: '+esc(d.n):esc(d.n)}</b>${d.role!=='Membro'&&!d.gone?`<em class="tag">${d.role}</em>`:''}${d.gone?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Vaga</span>':dPill(d)}</span>
+     <span class="dt2">${d.gone?`<span class="vac">${ic('user',13,2)}Sem discipulador${ch.length?` · ${ch.length} ${ch.length>1?'discípulos aguardam':'discípulo aguarda'}`:''}</span>`:d.stage?`${stageDots(d)}<span>${dProgTxt(d)}</span>`:`<span>${RHY[d.rhythm]}</span>`}${base?`<span class="sep">·</span><span>${base} na base</span>`:''}${d.meets.filter(m=>m.type==='done').length?`<span class="sep">·</span><span>${d.meets.filter(m=>m.type==='done').length} encontro${d.meets.filter(m=>m.type==='done').length>1?'s':''}</span>`:''}</span></span>
+    <span class="dr">${d.gone?`<button class="btn sec sm" data-a="dVacant" data-v="${d.id}">Preencher a vaga</button>`:cadence(d)}${ic('chevR',16)}</span>
    </div>
    ${ch.length&&d.open?`<ul class="dkids">${ch.map(k=>node(k,depth+1)).join('')}</ul>`:''}
   </li>`;};
@@ -75,10 +77,10 @@ function dResumo(){
  const late=DISC.filter(d=>dStatus(d)==='atrasado').sort((a,b)=>(b.last-b.rhythm)-(a.last-a.rhythm));
  return `<div class="rgrid">
   <section class="card kpis4"><div class="k4"><span class="kl">Em andamento</span><span class="kv">${andam}</span><span class="kd">${paus} pausado</span></div><div class="k4"><span class="kl">Encontros em setembro</span><span class="kv">${month}</span><span class="kd">${done.length} em 2026</span></div><div class="k4"><span class="kl">Próximos 7 dias</span><span class="kv">${next7}</span><span class="kd">${sched.length} agendados no total</span></div><div class="k4"><span class="kl">Formados</span><span class="kv">${form}</span><span class="kd">concluíram a trilha</span></div></section>
-  <section class="card pc rtrail"><div class="sh"><h2>Trilha por pessoa</h2><span class="who">6 etapas</span></div>
-   <div class="trl">${trail.sort((a,b)=>b.stage-a.stage).map(d=>`<button class="trr" data-a="dOpen" data-v="${d.id}">${dAv(d)}<span class="trn"><b>${first(d)} ${d.n.split(' ').slice(-1)}</b><span>${TRILHA[d.stage-1]}${d.paused?' · pausado':''}</span></span>
-    <span class="trs ${d.paused?'pz':''}">${TRILHA.map((t,i)=>`<i class="${i<d.stage?'on':''}" title="${i+1}. ${t}"></i>`).join('')}</span><b class="trp">${Math.round(d.stage/6*100)}%</b></button>`).join('')}</div>
-   <div class="trk">${TRILHA.map((t,i)=>`<span><b>${i+1}</b>${t}</span>`).join('')}</div></section>
+  <section class="card pc rtrail"><div class="sh"><h2>Trilha por pessoa</h2><span class="who">etapas da trilha</span></div>
+   <div class="trl">${trail.sort((a,b)=>dProg(b).p-dProg(a).p).map(d=>`<button class="trr" data-a="dOpen" data-v="${d.id}">${dAv(d)}<span class="trn"><b>${first(d)} ${d.n.split(' ').slice(-1)}</b><span>${dProgTxt(d)}${d.paused?' · pausado':''}</span></span>
+    <span class="tp ${d.paused?'pz':''}" style="width:96px"><i style="width:${dProg(d).p}%"></i></span><b class="trp">${dProg(d).p}%</b></button>`).join('')}</div>
+   </section>
   <div class="col">
    <section class="card pc"><div class="sh"><h2>Próximos encontros</h2><span class="who">${sched.length}</span></div>
     ${sched.length?`<ol class="upc">${sched.map(m=>`<li><span class="ud"><b>${fmtD(m.d).split(' ')[0]}</b><span>${fmtD(m.d).split(' ')[1]}</span></span><span class="ub"><b>${esc(m.who.n)}</b><span>${wd(m.d)} · ${m.time.replace(':00','h')} · ${m.mode==='Remoto'?'Remoto':'Presencial'}</span></span><span class="who">${inDays(m.d)===0?'hoje':'em '+inDays(m.d)+'d'}</span></li>`).join('')}</ol>`:'<p class="who">Nada agendado.</p>'}</section>
@@ -112,11 +114,12 @@ function dGeral(d){
     <div class="fld" style="margin-top:16px"><span class="fl">Ritmo de contato</span><div class="yn" role="radiogroup" id="rhy">${[7,14,30].map(r=>`<label><input type="radio" name="rhy" value="${r}" ${d.rhythm===r?'checked':''}><span>${RHY[r]}</span></label>`).join('')}</div></div>
     <p class="who" style="margin:10px 0 0">Calculado a partir do último encontro realizado.${next?` Próximo agendado: <b>${wd(next.d)}, ${fmtD(next.d)} às ${next.time.replace(':00','h')}</b>.`:''}</p>
    </section>
-   ${d.stage?`<section class="card pc"><div class="sh"><h2>Trilha</h2><span class="who">Etapa ${d.stage} de 6</span></div>
-    <ol class="walk">${TRILHA.map((t,i)=>`<li class="${i<d.stage-1?'done':i===d.stage-1?'next':''}"><span class="wd">${i<d.stage-1?ic('check',13,2.6):''}</span><span class="wl">${t}</span></li>`).join('')}</ol>
-    ${d.stage<6?`<div class="row2" style="margin-top:16px"><button class="btn sec sm" data-a="dStage">Concluir “${TRILHA[d.stage-1]}”</button></div>`:'<p class="who" style="margin:14px 0 0">Concluiu a trilha.</p>'}</section>`:''}
+   ${d.stage?`<section class="card pc"><div class="sh"><h2>Trilha</h2><span class="who">${dTrail(d).filter(j=>j.done>=j.c).length} de ${d.trail.length} itens concluídos</span></div>
+    <ol class="ct-tl">${dTrail(d).map(dTrailRow).join('')}
+     <li class="ct-addn"><span class="ct-node add">${ic('plus',14,2.2)}</span><button class="ct-cc add" data-a="dAddJ"><b>Adicionar à trilha</b><span>Jornada, curso, pregação, música ou material</span></button></li></ol>
+    <p class="who" style="margin:12px 0 0">Toque em um item para abri-lo. O progresso vem do que o discípulo assiste e conclui no app.</p></section>`:''}
    <section class="card pc"><div class="sh"><h2>Discípulos</h2><button class="btn sec sm" data-a="dAddUnder">${ic('plus',14,2.2)}Adicionar discípulo</button></div>
-    ${k.length?`<div class="dks">${k.map(c=>`<button class="dk" data-a="dOpen" data-v="${c.id}">${dAv(c)}<span class="dkt"><b>${esc(c.n)}</b><span>${c.stage?`Etapa ${c.stage}/6`:RHY[c.rhythm]}${desc(c.id).length?` · ${desc(c.id).length} na base`:''}</span></span>${dPill(c)}</button>`).join('')}</div>`:`<div class="soft-empty"><p>${first(d)} ainda não discipula ninguém.</p></div>`}</section>
+    ${k.length?`<div class="dks">${k.map(c=>`<button class="dk" data-a="dOpen" data-v="${c.id}">${dAv(c)}<span class="dkt"><b>${esc(c.n)}</b><span>${c.stage?dProgTxt(c):RHY[c.rhythm]}${desc(c.id).length?` · ${desc(c.id).length} na base`:''}</span></span>${dPill(c)}</button>`).join('')}</div>`:`<div class="soft-empty"><p>${first(d)} ainda não discipula ninguém.</p></div>`}</section>
   </div>
   <div class="col">
    <section class="card pc"><div class="sh"><h2>Anotações</h2><span class="who" id="nsaved"></span></div>
@@ -144,6 +147,37 @@ function discAfter(){
  const r=$('#rhy');if(r)r.addEventListener('change',e=>{const d=dById(S.disc);d.rhythm=+e.target.value;$('#dtb').innerHTML=dGeral(d);discAfter();toast(`Ritmo de ${first(d)} alterado para ${RHY[d.rhythm].toLowerCase()}`);});
  const n=$('#dnotes');if(n){let t;n.addEventListener('input',()=>{$('#nsaved').textContent='Salvando…';clearTimeout(t);t=setTimeout(()=>{dById(S.disc).notes=n.value;$('#nsaved').innerHTML=`${ic('check',13,2.4)} Salvo`;},700);});}
 }
+const dJById=id=>JORNS.find(x=>x.id===id);
+function dTrail(d){if(!d.trail)d.trail=['j2','j1'].map(id=>({k:'Jornada',id}));let left=Math.round(d.stage/6*9);
+ return d.trail.map(t=>{if(t.k&&t.k!=='Jornada'){const c=t.k==='Curso'?4:/^Série/.test(t.t)?3:1;return {k:t.k,n:t.t,note:t.note||'',c,done:t.done?c:0,courses:[]};}
+  const j=dJById(t.id)||{n:'Jornada',courses:[]},cs=j.courses.map(c=>c.n),done=Math.min(cs.length,left);left=Math.max(0,left-cs.length);return {k:'Jornada',id:t.id,n:j.n,note:t.note||'',c:cs.length,done,courses:cs};});}
+function dTrailRow(j,i){const jor=j.k==='Jornada',pr=Math.round(j.done/Math.max(1,j.c)*100),fin=j.done>=j.c,nt=j.note?`<span style="white-space:normal;font-style:italic">${esc(j.note)}</span>`:'';
+ const acts=`<button type="button" class="ibtn sm" data-a="dJSwap" data-v="${i}" title="Trocar por outro item" aria-label="Trocar item">${ic('swap',14)}</button><button type="button" class="ibtn sm" data-a="dJDel" data-v="${i}" title="Remover da trilha" aria-label="Remover da trilha">${ic('x',14)}</button>${ic('chevR',16)}`;
+ return `<li><span class="ct-node">${fin?ic('check',16,2.6):i+1}</span>`+(jor
+  ?`<div class="ct-cc" tabindex="0" data-a="dJGo" data-v="${i}" style="grid-template-columns:minmax(0,1fr) auto auto auto auto auto"><div class="ct-ccb"><b>${tpIcon('Jornada',14)}${esc(j.n)}</b><span style="white-space:normal">${j.courses.map((c,k)=>`${k<j.done?'✓':'○'} ${esc(c)}`).join('  ·  ')}</span>${nt}</div><span class="ct-ccm"><b>${j.c}</b> etapas</span><span class="ct-ccp"><span class="tr"><i style="width:${pr}%"></i></span><small>${j.done} de ${j.c} · ${pr}%</small></span>${acts}</div></li>`
+  :`<div class="ct-cc" tabindex="0" data-a="dJGo" data-v="${i}" style="grid-template-columns:minmax(0,1fr) auto auto auto auto auto"><div class="ct-ccb"><b>${tpIcon(j.k,14)}${esc(j.n)}</b><span>${j.k}</span>${nt}</div><span class="ct-ccm"><b>${j.c}</b> ${j.c===1?'etapa':'etapas'}</span><span class="ct-ccp"><span class="tr"><i style="width:${pr}%"></i></span><small>${j.done} de ${j.c} · ${pr}%</small></span>${acts}</div></li>`);}
+const TP_TYPES=['Jornada','Curso','Pregação','Música','Material'],TP_CLR={Jornada:'#0e7c66'},tpIc=k=>k==='Jornada'?'route':CTYPE_IC[k];
+const tpKey=t=>t.k==='Jornada'||!t.k?'Jornada|'+t.id:t.k+'|'+t.t;
+const tpIcon=(k,sz=15)=>`<span class="mc-i t-${k==='Jornada'?'cursos':MC_PAGE[k]}" ${TP_CLR[k]?`style="--k:${TP_CLR[k]}"`:''}>${ic(tpIc(k),sz,1.8)}</span>`;
+/* mesmo diálogo "Vincular conteúdo" do ministério, sem "Para quem" e "Obrigatório"; replace = índice do item que está sendo trocado */
+function dTrailPick(d,replace,re){dTrail(d);const single=replace!=null,have=new Set(d.trail.map(tpKey));let type=TP_TYPES[0],sel=new Set(),q='';
+ const items=t=>t==='Jornada'?JORNS.filter(j=>j.st==='ativa').map(j=>({k:'Jornada|'+j.id,l:j.n})):CONTENT[t].map(x=>({k:t+'|'+x,l:x}));
+ openDlg(`${dlgHead(single?'Trocar item da trilha':'Adicionar à trilha',`Trilha de ${esc(first(d))}`)}<div class="mcp">
+  <div class="mcp-ty">${TP_TYPES.map(t=>`<button type="button" data-ty="${t}" class="${t===type?'on':''}">${tpIcon(t)}${t}<small id="tpN-${t}"></small></button>`).join('')}</div>
+  <div class="mcp-r"><label class="sbox">${ic('search',16)}<input id="tpQ" placeholder="Buscar na biblioteca" autocomplete="off"></label><div class="mtf-list" id="tpL" style="max-height:260px"></div>
+   <label class="fld" style="margin-top:12px"><span class="fl">Observação <small>opcional</small></span><textarea class="ta" id="tpNote" rows="2" placeholder="Ex.: Assistir antes do nosso próximo encontro"></textarea></label></div></div>
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" id="tpOk" disabled>${single?'Trocar':'Adicionar'}</button></div>`,'lg');
+ const paint=()=>{const ql=norm(q),l=items(type).filter(x=>!ql||norm(x.l).includes(ql));
+  $('#tpL').innerHTML=l.map(x=>{const had=have.has(x.k);return `<button type="button" class="mtf-p ${sel.has(x.k)?'on':''}" data-k="${esc(x.k)}" ${had?'disabled':''}>${tpIcon(type,14)}<span class="dkt"><b>${esc(x.l)}</b><span>${had?'Já na trilha':type}</span></span><i class="mtf-ck">${ic('check',12,2.6)}</i></button>`;}).join('')||'<p class="who" style="padding:10px">Nada encontrado.</p>';
+  TP_TYPES.forEach(t=>{const n=[...sel].filter(k=>k.startsWith(t+'|')).length;$('#tpN-'+t).textContent=n||'';});
+  const ok=$('#tpOk');ok.disabled=!sel.size;ok.textContent=single?'Trocar':sel.size?`Adicionar ${sel.size} ${sel.size===1?'item':'itens'}`:'Adicionar';};
+ const D=$('.mcp');D.addEventListener('click',e=>{const t=e.target.closest('[data-ty],[data-k]');if(!t||t.disabled)return;
+  if(t.dataset.ty){type=t.dataset.ty;D.querySelectorAll('[data-ty]').forEach(x=>x.classList.toggle('on',x===t));paint();}
+  if(t.dataset.k){const k=t.dataset.k;if(single){sel.clear();sel.add(k);}else sel.has(k)?sel.delete(k):sel.add(k);paint();}});
+ $('#tpQ').addEventListener('input',e=>{q=e.target.value;paint();});paint();
+ $('#tpOk').onclick=()=>{const note=$('#tpNote').value.trim(),mk=k=>{const [ty,v]=[k.slice(0,k.indexOf('|')),k.slice(k.indexOf('|')+1)];return ty==='Jornada'?{k:ty,id:v,note}:{k:ty,t:v,note,done:false};},es=[...sel].map(mk);
+  if(single)d.trail[replace]=es[0];else es.forEach(x=>d.trail.push(x));
+  closeDlg();(re||reDisc)();toast(single?`Item trocado na trilha de ${first(d)}`:`${es.length} ${es.length===1?'item adicionado':'itens adicionados'} à trilha de ${first(d)}`);};}
 function reDisc(){const d=dById(S.disc);$('#dtb').innerHTML=S.dpt==='geral'?dGeral(d):dEnc(d);$$('.ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.dpt));const e=$('.ptabs [data-v=enc]');if(e)e.innerHTML=`Encontros${d.meets.length?`<small>${d.meets.length}</small>`:''}`;discAfter();}
 const partsOf=d=>{const p=d.parent&&dById(d.parent);return [d.n,p?p.n:null].filter(Boolean);};
 function partsField(d){return `<div class="fld"><span class="fl">Participantes</span><div class="parts" id="parts">${partsOf(d).map(n=>`<span class="pchip">${esc(n)}</span>`).join('')}<input id="partIn" placeholder="Adicionar…" list="partList" autocomplete="off"></div><datalist id="partList">${MEMBERS.map(m=>`<option value="${esc(m.n)}">`).join('')}</datalist></div>`;}
@@ -167,6 +201,7 @@ function regDlg(d,from){
 const DA={
  dtab:v=>{S.dtab=v;$$('.utabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===v);});$('#dbody').innerHTML=v==='rede'?dRede():dResumo();discAfter();},
  dFilter:v=>{S.df=v;$('#dbody').innerHTML=dRede();discAfter();},
+ dVacant:(v,b,e)=>{e.stopPropagation();toast('Escolha quem entra na vaga: só quem tem Editar ou Admin em Discipulado.');},
  dToggle:(v,b,e)=>{e.stopPropagation();const d=dById(v);d.open=!d.open;$('#dbody').innerHTML=dRede();discAfter();},
  dOpen:(v,b,e)=>{if(e&&e.target.closest('.dtog'))return;S.disc=v;S.dpt='geral';closePops();render();window.scrollTo({top:0,behavior:'smooth'});},
  dBack:()=>{S.disc=null;render();},
@@ -189,6 +224,10 @@ const DA={
    const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{d.meets.push(MT(fd.get('d'),'sched',{t:fd.get('t'),mode:fd.get('mode'),link:lk}));closeDlg();S.dpt='enc';render();toast(`Encontro agendado para ${wd(fd.get('d'))}, ${fmtD(fd.get('d'))} · convite enviado`);},800);});},
  dDelMeet:v=>{const d=dById(S.disc),i=d.meets.findIndex(m=>m.id===v),m=d.meets[i];
   confirmDel({title:m.type==='sched'?'Cancelar este encontro?':'Excluir este registro?',body:m.type==='sched'?`Os participantes serão avisados do cancelamento de ${wd(m.d)}, ${fmtD(m.d)}.`:`O registro de ${fmtD(m.d)} sai do histórico de ${first(d)}. A cadência de contato é recalculada.`,label:m.type==='sched'?'Cancelar encontro':'Excluir registro',onConfirm:()=>{d.meets.splice(i,1);reDisc();toast(m.type==='sched'?'Encontro cancelado':'Registro excluído',()=>{d.meets.splice(i,0,m);reDisc();});}});},
+ dAddJ:()=>{closePops();dTrailPick(dById(S.disc));},
+ dJSwap:v=>dTrailPick(dById(S.disc),+v),
+ dJDel:v=>{const d=dById(S.disc),r=dTrail(d)[+v],t=d.trail[+v];confirmDel({title:'Remover este item da trilha?',body:`“${esc(r.n)}” sai da trilha de ${esc(first(d))}. O conteúdo continua existindo em Conteúdo.`,label:'Remover',onConfirm:()=>{d.trail.splice(+v,1);reDisc();toast('Item removido da trilha',()=>{d.trail.splice(+v,0,t);reDisc();});}});},
+ dJGo:v=>{const d=dById(S.disc),t=(dTrail(d),d.trail[+v]);if(t.k&&t.k!=='Jornada'){S.disc=null;A.nav(MC_PAGE[t.k]);return;}S.jor=t.id;S.jtab='trilha';S.active='jornadas';S.disc=null;render();window.scrollTo({top:0});},
  dStage:()=>{const d=dById(S.disc),t=TRILHA[d.stage-1];d.stage++;reDisc();toast(`${first(d)} concluiu “${t}”`,()=>{d.stage--;reDisc();});},
  dPause:()=>{closePops();const d=dById(S.disc);d.paused=!d.paused;render();toast(d.paused?`Discipulado de ${first(d)} pausado`:`Discipulado de ${first(d)} retomado`);},
  dRemove:()=>{closePops();const d=dById(S.disc),k=kids(d.id),p=d.parent&&dById(d.parent);

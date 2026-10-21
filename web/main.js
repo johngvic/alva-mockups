@@ -38,4 +38,8 @@
 //#include ./screens-ajuda.js
 //#include ./screens-ext-5.js
 //#include ./screens-ext-6.js
+//#include ./screens-casas-ajustes.js
+//#include ./screens-notificacoes-ajustes.js
+//#include ./screens-parametros.js
+//#include ./screens-conteudo-ajustes.js
 render();

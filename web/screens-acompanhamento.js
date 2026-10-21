@@ -5,11 +5,12 @@ const CTYPE={Visita:'home',Hospital:'hospital',Aconselhamento:'message',Luto:'fl
 const CST={urgente:['Urgente','var(--st-rec)','var(--st-rec-bg)'],acompanhando:['Acompanhando','var(--st-sol)','var(--st-sol-bg)'],resolvido:['Resolvido','var(--st-int)','var(--st-int-bg)']};
 const PASTORS=[['Pr. Rafael Pereira','ceu'],['Diác. Ana Costa','rosado'],['Pr. Marcos Lima','salvia'],['Pra. Daniela Rocha','damasco']];
 let _cid=0;
-const CS=(n,st,type,desc,resp,o={})=>({id:'c'+(++_cid),sched:o.sched||[],n,tone:o.tone||TONES[_cid%6],st,type,desc,resp,restr:!!o.restr,meets:o.meets||[],opened:o.opened||addDays(-10),resolved:o.resolved||''});
+const CS=(n,st,type,desc,resp,o={})=>({id:'c'+(++_cid),sched:o.sched||[],n,tone:o.tone||TONES[_cid%6],st,type,desc,resp,restr:!!o.restr,meets:o.meets||[],opened:o.opened||addDays(-10),resolved:o.resolved||'',vago:!!o.vago});
+const crespInner=c=>c.vago?'Sem responsável · pendente':`<span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}`;
 const CASES=[
  CS('Maria Santos','urgente','Hospital','Internada no Hospital São Paulo — cirurgia programada para sexta.','Pr. Rafael Pereira',{tone:'rosado',opened:addDays(-4),meets:[{d:addDays(-1),t:'Visita no hospital. Família presente, pediu oração pela cirurgia.',result:'Combinar novo contato com a família após a cirurgia.',mode:'Presencial',time:'15:00',where:'Hospital São Paulo'},{d:addDays(-4),t:'Ligação após a internação.'}]}),
  CS('João Oliveira','acompanhando','Aconselhamento','Passando por divórcio. Terceira sessão de aconselhamento agendada.','Diác. Ana Costa',{restr:true,tone:'ceu',opened:addDays(-40),sched:[{d:addDays(5),t:'19:30',mode:'Presencial',where:'Gabinete pastoral'}],meets:[{d:addDays(-6),t:'2ª sessão de aconselhamento.'},{d:addDays(-20),t:'1ª sessão.'},{d:addDays(-40),t:'Primeira conversa após o culto.'}]}),
- CS('Clara Ferreira','acompanhando','Luto','Perdeu o pai em agosto. Necessita de visita e suporte.','Pr. Marcos Lima',{tone:'lima',opened:addDays(-35)}),
+ CS('Clara Ferreira','acompanhando','Luto','Perdeu o pai em agosto. Necessita de visita e suporte.','Pr. Marcos Lima',{tone:'lima',vago:true,opened:addDays(-35)}),
  CS('Pedro Almeida','urgente','Oração','Crise de ansiedade severa. Afastado do trabalho.','Pr. Rafael Pereira',{restr:true,tone:'damasco',opened:addDays(-3),meets:[{d:addDays(-2),t:'Conversa por telefone. Encaminhado para acompanhamento profissional.'}]}),
  CS('Lucia Gomes','resolvido','Visita','Visitação realizada. Membro bem-acolhida e encorajada.','Pra. Daniela Rocha',{tone:'menta',resolved:addDays(-8),meets:[{d:addDays(-8),t:'Visita em casa com a equipe de recepção.'}]}),
  CS('Roberto Nunes','resolvido','Hospital','Recebeu alta após a cirurgia. Recuperação em casa.','Pr. Rafael Pereira',{tone:'salvia',resolved:addDays(-15),meets:[{d:addDays(-15),t:'Visita no dia da alta.'},{d:addDays(-19),t:'Visita no hospital.'}]}),
@@ -43,9 +44,9 @@ function cRows(){
  if(!l.length)return `<div class="mempty"><p>Nenhum caso aqui.</p><span>${S.cf==='urgente'?'Nenhum caso urgente no momento.':'Nada corresponde a esse filtro.'}</span></div>`;
  return `<div class="clist">${l.map(c=>{const last=c.meets[0];return `<div class="crow ${c.st}" tabindex="0" data-a="cOpen" data-v="${c.id}">
   <span class="av" style="background:var(--tone-${c.tone});color:var(--tone-${c.tone}-ink)">${initials(c.n)}</span>
-  <div class="cb"><div class="c1"><b>${esc(c.n)}</b>${cPill(c)}<span class="ctype">${ic(CTYPE[c.type],14)}${c.type}</span>${c.restr?`<span class="crestr" title="Só o responsável e o Presbitério veem">${ic('lock',12,2.2)}Restrito</span>`:''}</div>
+  <div class="cb"><div class="c1"><b>${esc(c.n)}</b>${cPill(c)}<span class="ctype">${ic(CTYPE[c.type],14)}${c.type}</span>${c.restr?`<span class="crestr" title="Só o Administrar e os pastores escolhidos veem o caso completo">${ic('lock',12,2.2)}Restrito</span>`:''}</div>
    <p class="cdesc">${esc(c.desc)}</p>
-   <div class="c3"><span class="cresp"><span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}</span><span class="sep">·</span><span>${c.meets.length?`${c.meets.length} encontro${c.meets.length>1?'s':''} · último ${ago(last.d)}`:'<b style="color:var(--st-sol)">Nenhum encontro ainda</b>'}</span>${(c.sched||[]).length?`<span class="c-nxp">${ic('calendar',12,2)}Próximo: ${wd(c.sched[0].d).slice(0,3)}, ${fmtD(c.sched[0].d)} · ${c.sched[0].t}</span>`:''}</div></div>
+   <div class="c3"><span class="cresp${c.vago?' vago':''}">${crespInner(c)}</span><span class="sep">·</span><span>${c.meets.length?`${c.meets.length} encontro${c.meets.length>1?'s':''} · último ${ago(last.d)}`:'<b style="color:var(--st-sol)">Nenhum encontro ainda</b>'}</span>${(c.sched||[]).length?`<span class="c-nxp">${ic('calendar',12,2)}Próximo: ${wd(c.sched[0].d).slice(0,3)}, ${fmtD(c.sched[0].d)} · ${c.sched[0].t}</span>`:''}</div></div>
   <span class="tc">${ic('chevR',16)}</span></div>`;}).join('')}</div>
  <div class="tfoot"><span>${l.length} ${l.length>1?'casos':'caso'}</span></div>`;
 }
@@ -67,10 +68,21 @@ function caseDetail(){
   <aside class="stack-col">
    <section class="card pc"><div class="sh"><h2>Situação</h2></div><div class="yn cst" role="radiogroup" id="cstG">${Object.keys(CST).map(k=>`<label><input type="radio" name="cst" value="${k}" ${c.st===k?'checked':''}><span><i style="background:${CST[k][1]}"></i>${CST[k][0]}</span></label>`).join('')}</div></section>
    <section class="card pc"><div class="sh"><h2>Sobre o caso</h2></div><p class="cdtx">${esc(c.desc)}</p>
-    <dl class="cdkv"><div><dt>Responsável</dt><dd class="cresp"><span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}</dd></div><div><dt>Quem vê</dt><dd>${c.restr?`${ic('lock',13,2.2)} Responsável e Presbitério`:'Todos os pastores'}</dd></div><div><dt>Aberto em</dt><dd>${fmtD(c.opened)}</dd></div></dl></section>
+    <dl class="cdkv"><div><dt>Responsável</dt><dd class="cresp${c.vago?' vago':''}">${crespInner(c)}</dd></div><div><dt>Quem vê</dt><dd>${c.restr?`${ic('lock',13,2.2)} Administrar e pastores escolhidos`:'Todos os pastores'}</dd></div><div><dt>Aberto em</dt><dd>${fmtD(c.opened)}</dd></div></dl></section>
   </aside></div>`;
 }
 function caseAfter(){const c=cById(S.case);const g=$('#cstG');if(!c||!g)return;g.addEventListener('change',e=>{const old=c.st,oldResolved=c.resolved;c.st=e.target.value;c.resolved=c.st==='resolvido'?TODAY.toISOString().slice(0,10):'';cRe();toast(`Caso de ${c.n.split(' ')[0]}: ${CST[c.st][0].toLowerCase()}`,()=>{careLog(c,'Alteração de situação desfeita',`${CST[c.st][0]} → ${CST[old][0]}`);c.st=old;c.resolved=oldResolved;cRe();});});}
 const cRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
+/* Triagem (17/10/2026): quem tem Administrar classifica o caso como normal ou restrito, escolhe os pastores que veem o restrito e designa o responsável */
+function cTriage(v){const c=cById(v);if(!c)return;const vw=new Set(c.viewers||[c.resp]);
+ openDlg(`${dlgHead('Triagem do caso',`Defina quem pode ver o caso de ${esc(c.n)}.`)}
+  <form id="trF" class="fgrid one" novalidate>
+   <div class="fld"><span class="fl">Quem vê</span><div class="yn" role="radiogroup"><label><input type="radio" name="tr" value="n" ${c.restr?'':'checked'}><span>Normal</span></label><label><input type="radio" name="tr" value="r" ${c.restr?'checked':''}><span>${ic('lock',13,2.2)}&nbsp;Restrito</span></label></div><span class="hint" id="trH"></span></div>
+   <div class="fld" id="trV"><span class="fl">Pastores que veem o caso completo</span><div class="cm-dpick">${PASTORS.map(p=>`<label><input type="checkbox" name="vw" value="${esc(p[0])}" ${vw.has(p[0])?'checked':''}><span>${esc(p[0])}</span></label>`).join('')}</div><span class="hint">Os demais pastores veem só “Caso restrito”, com urgência e status.</span></div>
+   <label class="fld"><span class="fl">Responsável</span><span class="selw"><select name="resp">${PASTORS.map(p=>`<option ${p[0]===c.resp?'selected':''}>${esc(p[0])}</option>`).join('')}</select>${ic('updown',14)}</span></label>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Salvar triagem</button></div></form>`,'sm');
+ const f=$('#trF'),h=()=>{const r=f.elements.tr.value==='r';$('#trV').hidden=!r;$('#trH').textContent=r?'Só o Administrar e os pastores escolhidos veem o caso completo.':'Todos os pastores com acesso a Acompanhamento veem o caso.';};
+ f.addEventListener('change',h);h();
+ f.addEventListener('submit',e=>{e.preventDefault();const r=f.elements.tr.value==='r';c.restr=r;c.resp=f.elements.resp.value;c.vago=false;c.viewers=r?[...f.querySelectorAll('[name=vw]:checked')].map(x=>x.value):[];if(r&&!c.viewers.includes(c.resp))c.viewers.push(c.resp);closeDlg();cRe();toast(r?'Caso marcado como restrito':'Caso aberto a todos os pastores');});}
 function refreshCases(){if(S.active==='acompanhamento'){const y=window.scrollY;render();window.scrollTo(0,y);}}
 

@@ -1,17 +1,17 @@
 /* ================= Agenda › Escalas ================= */
 const EST={criacao:['Em criação','var(--ink-muted)','var(--surface-2)'],aguardando:['Aguardando aceite','var(--st-sol)','var(--st-sol-bg)'],aprovada:['Aprovada','var(--st-int)','var(--st-int-bg)']};
-const MST={rascunho:['Não enviado','var(--ink-muted)','var(--surface)'],aguardando:['Aguardando','var(--st-sol)','var(--st-sol-bg)'],confirmado:['Confirmado','var(--st-int)','var(--st-int-bg)'],recusado:['Recusou','var(--st-rec)','var(--st-rec-bg)']};
+const MST={rascunho:['Não enviado','var(--ink-muted)','var(--surface)'],aguardando:['Pendente','var(--st-sol)','var(--st-sol-bg)'],confirmado:['Aceitou','var(--st-int)','var(--st-int-bg)'],recusado:['Recusou','var(--st-rec)','var(--st-rec-bg)']};
 let _bid=0;
 const BK=(label,members=[],content=[],team='')=>({id:'bk'+(++_bid),label,team,members:members.map(m=>({n:m[0],role:m[1],st:m[2]||'confirmado',over:m[3]||undefined})),content:content.map(c=>({t:c[0],d:c[1]||'',k:c[2]||(/^Tom /.test(c[1]||'')?'musica':'material')}))});
 const DT=(ev,blocks)=>({id:'dt'+(++_bid),ev,blocks});
-/* ---------- presença no dia (check-in com geolocalização) ---------- */
-const CKDAY='2026-09-30',CKNOW=20*60+25,CKRAIO=150;
+/* ---------- presença no dia (o check-in da pessoa já é Presente) ---------- */
+const CKDAY='2026-09-30',CKNOW=20*60+25;
 const ckMin=t=>{const m=String(t).match(/(\d{1,2})h(\d{2})?/);return m?+m[1]*60+(+m[2]||0):19*60;};
 const ckHM=m=>`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}`.replace('h00','h');
 function ckWin(e){const st=ckMin(e.time);return {open:st-120,start:st,close:st+120};}
 function ckState(e){if(!e||e.d!==CKDAY)return null;const w=ckWin(e);return CKNOW<w.open?'antes':CKNOW>w.close?'fim':'aberto';}
-const CKPR={pend:['Sem check-in','var(--ink-muted)','var(--surface)'],ck:['Check-in feito','var(--st-sol)','var(--st-sol-bg)'],ok:['Presente','var(--st-int)','var(--st-int-bg)'],falta:['Faltou','var(--st-rec)','var(--st-rec-bg)']};
-const ckOf=m=>m.pr==='ok'?'ok':m.pr==='falta'?'falta':m.ck?'ck':'pend';
+const CKPR={pend:['Sem check-in','var(--ink-muted)','var(--surface)'],ok:['Presente','var(--st-int)','var(--st-int-bg)'],falta:['Ausente','var(--st-rec)','var(--st-rec-bg)']};
+const ckOf=m=>m.pr==='ok'?'ok':m.pr==='falta'?'falta':'pend';
 const ESCALAS=[
  {id:'es0',n:'Escala Louvor — Ensaios de setembro',min:'Louvor',desc:'Ensaio geral antes dos cultos de outubro.',st:'aprovada',dates:[
   DT('ev11',[BK('Ensaio',[['Daniela Rocha','Vocal'],['Elisa Moura','Vocal'],['Diego Faria','Bateria'],['Igor Santana','Baixo'],['Clara Nunes','Teclado'],['Gustavo Mendes','Guitarra','recusado']],[['Grande é o Senhor','Tom G']],'Domingo manhã')])]},
@@ -26,7 +26,7 @@ const ESCALAS=[
 ];
 /* culto de hoje: cada ministério tem a sua escala; o check-in agrupa por evento */
 (()=>{const ev=EVTS.find(e=>e.t==='Culto de Quarta').id;
- const mk=(id,min,ppl,marks)=>{const x={id,n:`Escala ${min} — Culto de Quarta`,min,desc:'',st:'aprovada',dates:[DT(ev,[BK('Culto inteiro',ppl)])]};x.dates[0].blocks[0].members.forEach((m,i)=>{const k=marks[i];if(k==='ok'){m.ck={at:'19h0'+(i%9),dist:20+i*7};m.pr='ok';m.by='Líder';}else if(k==='ck')m.ck={at:'19h'+(20+i),dist:30+i*5};});ESCALAS.push(x);};
+ const mk=(id,min,ppl,marks)=>{const x={id,n:`Escala ${min} — Culto de Quarta`,min,desc:'',st:'aprovada',dates:[DT(ev,[BK('Culto inteiro',ppl)])]};x.dates[0].blocks[0].members.forEach((m,i)=>{const k=marks[i];if(k==='ok'){m.ck={at:'19h0'+(i%9)};m.pr='ok';m.by='Líder';}else if(k==='ck'){m.ck={at:'19h'+(20+i)};m.pr='ok';}});ESCALAS.push(x);};
  mk('esq1','Louvor',[['Ana Clara Lima','Vocal'],['Daniela Rocha','Vocal'],['Bruno Reis','Violão'],['Helena Duarte','Teclado'],['Diego Faria','Bateria'],['Igor Santana','Baixo']],['ok','ok','ok','ok','ok','ck']);
  mk('esq2','Kids',[['Marina Costa','Coordenação'],['Mônica Souza','Berçário'],['Cláudia Ferraz','Maternal'],['Renan Ferreira','Maternal'],['Paula Siqueira','Juniores'],['Júlia Prado','Juniores'],['Otávio Lins','Apoio']],['ok','ok','ok','ck','','','']);
  mk('esq3','Mídia',[['Diego Faria','Transmissão'],['Lucas Mendes','Câmera'],['Rafa Toledo','Projeção'],['Sofia Barros','Redes sociais']],['ok','ok','ok','ok']);
@@ -34,11 +34,18 @@ const ESCALAS=[
  mk('esq5','Cozinha',[['Mônica Souza','Restaurante'],['Sérgio Dantas','Restaurante'],['Lívia Campos','Cafeteria'],['Nádia Reis','Cafeteria'],['Paulo Vieira','Caixa'],['Vera Lúcia','Restaurante'],['Caio Teles','Apoio']],['ok','ok','ok','ck','','','']);
  mk('esq6','Intercessão',[['Renata Campos','Sala de oração'],['Elisa Moura','Sala de oração'],['Marcos Teixeira','Altar']],['ok','ok','ok']);
 })();
-(()=>{const m=ESCALAS[0].dates[0].blocks[0].members;Object.assign(m[0],{ck:{at:'19h12',dist:40},pr:'ok',by:'Você'});m[1].ck={at:'20h02',dist:12};m[2].ck={at:'19h58',dist:85};})();
+(()=>{const m=ESCALAS[0].dates[0].blocks[0].members;Object.assign(m[0],{ck:{at:'19h12'},pr:'ok',by:'Você'});Object.assign(m[1],{ck:{at:'20h02'},pr:'ok'});Object.assign(m[2],{ck:{at:'19h58'},pr:'ok'});})();
+/* escala já realizada: culto de 27/09 com a presença registrada */
+(()=>{const ev=EVTS.find(z=>z.d==='2026-09-27'&&z.kind==='culto');if(!ev)return;const d=DT(ev.id,[BK('Culto inteiro',[['Ana Clara Lima','Vocal'],['Daniela Rocha','Vocal'],['Bruno Reis','Violão'],['Helena Duarte','Teclado'],['Diego Faria','Bateria']],[['Grande é o Senhor','Tom G']],'Domingo manhã')]);
+ const ms=d.blocks[0].members;ms.forEach((m,i)=>{if(i===3){m.pr='falta';}else{m.pr='ok';m.ck={at:'09h'+String(20+i*5)};}});
+ ESCALAS.push({id:'es9',n:'Escala Louvor — Setembro',min:'Louvor',desc:'Cultos de celebração de setembro.',st:'aprovada',dates:[d]});})();
 Object.assign(S,{esc:null,estab:'datas',esview:'blocos',esq:'',esf:'todos',esM:null,esSel:null,esCol:{}});
 const esById=id=>ESCALAS.find(x=>x.id===id);
+const esIsPast=d=>{const e=eById(d.ev);return !!(e&&past(e));};
+const esPillDone='<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Realizada</span>';
+const attPill=m=>{if(m.st==='recusado')return msPill(m);const k=ckOf(m);return `<span class="stp" style="--c:${CKPR[k][1]};--b:${CKPR[k][2]}"><i></i>${k==='pend'?'Sem registro':CKPR[k][0]}</span>`;};
 const esPill=s=>`<span class="stp" style="--c:${EST[s][1]};--b:${EST[s][2]}"><i></i>${EST[s][0]}</span>`;
-const msPill=(m,clickable,ref)=>`<${clickable?`button data-a="esMst" data-v="${ref}" title="Marcar como confirmado"`:'span'} class="stp ${clickable?'clk':''}" style="--c:${MST[m.st][1]};--b:${MST[m.st][2]}"><i></i>${MST[m.st][0]}</${clickable?'button':'span'}>`;
+const msPill=(m,clickable,ref)=>`<${clickable?`button data-a="esMst" data-v="${ref}" title="Marcar como aceito"`:'span'} class="stp ${clickable?'clk':''}" style="--c:${MST[m.st][1]};--b:${MST[m.st][2]}"><i></i>${MST[m.st][0]}</${clickable?'button':'span'}>`;
 const esMembers=x=>x.dates.flatMap(d=>d.blocks.flatMap(b=>b.members));
 const esSorted=x=>x.dates.slice().sort((a,b)=>(eById(a.ev)?.d||'')<(eById(b.ev)?.d||'')?-1:1);
 const dateState=d=>{const e=eById(d.ev);if(e&&past(e))return 'past';const ms=d.blocks.flatMap(b=>b.members);if(!ms.length)return 'empty';if(ms.some(m=>m.st==='recusado')||d.blocks.some(b=>!b.members.length))return 'acao';if(ms.some(m=>m.st!=='confirmado'))return 'wait';return 'ok';};
@@ -52,20 +59,36 @@ function escList(){
   <div class="pact"><button class="btn sec" data-a="lmOpen" data-v="lim">${ic('sliders',15)}Regras de escala</button>${rpBtn('escalas','escalas')}
   <button class="btn pri" data-a="esAdd">${ic('plus',15,2.2)}Nova escala</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">
-  <div class="k4"><span class="kl">Aprovadas</span><span class="kv" style="color:var(--st-int)">${c('aprovada')}</span><span class="kd">todos confirmaram</span></div>
+  <div class="k4"><span class="kl">Aprovadas</span><span class="kv" style="color:var(--st-int)">${c('aprovada')}</span><span class="kd">todos aceitaram</span></div>
   <div class="k4"><span class="kl">Aguardando aceite</span><span class="kv" style="color:var(--st-sol)">${c('aguardando')}</span><span class="kd">${ESCALAS.filter(x=>x.st==='aguardando').reduce((a,x)=>a+esMembers(x).filter(m=>m.st==='aguardando').length,0)} pessoas sem resposta</span></div>
   <div class="k4"><span class="kl">Em criação</span><span class="kv">${c('criacao')}</span><span class="kd">ainda não enviadas</span></div>
  </section>
  ${ckStrip()}
  <section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="esq" placeholder="Buscar escala ou ministério" value="${esc(S.esq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todas',ESCALAS.length],['aprovada','Aprovadas',c('aprovada')],['aguardando','Aguardando aceite',c('aguardando')],['criacao','Em criação',c('criacao')]].map(x=>`<button class="chipf ${S.esf===x[0]?'on':''}" data-a="esF" data-v="${x[0]}">${x[0]!=='todos'?`<i style="background:${EST[x[0]][1]}"></i>`:''}${x[1]}<small>${x[2]}</small></button>`).join('')}</div></div>
-  ${l.length?`<div class="trow es thead"><span>Escala</span><span>Datas</span><span>Confirmações</span><span>Status</span><span></span></div>${l.map(x=>{const ms=esMembers(x),ok=ms.filter(m=>m.st==='confirmado').length,ds=esSorted(x);return `<div class="trow es" tabindex="0" data-a="esOpen" data-v="${x.id}">
+  ${l.length?`<div class="trow es thead"><span>Escala</span><span>Datas</span><span>Aceites</span><span>Status</span><span></span></div>${l.map(x=>esRow(x,'esOpen')).join('')}`:'<div class="mempty"><p>Nenhuma escala.</p><span>Nada corresponde a esse filtro.</span></div>'}
+  <div class="tfoot"><span>${l.length} escalas</span></div></section>`;
+}
+
+/* linha da lista de escalas (tela de Escalas, aba Escalas do ministério e do evento) */
+const esRow=(x,act,ev)=>{const ds=ev?x.dates.filter(d=>d.ev===ev):esSorted(x),ms=ev?ds.flatMap(d=>d.blocks.flatMap(b=>b.members)):esMembers(x),ok=ms.filter(m=>m.st==='confirmado').length;return `<div class="trow es" tabindex="0" data-a="${act}" data-v="${x.id}">
    <span class="tn"><span class="htile" style="--s:36px;background:var(--tone-${(MINIS.find(m=>m.n===x.min)||{tone:'ceu'}).tone});color:var(--tone-${(MINIS.find(m=>m.n===x.min)||{tone:'ceu'}).tone}-ink)">${ic((MINIS.find(m=>m.n===x.min)||{icon:'users'}).icon,17)}</span><span class="hn"><b>${esc(x.n)}</b><span>Ministério de ${esc(x.min)}</span></span></span>
    <span class="esd">${ds.length?ds.slice(0,4).map(d=>{const e=eById(d.ev);return `<span class="esdc ${dateState(d)}" title="${esc(e.t)}">${+e.d.slice(8)}<small>${MONTHS[+e.d.slice(5,7)-1].slice(0,3)}</small></span>`;}).join('')+(ds.length>4?`<span class="soft">+${ds.length-4}</span>`:''):'<span class="soft">Nenhuma data</span>'}</span>
    <span class="esc">${ms.length?`<span class="tr"><i style="width:${ok/ms.length*100}%"></i></span><span><b>${ok}</b>/${ms.length}</span>`:'<span class="soft">Ninguém escalado</span>'}</span>
-   <span class="ts">${esPill(x.st)}</span><span class="tc">${ic('chevR',16)}</span></div>`;}).join('')}`:'<div class="mempty"><p>Nenhuma escala.</p><span>Nada corresponde a esse filtro.</span></div>'}
-  <div class="tfoot"><span>${l.length} escalas</span></div></section>`;
-}
+   <span class="ts">${esDone(x)?esPillDone:esPill(x.st)}</span><span class="tc">${ic('chevR',16)}</span></div>`;};
+const esDone=x=>x.dates.length>0&&x.dates.every(d=>{const e=eById(d.ev);return e&&past(e);});
+const esHead='<div class="trow es thead"><span>Escala</span><span>Datas</span><span>Aceites</span><span>Status</span><span></span></div>';
+Object.assign(S,{mnesf:'abertas'});
+const esCntMin=m=>ESCALAS.filter(x=>x.min===m.n&&!esDone(x)).length||null;
+function mnEsc(m){const all=ESCALAS.filter(x=>x.min===m.n),ab=all.filter(x=>!esDone(x)),re=all.filter(esDone),l=S.mnesf==='real'?re:ab;
+ return `<section class="card mtab"><div class="tbar"><div class="chips">${[['abertas','Abertas',ab.length],['real','Realizadas',re.length]].map(c=>`<button class="chipf ${S.mnesf===c[0]?'on':''}" data-a="mnEscF" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div></div>
+  ${l.length?esHead+l.map(x=>esRow(x,'mnEscGo')).join(''):`<div class="mempty"><p>Nenhuma escala ${S.mnesf==='real'?'realizada':'aberta'}.</p><span>As escalas do Ministério de ${esc(m.n)} aparecem aqui.</span></div>`}
+  <div class="tfoot"><span>${l.length} ${l.length===1?'escala':'escalas'}</span></div></section>`;}
+/* aba Escalas do evento e do culto: só leitura, uma linha por escala que usa a data */
+const esOfEvt=e=>ESCALAS.filter(x=>x.dates.some(d=>d.ev===e.id));
+function evEsc(e){const l=esOfEvt(e);
+ return `<section class="card mtab">${l.length?esHead+l.map(x=>esRow(x,'mnEscGo',e.id)).join(''):`<div class="mempty"><p>Nenhuma escala usa esta data.</p><span>As escalas são montadas em Escalas, escolhendo esta data entre os eventos do Calendário.</span></div>`}
+  <div class="tfoot"><span>${l.length} ${l.length===1?'escala':'escalas'}</span></div></section>`;}
 
 /* ---------- detail ---------- */
 function escDetail(){
@@ -73,26 +96,25 @@ function escDetail(){
  const ms=esMembers(x),ok=ms.filter(m=>m.st==='confirmado').length,pend=ms.filter(m=>m.st==='aguardando').length,bl=x.dates.reduce((a,d)=>a+d.blocks.length,0),allOk=ms.length&&ok===ms.length;
  const act=x.st==='criacao'?`<button class="btn pri" data-a="esSend" ${ms.length?'':'disabled title="Adicione pessoas antes de enviar"'}>${ic('mail',15)}Enviar para os escalados</button>`:x.st==='aguardando'?(allOk?`<button class="btn pri" data-a="esApprove">${ic('check',15,2.4)}Aprovar escala</button>`:`<button class="btn sec" data-a="esRemind" ${pend?'':'disabled'}>${ic('bell',15)}Lembrar ${pend} pendente${pend===1?'':'s'}</button>`):'';
  return `<nav class="crumb rise"><span class="soft">Agenda</span>${ic('chevR',13,2)}<button class="lnk back" data-a="esBack">Escalas</button>${ic('chevR',13,2)}<span>${esc(x.n)}</span></nav>
- <header class="card prof rise" style="--d:1"><div class="pid"><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(x.n)}</h1>${esPill(x.st)}</div><p>Ministério de ${esc(x.min)}${x.desc?' · '+esc(x.desc):''}</p></div></div>
+ <header class="card prof rise" style="--d:1"><div class="pid"><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(x.n)}</h1>${esDone(x)?esPillDone:esPill(x.st)}</div><p>Ministério de ${esc(x.min)}${x.desc?' · '+esc(x.desc):''}</p></div></div>
   <div class="pact">${act}<div style="position:relative"><button class="ibtn" data-a="esMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="esPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="esDup">${ic('layers',17)}Duplicar para o próximo mês</button><hr><button class="pi danger" data-a="esDel">${ic('x',17)}Excluir escala</button></div></div></div>
-  ${x.st==='criacao'?`<div class="esflow"><span class="on"><i>1</i>Montar</span><b></b><span><i>2</i>Escalados confirmam</span><b></b><span><i>3</i>Aprovada</span></div>`:x.st==='aguardando'?`<div class="esflow"><span class="done"><i>${ic('check',11,3)}</i>Montar</span><b class="on"></b><span class="on"><i>2</i>Escalados confirmam</span><b></b><span><i>3</i>Aprovada</span></div>`:''}
-  <div class="ikpi hk"><div><b>${x.dates.length}</b><span>Datas</span></div><div><b>${bl}</b><span>Blocos</span></div><div><b>${ms.length}</b><span>Pessoas escaladas</span></div><div><b>${ok}<small class="kof">/${ms.length}</small></b><span>Confirmaram</span></div></div>
-  <div class="ptabs" role="tablist">${[['det','Detalhes'],['datas','Datas',x.dates.length],['ck','Check-in']].map(t=>`<button role="tab" class="${S.estab===t[0]?'on':''}" data-a="esTab" data-v="${t[0]}">${t[0]==='ck'&&ckToday(x)?'<i class="cklive"></i>':''}${t[1]}${t[2]?`<small>${t[2]}</small>`:t[0]==='ck'&&ckPendN(x)?`<small class="ckn">${ckPendN(x)}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
+  ${x.st==='criacao'?`<div class="esflow"><span class="on"><i>1</i>Montar</span><b></b><span><i>2</i>Escalados aceitam</span><b></b><span><i>3</i>Aprovada</span></div>`:x.st==='aguardando'?`<div class="esflow"><span class="done"><i>${ic('check',11,3)}</i>Montar</span><b class="on"></b><span class="on"><i>2</i>Escalados aceitam</span><b></b><span><i>3</i>Aprovada</span></div>`:''}
+  <div class="ikpi hk"><div><b>${x.dates.length}</b><span>Datas</span></div><div><b>${bl}</b><span>Blocos</span></div><div><b>${ms.length}</b><span>Pessoas escaladas</span></div><div><b>${ok}<small class="kof">/${ms.length}</small></b><span>Aceitaram</span></div></div>
+  <div class="ptabs" role="tablist">${[['det','Detalhes'],['datas','Datas',x.dates.length],['ck','Check-in']].map(t=>`<button role="tab" class="${S.estab===t[0]?'on':''}" data-a="esTab" data-v="${t[0]}">${t[0]==='ck'&&ckToday(x)?'<i class="cklive"></i>':''}${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
  <div class="rise" style="--d:2">${S.estab==='det'?esDet(x):S.estab==='ck'?esCk(x):esDatas(x)}</div>`;
 }
 function esDet(x){
  const ms=esMembers(x),tot=ms.length||1,cnt=k=>ms.filter(m=>m.st===k).length,mn=MINIS.find(m=>m.n===x.min)||{tone:'ceu',icon:'users'},tm=teamsFor(x.min),ds=esSorted(x);
  const seg=[['confirmado','var(--st-int)'],['aguardando','var(--st-sol)'],['recusado','var(--st-rec)'],['rascunho','var(--line-strong)']];
- if(x.auto===undefined)x.auto=true;
- return `<section class="card esdet">
+  return `<section class="card esdet">
   <div class="esdf"><div class="sh" style="margin-bottom:14px"><h2>Sobre a escala</h2><span class="who" id="essaved">Salva sozinha</span></div>
    <div class="fgrid">
     <label class="fld"><span class="fl">Nome</span><input id="esN" value="${esc(x.n)}"></label>
     <label class="fld"><span class="fl">Ministério</span><span class="selw"><select id="esMin">${MINIS.filter(m=>m.active).map(m=>`<option value="${esc(m.n)}" ${m.n===x.min?'selected':''}>Ministério de ${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></label>
     <label class="fld" style="grid-column:1/-1"><span class="fl">Recado para quem vai servir <small>opcional</small></span><textarea class="ta" id="esDesc" rows="3" placeholder="Ex.: chegar 40 min antes para oração e passagem de som">${esc(x.desc)}</textarea><span class="hint">Aparece no convite que cada pessoa recebe no app.</span></label>
    </div>
-   <label class="tog esauto"><input type="checkbox" id="esAuto" ${x.auto?'checked':''}><span class="sw"></span><span><b>Lembrar quem não respondeu</b><small>Enviamos um lembrete automático 2 dias antes de cada data</small></span></label>
+   <p class="who esauto" style="margin:14px 0 0">${ic('bell',14,2)}O lembrete automático antes da data é configurado em Comunicação (padrão de 1 dia).</p>
   </div>
   <aside class="esdx">
    <div class="esxm"><span class="htile" style="--s:40px;background:var(--tone-${mn.tone});color:var(--tone-${mn.tone}-ink)">${ic(mn.icon,19)}</span><span class="dkt"><b>Ministério de ${esc(x.min)}</b><span>${tm.length} time${tm.length===1?'':'s'} disponíve${tm.length===1?'l':'is'} para escalar</span></span></div>
@@ -105,27 +127,27 @@ function esDet(x){
 }
 function esDatas(x){
  const ds=esSorted(x);
- return `<section class="card pc"><div class="sh"><div class="segc" role="group"><button data-a="esView" data-v="blocos" aria-pressed="${S.esview==='blocos'}">Blocos</button><button data-a="esView" data-v="cal" aria-pressed="${S.esview==='cal'}">Calendário</button></div><span class="row2">${S.esview==='blocos'&&ds.length>0?`<button class="btn ghost sm" data-a="esColAll">${ic(ds.every(d=>S.esCol[d.id])?'expand':'collapse',14)}${ds.every(d=>S.esCol[d.id])?'Expandir tudo':'Recolher tudo'}</button>`:''}<button class="btn pri sm" data-a="esAddDate">${ic('plus',14,2.2)}Adicionar data</button></span></div>
+ return `<section class="card pc"><div class="sh"><div class="segc" role="group"><button data-a="esView" data-v="blocos" aria-pressed="${S.esview==='blocos'}">Blocos</button><button data-a="esView" data-v="cal" aria-pressed="${S.esview==='cal'}">Calendário</button></div><span class="row2">${S.esview==='blocos'&&ds.length>0?`<button class="btn ghost sm" data-a="esColAll">${ic(ds.every(d=>S.esCol[d.id])?'expand':'collapse',14)}${ds.every(d=>S.esCol[d.id])?'Expandir tudo':'Recolher tudo'}</button>`:''}${esDone(x)?'':`<button class="btn pri sm" data-a="esAddDate">${ic('plus',14,2.2)}Adicionar data</button>`}</span></div>
   ${!ds.length?`<div class="eempty"><span class="eei">${ic('calendar',22)}</span><p>Nenhuma data ainda.</p><span class="who">Escolha um culto ou evento do Calendário para começar a escalar.</span><button class="btn pri" data-a="esAddDate" style="margin-top:10px">${ic('plus',14,2.2)}Adicionar data</button></div>`
   :S.esview==='cal'?esCal(x,ds):`<p class="who" style="margin:-4px 0 16px;max-width:640px">Cada data começa com um bloco para o evento inteiro. Se precisar de mais de um time ao mesmo tempo, ou trocar de time ao longo do dia, adicione blocos. O nome do bloco é livre.</p>${ds.map(d=>esDateCard(x,d)).join('')}`}
  </section>`;
 }
 function esDateCard(x,d){
- const e=eById(d.ev),st=dateState(d),col=!!S.esCol[d.id],ms=d.blocks.flatMap(b=>b.members),ok=ms.filter(m=>m.st==='confirmado').length;
- return `<article class="esdt ${col?'col':''}" id="${d.id}"><header class="esdh"><button class="ibtn sm estog" data-a="esCol" data-v="${d.id}" aria-expanded="${!col}" aria-label="${col?'Expandir':'Recolher'} data" title="${col?'Expandir':'Recolher'}">${ic('chevD',15,2.2)}</button>${dTile(e)}<div class="dkt"><b>${esc(e.t)}</b><span>${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}</span></div>${tTag(e.type)}<span class="esst ${st}">${{ok:'Tudo confirmado',wait:'Aguardando respostas',acao:'Precisa de ação',empty:'Sem ninguém',past:'Já aconteceu'}[st]}</span><button class="ibtn sm" data-a="esDelDate" data-v="${d.id}" aria-label="Remover data" title="Remover data">${ic('x',14)}</button></header>
-  ${ckBar(d,e)}${col?`<button class="esmini" data-a="esCol" data-v="${d.id}"><span>${d.blocks.map(b=>`<em>${esc(b.label)}</em>`).join('')}</span><span class="esmc">${ms.length?`<b>${ok}</b>/${ms.length} confirmados`:'Ninguém escalado'}</span><span class="avs">${ms.slice(0,5).map(m=>`<span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span>`).join('')}</span></button>`:`<div class="esbl">${d.blocks.map(b=>esBlock(x,d,b)).join('')}</div>
-  <button class="btn sec sm esaddb" data-a="esAddBlock" data-v="${d.id}">${ic('plus',13,2.2)}Adicionar bloco</button>`}</article>`;
+ const e=eById(d.ev),st=dateState(d),col=!!S.esCol[d.id],ms=d.blocks.flatMap(b=>b.members),ok=ms.filter(m=>m.st==='confirmado').length,pd=esIsPast(d),pres=ms.filter(m=>ckOf(m)==='ok').length;
+ return `<article class="esdt ${col?'col':''}" id="${d.id}"><header class="esdh"><button class="ibtn sm estog" data-a="esCol" data-v="${d.id}" aria-expanded="${!col}" aria-label="${col?'Expandir':'Recolher'} data" title="${col?'Expandir':'Recolher'}">${ic('chevD',15,2.2)}</button>${dTile(e)}<div class="dkt"><b>${esc(e.t)}</b><span>${wd(e.d)}, ${dBR(e.d)} · ${e.time} · ${esc(e.place)}</span></div>${tTag(e.type)}<span class="esst ${st}">${{ok:'Tudo aceito',wait:'Aguardando respostas',acao:'Precisa de ação',empty:'Sem ninguém',past:`Realizada · ${pres} de ${ms.length} presentes`}[st]}</span>${pd?'':`<button class="ibtn sm" data-a="esDelDate" data-v="${d.id}" aria-label="Remover data" title="Remover data">${ic('x',14)}</button>`}</header>
+  ${ckBar(d,e)}${col?`<button class="esmini" data-a="esCol" data-v="${d.id}"><span>${d.blocks.map(b=>`<em>${esc(b.label)}</em>`).join('')}</span><span class="esmc">${ms.length?`<b>${ok}</b>/${ms.length} aceitaram`:'Ninguém escalado'}</span><span class="avs">${ms.slice(0,5).map(m=>`<span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span>`).join('')}</span></button>`:`<div class="esbl">${d.blocks.map(b=>esBlock(x,d,b)).join('')}</div>
+  ${pd?'':`<button class="btn sec sm esaddb" data-a="esAddBlock" data-v="${d.id}">${ic('plus',13,2.2)}Adicionar bloco</button>`}`}</article>`;
 }
 function esBlock(x,d,b){
- const ym=lmYmOf(d),r=`${d.id}|${b.id}`,pend=b.members.filter(m=>m.st==='aguardando'||m.st==='rascunho').length;
- return `<div class="esb"><div class="esbh"><input class="esbl-in" value="${esc(b.label)}" data-ref="${r}" aria-label="Nome do bloco">${d.blocks.length>1?`<button class="ibtn sm" data-a="esDelBlock" data-v="${r}" aria-label="Remover bloco" title="Remover bloco">${ic('x',14)}</button>`:''}</div>
+ const ym=lmYmOf(d),r=`${d.id}|${b.id}`,pd=esIsPast(d),pend=b.members.filter(m=>m.st==='aguardando'||m.st==='rascunho').length;
+ return `<div class="esb"><div class="esbh"><input class="esbl-in" value="${esc(b.label)}" data-ref="${r}" aria-label="Nome do bloco" ${pd?'readonly':''}>${d.blocks.length>1&&!pd?`<button class="ibtn sm" data-a="esDelBlock" data-v="${r}" aria-label="Remover bloco" title="Remover bloco">${ic('x',14)}</button>`:''}</div>
   <div class="esbc"><div><p class="fl">Time e pessoas</p>
-   ${b.team?`<span class="esteam">${ic('users',13)}${esc(b.team)}<button data-a="esTeamClr" data-v="${r}" aria-label="Tirar time">${ic('x',11,2.4)}</button></span>`:''}
-   ${b.members.length?`<div class="esms">${b.members.map((m,i)=>`<div class="esm"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${m.over&&m.st!=='recusado'?` <em class="lm-x" title="Escalado(a) acima do limite mensal">${ic('alert',10,2.6)}Exceção ao limite</em>`:''}${m.sub?` <em class="es-sub" title="${esc(m.sub.why)}">${ic('swap',10,2.4)}no lugar de ${esc(m.sub.from.split(' ')[0])}</em>`:''}</span></span>${m.st!=='recusado'&&['over','full','pause'].includes(lmUse(m.n,ym).st)?lmPill(m.n,ym):''}${msPill(m,x.st==='aguardando'&&m.st==='aguardando',r+'|'+i)}<button class="ibtn sm" data-a="esSwap" data-v="${r}|${i}" aria-label="Substituir ${esc(m.n)}" title="Substituir">${ic('swap',13)}</button><button class="ibtn sm" data-a="esDelM" data-v="${r}|${i}" aria-label="Remover ${esc(m.n)}" title="Remover">${ic('x',13)}</button></div>`).join('')}</div>`:`<p class="esempty">${ic('alert',13,2)}Ninguém escalado neste bloco.</p>`}
-   <div class="row2" style="margin-top:8px">${b.team?'':`<button class="btn sec sm" data-a="esTeam" data-v="${r}">${ic('users',13)}Selecionar time</button>`}<button class="btn sec sm" data-a="esAddM" data-v="${r}">${ic('plus',13,2.2)}Pessoa</button>${x.st!=='criacao'?`<button class="btn sec sm" data-a="esNotify" data-v="${r}" ${pend?'':'disabled'}>${ic('bell',13)}Notificar</button>`:''}</div></div>
+   ${b.team?`<span class="esteam">${ic('users',13)}${esc(b.team)}${pd?'':`<button data-a="esTeamClr" data-v="${r}" aria-label="Tirar time">${ic('x',11,2.4)}</button>`}</span>`:''}
+   ${b.members.length?`<div class="esms">${b.members.map((m,i)=>`<div class="esm"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${m.over&&m.st!=='recusado'?` <em class="lm-x" title="Escalado(a) acima do limite mensal">${ic('alert',10,2.6)}Exceção ao limite</em>`:''}${m.sub?` <em class="es-sub" title="${esc(m.sub.why)}">${ic('swap',10,2.4)}no lugar de ${esc(m.sub.from.split(' ')[0])}</em>`:''}</span></span>${!pd&&m.st!=='recusado'&&['over','full','pause'].includes(lmUse(m.n,ym).st)?lmPill(m.n,ym):''}${pd?attPill(m):msPill(m,x.st==='aguardando'&&m.st==='aguardando',r+'|'+i)}${pd?'':`<button class="ibtn sm" data-a="esSwap" data-v="${r}|${i}" aria-label="Substituir ${esc(m.n)}" title="Substituir">${ic('swap',13)}</button><button class="ibtn sm" data-a="esDelM" data-v="${r}|${i}" aria-label="Remover ${esc(m.n)}" title="Remover">${ic('x',13)}</button>`}</div>`).join('')}</div>`:`<p class="esempty">${ic('alert',13,2)}Ninguém escalado neste bloco.</p>`}
+   ${pd?'':`<div class="row2" style="margin-top:8px">`}${pd?'':`${b.team?'':`<button class="btn sec sm" data-a="esTeam" data-v="${r}">${ic('users',13)}Selecionar time</button>`}<button class="btn sec sm" data-a="esAddM" data-v="${r}">${ic('plus',13,2.2)}Pessoa</button>${x.st!=='criacao'?`<button class="btn sec sm" data-a="esNotify" data-v="${r}" ${pend?'':'disabled'}>${ic('bell',13)}Notificar</button>`:''}`}${pd?'':`</div>`}</div>
   <div><p class="fl">Conteúdo <small>repertório, material de apoio…</small></p>
-   ${b.content.length?`<div class="escs">${b.content.map((c,i)=>`<div class="escc"><span class="cti ec-k ${c.k||'outro'}" style="width:28px;height:28px;border-radius:8px">${ic(ECT[c.k||'outro'][2],13)}</span><span class="dkt"><b>${esc(c.t)}</b><span>${ECT[c.k||'outro'][0]}${c.d?' · '+esc(c.d):''}</span></span><button class="ibtn sm" data-a="esDelC" data-v="${r}|${i}" aria-label="Remover">${ic('x',13)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0 0 4px">Nada ainda.</p>'}
-   <div class="row2" style="margin-top:8px"><button class="btn sec sm" data-a="esAddC" data-v="${r}">${ic('plus',13,2.2)}Conteúdo</button><button class="btn sec sm" data-a="esReuse" data-v="${r}">${ic('layers',13)}Reaproveitar de outro bloco</button></div></div></div></div>`;
+   ${b.content.length?`<div class="escs">${b.content.map((c,i)=>`<div class="escc"><span class="cti ec-k ${c.k||'outro'}" style="width:28px;height:28px;border-radius:8px">${ic(ECT[c.k||'outro'][2],13)}</span><span class="dkt"><b>${esc(c.t)}</b><span>${ECT[c.k||'outro'][0]}${c.d?' · '+esc(c.d):''}</span></span>${pd?'':`<button class="ibtn sm" data-a="esDelC" data-v="${r}|${i}" aria-label="Remover">${ic('x',13)}</button>`}</div>`).join('')}</div>`:'<p class="who" style="margin:0 0 4px">Nada ainda.</p>'}
+   ${pd?'':`<div class="row2" style="margin-top:8px"><button class="btn sec sm" data-a="esAddC" data-v="${r}">${ic('plus',13,2.2)}Conteúdo</button><button class="btn sec sm" data-a="esReuse" data-v="${r}">${ic('layers',13)}Reaproveitar de outro bloco</button></div>`}</div></div></div>`;
 }
 function esCal(x,ds){
  const first=eById(ds[0].ev).d;S.esM=S.esM||first.slice(0,7);const [y,m]=S.esM.split('-').map(Number),off=new Date(y,m-1,1).getDay(),days=new Date(y,m,0).getDate();
@@ -134,7 +156,7 @@ function esCal(x,ds){
  const sd=sel&&by[sel],se=sd&&eById(sd.ev);
  return `<div class="escal"><div><div class="sh" style="margin-bottom:10px"><button class="ibtn sm" data-a="esM" data-v="-1" aria-label="Mês anterior">${ic('chevL',14,2)}</button><b style="font:600 15px/1 var(--font-display)">${MONTHS[m-1][0].toUpperCase()+MONTHS[m-1].slice(1)} ${y}</b><button class="ibtn sm" data-a="esM" data-v="1" aria-label="Próximo mês">${ic('chevR',14,2)}</button></div>
   <div class="escg">${['D','S','T','Q','Q','S','S'].map(w=>`<span class="cwd">${w}</span>`).join('')}${cells.join('')}</div>
-  <div class="esleg">${[['ok','Tudo confirmado'],['wait','Aguardando alguém'],['acao','Precisa de ação'],['past','Já aconteceu'],['empty','Sem ninguém']].map(l=>`<span><i class="escd ${l[0]}"></i>${l[1]}</span>`).join('')}</div></div>
+  <div class="esleg">${[['ok','Tudo aceito'],['wait','Aguardando alguém'],['acao','Precisa de ação'],['past','Já aconteceu'],['empty','Sem ninguém']].map(l=>`<span><i class="escd ${l[0]}"></i>${l[1]}</span>`).join('')}</div></div>
   <div class="essum">${sd?`<div class="esdh" style="padding:0 0 12px">${dTile(se)}<div class="dkt"><b>${esc(se.t)}</b><span>${wd(se.d)}, ${dBR(se.d)} · ${se.time}</span></div><button class="btn sec sm" data-a="esGoBlocks" data-v="${sd.id}">Editar blocos</button></div>
    ${sd.blocks.map(b=>`<div class="essb"><p class="fl">${esc(b.label)}</p>${b.members.length?b.members.map(mm=>`<div class="essr"><span>${esc(mm.n)} <span class="soft">· ${esc(mm.role)}</span></span>${msPill(mm)}</div>`).join(''):'<p class="esempty">Ninguém escalado ainda.</p>'}</div>`).join('')}`:'<div class="soft-empty"><p>Nenhuma data neste mês.</p></div>'}</div></div>`;
 }
@@ -147,8 +169,7 @@ function escAfter(){
  let t;const sv=()=>{clearTimeout(t);$('#essaved').textContent='Salvando…';t=setTimeout(()=>{const n=$('#esN').value.trim();if(n)x.n=n;x.min=$('#esMin').value;x.desc=$('#esDesc').value.trim();$('#essaved').innerHTML=`${ic('check',13,2.4)} Salvo`;$('#essaved').style.color='var(--st-int)';$('.prof .pn p').textContent='Ministério de '+x.min+(x.desc?' · '+x.desc:'');$('.prof h1').textContent=x.n;$('.crumb>span:last-child').textContent=x.n;},600);};
  ['esN','esDesc'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener('input',sv);});
  const mi=$('#esMin');if(mi)mi.addEventListener('change',()=>{x.min=mi.value;esRe();toast('Ministério alterado');});
- const au=$('#esAuto');if(au)au.addEventListener('change',()=>{x.auto=au.checked;toast(au.checked?'Lembretes automáticos ligados':'Lembretes automáticos desligados');});
-}
+ }
 const esRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
 const refB=v=>{const x=esById(S.esc),[di,bi,mi]=v.split('|'),d=x.dates.find(z=>z.id===di),b=d&&d.blocks.find(z=>z.id===bi);return {x,d,b,mi:mi!==undefined?+mi:null};};
 function sentSt(x){return x.st==='criacao'?'rascunho':'aguardando';}
@@ -197,7 +218,7 @@ const EA={
   const n=byId(s.value).n,{d}=refB(v),ym=lmYmOf(d),u=lmUse(n,ym),ov=u.c>=u.lim,ack=$('#emack');
   if(ov&&!(ack&&ack.checked)){const l=ack.closest('.lm-ack');l.classList.remove('shk');void l.offsetWidth;l.classList.add('shk','bad');return;}
   bt.classList.add('busy');setTimeout(()=>{b.members.push({n,role:r.value.trim(),st:sentSt(x),over:ov||undefined});if(ov)LOG.unshift({u:'Rafael Pereira',a:'Escalou acima do limite',e:'Escala',x:n,det:`${u.c+1}/${u.lim} em ${lmMon(ym)} · ${x.n}`,d:'2026-10-01',t:new Date().toTimeString().slice(0,5)});closeDlg();esRe();const f=n.split(' ')[0];toast(ov?`${f} escalado(a) como exceção: ${u.c+1} de ${u.lim} em ${lmMon(ym)}${x.st!=='criacao'?'. O convite avisa que pode recusar':''}`:u.c+1===u.lim&&LMR.on?`${f} adicionado(a) · fechou o limite de ${lmMon(ym)} (${u.lim}/${u.lim})`:x.st==='criacao'?`${f} adicionado(a)`:`${f} adicionado(a) e avisado(a)`);},400);},
- esDelM:v=>{const {x,b,mi}=refB(v),m=b.members[mi];const go=()=>{b.members.splice(mi,1);esRe();toast(`${m.n.split(' ')[0]} removido(a)`,()=>{b.members.splice(mi,0,m);esRe();});};if(x.st==='criacao')return go();confirmDel({title:`Tirar ${m.n.split(' ')[0]} deste bloco?`,body:`${m.n} ${m.st==='confirmado'?'já tinha confirmado e ':''}será avisado(a) de que não precisa mais servir em “${esc(b.label)}”.`,label:'Tirar da escala',onConfirm:go});},
+ esDelM:v=>{const {x,b,mi}=refB(v),m=b.members[mi];const go=()=>{b.members.splice(mi,1);esRe();toast(`${m.n.split(' ')[0]} removido(a)`,()=>{b.members.splice(mi,0,m);esRe();});};if(x.st==='criacao')return go();confirmDel({title:`Tirar ${m.n.split(' ')[0]} deste bloco?`,body:`${m.n} ${m.st==='confirmado'?'já tinha aceitado e ':''}será avisado(a) de que não precisa mais servir em “${esc(b.label)}”.`,label:'Tirar da escala',onConfirm:go});},
  esSwap:v=>{const {x,d,b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0],ym=lmYmOf(d),cand=MEMBERS.filter(z=>z.n!==m.n&&!b.members.some(y=>y.n===z.n)),ev=eById(d.ev);
   const WHY=[['Imprevisto pessoal','alert'],['Saúde','heart'],['Viagem','car'],['Trabalho','clipboard'],['Troca combinada','swap'],['Outro','dots']];
   openDlg(`${dlgHead('Substituir '+esc(f),`${esc(b.label)} · ${esc(ev.t)} · ${dBR(ev.d)}`)}<div class="esw">
@@ -207,7 +228,7 @@ const EA={
    <p class="fl" style="margin:14px 0 8px">Motivo da substituição</p><div class="ckwhy esw-why" id="eswWhy">${WHY.map(([w,i])=>`<button type="button" class="chipf" data-w="${w}"><span>${ic(i,15,2)}</span>${w}</button>`).join('')}</div>
    <label class="fld" id="eswObsF" hidden><span class="fl">Conte o motivo</span><input id="eswObs" placeholder="Ex.: Mudou de turno no trabalho" autocomplete="off"><span class="err"></span></label>
    <p class="eswarn" id="eswE" hidden>${ic('alert',13,2)}Escolha um motivo. Fica registrado no histórico da escala.</p>
-   ${x.st!=='criacao'?`<p class="esw-note">${ic('bell',13,2)}${esc(f)} é avisado(a) de que não precisa mais servir, e quem entra recebe o convite${m.st==='confirmado'?' para confirmar':''}.</p>`:''}</div>
+   ${x.st!=='criacao'?`<p class="esw-note">${ic('bell',13,2)}${esc(f)} é avisado(a) de que não precisa mais servir, e quem entra recebe o convite${m.st==='confirmado'?' para aceitar':''}.</p>`:''}</div>
    <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="esDoSwap" data-v="${v}" id="eswOk">Substituir</button></div>`);
   const sync=()=>{const sel=$('input[name=pm]:checked'),box=$('#eswIn');$('#eml').innerHTML=sel?lmWarn(byId(sel.value).n,ym):'';if(sel){const p=byId(sel.value);box.classList.add('on');box.innerHTML=`${mav(p)}<span class="dkt"><b>${esc(p.n)}</b><span>${esc($('#emr').value||m.role)} · entra</span></span>`;}};
   $('#emp').addEventListener('change',sync);$('#emq').addEventListener('input',e=>{$('#emp').innerHTML=lmCand(cand,e.target.value,ym);sync();});$('#emr').addEventListener('input',sync);
@@ -222,7 +243,7 @@ const EA={
   const why=w.dataset.w==='Outro'?obs.value.trim():w.dataset.w+(obs.value.trim()?' · '+obs.value.trim():''),nw={n,role:r.value.trim(),st:sentSt(x),over:ov||undefined,sub:{from:m.n,why,at:'08/10'}};
   bt.classList.add('busy');setTimeout(()=>{b.members.splice(mi,1,nw);LOG.unshift({u:'Rafael Pereira',a:'Substituiu na escala',e:'Escala',x:`${m.n} → ${n}`,det:`${why} · ${b.label} · ${x.n}`,d:'2026-10-08',t:new Date().toTimeString().slice(0,5)});closeDlg();esRe();
    toast(`${n.split(' ')[0]} entrou no lugar de ${m.n.split(' ')[0]}${x.st!=='criacao'?' · os dois foram avisados':''}`,()=>{b.members.splice(mi,1,m);esRe();});},450);},
- esMst:v=>{const {x,b,mi}=refB(v),m=b.members[mi];m.st='confirmado';esRe();toast(`${m.n.split(' ')[0]} marcado(a) como confirmado`,()=>{m.st='aguardando';esRe();});},
+ esMst:v=>{const {x,b,mi}=refB(v),m=b.members[mi];m.st='confirmado';esRe();toast(`${m.n.split(' ')[0]} marcado(a) como aceito`,()=>{m.st='aguardando';esRe();});},
  esNotify:(v,bt)=>{const {b}=refB(v),p=b.members.filter(m=>m.st==='aguardando'||m.st==='rascunho');busy(bt,800,'Avisado',()=>{p.forEach(m=>m.st='aguardando');toast(`${p.map(m=>m.n.split(' ')[0]).join(', ')} ${p.length>1?'foram avisados':'foi avisado(a)'}`);setTimeout(esRe,900);});},
  esAddC:v=>{const {x,b}=refB(v);window._ecS={v,k:x.min==='Louvor'?'musica':x.min==='Kids'?'material':'musica',sel:{video:{ids:[],cfg:{}},musica:{ids:[],cfg:{}},material:{ids:[],cfg:{}},pregacao:{ids:[],cfg:{}}},out:{t:'',d:''},q:''};
   openDlg(`${dlgHead('Adicionar conteúdo',`${esc(b.label)} · escolha o tipo e depois o item da biblioteca`)}<div class="ec-ty" role="radiogroup" aria-label="Tipo de conteúdo">${Object.entries(ECT).map(([k,t])=>`<button type="button" role="radio" class="ec-t ${k}" data-k="${k}"><span class="ec-ti">${ic(t[2],16)}</span><b>${t[0]}</b><small>${t[1]}</small><em class="ec-bd" data-bd="${k}"></em></button>`).join('')}</div><div id="ecBody"></div>
@@ -244,13 +265,15 @@ const EA={
   window._esSrc=src;},
  esDoReuse:v=>{const {b}=refB(v),s=window._esSrc[+$('input[name=rs]:checked').value];let n=0;s.z.content.forEach(c=>{if(!b.content.some(z=>z.t===c.t)){b.content.push({...c});n++;}});closeDlg();esRe();toast(n?`${n} ${n===1?'item copiado':'itens copiados'}`:'Esse conteúdo já estava no bloco');},
  esSend:(v,bt)=>{const x=esById(S.esc),ms=esMembers(x),empty=x.dates.reduce((a,d)=>a+d.blocks.filter(b=>!b.members.length).length,0);
-  openDlg(`${dlgHead('Enviar para os escalados?',`${ms.length} ${ms.length===1?'pessoa recebe':'pessoas recebem'} o pedido no app e por e-mail para confirmar.`)}${empty?`<p class="eswarn">${ic('alert',13,2)}${empty} ${empty===1?'bloco está':'blocos estão'} sem ninguém. Dá para completar depois.</p>`:''}${(()=>{const ov=[...new Set(ms.filter(m=>m.over&&m.st!=='recusado').map(m=>m.n))];return ov.length?`<div class="lm-w bad" style="margin-top:10px">${ic('alert',14,2.2)}<div><b>${ov.length} ${ov.length===1?'convite vai':'convites vão'} como exceção ao limite mensal</b><span>${ov.map(n=>esc(n.split(' ')[0])).join(', ')} ${ov.length===1?'vê':'veem'} o aviso no app e ${ov.length===1?'pode':'podem'} recusar sem constrangimento.</span></div></div>`:'';})()}<div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="esDoSend">Enviar</button></div>`,'sm');},
- esDoSend:(v,bt)=>{bt.classList.add('busy');setTimeout(()=>{const x=esById(S.esc);x.st='aguardando';esMembers(x).forEach(m=>{if(m.st==='rascunho')m.st='aguardando';});closeDlg();esRe();toast('Pedidos enviados. Você será avisado quando confirmarem.');},800);},
+  openDlg(`${dlgHead('Enviar para os escalados?',`${ms.length} ${ms.length===1?'pessoa recebe':'pessoas recebem'} o pedido no app e por e-mail para aceitar ou recusar.`)}${empty?`<p class="eswarn">${ic('alert',13,2)}${empty} ${empty===1?'bloco está':'blocos estão'} sem ninguém. Dá para completar depois.</p>`:''}${(()=>{const ov=[...new Set(ms.filter(m=>m.over&&m.st!=='recusado').map(m=>m.n))];return ov.length?`<div class="lm-w bad" style="margin-top:10px">${ic('alert',14,2.2)}<div><b>${ov.length} ${ov.length===1?'convite vai':'convites vão'} como exceção ao limite mensal</b><span>${ov.map(n=>esc(n.split(' ')[0])).join(', ')} ${ov.length===1?'vê':'veem'} o aviso no app e ${ov.length===1?'pode':'podem'} recusar sem constrangimento.</span></div></div>`:'';})()}<div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="esDoSend">Enviar</button></div>`,'sm');},
+ esDoSend:(v,bt)=>{bt.classList.add('busy');setTimeout(()=>{const x=esById(S.esc);x.st='aguardando';esMembers(x).forEach(m=>{if(m.st==='rascunho')m.st='aguardando';});closeDlg();esRe();toast('Pedidos enviados. Você será avisado quando responderem.');},800);},
  esRemind:(v,bt)=>busy(bt,800,'Lembrete enviado',()=>{const x=esById(S.esc),p=esMembers(x).filter(m=>m.st==='aguardando');toast(`Lembrete enviado para ${p.map(m=>m.n.split(' ')[0]).join(', ')}`);}),
  esApprove:(v,bt)=>{bt.classList.add('busy');setTimeout(()=>{const x=esById(S.esc);x.st='aprovada';esRe();toast(`${x.n} aprovada`);},600);},
  esDup:()=>{closePops();const x=esById(S.esc),c=JSON.parse(JSON.stringify(x));c.id='es'+Date.now();c.n=x.n.replace(/— \w+$/,'')+'(cópia)';c.st='criacao';c.dates=[];ESCALAS.unshift(c);S.esc=c.id;render();toast('Escala duplicada sem datas. Adicione as do próximo mês.');},
  esDel:()=>{closePops();const x=esById(S.esc),n=esMembers(x).length;confirmDel({title:`Excluir ${x.n}?`,body:`${n&&x.st!=='criacao'?`As ${n} pessoas escaladas são avisadas do cancelamento. `:''}Os eventos continuam no Calendário. Esta ação não pode ser desfeita.`,label:'Excluir escala',typed:n&&x.st!=='criacao'?x.n:null,onConfirm:()=>{ESCALAS.splice(ESCALAS.indexOf(x),1);S.esc=null;render();toast(`${x.n} excluída`);}});},
 };
+
+Object.assign(EA,{mnEscF:v=>{S.mnesf=v;reMn();},mnEscGo:v=>{S.active='escalas';S.esc=v;S.estab='datas';S.esview='blocos';S.esM=null;S.esSel=null;S.mini=null;S.evt=null;render();window.scrollTo({top:0});}});
 
 /* ---------- limite mensal de escalas ---------- */
 const LMR={on:true,limit:3,notifyMember:true,warnNear:true};
@@ -311,7 +334,7 @@ function lmTabLim(){
   <p class="lm2-sub">Somando todos os ministérios. Acima disso, só como exceção.</p>
   <button type="button" class="lm2-imp ${ov?'bad':''}" data-a="lmTab" data-v="carga">${impact}${D.on?ic('chevR',13,2.2):''}</button>
  </div>
- <details class="lm2-how" ${S.lmHow?'open':''}><summary>${ic('info',14,2)}Como a conta funciona${ic('chevD',14,2.2)}</summary><ul><li>Convites <b>confirmados e pendentes</b> contam.</li><li>Se a pessoa <b>recusa</b>, a vaga volta.</li><li>Cada <b>bloco</b> conta 1 (manhã e tarde = 2).</li></ul></details>
+ <details class="lm2-how" ${S.lmHow?'open':''}><summary>${ic('info',14,2)}Como a conta funciona${ic('chevD',14,2.2)}</summary><ul><li>Convites <b>aceitos e pendentes</b> contam.</li><li>Se a pessoa <b>recusa</b>, a vaga volta.</li><li>Cada <b>bloco</b> conta 1 (manhã e tarde = 2).</li></ul></details>
  <label class="tog lm2-ntf"><input type="checkbox" id="lmNm" ${D.notifyMember?'checked':''}><span class="sw"></span><span><b>Enviar avisos</b><small>Para a pessoa quando chega no limite, e para o líder na última vaga</small></span></label>
  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="lmSave" ${lmDirty()?'':'disabled'}>Salvar</button></div>`;
 }
@@ -437,33 +460,30 @@ function ecFoot(){const E=window._ecS,go=$('#ecGo');if(!go)return;const c={video
  const sm=$('#ecSum');if(sm){const parts=[[c.video,'vídeo','vídeos'],[c.musica,'música','músicas'],[c.material,'material','materiais'],[c.pregacao,'pregação','pregações'],[c.outro,'outro','outros']].filter(z=>z[0]).map(z=>`${z[0]} ${z[0]===1?z[1]:z[2]}`);sm.innerHTML=parts.length?`${ic('check',12,2.6)}No bloco vão: ${parts.join(' · ')}`:'';}}
 
 /* presença: UI */
-function ckBar(d,e){const st=ckState(e);if(!st)return '';const w=ckWin(e),ms=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'),c=k=>ms.filter(m=>ckOf(m)===k).length,nck=c('ck');
+function ckBar(d,e){const st=ckState(e);if(!st)return '';const w=ckWin(e),ms=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'),c=k=>ms.filter(m=>ckOf(m)===k).length;
  const tx=st==='antes'?`Check-in abre às ${ckHM(w.open)}, 2h antes`:st==='fim'?`Check-in encerrou às ${ckHM(w.close)}`:`Check-in aberto até ${ckHM(w.close)}`;
- return `<div class="ckbar ${st}"><span class="ckb-i">${ic('pin',16,2)}</span><div class="dkt"><b>Hoje · ${tx}</b><span>Só vale a até ${CKRAIO} m de ${esc(e.place)} · agora ${ckHM(CKNOW)}</span></div>
-  <div class="ckb-n">${[['ok','presentes'],['ck','a confirmar'],['pend','sem check-in'],['falta','faltas']].filter(z=>c(z[0])||z[0]!=='falta').map(z=>`<span class="${z[0]}"><b>${c(z[0])}</b>${z[1]}</span>`).join('')}</div>
-  ${S.estab==='ck'?(nck?`<button class="btn pri sm" data-a="ckAll" data-v="${d.id}">${ic('check',14,2.4)}Confirmar ${nck} check-in${nck===1?'':'s'}</button>`:''):`<button class="btn pri sm" data-a="esTab" data-v="ck">Abrir check-in${ic('arrowR',14,2)}</button>`}</div>`;}
-function ckCell(m,ref,e){const k=ckOf(m),w=ckWin(e),pill=(lab,sub)=>`<span class="ckp ${k}"><b>${lab}</b>${sub?`<small>${sub}</small>`:''}</span>`;
- if(k==='ck')return `${pill(`Check-in ${m.ck.at}`,`a ${m.ck.dist} m do local`)}<button class="btn pri sm ckgo" data-a="ckOk" data-v="${ref}">${ic('check',13,2.4)}Confirmar</button>`;
- if(k==='ok')return `${pill('Presente',m.manual?`marcado por ${m.by.toLowerCase()} · ${esc(m.why)}`:`check-in ${m.ck.at} · ${m.dist||m.ck.dist} m`)}<button class="ibtn sm" data-a="ckUndo" data-v="${ref}" aria-label="Desfazer" title="Desfazer">${ic('swap',13)}</button>`;
- if(k==='falta')return `${pill('Faltou','marcado por você')}<button class="ibtn sm" data-a="ckUndo" data-v="${ref}" aria-label="Desfazer" title="Desfazer">${ic('swap',13)}</button>`;
- const pre=CKNOW<w.start;return `${pill('Sem check-in','')}<button class="btn sec sm" data-a="ckMan" data-v="${ref}">Marcar presente</button><button class="btn sec sm ckf" data-a="ckFalta" data-v="${ref}" ${pre?`disabled title="Disponível depois do início (${ckHM(w.start)})"`:''}>Falta</button>`;}
+ return `<div class="ckbar ${st}"><span class="ckb-i">${ic('pin',16,2)}</span><div class="dkt"><b>Hoje · ${tx}</b><span>${esc(e.place)} · agora ${ckHM(CKNOW)}</span></div>
+  <div class="ckb-n">${[['ok','presentes'],['pend','sem check-in'],['falta','ausentes']].filter(z=>c(z[0])||z[0]!=='falta').map(z=>`<span class="${z[0]}"><b>${c(z[0])}</b>${z[1]}</span>`).join('')}</div>
+  ${S.estab==='ck'?'':`<button class="btn pri sm" data-a="esTab" data-v="ck">Abrir check-in${ic('arrowR',14,2)}</button>`}</div>`;}
+function ckCell(m,ref,e){const k=ckOf(m),w=ckWin(e),pill=(lab,sub)=>`<span class="ckp ${k}"><b>${lab}</b>${sub?`<small>${sub}</small>`:''}</span>`,und=`<button class="ibtn sm" data-a="ckUndo" data-v="${ref}" aria-label="Desfazer" title="Desfazer">${ic('swap',13)}</button>`;
+ if(k==='ok')return `${pill('Presente',m.manual?`marcado por ${m.by.toLowerCase()}${m.why?' · '+esc(m.why):''}`:`check-in ${m.ck.at}`)}<button class="btn sec sm ckf" data-a="ckFalta" data-v="${ref}">Ausente</button>${und}`;
+ if(k==='falta')return `${pill('Ausente','marcado por você')}<button class="btn sec sm" data-a="ckMan" data-v="${ref}">Marcar presente</button>${und}`;
+ const pre=CKNOW<w.start;return `${pill('Sem check-in','')}<button class="btn sec sm" data-a="ckMan" data-v="${ref}">Marcar presente</button><button class="btn sec sm ckf" data-a="ckFalta" data-v="${ref}" ${pre?`disabled title="Disponível depois do início (${ckHM(w.start)})"`:''}>Ausente</button>`;}
 const CKA={
- ckOk:(v,bt)=>{const {b,mi}=refB(v),m=b.members[mi];busy(bt,500,'Confirmado',()=>{m.pr='ok';m.by='Você';setTimeout(()=>{esRe();toast(`Presença de ${m.n.split(' ')[0]} confirmada`,()=>{delete m.pr;esRe();});},250);});},
- ckAll:(v,bt)=>{const x=esById(S.esc),d=x.dates.find(z=>z.id===v),l=d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'&&ckOf(m)==='ck');busy(bt,700,'Confirmados',()=>{l.forEach(m=>{m.pr='ok';m.by='Você';});setTimeout(()=>{esRe();toast(`${l.length} presença${l.length===1?'':'s'} confirmada${l.length===1?'':'s'}: ${l.map(m=>m.n.split(' ')[0]).join(', ')}`,()=>{l.forEach(m=>delete m.pr);esRe();});},250);});},
  ckMan:v=>{const {b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0];
-  openDlg(`${dlgHead(`Marcar ${esc(f)} como presente?`,`Use quando a pessoa está no local mas não conseguiu fazer check-in.`)}<p class="fl ckwhy-l">Motivo</p><div class="ckwhy" id="ckWhy">${[['Esqueceu o celular','phone'],['Sem internet','radio'],['Localização bloqueada','pin'],['Chegou depois','clock'],['Outro','dots']].map(([w,i])=>`<button type="button" class="chipf" data-w="${w}"><span>${ic(i,15,2)}</span>${w}</button>`).join('')}</div><p class="eswarn" id="ckE" hidden>${ic('alert',13,2)}Escolha um motivo. Fica registrado no histórico.</p>
+  openDlg(`${dlgHead(`Marcar ${esc(f)} como presente?`,`Use quando a pessoa está no local mas não fez o check-in.`)}<p class="fl ckwhy-l">Motivo <small>opcional</small></p><div class="ckwhy" id="ckWhy">${[['Esqueceu o celular','phone'],['Sem internet','radio'],['Chegou depois','clock'],['Outro','dots']].map(([w,i])=>`<button type="button" class="chipf" data-w="${w}"><span>${ic(i,15,2)}</span>${w}</button>`).join('')}</div>
    <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="ckDoMan" data-v="${v}">Marcar presente</button></div>`,'sm');
-  $('#ckWhy').addEventListener('click',e=>{const t=e.target.closest('[data-w]');if(!t)return;$$('#ckWhy .chipf').forEach(z=>z.classList.toggle('on',z===t));$('#ckE').hidden=true;});},
- ckDoMan:(v,bt)=>{const w=$('#ckWhy .chipf.on');if(!w){$('#ckE').hidden=false;return;}const {b,mi}=refB(v),m=b.members[mi];bt.classList.add('busy');setTimeout(()=>{Object.assign(m,{pr:'ok',manual:true,why:w.dataset.w,by:'Você'});LOG.unshift({u:'Rafael Pereira',a:'Marcou presença',e:'Escala',x:m.n,det:`Manual · ${w.dataset.w}`,d:CKDAY,t:ckHM(CKNOW)});closeDlg();esRe();toast(`${m.n.split(' ')[0]} marcado(a) como presente`,()=>{delete m.pr;delete m.manual;delete m.why;esRe();});},400);},
- ckFalta:v=>{const {b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0];confirmDel({title:`Registrar falta de ${f}?`,body:`${esc(m.n)} não fez check-in e não foi marcado(a) como presente. A falta fica no histórico de serviço e ${f} recebe um aviso gentil no app. Dá para desfazer.`,label:'Registrar falta',onConfirm:()=>{m.pr='falta';LOG.unshift({u:'Rafael Pereira',a:'Registrou falta',e:'Escala',x:m.n,d:CKDAY,t:ckHM(CKNOW)});esRe();toast(`Falta de ${f} registrada`,()=>{delete m.pr;esRe();});}});},
+  $('#ckWhy').addEventListener('click',e=>{const t=e.target.closest('[data-w]');if(!t)return;const was=t.classList.contains('on');$$('#ckWhy .chipf').forEach(z=>z.classList.toggle('on',z===t&&!was));});},
+ ckDoMan:(v,bt)=>{const w=$('#ckWhy .chipf.on')||{dataset:{w:''}};const {b,mi}=refB(v),m=b.members[mi];bt.classList.add('busy');setTimeout(()=>{Object.assign(m,{pr:'ok',manual:true,why:w.dataset.w,by:'Você'});LOG.unshift({u:'Rafael Pereira',a:'Marcou presença',e:'Escala',x:m.n,det:w.dataset.w?`Manual · ${w.dataset.w}`:'Manual',d:CKDAY,t:ckHM(CKNOW)});closeDlg();esRe();toast(`${m.n.split(' ')[0]} marcado(a) como presente`,()=>{delete m.pr;delete m.manual;delete m.why;esRe();});},400);},
+ ckFalta:v=>{const {b,mi}=refB(v),m=b.members[mi],f=m.n.split(' ')[0];confirmDel({title:`Marcar ${f} como ausente?`,body:`${esc(m.n)} fica como ausente nesta data. Fica no histórico de serviço. Dá para desfazer.`,label:'Marcar ausente',onConfirm:()=>{delete m.manual;delete m.why;m.pr='falta';LOG.unshift({u:'Rafael Pereira',a:'Registrou ausência',e:'Escala',x:m.n,d:CKDAY,t:ckHM(CKNOW)});esRe();toast(`${f} marcado(a) como ausente`,()=>{delete m.pr;esRe();});}});},
  ckUndo:v=>{const {b,mi}=refB(v),m=b.members[mi],old={pr:m.pr,manual:m.manual,why:m.why};delete m.pr;delete m.manual;delete m.why;esRe();toast(`Presença de ${m.n.split(' ')[0]} reaberta`,()=>{Object.assign(m,old);esRe();});},
 };
 
 /* aba Check-in */
 const ckToday=x=>x.dates.find(d=>{const e=eById(d.ev);return e&&e.d===CKDAY;});
-const ckPendN=x=>{const d=ckToday(x);return d?d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado'&&ckOf(m)==='ck').length:0;};
 function esCk(x){const d=ckToday(x),ds=esSorted(x),fut=ds.filter(z=>{const e=eById(z.ev);return e&&e.d>CKDAY;}),pas=ds.filter(z=>{const e=eById(z.ev);return e&&e.d<CKDAY;});
- const how=`<div class="ckhow"><span>${ic('clock',15,2)}<b>Abre 2h antes</b><small>e fecha 2h depois do início</small></span><span>${ic('pin',15,2)}<b>Até ${CKRAIO} m do local</b><small>fora disso, o app bloqueia</small></span><span>${ic('check',15,2.4)}<b>Você confirma</b><small>ou marca quem esqueceu</small></span></div>`;
+ if(!d&&!fut.length&&pas.length)return esCkPast(pas[pas.length-1]);
+ const how=`<div class="ckhow"><span>${ic('clock',15,2)}<b>Abre 2h antes</b><small>e fecha 2h depois do início</small></span><span>${ic('check',15,2.4)}<b>Check-in = Presente</b><small>a pessoa faz no app</small></span><span>${ic('swap',15,2)}<b>Você ajusta</b><small>marca presente, ausente ou desfaz</small></span></div>`;
  if(!d){const nx=fut[0],e=nx&&eById(nx.ev),w=e&&ckWin(e);
   return `<section class="card ckempty"><span class="cke-i">${ic('pin',26,1.8)}<i></i></span><h2>${nx?'O check-in ainda não abriu':'Nenhuma data com check-in'}</h2><p class="who">${nx?`Os check-ins aparecem aqui no dia da escala. O próximo é <b>${esc(e.t)}</b>, ${wd(e.d)}, ${dBR(e.d)}, a partir das <b>${ckHM(w.open)}</b>.`:'Adicione datas futuras na aba Datas para acompanhar a presença do time.'}</p>
    ${nx?`<div class="cknext">${fut.slice(0,4).map(z=>{const ev=eById(z.ev),wn=ckWin(ev),n=z.blocks.reduce((a,b)=>a+b.members.filter(m=>m.st!=='recusado').length,0);return `<div class="ckn-r">${dTile(ev)}<span class="dkt"><b>${esc(ev.t)}</b><span>${n} pessoa${n===1?'':'s'} · abre às ${ckHM(wn.open)}</span></span><span class="ckn-in">em ${inDays(ev.d)} dia${inDays(ev.d)===1?'':'s'}</span></div>`;}).join('')}</div>`:`<button class="btn pri" data-a="esTab" data-v="datas" style="margin-top:6px">Ir para Datas</button>`}
@@ -476,6 +496,10 @@ function esCk(x){const d=ckToday(x),ds=esSorted(x),fut=ds.filter(z=>{const e=eBy
   ${d.blocks.flatMap(b=>b.members).some(m=>m.st!=='confirmado'&&m.st!=='recusado')?`<p class="eswarn" style="margin-top:12px">${ic('alert',13,2)}Quem não confirmou a escala não aparece no check-in.</p>`:''}
  </section>`;}
 
+/* escala realizada: presença da última data, só leitura */
+function esCkPast(d){const e=eById(d.ev),l=d.blocks.flatMap(b=>b.members.map(m=>({m,b}))).filter(z=>z.m.st==='confirmado'),n=k=>l.filter(z=>ckOf(z.m)===k).length,ord={ok:0,falta:1,pend:2};
+ return `<section class="card ckpanel"><div class="ckbar fim"><span class="ckb-i">${ic('check',16,2)}</span><div class="dkt"><b>${esc(e.t)} · ${wd(e.d)}, ${dBR(e.d)}</b><span>Realizada · a presença abaixo é só para consulta</span></div><div class="ckb-n"><span class="ok"><b>${n('ok')}</b>presentes</span><span class="falta"><b>${n('falta')}</b>ausentes</span></div></div>
+  <div class="cklist" style="margin-top:12px">${l.sort((a,b)=>ord[ckOf(a.m)]-ord[ckOf(b.m)]).map(({m,b})=>`<div class="esm ckr ${ckOf(m)}"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${d.blocks.length>1?' · '+esc(b.label):''}</span></span>${attPill(m)}</div>`).join('')}</div></section>`;}
 function ckGroups(){const g={};ESCALAS.forEach(x=>{const d=ckToday(x);if(!d)return;const e=eById(d.ev);(g[e.id]=g[e.id]||{e,list:[]}).list.push({x,d});});
  return Object.values(g).map(G=>{G.list.forEach(z=>{const ms=z.d.blocks.flatMap(b=>b.members).filter(m=>m.st==='confirmado');z.tot=ms.length;z.ok=ms.filter(m=>ckOf(m)==='ok').length;z.ck=ms.filter(m=>ckOf(m)==='ck').length;z.pend=ms.filter(m=>ckOf(m)==='pend').length;z.mn=MINIS.find(m=>m.n===z.x.min)||{icon:'users',lead:''};});
   G.list.sort((a,b)=>b.pend-a.pend||b.ck-a.ck||a.x.min.localeCompare(b.x.min));['tot','ok','ck','pend'].forEach(k=>G[k]=G.list.reduce((n,z)=>n+z[k],0));return G;}).sort((a,b)=>b.list.length-a.list.length||b.tot-a.tot);}
@@ -483,18 +507,18 @@ const ckStTxt=e=>{const st=ckState(e),w=ckWin(e);return st==='aberto'?`check-in 
 function ckLane(z){const done=!z.pend&&!z.ck,arr=z.ok+z.ck;return `<button class="ckl ${z.pend?'pend':done?'done':'wait'}" data-a="ckGo" data-v="${z.x.id}" title="${esc(z.x.n)}"><span class="ckl-i">${ic(done?'check':z.mn.icon,13,2)}</span><span class="ckl-t"><b>${esc(z.x.min)}</b><span class="ckl-b"><i style="width:${arr/Math.max(1,z.tot)*100}%"></i></span></span><span class="ckl-n">${arr}/${z.tot}</span></button>`;}
 function ckEvent(G,compact){const e=G.e,arr=G.ok+G.ck,MAX=5,more=G.list.length-MAX;
  const head=`<span class="ckb-i">${ic('pin',16,2)}</span><div class="dkt"><b>Hoje · ${esc(e.t)} · ${ckStTxt(e)}</b><span>${e.time} · ${esc(e.place)} · ${G.list.length>1?G.list.length+' ministérios':esc(G.list[0].x.min)}</span></div>`;
- const sum=`<div class="ckt-n"><span><b>${G.ok}</b>presentes</span><span><b>${G.ck}</b>a confirmar</span><span class="${G.pend?'warn':''}"><b>${G.pend}</b>sem check-in</span></div>`;
+ const sum=`<div class="ckt-n"><span><b>${G.ok}</b>presentes</span><span class="${G.pend?'warn':''}"><b>${G.pend}</b>sem check-in</span></div>`;
  const btn=`<button class="btn sm" data-a="${G.list.length>1?'ckEv':'ckGo'}" data-v="${G.list.length>1?e.id:G.list[0].x.id}">Abrir check-in${ic('arrowR',14,2)}</button>`;
  if(compact||G.list.length===1)return `<section class="cktoday-strip ${compact?'cmp':''}">${head}${sum}${btn}</section>`;
  return `<section class="cktoday-strip ckev"><div class="ckev-h">${head}<div class="ckev-p"><span><b>${arr}</b> de ${G.tot} já chegaram</span><span class="ckev-bar"><i style="width:${G.ok/Math.max(1,G.tot)*100}%"></i><em style="width:${G.ck/Math.max(1,G.tot)*100}%"></em></span></div>${btn}</div>
   <div class="ckev-l">${G.list.slice(0,more>0?MAX:G.list.length).map(ckLane).join('')}${more>0?`<button class="ckl more" data-a="ckEv" data-v="${e.id}"><b>+${more}</b> ministério${more>1?'s':''}</button>`:''}</div>
-  <div class="ckev-f"><span><i class="d ok"></i>${G.ok} presentes</span><span><i class="d ck"></i>${G.ck} a confirmar</span><span><i class="d pend"></i>${G.pend} sem check-in</span></div></section>`;}
+  <div class="ckev-f"><span><i class="d ok"></i>${G.ok} presentes</span><span><i class="d pend"></i>${G.pend} sem check-in</span></div></section>`;}
 function ckStrip(){const gs=ckGroups();if(!gs.length)return '';const open=S.ckMore,rest=gs.slice(1);
  return `<div class="ckstack rise" style="--d:1">${ckEvent(gs[0])}</div>`;}
 CKA.ckMore=()=>{S.ckMore=!S.ckMore;render();};
 CKA.ckEv=v=>{const G=ckGroups().find(g=>g.e.id===v);if(!G)return;
- openDlg(`${dlgHead('Check-in · '+G.e.t,`Hoje, ${G.e.time} · ${ckStTxt(G.e)}`)}<div class="ckd"><div class="ckd-s"><span><b>${G.ok}</b>presentes</span><span><b>${G.ck}</b>a confirmar</span><span class="${G.pend?'warn':''}"><b>${G.pend}</b>sem check-in</span></div>
-  <div class="ckd-l">${G.list.map(z=>{const arr=z.ok+z.ck,done=!z.pend&&!z.ck;return `<button class="ckd-r" data-a="ckGo" data-v="${z.x.id}"><span class="htile" style="--s:36px;background:var(--tone-${z.mn.tone||'ceu'});color:var(--tone-${z.mn.tone||'ceu'}-ink)">${ic(z.mn.icon,16)}</span><span class="dkt"><b>${esc(z.x.min)}</b><span>${z.mn.lead?esc(z.mn.lead)+' · ':''}${z.tot} na escala</span></span><span class="ckd-p"><span class="ckev-bar sm"><i style="width:${z.ok/Math.max(1,z.tot)*100}%"></i><em style="width:${z.ck/Math.max(1,z.tot)*100}%"></em></span><small>${arr}/${z.tot}${z.pend?` · <b>${z.pend} sem check-in</b>`:done?' · completo':` · ${z.ck} a confirmar`}</small></span>${ic('chevR',15,2)}</button>`;}).join('')}</div></div>
+ openDlg(`${dlgHead('Check-in · '+G.e.t,`Hoje, ${G.e.time} · ${ckStTxt(G.e)}`)}<div class="ckd"><div class="ckd-s"><span><b>${G.ok}</b>presentes</span><span class="${G.pend?'warn':''}"><b>${G.pend}</b>sem check-in</span></div>
+  <div class="ckd-l">${G.list.map(z=>{const arr=z.ok+z.ck,done=!z.pend&&!z.ck;return `<button class="ckd-r" data-a="ckGo" data-v="${z.x.id}"><span class="htile" style="--s:36px;background:var(--tone-${z.mn.tone||'ceu'});color:var(--tone-${z.mn.tone||'ceu'}-ink)">${ic(z.mn.icon,16)}</span><span class="dkt"><b>${esc(z.x.min)}</b><span>${z.mn.lead?esc(z.mn.lead)+' · ':''}${z.tot} na escala</span></span><span class="ckd-p"><span class="ckev-bar sm"><i style="width:${z.ok/Math.max(1,z.tot)*100}%"></i><em style="width:${z.ck/Math.max(1,z.tot)*100}%"></em></span><small>${arr}/${z.tot}${z.pend?` · <b>${z.pend} sem check-in</b>`:done?' · completo':''}</small></span>${ic('chevR',15,2)}</button>`;}).join('')}</div></div>
   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`);};
 CKA.ckGo=v=>{closeDlg();S.esc=v;S.estab='ck';S.esview='blocos';render();window.scrollTo({top:0});};
 

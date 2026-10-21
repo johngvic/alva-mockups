@@ -37,28 +37,42 @@ Object.assign(S,{sxSit:'todas',sxAto:'todos',sxDocT:'emitidos',sxArq:'todas',sxA
  NAV.find(x=>x[0]==='Geral')[1].find(n=>n[0]==='cuidado')[3].push(['disciplina','Disciplina']);
  SAREAS.push(['Secretaria','file']);
  ['Secretaria','Disciplina'].forEach(k=>MODS.push(k));
- Object.keys(RPERM).forEach(r=>{RPERM[r].Secretaria=r==='Administrador'||r==='Secretaria'?ACTS.slice():r==='Pastor'?['Ver','Criar','Editar']:[];RPERM[r].Disciplina=r==='Administrador'||r==='Pastor'?ACTS.slice():[];});
+ Object.keys(RPERM).forEach(r=>{RPERM[r].Secretaria=r==='Administrador'||r==='Secretaria'?ACTS.slice():r==='Pastor'?['Ver','Criar','Editar']:[];RPERM[r].Disciplina=r==='Administrador'?ACTS.slice():[];});
 })();
 
 /* ---------- situação do membro ---------- */
 const SX_SITS={
- ativo:['Ativo','var(--st-int)','var(--st-int-bg)','Volta às listas, escalas e ao app.'],
- afastado:['Afastado','var(--st-sol)','var(--st-sol-bg)','Continua com acesso ao app; fica marcado como afastado e entra no acompanhamento.'],
+ ativo:['Ativo','var(--st-int)','var(--st-int-bg)','Volta ao app e às listas, sem papéis nem lugares: quem lidera o recoloca.'],
+ afastado:['Afastado','var(--st-sol)','var(--st-sol-bg)','Perde o acesso e sai de tudo (mandatos, escalas, casas e rede de discipulado), como no desligamento. Pode ser reativado sem nova integração, mas volta sem nada: quem lidera o coloca de novo onde quiser.'],
  transferido:['Transferido','var(--st-ace)','var(--st-ace-bg)','Saiu para outra igreja. O acesso ao painel e ao app é encerrado.'],
  desligado:['Desligado','var(--st-rec)','var(--st-rec-bg)','Deixou de ser membro. O acesso é encerrado e os mandatos vigentes terminam.'],
  falecido:['Falecido','var(--ink-muted)','var(--surface-2)','Registro de falecimento. O acesso é encerrado e os mandatos vigentes terminam.']};
-const SX_BLOCK=['transferido','desligado','falecido'];
+const SX_BLOCK=['transferido','desligado','falecido'],SX_OUT=[...SX_BLOCK,'afastado'];
+/* Impacto da mudança de situação no Cuidado: o painel mostra só números; nada é reatribuído sozinho (quem lidera é avisado e decide) */
+const sxNode=m=>DISC.find(d=>d.n===m.n);
+function sxImpact(m){const d=sxNode(m),ks=d?kids(d.id):[];
+ return {disc:ks.length,meets:(d?d.meets.filter(e=>e.type==='sched').length:0)+ks.reduce((a,k)=>a+k.meets.filter(e=>e.type==='sched').length,0),cases:CASES.filter(c=>c.resp===m.n&&c.st!=='resolvido').length,mands:SX_MAND.filter(x=>x.pessoa===m.n&&sxMandSt(x)!=='encerrado').length,docs:SX_DOCS.filter(x=>x.mid===m.id&&x.st==='valido').length};}
+function sxImpactHtml(m,s){const i=sxImpact(m),kv=(k,v)=>`<p class="sx-kv"><span>${k}</span><b>${v}</b></p>`,pl=(n,a,b)=>n+' '+(n===1?a:b);let r=[];
+ if(s==='ativo'){r.push(kv('Acesso ao app','Reativado, sem papéis'));r.push(kv('O que ele exercia','Nada volta: rede, casas, escalas, tarefas, mandatos e documentos precisam ser dados de novo'));}
+ else{const fim=SX_BLOCK.includes(s);
+  r.push(kv('Acesso ao app',fim?'Encerrado':'Perdido (pode ser reativado)'));
+  if(i.disc)r.push(kv('Discipulado',pl(i.disc,'discípulo fica','discípulos ficam')+' sem discipulador · a vaga fica cinza até alguém ser colocado'));
+  if(i.cases)r.push(kv('Acompanhamento',pl(i.cases,'caso fica','casos ficam')+' sem responsável · quem administra o Acompanhamento é avisado'));
+  r.push(kv('Encontros agendados',i.meets?pl(i.meets,'cancelado','cancelados'):'Nenhum a cancelar'));
+  if(i.mands)r.push(kv('Mandatos',pl(i.mands,'mandato encerrado','mandatos encerrados')));
+  if(i.docs)r.push(kv('Documentos',pl(i.docs,'documento revogado','documentos revogados')));}
+ return `<h4 class="sx-h4">O que muda ao confirmar</h4>${r.join('')}${s==='ativo'?'':'<p class="who" style="margin:8px 0 0">Nada é reatribuído sozinho: a vaga no discipulado, o responsável de caso e o líder ficam com quem administra a área, e os líderes e administradores são avisados.</p>'}`;}
 const SX_SIT={};
 const sxSitOf=m=>m.st!=='integrado'?null:(SX_SIT[m.id]?SX_SIT[m.id].s:'ativo');
 const sxSitPill=s=>sxPill(SX_SITS[s][0],SX_SITS[s][1],SX_SITS[s][2]);
 function sxSetSit(m,s,o){
  const r=SX_SIT[m.id]||(SX_SIT[m.id]={s:'ativo',h:[]});
  r.h.unshift({d:o.d||SX_TODAY,s,from:r.s,why:o.why||'',dest:o.dest||'',by:sxMe});r.s=s;
- if(SX_BLOCK.includes(s)){sxEndMands(m);if(m.app&&m.app.st==='ativo')m.app.st='suspensa';const u=USERS.find(x=>x.n===m.n);if(u)u.revoked=true;}
- else if(s==='ativo'&&m.app&&m.app.st==='suspensa')m.app.st='ativo';
+ if(SX_OUT.includes(s)){sxEndMands(m);if(m.app&&m.app.st==='ativo')m.app.st='suspensa';const u=USERS.find(x=>x.n===m.n);if(u)u.revoked=true;}
+ else if(s==='ativo'){if(m.app&&m.app.st==='suspensa')m.app.st='ativo';const u=USERS.find(x=>x.n===m.n);if(u)u.revoked=false;}
  sxLog('Alterou','Membro',m.n,'Situação: '+SX_SITS[r.h[0].from][0]+' → '+SX_SITS[s][0]);
 }
-[['Elisa Moura','afastado','2026-08-12','Mudança temporária de cidade por trabalho',''],['Patrícia Oliveira Nunes','transferido','2026-07-03','Mudou de cidade','Igreja de fora · Comunidade Esperança, Curitiba'],['Bruno Reis','desligado','2026-06-20','Pedido do próprio membro',''],['Diego Faria','falecido','2026-05-02','Falecimento comunicado pela família','']].forEach(([n,s,d,why,dest])=>{const m=sxMem(n);if(m){SX_SIT[m.id]={s,h:[{d,s,from:'ativo',why,dest,by:sxMe}]};if(SX_BLOCK.includes(s)&&m.app&&m.app.st==='ativo')m.app.st='suspensa';}});
+[['Elisa Moura','afastado','2026-08-12','Mudança temporária de cidade por trabalho',''],['Patrícia Oliveira Nunes','transferido','2026-07-03','Mudou de cidade','Igreja de fora · Comunidade Esperança, Curitiba'],['Bruno Reis','desligado','2026-06-20','Pedido do próprio membro',''],['Diego Faria','falecido','2026-05-02','Falecimento comunicado pela família','']].forEach(([n,s,d,why,dest])=>{const m=sxMem(n);if(m){SX_SIT[m.id]={s,h:[{d,s,from:'ativo',why,dest,by:sxMe}]};if((SX_BLOCK.includes(s)||s==='afastado')&&m.app&&m.app.st==='ativo')m.app.st='suspensa';}});
 {const _f=filtered;filtered=()=>_f().filter(m=>S.sxSit==='todas'||sxSitOf(m)===S.sxSit);}
 {const _row=row;row=m=>{const h=_row(m),s=sxSitOf(m);if(!s||s==='ativo')return h;const sp=stPill(m.st);return h.replace(sp+'</span>',sp+sxSitPill(s)+'</span>');};}
 {const _m=members;members=()=>{const h=_m(),c=k=>sxInteg().filter(m=>sxSitOf(m)===k).length;
@@ -79,11 +93,11 @@ Object.assign(A,{
  sxSitDlg:v=>{closePops();const m=byId(S.member);if(!m||m.st!=='integrado')return;const cur=sxSitOf(m);
   const opts=Object.keys(SX_SITS).filter(k=>k!==cur).map(k=>[k,SX_SITS[k][0]]),first=v&&v!==cur?v:opts[0][0];
   sxDlg('Alterar situação',esc(m.n)+' · hoje '+SX_SITS[cur][0].toLowerCase(),
-   sxF('Nova situação',sxSel('s',opts,first,'sxS'))+`<p class="sx-eff" id="sxEff"></p>`
+   sxF('Nova situação',sxSel('s',opts,first,'sxS'))+`<p class="sx-eff" id="sxEff"></p><div id="sxImp"></div>`
    +`<div id="sxDest" hidden>${sxF('Para onde',sxSel('dk',[['int','Outra igreja da organização (usa Trocar igreja)'],['out','Igreja de fora']],'out'))}<div id="sxDestN">${sxF('Nome da igreja de destino','<input name="dn" placeholder="Ex.: Comunidade Esperança, Curitiba" autocomplete="off">')}</div></div>`
    +sxF('Data',`<input type="date" name="d" value="${SX_TODAY}" max="${SX_TODAY}">`)+sxF('Motivo','<input name="why" placeholder="Obrigatório, exceto ao voltar a ativo" autocomplete="off">'),
    sxOk('Salvar situação'));
-  const f=$('#sxF'),upd=()=>{const s=f.s.value;$('#sxEff').innerHTML=ic(SX_BLOCK.includes(s)?'lock':'info',14,2)+' '+SX_SITS[s][3];$('#sxDest').hidden=s!=='transferido';$('#sxDestN').hidden=f.dk.value!=='out';};
+  const f=$('#sxF'),upd=()=>{const s=f.s.value;$('#sxEff').innerHTML=ic(SX_BLOCK.includes(s)?'lock':'info',14,2)+' '+SX_SITS[s][3];$('#sxImp').innerHTML=sxImpactHtml(m,s);$('#sxDest').hidden=s!=='transferido';$('#sxDestN').hidden=f.dk.value!=='out';};
   f.s.onchange=upd;f.dk.onchange=upd;upd();
   f.onsubmit=e=>{e.preventDefault();sxClr(f);const s=f.s.value;
    if(s==='transferido'&&f.dk.value==='int'){closeDlg();toast('A transferência dentro da organização é feita em Trocar igreja');A.idMemberChurch();return;}
@@ -488,6 +502,7 @@ function secVis(){
  const long=afast.filter(m=>sxDays(SX_SIT[m.id].h[0].d,SX_TODAY)>=30);
  const pend=SX_ATOS.filter(a=>a.auto&&a.dec==='pendente');
  const items=[
+  ...sxDiPend().map(p=>({ic:'care',t:p.k==='ret'?`Confirmar a volta de <b>${esc(p.x.m)}</b> à situação Ativo`:`Confirmar ${p.x.req==='Away'?'afastamento':'desligamento'} de <b>${esc(p.x.m)}</b>`,s:'Caso de disciplina · '+(p.k==='ret'?'registro encerrado':'registrado em '+dBR(p.x.d)),a:'sxPendDisc',v:p.x.id,l:'Revisar'})),
   ...(pend.length?[{ic:'clock',t:`<b>${pend.length}</b> ${pend.length===1?'ato declarado':'atos declarados'} na integração ${pend.length===1?'aguarda':'aguardam'} decisão`,s:pend.slice(0,3).map(a=>esc(a.ppl[0])+' · '+SX_ATO_T[a.t][0].toLowerCase()).join(', '),a:'sxPendGo',v:'',l:'Decidir'}]:[]),
   ...vig.map(x=>({ic:'key',t:`Mandato de <b>${esc(x.pessoa)}</b> (${esc(sxCargo(x.cg).n)}) vence em ${dBR(x.fim)}`,s:`${sxDays(SX_TODAY,x.fim)} dias${x.sc?' · o acesso '+esc(sxCargo(x.cg).ac.area)+' sai junto':''}`,a:'sxGo',v:'sec-cargos',l:'Ver mandatos'})),
   ...prev.map(e=>({ic:SX_ATO_T[CERT[e.type].k][1],t:`${e.type} em ${dBR(e.d)}: <b>${ceUsed(e)} ${ceUsed(e)===1?CERT[e.type].un:CERT[e.type].pl}</b>`,s:esc(e.place||'')+' · evento na Agenda',a:'sxOpenEv',v:e.id,l:'Abrir evento'})),
@@ -508,46 +523,58 @@ Object.assign(A,{sxGo:v=>A.nav(v)});
 const SX_DISC_T={adm:['Admoestação','var(--st-sol)','var(--st-sol-bg)'],afa:['Afastamento temporário','var(--st-ace)','var(--st-ace-bg)'],des:['Desligamento','var(--st-rec)','var(--st-rec-bg)']};
 const SX_DISC=[
  {id:'ds1',m:'Otávio Lins',t:'adm',d:'2026-07-15',rev:'2026-10-15',resp:'Pr. Marcos Souza',obs:'Conversa pastoral registrada. Acompanhar em 90 dias.',st:'vigente',h:[['2026-07-15','Registro criado']]},
- {id:'ds2',m:'Juliana Prado',t:'afa',d:'2026-08-30',rev:'2026-09-20',resp:'Pr. Marcos Souza',obs:'Afastamento acordado com a liderança, com revisão no fim do prazo.',st:'vigente',h:[['2026-08-30','Registro criado']]},
+ {id:'ds2',m:'Juliana Prado',t:'afa',d:'2026-08-30',rev:'2026-09-20',resp:'Pr. Marcos Souza',obs:'Afastamento acordado com a liderança, com revisão no fim do prazo.',st:'vigente',req:'Away',conf:'2026-08-30',h:[['2026-08-30','Registro criado']]},
+ {id:'ds6',m:'Ana Clara Lima',t:'afa',d:'2026-09-28',rev:'2026-12-28',resp:'Pr. Rafael Pereira',obs:'Afastamento acordado com a liderança. Retomar a conversa ao fim do prazo.',st:'vigente',req:'Away',h:[['2026-09-28','Registro criado']]},
  {id:'ds3',m:'Clara Nunes',t:'adm',d:'2026-03-10',rev:'',resp:'Pr. Rafael Pereira',obs:'Orientação feita e aceita. Caso encerrado.',st:'encerrada',h:[['2026-03-10','Registro criado'],['2026-04-02','Encerrado']]}];
-{const m=sxMem('Juliana Prado');if(m&&!SX_SIT[m.id])SX_SIT[m.id]={s:'afastado',h:[{d:'2026-08-30',s:'afastado',from:'ativo',why:'Afastamento a pedido da liderança',dest:'',by:sxMe}]};}
+{const m=sxMem('Juliana Prado');if(m&&!SX_SIT[m.id])SX_SIT[m.id]={s:'afastado',h:[{d:'2026-08-30',s:'afastado',from:'ativo',why:'Afastamento a pedido da liderança',dest:'',by:sxMe}]};if(m.app&&m.app.st==='ativo')m.app.st='suspensa';}
+const sxDiPend=()=>SX_DISC.flatMap(x=>x.st==='vigente'&&x.req&&!x.conf?[{k:'sit',x}]:x.ret==='pend'?[{k:'ret',x}]:[]);
 const sxRevDue=x=>x.st==='vigente'&&x.rev&&x.rev<SX_TODAY;
 function discPage(){
  const f=S.sxDi,l=SX_DISC.filter(x=>f==='todos'||(f==='vigente'?x.st==='vigente':x.st!=='vigente')).sort((a,b)=>a.d<b.d?1:-1),vig=SX_DISC.filter(x=>x.st==='vigente');
  return sxHead('Cuidado','Disciplina','Registro pastoral de admoestações, afastamentos e desligamentos. Acesso super restrito.',`<button class="btn pri" data-a="sxDiNew">${ic('plus',15,2.2)}Novo registro</button>`)
- +`<div class="sx-lock rise" style="--d:1">${ic('lock',20,2)}<span><b>Área restrita</b> · só o papel Administrador e o Pastor com acesso a Disciplina. Cada consulta e cada alteração vai para a auditoria. Estes registros <b>não aparecem</b> em buscas, listas, exportações, no app nem em avisos, e nunca são mostrados ao próprio membro.</span></div>`
+ +`<div class="sx-lock rise" style="--d:1">${ic('lock',20,2)}<span><b>Área restrita</b> · só o Administrador e quem a igreja autorizar para a Disciplina. Cada consulta e cada alteração vai para a auditoria. Estes registros <b>não aparecem</b> em buscas, listas, exportações, no app nem em avisos, e nunca são mostrados ao próprio membro.</span></div>`
  +sxKpis([['Em vigor',vig.length,'registros abertos'],['Revisão vencida',vig.filter(sxRevDue).length,'pedem uma conversa',vig.some(sxRevDue)?'var(--st-rec)':''],['Encerrados',SX_DISC.length-vig.length,'no histórico']])
  +`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><div class="chips">${[['todos','Todos'],['vigente','Em vigor'],['encerrada','Encerrados']].map(c=>`<button class="chipf ${f===c[0]?'on':''}" data-a="sxDiF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
-  ${l.length?l.map(x=>{const m=sxMem(x.m);return `<button class="sx-r" data-a="sxDiOpen" data-v="${x.id}"><span class="sx-ti">${m?mav(m):sxAv(x.m)}</span><span class="sx-m"><b>${esc(x.m)}</b><small>${esc(SX_DISC_T[x.t][0])} · desde ${dBR(x.d)} · ${esc(x.resp)}</small></span><span class="sx-c">${x.rev?'Revisar até '+dBR(x.rev):'Sem revisão'}<small>${sxRevDue(x)?'<span style="color:var(--st-rec)">revisão vencida</span>':x.st==='vigente'?'em vigor':'encerrado'}</small></span><span class="sx-s">${sxPill(SX_DISC_T[x.t][0],SX_DISC_T[x.t][1],SX_DISC_T[x.t][2])}</span><span class="sx-ch">${ic('chevR',16)}</span></button>`;}).join(''):'<div class="mempty"><p>Nenhum registro.</p><span>Os registros aparecem aqui.</span></div>'}</section>`;
+  ${l.length?l.map(x=>{const m=sxMem(x.m);return `<button class="sx-r" data-a="sxDiOpen" data-v="${x.id}"><span class="sx-ti">${m?mav(m):sxAv(x.m)}</span><span class="sx-m"><b>${esc(x.m)}</b><small>${esc(SX_DISC_T[x.t][0])} · desde ${dBR(x.d)} · ${esc(x.resp)}</small></span><span class="sx-c">${x.rev?'Revisar até '+dBR(x.rev):'Sem revisão'}<small>${x.st==='vigente'&&x.req&&!x.conf?'<span style="color:var(--st-sol)">aguardando a Secretaria</span>':sxRevDue(x)?'<span style="color:var(--st-rec)">revisão vencida</span>':x.st==='vigente'?'em vigor':'encerrado'}</small></span><span class="sx-s">${sxPill(SX_DISC_T[x.t][0],SX_DISC_T[x.t][1],SX_DISC_T[x.t][2])}</span><span class="sx-ch">${ic('chevR',16)}</span></button>`;}).join(''):'<div class="mempty"><p>Nenhum registro.</p><span>Os registros aparecem aqui.</span></div>'}</section>`;
+}
+function sxPendDlg(id){
+ const x=SX_DISC.find(y=>y.id===id),m=sxMem(x.m),ret=x.ret==='pend'&&x.st!=='vigente',tgt=ret?'ativo':x.req==='Away'?'afastado':'desligado',T=ret?'Confirmar a volta a Ativo':x.req==='Away'?'Confirmar afastamento':'Confirmar desligamento';
+ openDlg(dlgHead(T,esc(x.m)+' · decisão da Disciplina')+`<div class="sx-lock sm">${ic('lock',16,2)}<span>Os pastores tratam o caso e a observação fica só com eles. Aqui você confirma a situação.</span></div>
+  <p class="sx-kv"><span>Pessoa</span><b>${esc(x.m)}</b></p><p class="sx-kv"><span>Origem</span><b>Caso de disciplina · ${ret?'encerrado':SX_DISC_T[x.t][0].toLowerCase()}</b></p><p class="sx-kv"><span>Situação hoje</span><b>${SX_SITS[sxSitOf(m)][0]}</b></p><p class="sx-kv"><span>Nova situação</span><b>${SX_SITS[tgt][0]}</b></p>
+  ${sxImpactHtml(m,tgt)}
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Agora não</button><button class="btn pri" data-a="sxPendOk" data-v="${x.id}">${T}</button></div>`,'sc-dlg');
 }
 function sxDiView(id){
  const x=SX_DISC.find(y=>y.id===id);sxLog('Consultou','Disciplina',x.m,SX_DISC_T[x.t][0]);
  openDlg(dlgHead('Registro de disciplina',esc(x.m)+' · '+SX_DISC_T[x.t][0])+`<div class="sx-lock sm">${ic('lock',16,2)}<span>Consulta registrada na auditoria.</span></div>
-  <p class="sx-kv"><span>Desde</span><b>${dBR(x.d)}</b></p><p class="sx-kv"><span>Responsável</span><b>${esc(x.resp)}</b></p><p class="sx-kv"><span>Revisão</span><b>${x.rev?dBR(x.rev)+(sxRevDue(x)?' (vencida)':''):'—'}</b></p><p class="sx-kv"><span>Observação restrita</span><b>${esc(x.obs)}</b></p>
+  <p class="sx-kv"><span>Desde</span><b>${dBR(x.d)}</b></p><p class="sx-kv"><span>Responsável</span><b>${esc(x.resp)}</b></p><p class="sx-kv"><span>Revisão</span><b>${x.rev?dBR(x.rev)+(sxRevDue(x)?' (vencida)':''):'—'}</b></p>${x.req?`<p class="sx-kv"><span>Situação do membro</span><b>${x.conf?'Confirmada pela Secretaria em '+dBR(x.conf):x.st==='vigente'?'Aguardando a Secretaria':'Pendente encerrado, sem efeito'}</b></p>`:''}<p class="sx-kv"><span>Observação restrita</span><b>${esc(x.obs)}</b></p>
   <h4 class="sx-h4">Histórico</h4><ol class="sx-hist">${x.h.slice().reverse().map(h=>`<li><span>${dBR(h[0])}</span>${esc(h[1])}</li>`).join('')}</ol>
   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button>${x.st==='vigente'?`<button class="btn sec" data-a="sxDiRev" data-v="${x.id}">Registrar revisão</button><button class="btn pri" data-a="sxDiEnd" data-v="${x.id}">Encerrar registro</button>`:''}</div>`,'sc-dlg');
 }
 Object.assign(A,{
- sxDiF:v=>{S.sxDi=v;render();},sxDiOpen:v=>sxDiView(v),
+ sxDiF:v=>{S.sxDi=v;render();},sxDiOpen:v=>sxDiView(v),sxPendDisc:v=>sxPendDlg(v),
+ sxPendOk:v=>{const x=SX_DISC.find(y=>y.id===v),m=sxMem(x.m),ret=x.ret==='pend'&&x.st!=='vigente',nm=m.n.split(' ')[0];
+  if(ret){x.ret='done';sxSetSit(m,'ativo',{why:'Retorno após a Disciplina'});x.h.push([SX_TODAY,'Volta a Ativo confirmada pela Secretaria']);}
+  else{x.conf=SX_TODAY;sxSetSit(m,x.req==='Away'?'afastado':'desligado',{why:'Disciplina: '+SX_DISC_T[x.t][0].toLowerCase()});x.h.push([SX_TODAY,'Situação confirmada pela Secretaria']);}
+  closeDlg();render();toast(ret?nm+': situação voltou a Ativo':nm+': '+(x.req==='Away'?'afastamento':'desligamento')+' confirmado · quem lidera foi avisado');},
  sxDiNew:()=>{const ms=sxInteg().filter(m=>!SX_BLOCK.includes(sxSitOf(m)));
   sxDlg('Novo registro de disciplina','Acesso restrito. Registre só o necessário.',
    sxF('Membro',sxSel('m',ms.map(m=>[m.id,m.n]),ms[0].id))+sxF('Tipo',sxSel('t',Object.keys(SX_DISC_T).map(k=>[k,SX_DISC_T[k][0]]),'adm','sxDt'))
    +`<div class="fgrid" style="gap:14px">${sxF('Data',`<input type="date" name="d" value="${SX_TODAY}" max="${SX_TODAY}">`)}${sxF('Revisar até',`<input type="date" name="r" value="${D_PLUS(90)}">`,'Obrigatório em afastamento')}</div>`
    +sxF('Responsável',sxSel('rp',['Pr. Marcos Souza','Pr. Rafael Pereira'],'Pr. Marcos Souza'))
    +sxF('Observação restrita','<textarea name="o" rows="3" placeholder="Só o necessário. Só quem tem acesso a Disciplina vê."></textarea>')
-   +`<label class="chk3" id="sxSw"><input type="checkbox" name="sw" checked><span id="sxSt"></span></label><p class="hint" id="sxSh">No cadastro do membro aparece só a situação, com um texto genérico: o detalhe fica aqui.</p>`,sxOk('Registrar'));
-  const f=$('#sxF'),upd=()=>{const t=f.t.value;$('#sxSw').hidden=t==='adm';$('#sxSh').hidden=t==='adm';$('#sxSt').textContent=t==='des'?'Alterar a situação do membro para Desligado':'Alterar a situação do membro para Afastado';};f.t.onchange=upd;upd();
+   +`<p class="hint" id="sxSh"><b id="sxSt"></b> No cadastro do membro aparece só um texto genérico: o detalhe fica aqui.</p>`,sxOk('Registrar'));
+  const f=$('#sxF'),upd=()=>{const t=f.t.value;$('#sxSh').hidden=t==='adm';$('#sxSt').textContent=t==='des'?'A Secretaria recebe um pendente para confirmar o desligamento.':'A Secretaria recebe um pendente para confirmar o afastamento.';};f.t.onchange=upd;upd();
   f.onsubmit=e=>{e.preventDefault();sxClr(f);const m=byId(f.m.value),t=f.t.value;
    if(!f.d.value)return sxErr(f,'d','Informe a data');if(t==='afa'&&!f.r.value)return sxErr(f,'r','Informe a data de revisão');if(f.r.value&&f.r.value<f.d.value)return sxErr(f,'r','A revisão não pode ser antes do registro');
    if(!f.o.value.trim())return sxErr(f,'o','Escreva a observação');
-   const x={id:'ds'+Date.now(),m:m.n,t,d:f.d.value,rev:f.r.value,resp:f.rp.value,obs:f.o.value.trim(),st:'vigente',h:[[f.d.value,'Registro criado']]};SX_DISC.unshift(x);
-   if(t!=='adm'&&f.sw.checked)sxSetSit(m,t==='des'?'desligado':'afastado',{d:f.d.value,why:t==='des'?'Desligamento pela liderança':'Afastamento a pedido da liderança'});
-   sxLog('Registrou','Disciplina',m.n,SX_DISC_T[t][0]);closeDlg();render();toast('Registro criado');};},
+   const x={id:'ds'+Date.now(),m:m.n,t,d:f.d.value,rev:f.r.value,resp:f.rp.value,obs:f.o.value.trim(),req:t==='afa'?'Away':t==='des'?'Dismissed':null,st:'vigente',h:[[f.d.value,'Registro criado']]};SX_DISC.unshift(x);
+      sxLog('Registrou','Disciplina',m.n,SX_DISC_T[t][0]);closeDlg();render();toast(t==='adm'?'Registro criado':'Registro criado · a Secretaria foi avisada para confirmar a mudança de situação');};},
  sxDiRev:v=>{const x=SX_DISC.find(y=>y.id===v);sxDlg('Registrar revisão',esc(x.m),sxF('Como foi a conversa','<input name="n" autocomplete="off" placeholder="Resumo curto">')+sxF('Próxima revisão (opcional)',`<input type="date" name="r" value="${D_PLUS(60)}">`),sxOk('Registrar revisão'));
   const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.n.value.trim())return sxErr(f,'n','Escreva o resumo');x.h.push([SX_TODAY,'Revisão: '+f.n.value.trim()]);x.rev=f.r.value;sxLog('Editou','Disciplina',x.m,'Revisão registrada');closeDlg();render();toast('Revisão registrada');};},
- sxDiEnd:v=>{const x=SX_DISC.find(y=>y.id===v),m=sxMem(x.m),back=m&&sxSitOf(m)==='afastado'&&x.t==='afa';
-  sxDlg('Encerrar registro',esc(x.m)+' · '+SX_DISC_T[x.t][0],sxF('Motivo do encerramento','<input name="n" autocomplete="off" placeholder="Ex.: Restauração concluída">')+(back?'<label class="chk3"><input type="checkbox" name="bk" checked><span>Voltar o membro à situação Ativo</span></label>':''),sxOk('Encerrar'));
-  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.n.value.trim())return sxErr(f,'n','Informe o motivo');x.st='encerrada';x.rev='';x.h.push([SX_TODAY,'Encerrado: '+f.n.value.trim()]);if(back&&f.bk&&f.bk.checked)sxSetSit(m,'ativo',{why:'Retorno após revisão'});sxLog('Encerrou','Disciplina',x.m);closeDlg();render();toast('Registro encerrado');};}
+ sxDiEnd:v=>{const x=SX_DISC.find(y=>y.id===v),m=sxMem(x.m),back=m&&sxSitOf(m)==='afastado'&&x.t==='afa'&&!!x.conf;
+  sxDlg('Encerrar registro',esc(x.m)+' · '+SX_DISC_T[x.t][0],sxF('Motivo do encerramento','<input name="n" autocomplete="off" placeholder="Ex.: Restauração concluída">')+(back?'<p class="hint">A Secretaria recebe um pendente para confirmar a volta do membro à situação Ativo.</p>':''),sxOk('Encerrar'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.n.value.trim())return sxErr(f,'n','Informe o motivo');x.st='encerrada';x.rev='';x.h.push([SX_TODAY,'Encerrado: '+f.n.value.trim()]);if(back)x.ret='pend';sxLog('Encerrou','Disciplina',x.m);closeDlg();render();toast(back?'Registro encerrado · a Secretaria foi avisada para confirmar a volta':'Registro encerrado');};}
 });
 function D_PLUS(n){const d=new Date(Date.parse(SX_TODAY)+n*864e5);return d.toISOString().slice(0,10);}
 

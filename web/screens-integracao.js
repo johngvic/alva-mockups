@@ -30,6 +30,7 @@ const INTEGS=[
  mkInteg('Admin_teste','2026-04-17','08:00',1,0,{aceitos:0,pend:1}),
  mkInteg('Pietra B','2026-08-19','08:00',1,0,{aceitos:0,pend:1}),
 ];
+{const p0=INTEGS.find(g=>g.current).ppl.find(p=>p.st==='pendente');if(p0)p0.prev={s:'Desligado',d:'2026-04-12',r:'Decisão pastoral'};}
 /* regras da igreja para as integrações (valem como padrão; cada integração ainda pode mudar o seu limite) */
 const INTR={max:30,prazo:3,aceite:'manual',cert:false};
 /* fila de espera: lista da igreja (não de uma integração). Entra quem pede com a integração lotada, fora do prazo ou sem integração aberta; ordem de chegada */
@@ -144,7 +145,7 @@ function iMembers(g){
  return `<section class="card mtab"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="imq" placeholder="Buscar pessoa" value="${esc(S.imq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todos',g.ppl.length],...Object.keys(IST).map(k=>[k,IST[k][0],icount(g,k)])].map(c=>`<button class="chipf ${S.imf===c[0]?'on':''}" data-a="imf" data-v="${c[0]}">${c[0]!=='todos'?`<i style="background:${c[0]==='andamento'?'var(--seq2)':IST[c[0]][1]}"></i>`:''}${c[1]}<small>${c[2]}</small></button>`).join('')}</div></div>
   ${list.length?`<div class="trow im thead"><span>Pessoa</span><span>Etapa atual</span><span>Status</span><span></span></div>${list.map(p=>`<div class="trow im" id="${p.id}">
-   <span class="tn">${pAv(p)}<span><b>${esc(p.n)}</b></span></span>
+   <span class="tn">${pAv(p)}<span><b>${esc(p.n)}</b>${p.prev?` <button type="button" class="chipf" style="min-height:24px;padding:0 8px;margin-left:8px" data-a="igPrev" data-v="${p.id}">Já saiu antes</button>`:''}</span></span>
    <span class="ist">${p.st==='integrado'?'<span class="soft">Concluiu todas</span>':p.step===0?'<span class="soft">Aguardando aceite</span>':`<span class="stepdots">${g.steps.map((s,i)=>`<i class="${i<p.step?'on':''}"></i>`).join('')}</span>${esc((g.steps[p.step]||g.steps[g.steps.length-1]||{t:''}).t)}`}</span>
    <span class="ts"><span class="stp" style="--c:${IST[p.st][1]};--b:${IST[p.st][2]}"><i></i>${IST[p.st][0]}</span></span>
    <span class="iact">${p.st==='pendente'?`<button class="btn pri sm" data-a="acceptP" data-v="${p.id}">Aceitar</button>`:p.st!=='integrado'?`<button class="btn sec sm" data-a="advanceP" data-v="${p.id}">Avançar etapa</button>`:''}<button class="ibtn sm" data-a="removeP" data-v="${p.id}" aria-label="Remover da integração" title="Remover da integração">${ic('x',14)}</button></span></div>`).join('')}`
@@ -185,6 +186,10 @@ const IA={
  imf:v=>{S.imf=v;reITab();},
  resend:(v,b)=>busy(b,1000,'E-mail reenviado',()=>toast(`E-mail reenviado para ${icount(ibyId(S.integ),'pendente')+icount(ibyId(S.integ),'aceito')} pessoas com etapas em aberto`)),
  doCurrent:(v,b)=>{b.classList.add('busy');setTimeout(()=>{const g=ibyId(S.integ);INTEGS.forEach(x=>x.current=false);g.current=true;closeDlg();render();toast(`${g.n} agora é a integração atual`);},700);},
+ igPrev:v=>{const p=INTEGS.flatMap(g=>g.ppl).find(x=>x.id===v);if(!p||!p.prev)return;openDlg(`${dlgHead('Já saiu da igreja antes',esc(p.n))}
+  <p class="sx-kv"><span>Situação</span><b>${p.prev.s}</b></p><p class="sx-kv"><span>Em</span><b>${dBR(p.prev.d)}</b></p><p class="sx-kv"><span>Motivo</span><b>${esc(p.prev.r)}</b></p>
+  <p class="who" style="margin:10px 0 0">Quem decide se aceita é a equipe de integração. Para saber mais, converse com os pastores.</p>
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`,'sm');},
  acceptP:v=>{const g=ibyId(S.integ),p=g.ppl.find(x=>x.id===v);p.st='aceito';p.step=1;render();toast(`${p.n.split(' ')[0]} aceito(a) na integração`);},
  advanceP:v=>{const g=ibyId(S.integ),p=g.ppl.find(x=>x.id===v);p.step++;if(p.st==='aceito')p.st='andamento';let au='';if(p.step>=g.steps.length){p.st='integrado';p.step=g.steps.length;const mm=MEMBERS.find(x=>x.n===p.n);if(mm){const was=mm.st;mm.st='integrado';if(was!=='integrado')au=sxIntegrated(mm);}}render();toast(p.st==='integrado'?`${p.n.split(' ')[0]} concluiu a integração`+(au?'. '+au:''):`${p.n.split(' ')[0]} avançou para ${g.steps[p.step].t}`);},
  removeP:v=>{const g=ibyId(S.integ),i=g.ppl.findIndex(x=>x.id===v),p=g.ppl[i];

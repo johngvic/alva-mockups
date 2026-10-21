@@ -1,4 +1,4 @@
-/* ================= Comunidade › Redes de célula ================= */
+/* ================= Comunidade › Redes de casa ================= */
 let _rid=0;
 const RD=(n,sup,tone,casas)=>({id:'r'+(++_rid),n,sup,tone,casas,meets:[]});
 const REDES=[RD('Rede Norte','Rodrigo Alves','ceu',['h1','h5']),RD('Rede Sul','Camila Duarte','damasco',['h2']),RD('Rede Leste/Oeste','Diego Martins','lima',['h3','h4'])];
@@ -7,7 +7,7 @@ const casaRede=hid=>REDES.find(r=>r.casas.includes(hid));
 function redesList(){
  const q=norm(S.rq||'');const loose=CASAS.filter(c=>!casaRede(c.id));
  const l=REDES.filter(r=>!q||norm(r.n+' '+r.sup+' '+r.casas.map(h=>hById(h)?.n||'').join(' ')).includes(q));
- return `<header class="ph rise"><div><p class="eb">Comunidade</p><h1>Redes de célula</h1><p class="lede">Hierarquia de supervisão: supervisor › líder › casa</p></div>
+ return `<header class="ph rise"><div><p class="eb">Comunidade</p><h1>Redes de casa</h1><p class="lede">Hierarquia de supervisão: supervisor › líder › casa</p></div>
   <div class="pact">${rpBtn('casas','redes')}
   <button class="btn pri" data-a="rAdd">${ic('plus',15,2.2)}Nova rede</button></div></header>
  <section class="card kpis4 k3 rise" style="--d:1">

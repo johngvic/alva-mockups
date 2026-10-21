@@ -29,7 +29,7 @@ Object.assign(A,{
 
 /* ---------- Disciplina: tabela com busca e filtros ---------- */
 if(!SX_DISC.some(x=>x.m==='Elisa Moura'))SX_DISC.push(
- {id:'ds4',m:'Elisa Moura',t:'afa',d:'2026-08-12',rev:'2026-11-12',resp:'Pr. Rafael Pereira',obs:'Afastamento combinado durante a mudança temporária de cidade.',st:'vigente',h:[['2026-08-12','Registro criado']]},
+ {id:'ds4',m:'Elisa Moura',t:'afa',d:'2026-08-12',rev:'2026-11-12',resp:'Pr. Rafael Pereira',obs:'Afastamento combinado durante a mudança temporária de cidade.',st:'vigente',req:'Away',conf:'2026-08-12',h:[['2026-08-12','Registro criado']]},
  {id:'ds5',m:'Bruno Reis',t:'des',d:'2026-06-20',rev:'',resp:'Pr. Marcos Souza',obs:'Desligamento a pedido do próprio membro.',st:'encerrada',h:[['2026-06-20','Registro criado'],['2026-06-20','Encerrado']]});
 discPage=function(){
  const vig=SX_DISC.filter(x=>x.st==='vigente'),q=norm(S.dsQ),stOf=x=>sxRevDue(x)?'vencida':x.st==='vigente'?'vigente':'encerrada';
@@ -40,11 +40,11 @@ discPage=function(){
  const tdd='<div style="position:relative"><button class="btn sec sel" data-a="dsTMenu" aria-haspopup="menu">'+(S.dsT==='todos'?'Todos os tipos':SX_DISC_T[S.dsT][0])+ic('updown',14)+'</button><div class="pop" id="dsTPop" role="menu" style="left:0;top:calc(100% + 6px)"><button class="pi" data-a="dsT" data-v="todos">Todos os tipos'+(S.dsT==='todos'?'<span class="ck">'+ic('check',16,2.25)+'</span>':'')+'</button><hr>'+Object.keys(SX_DISC_T).map(k=>'<button class="pi" data-a="dsT" data-v="'+k+'"><i class="msd" style="background:'+SX_DISC_T[k][1]+'"></i>'+SX_DISC_T[k][0]+'<small style="margin-left:6px;color:var(--ink-soft)">'+SX_DISC.filter(x=>x.t===k).length+'</small>'+(S.dsT===k?'<span class="ck">'+ic('check',16,2.25)+'</span>':'')+'</button>').join('')+'</div></div>';
  const filt=S.dsF!=='todos'||S.dsT!=='todos'||S.dsQ;
  return sxHead('Cuidado','Disciplina','Registro pastoral de admoestações, afastamentos e desligamentos. Acesso super restrito.',`<button class="btn pri" data-a="sxDiNew">${ic('plus',15,2.2)}Novo registro</button>`)
- +`<div class="sx-lock rise" style="--d:1">${ic('lock',20,2)}<span><b>Área restrita</b> · só o papel Administrador e o Pastor com acesso a Disciplina. Cada consulta e cada alteração vai para a auditoria. Estes registros <b>não aparecem</b> em buscas, listas, exportações, no app nem em avisos, e nunca são mostrados ao próprio membro.</span></div>`
+ +`<div class="sx-lock rise" style="--d:1">${ic('lock',20,2)}<span><b>Área restrita</b> · só o Administrador e quem a igreja autorizar para a Disciplina. Cada consulta e cada alteração vai para a auditoria. Estes registros <b>não aparecem</b> em buscas, listas, exportações, no app nem em avisos, e nunca são mostrados ao próprio membro.</span></div>`
  +sxKpis([['Em vigor',vig.length,'registros abertos'],['Revisão vencida',vig.filter(sxRevDue).length,'pedem uma conversa',vig.some(sxRevDue)?'var(--st-rec)':''],['Encerrados',SX_DISC.length-vig.length,'no histórico']])
  +`<section class="card mtab rise" style="--d:3" aria-label="Registros de disciplina"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="dsq" placeholder="Pesquisar pessoa ou responsável" value="${esc(S.dsQ)}" autocomplete="off"></label>${tdd}
   <div class="chips" role="tablist" aria-label="Situação">${chips.map(c=>`<button role="tab" class="chipf ${S.dsF===c[0]?'on':''}" data-a="sxDiF" data-v="${c[0]}" aria-selected="${S.dsF===c[0]}">${c[2]?`<i style="background:${c[2]}"></i>`:''}${c[1]}<small>${cnt(c[0])}</small></button>`).join('')}</div></div>
-  ${l.length?`<div class="dsr thead"><span>Pessoa</span><span>Tipo</span><span>Desde</span><span>Responsável</span><span>Revisão</span><span>Situação</span><span></span></div>`+l.map(x=>{const m=sxMem(x.m),k=stOf(x);return `<div class="dsr ${k}" role="row" tabindex="0" data-a="sxDiOpen" data-v="${x.id}"><span class="ds-p">${m?mav(m):sxAv(x.m)}<b>${esc(x.m)}</b></span><span class="ds-t">${sxPill(SX_DISC_T[x.t][0],SX_DISC_T[x.t][1],SX_DISC_T[x.t][2])}</span><span class="ds-d">${dBR(x.d)}</span><span class="ds-r">${esc(x.resp)}</span><span class="ds-v">${x.rev?dBR(x.rev):'<span class="soft">—</span>'}</span><span class="ds-s">${k==='vencida'?'<span class="stp" style="--c:var(--st-rec);--b:var(--st-rec-bg)"><i></i>Revisão vencida</span>':k==='vigente'?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Em vigor</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Encerrado</span>'}</span><span class="ds-c">${ic('chevR',16)}</span></div>`;}).join('')
+  ${l.length?`<div class="dsr thead"><span>Pessoa</span><span>Tipo</span><span>Desde</span><span>Responsável</span><span>Revisão</span><span>Situação</span><span></span></div>`+l.map(x=>{const m=sxMem(x.m),k=stOf(x);return `<div class="dsr ${k}" role="row" tabindex="0" data-a="sxDiOpen" data-v="${x.id}"><span class="ds-p">${m?mav(m):sxAv(x.m)}<b>${esc(x.m)}</b></span><span class="ds-t">${sxPill(SX_DISC_T[x.t][0],SX_DISC_T[x.t][1],SX_DISC_T[x.t][2])}</span><span class="ds-d">${dBR(x.d)}</span><span class="ds-r">${esc(x.resp)}</span><span class="ds-v">${x.rev?dBR(x.rev):'<span class="soft">—</span>'}</span><span class="ds-s">${x.st==='vigente'&&x.req&&!x.conf?'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Aguardando a Secretaria</span>':k==='vencida'?'<span class="stp" style="--c:var(--st-rec);--b:var(--st-rec-bg)"><i></i>Revisão vencida</span>':k==='vigente'?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Em vigor</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Encerrado</span>'}</span><span class="ds-c">${ic('chevR',16)}</span></div>`;}).join('')
    +`<div class="tfoot"><span>${l.length} ${l.length>1?'registros':'registro'}${filt?' · <button class="lnk" data-a="dsClear">Limpar filtros</button>':''}</span></div>`
   :`<div class="mempty"><p>Nenhum registro.</p><span>${filt?'Nada corresponde a esses filtros.':'Os registros aparecem aqui.'}</span>${filt?'<button class="lnk" data-a="dsClear">Limpar filtros</button>':''}</div>`}</section>`;};
 Object.assign(A,{
@@ -211,7 +211,7 @@ actCards=function(){
   <article class="card act ${t2.done?'gone':''}" id="t2" style="${t2.done?'display:none':''}">
    <div class="top"><span class="tg" style="background:var(--seq3)"></span>Escalas<button class="x" data-a="done" data-v="t2" aria-label="Marcar como resolvido" title="Marcar como resolvido">${ic('check',16,2.25)}</button></div>
    <div class="hero"><span class="n">${PENDING.length}</span><span class="u">sem resposta para o culto de domingo</span></div>
-   <div class="act-m"><span class="act-bar"><i style="width:${Math.round(12/16*100)}%"></i></span>12/16 confirmados</div>
+   <div class="act-m"><span class="act-bar"><i style="width:${Math.round(12/16*100)}%"></i></span>12/16 aceitaram</div>
    <div class="act-box">${PENDING.slice(0,3).map((p,i)=>actRow(av(p),esc(p.n),ACT_ROLE[i])).join('')}${actMore(PENDING.length-3,'goTask','t2','sem resposta')}
     <div class="ar-foot">${ic('calendar',13,2)}<span><b>${DRAFTS.length} escalas de outubro</b> em rascunho · fecham dia 10</span></div></div>
    <div class="foot"><button class="btn pri" data-a="remind">Lembrar os ${PENDING.length}</button><button class="lnk" data-a="goTask" data-v="t2">Abrir escalas</button></div>
@@ -325,7 +325,7 @@ tHist=function(m){const h=history(m).reverse();
   return `<div class="cdx">
   <section class="card pc cdx-about"><div class="sh"><h2>Sobre o caso</h2></div>
    <p class="cdx-desc">${esc(c.desc)}</p>
-   <div class="cdx-g">${kv(CTYPE[c.type]||'info','Tipo',esc(c.type))+kv('user','Responsável',`<span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}`)+kv(c.restr?'lock':'eye','Quem vê',c.restr?'Responsável e Presbitério':'Todos os pastores')+kv('calendar','Aberto em',`${fmtD(c.opened)} <i>· ${ago(c.opened)}</i>`)}</div>
+   <div class="cdx-g">${kv(CTYPE[c.type]||'info','Tipo',esc(c.type))+kv('user','Responsável',crespInner(c))+kv(c.restr?'lock':'eye','Quem vê',(c.restr?`Administrar e ${(c.viewers||[c.resp]).length} pastor${(c.viewers||[c.resp]).length>1?'es':''}`:'Todos os pastores')+` <button type="button" class="lnk" data-a="cTriage" data-v="${c.id}">Alterar</button>`)+kv('calendar','Aberto em',`${fmtD(c.opened)} <i>· ${ago(c.opened)}</i>`)}</div>
    <button class="cdx-nx ${nx?'':'none'}" data-a="careTab" data-v="meetings">${nx?`<span class="cdx-nd"><b>${+nx.d.slice(8)}</b><small>${fmtD(nx.d).split(' ')[1]}</small></span><span class="cdx-nt"><small>Próximo encontro</small><b>${nx.mode==='Remoto'?'Encontro remoto':'Encontro presencial'} · ${esc(nx.t)}</b></span>`:`<span class="cdx-nd e">${ic('calendar',16,2)}</span><span class="cdx-nt"><small>Próximo encontro</small><b>Nenhum agendado</b></span>`}<span class="cdx-go">Ver encontros${ic('arrowR',13,2)}</span></button>
   </section>
   <aside class="stack-col">
@@ -339,11 +339,12 @@ tHist=function(m){const h=history(m).reverse();
  const _cd=caseDetail;caseDetail=function(){let h=_cd.apply(this,arguments);const c=cById(S.case);if(!c)return h;
   h=h.replace(/<button class="btn sec" data-a="cReg"[^>]*>Registrar encontro<\/button><button class="btn pri" data-a="cSched"[^>]*>[\s\S]*?Agendar<\/button>/,'');
   const i=h.indexOf('<div class="care-details">');if(i>-1)h=h.slice(0,i)+careDet(c)+'</div>';return h;};
+ A.cTriage=cTriage;
  const KIND=t=>/aberto/i.test(t)?['plus','brand','Abertura']:/resolvido/i.test(t)?['check','int','Encerramento']:/cancel/i.test(t)?['x','mute','Encontro']:/realizado/i.test(t)?['check','int','Encontro']:/agendado/i.test(t)?['calendar','ace','Encontro']:/Situa/i.test(t)?['swap','sol','Situação']:['info','mute','Registro'];
  careTimeline=function(c){careInit(c);const ev=c.events.slice().sort((a,b)=>b.d.localeCompare(a.d));
   return `<section class="card pc mh care-h"><div class="sh"><h2>Histórico do acompanhamento</h2><span class="who">${ev.length} registros · mais recentes primeiro</span></div>
    <ol class="mh-l">${ev.map((e,i)=>{const k=KIND(e.title),p=fmtD(e.d.slice(0,10)).split(' '),tm=e.d.includes('T')?new Date(e.d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
-    return `<li class="mh-i ${i===0?'first':''}"><span class="mh-d"><b>${p[0]}</b><small>${p[1]}${tm?' · '+tm:''}</small></span><span class="mh-ic k-${k[1]}">${ic(k[0],15,2)}</span><div class="mh-b"><div class="mh-h"><b>${esc(e.title)}</b><span class="mh-k">${k[2]}</span></div>${e.text?`<p class="care-ht">${esc(e.text)}</p>`:''}<span class="mh-m">${avN(e.by)}<span>por ${esc(e.by)}</span>${e.ref?`<button class="lnk care-hl" data-a="careMeet" data-v="${e.ref}">Ver encontro${ic('arrowR',12,2)}</button>`:''}</span></div></li>`;}).join('')}</ol></section>`;};}
+    return `<li class="mh-i ${i===0?'first':''}"><span class="mh-d"><b>${p[0]}</b><small>${p[1]}${tm?' · '+tm:''}</small></span><span class="mh-ic k-${k[1]}">${ic(k[0],15,2)}</span><div class="mh-b"><div class="mh-h"><b>${esc(e.title)}</b><span class="mh-k">${k[2]}</span></div>${histTxt(e)?`<p class="care-ht">${esc(histTxt(e))}</p>`:''}<span class="mh-m">${avN(e.by)}<span>por ${esc(e.by)}</span>${e.ref?`<button class="lnk care-hl" data-a="careMeet" data-v="${e.ref}">Ver encontro${ic('arrowR',12,2)}</button>`:''}</span></div></li>`;}).join('')}</ol></section>`;};}
 
 /* ---------- Evento: Financeiro ---------- */
 evFinDet=function(e){
@@ -363,16 +364,20 @@ Object.assign(A,{eiPg:v=>{S.eipg=+v;const b=$('#eirows');if(b){b.innerHTML=eiRow
 
 /* ---------- Evento: tabela de inscrições ---------- */
 Object.assign(S,{rgq:'',rgf:'todos',rgt:'todos',rgpg:1});
+/* a compra tem dois estados: situação (Confirmada, Pendente, Cancelada) e pagamento (Pago, Pendente, Reembolso solicitado, Reembolsado) */
+const rgSit=r=>r.st==='cancelada'?stpill('var(--st-rec)','var(--st-rec-bg)','Cancelada'):r.pay==='pendente'?stpill('var(--st-sol)','var(--st-sol-bg)','Pendente'):stpill('var(--st-int)','var(--st-int-bg)','Confirmada');
+const rgPay=r=>r.pay==='pago'?stpill('var(--st-int)','var(--st-int-bg)','Pago'):r.pay==='pendente'?stpill('var(--st-sol)','var(--st-sol-bg)','Pendente'):r.pay==='reembolso'?stpill('var(--st-sol)','var(--st-sol-bg)','Reembolso solicitado'):r.pay==='reembolsado'?stpill('var(--ink-muted)','var(--surface-2)','Reembolsado'):r.pay==='cancelado'?'<span class="soft">Sem cobrança</span>':'<span class="soft">Gratuita</span>';
+{const ev=EVTS.find(z=>z.paid&&z.regs.filter(r=>r.pay==='pago').length>2);if(ev){const p=ev.regs.filter(r=>r.pay==='pago');Object.assign(p[1],{st:'cancelada',pay:'reembolso'});Object.assign(p[2],{st:'cancelada',pay:'reembolsado'});}}
 function rgRows(e){const mny=evMoney(e),mt=e.tickets.length>1,q=norm(S.rgq),sig=[e.id,S.rgq,S.rgf,S.rgt].join('|');if(S.rgSig!==sig){S.rgSig=sig;S.rgpg=1;}
  const l=e.regs.filter(r=>(S.rgf==='todos'||r.pay===S.rgf)&&(S.rgt==='todos'||(tkOf(e,r)||{}).id===S.rgt)&&(!q||norm(r.n+' '+(r.vch||'')).includes(q)));
  if(!e.regs.length)return `<div class="mempty"><p>Ninguém inscrito ainda.</p><span>Compartilhe o link do evento ou adicione alguém manualmente.</span></div>`;
  if(!l.length)return `<div class="mempty"><p>Nada por aqui.</p><span>Nenhuma inscrição corresponde a esses filtros.</span></div>`;
  const pp=10,P=Math.max(1,Math.ceil(l.length/pp));S.rgpg=Math.min(Math.max(1,S.rgpg),P);const c=S.rgpg,pg=l.slice((c-1)*pp,c*pp);
  const cls=`trow rg2 ${mt?'mt':''} ${mny?'':'free'}`;
- const head=`<div class="${cls} thead"><span>Nome</span>${mt?'<span>Ingresso</span>':''}<span>Inscrição</span>${mny?'<span>Pagamento</span><span>Valor</span>':''}<span></span></div>`;
+ const head=`<div class="${cls} thead"><span>Nome</span>${mt?'<span>Ingresso</span>':''}<span>Inscrição</span>${mny?'<span>Situação</span><span>Pagamento</span><span>Valor</span>':''}<span></span></div>`;
  const body=pg.map(r=>{const tk=tkOf(e,r),nb=buyOf(e,r).length,tot=regTot(e,r);return `<div class="${cls} ${S.rgHi===r.id?'hi':''}" id="rg-${r.id}" tabindex="0" data-a="rgView" data-v="${r.id}"><span class="tn"><span class="av" style="background:var(--tone-${TONES[r.n.length%6]});color:var(--tone-${TONES[r.n.length%6]}-ink)">${initials(r.n)}</span><span class="hn"><b>${esc(r.n)}</b>${nb||r.vch?`<span class="rg2-s">${nb?`+${nb} ${nb===1?'compra':'compras'}`:''}${r.vch?`<span class="mono vtag">${ic('ticket',11)}${esc(r.vch)}</span>`:''}</span>`:''}</span></span>
-  ${mt?`<span class="rg2-tk">${esc(tk?tk.n:'—')}</span>`:''}<span class="rdt">${dBR(r.d)}</span>${mny?`<span class="ts">${r.pay==='pago'?stpill('var(--st-int)','var(--st-int-bg)','Pago'):r.pay==='pendente'?stpill('var(--st-sol)','var(--st-sol-bg)','Pendente'):'<span class="soft">Gratuita</span>'}</span><span class="rv mono">${r.pay==='—'?'—':tot?brl(tot):'Bolsa'}</span>`:''}
-  <span class="hact"><div style="position:relative"><button class="ibtn sm" data-a="rgMenu" data-v="${r.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="rgPop-${r.id}" style="right:0;top:calc(100% + 4px)"><button class="pi" data-a="rgView" data-v="${r.id}">${ic('eye',16)}Ver inscrição</button><hr>${mny&&r.pay==='pendente'?`<button class="pi" data-a="rgPaid" data-v="${r.id}">${ic('check',16)}Marcar como pago</button><button class="pi" data-a="rgLink" data-v="${r.id}">${ic('mail',16)}Reenviar link de pagamento</button><hr>`:''}<button class="pi danger" data-a="rgDel" data-v="${r.id}">${ic('x',16)}Cancelar inscrição</button></div></div></span></div>`;}).join('');
+  ${mt?`<span class="rg2-tk">${esc(tk?tk.n:'—')}</span>`:''}<span class="rdt">${dBR(r.d)}</span>${mny?`<span class="ts sit">${rgSit(r)}</span><span class="ts">${rgPay(r)}</span><span class="rv mono">${r.pay==='—'?'—':tot?brl(tot):'Bolsa'}</span>`:''}
+  <span class="hact"><div style="position:relative"><button class="ibtn sm" data-a="rgMenu" data-v="${r.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="rgPop-${r.id}" style="right:0;top:calc(100% + 4px)"><button class="pi" data-a="rgView" data-v="${r.id}">${ic('eye',16)}Ver inscrição</button><hr>${mny&&r.pay==='pendente'?`<button class="pi" data-a="rgPaid" data-v="${r.id}">${ic('check',16)}Marcar como pago</button><button class="pi" data-a="rgLink" data-v="${r.id}">${ic('mail',16)}Reenviar link de pagamento</button><hr>`:''}${r.st==='cancelada'?'':`<button class="pi danger" data-a="rgDel" data-v="${r.id}">${ic('x',16)}Cancelar compra</button>`}</div></div></span></div>`;}).join('');
  const n=[];for(let i=1;i<=P;i++){if(i===1||i===P||Math.abs(i-c)<=1)n.push(i);else if(n[n.length-1]!=='…')n.push('…');}
  const pager=P>1?`<div class="mpg" role="navigation" aria-label="Páginas"><button class="ibtn sm" data-a="rgPg" data-v="${c-1}" ${c===1?'disabled':''} aria-label="Página anterior">${ic('chevL',14,2)}</button>${n.map(i=>i==='…'?'<span class="mpg-e">…</span>':`<button class="mpg-n ${i===c?'on':''}" data-a="rgPg" data-v="${i}">${i}</button>`).join('')}<button class="ibtn sm" data-a="rgPg" data-v="${c+1}" ${c===P?'disabled':''} aria-label="Próxima página">${ic('chevR',14,2)}</button></div>`:'';
  return head+body+`<div class="tfoot rg2-f"><span>${P>1?`${(c-1)*pp+1}–${Math.min(l.length,c*pp)} de ${l.length} inscrições`:`${l.length} ${l.length===1?'inscrição':'inscrições'}`}${e.cap?` · ${e.regs.length} de ${e.cap} vagas`:''}</span>${pager}</div>`;}
@@ -573,7 +578,7 @@ lede=function(){return '';};
  Gestão:['Secretaria','Financeiro','Comunicação','Relatórios','Administração']};
  const SUB={
  Pessoas:['Integração','Membros'],
- Comunidade:['Casas de Apascentamento','Redes de célula','Ministérios'],
+ Comunidade:['Casas de Apascentamento','Redes de casa','Ministérios'],
  Cuidado:['Discipulado','Acompanhamento','Pedidos de oração','Como estou me sentindo','Disciplina'],
  Kids:['Visão geral','Turmas','Salas','Times'],
  Conteúdo:['Pregações','Séries','Vídeos','Músicas','Cursos','Jornadas','Material de apoio'],
@@ -585,9 +590,9 @@ lede=function(){return '';};
  Loja:['Visão geral','Itens','Categorias','Vendas','Pedidos do app','Caixa diário','Movimentações'],
  Secretaria:['Visão geral','Atos','Documentos','Cargos e mandatos','Análises'],
  Financeiro:['Visão geral','Lançamentos','Contas a receber','Contas a pagar','Doações','Aprovações','Importar e exportar','Análises'],
- Comunicação:['Notícias','Banners','Push e e-mail','Transmissões'],
+ Comunicação:['Notícias','Banners','Notificações','Transmissões'],
  Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],
- Administração:['Usuários e permissões','Superusuários','Visitantes','Recursos habilitados','Multi-igreja','Auditoria e LGPD']};
+ Administração:['Usuários e permissões','Superusuários','Visitantes','Recursos habilitados','Parâmetros do sistema','Multi-igreja','Auditoria e LGPD']};
  const by=(list,key,order)=>{const ix=x=>{const i=order.indexOf(key(x));return i<0?999:i;};list.sort((a,b)=>ix(a)-ix(b));};
  const apply=()=>NAV.forEach(g=>{if(ORD[g[0]])by(g[1],x=>x[2],ORD[g[0]]);g[1].forEach(n=>{if(n[3]&&SUB[n[2]])by(n[3],c=>c[1],SUB[n[2]]);});});
  apply();const _sb=sidebar;sidebar=function(){apply();return _sb.apply(this,arguments);};}
@@ -602,13 +607,14 @@ lede=function(){return '';};
  return h;};}
 {const _l=ntList;ntList=function(){const h=_l.apply(this,arguments);return h.startsWith('<div class="cm-nl">')?h.replace('<div class="cm-nl">','<div class="cm-nl"><div class="cm-nh"><span>Notícia</span><span>Saída do ar</span><span>Situação</span><span></span></div>'):h;};}
 
+/* O histórico guarda só o fato (quem, o quê, quando): o conteúdo tratado no encontro fica no próprio encontro. */
+function histTxt(e){return /^Encontro realizado/.test(e.title)?'':e.text;}
 /* ---------- Discipulado: histórico ---------- */
 function dLog(d,title,text,kind){(d.hist=d.hist||[]).push({d:new Date().toISOString(),title,text,by:ME.n||'Rafael Pereira',kind});}
 function dEvents(d){const p=d.parent&&dById(d.parent),done=d.meets.filter(m=>m.type==='done').sort((a,b)=>a.d<b.d?-1:1);
  const since=done.length?addDays(-(Math.round((TODAY-new Date(done[0].d))/864e5)+21)):addDays(-((d.last||14)+45));
  const ev=[{d:since,title:'Entrou na rede de discipulado',text:p?'Discipulado por '+p.n:'Topo da rede',by:p?p.n:'',kind:'start'},
   {d:since,title:'Ritmo de contato definido',text:RHY[d.rhythm],by:p?p.n:'',kind:'rhy'}];
- if(d.stage>1){const span=Math.max(1,Math.round((TODAY-new Date(since))/864e5));for(let i=1;i<d.stage;i++)ev.push({d:addDays(-Math.round(span*(1-i/d.stage))),title:'Concluiu “'+TRILHA[i-1]+'”',text:'Etapa '+i+' de 6 da trilha',by:p?p.n:'',kind:'stage'});}
  d.meets.forEach(m=>ev.push(m.type==='done'?{d:m.d,title:'Encontro realizado',text:m.content||m.mode,by:p?p.n:'',kind:'meet',ref:m.id}:{d:addDays(-2),title:'Encontro agendado',text:wd(m.d)+', '+fmtD(m.d)+' às '+m.time.replace(':00','h'),by:p?p.n:'',kind:'sched',ref:m.id}));
  kids(d.id).forEach((k,i)=>ev.push({d:addDays(-((k.last||14)+30+i*9)),title:'Passou a discipular '+k.n,text:RHY[k.rhythm],by:'',kind:'kid'}));
  if(d.paused)ev.push({d:addDays(-Math.max(1,(d.last||10)-5)),title:'Discipulado pausado',text:d.notes||'',by:p?p.n:'',kind:'pause'});
@@ -617,7 +623,7 @@ const DK={start:['plus','brand','Rede'],rhy:['clock','mute','Ritmo'],stage:['awa
 function dHist(d){const ev=dEvents(d);
  return `<section class="card pc mh care-h"><div class="sh"><h2>Histórico do discipulado</h2><span class="who">${ev.length} registros · mais recentes primeiro</span></div>
   <ol class="mh-l">${ev.map((e,i)=>{const k=DK[e.kind]||['info','mute','Registro'],p=fmtD(e.d.slice(0,10)).split(' '),tm=e.d.includes('T')?new Date(e.d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
-   return `<li class="mh-i ${i===0?'first':''}"><span class="mh-d"><b>${p[0]}</b><small>${p[1]}${tm?' · '+tm:''}</small></span><span class="mh-ic k-${k[1]}">${ic(k[0],15,2)}</span><div class="mh-b"><div class="mh-h"><b>${esc(e.title)}</b><span class="mh-k">${k[2]}</span></div>${e.text?`<p class="care-ht">${esc(e.text)}</p>`:''}<span class="mh-m">${e.by?avN(e.by)+`<span>por ${esc(e.by)}</span>`:`<span class="mh-sys">${ic('zap',11,2.2)}Automático</span>`}${e.ref&&e.kind==='meet'?`<button class="lnk care-hl" data-a="dViewMeet" data-v="${e.ref}">Ver encontro${ic('arrowR',12,2)}</button>`:''}</span></div></li>`;}).join('')}</ol></section>`;}
+   return `<li class="mh-i ${i===0?'first':''}"><span class="mh-d"><b>${p[0]}</b><small>${p[1]}${tm?' · '+tm:''}</small></span><span class="mh-ic k-${k[1]}">${ic(k[0],15,2)}</span><div class="mh-b"><div class="mh-h"><b>${esc(e.title)}</b><span class="mh-k">${k[2]}</span></div>${histTxt(e)?`<p class="care-ht">${esc(histTxt(e))}</p>`:''}<span class="mh-m">${e.by?avN(e.by)+`<span>por ${esc(e.by)}</span>`:`<span class="mh-sys">${ic('zap',11,2.2)}Automático</span>`}${e.ref&&e.kind==='meet'?`<button class="lnk care-hl" data-a="dViewMeet" data-v="${e.ref}">Ver encontro${ic('arrowR',12,2)}</button>`:''}</span></div></li>`;}).join('')}</ol></section>`;}
 {const _dd=discDetail;discDetail=function(){let h=_dd.apply(this,arguments);const d=dById(S.disc);if(!d)return h;
  h=h.replace('<span class="tind"></span></div>\n </header>',`<button role="tab" class="${S.dpt==='hist'?'on':''}" data-a="dpt" data-v="hist">Histórico</button><span class="tind"></span></div>\n </header>`);
  if(S.dpt==='hist'){const i=h.indexOf('<div id="dtb"');h=h.slice(0,i)+`<div id="dtb" class="rise" style="--d:2">${dHist(d)}</div>`;}

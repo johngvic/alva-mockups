@@ -342,7 +342,7 @@ phone.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el|
 phone.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role=button][data-a]')){e.preventDefault();e.target.click();}if(e.key==='Escape'&&$('#overlay .scrim'))closeSheet();});
 phone.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const fn=F[f.dataset.submit];if(fn)fn(f);});
 phone.addEventListener('input',e=>{if(e.target.id)clearErr(e.target.id);const t=e.target;
- if(t.id==='mCep'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;if(d.length===8&&!val('mRua')){[['mRua','Rua das Acácias'],['mBairro','Jardins'],['mCid','São Paulo'],['mUf','SP']].forEach(([i,v])=>{const x=$('#'+i);if(x&&!x.value)x.value=v;});$('#mNum')&&$('#mNum').focus();}}
+ if(t.id==='mCep'&&(($('#mPais')||{}).value||'Brasil')==='Brasil'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;if(d.length===8&&!val('mRua')){[['mRua','Rua das Acácias'],['mBairro','Jardins'],['mCid','São Paulo'],['mUf','SP']].forEach(([i,v])=>{const x=$('#'+i);if(x&&!x.value)x.value=v;});$('#mNum')&&$('#mNum').focus();}}
  if(t.id==='mNasc'||t.id==='fNasc'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>4?d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4):d.length>2?d.slice(0,2)+'/'+d.slice(2):d;}
  if(t.id==='mTel')t.value=maskPhone(t.value);});
 

@@ -1,5 +1,7 @@
 /* ================= Administração ================= */
-const AREAS_P=['Membros','Integração','Cuidado','Comunidade','Kids','Eventos','Conteúdo','Financeiro','Administração'];
+/* Cuidado deixou de ser um módulo: cada parte tem o seu (17/10/2026) */
+const CUI=['Discipulado','Acompanhamento','Pedidos de oração','Como estou me sentindo'];
+const AREAS_P=['Membros','Integração',...CUI,'Comunidade','Kids','Eventos','Conteúdo','Financeiro','Administração'];
 const ACTS=['Ver','Criar','Editar','Excluir'];
 const ROLES={Administrador:['st-rec'],Pastor:['st-ace'],Líder:['st-ace'],Secretaria:['st-int'],Voluntário:['st-sol']};
 const IGREJAS=[{id:'g1',n:'Alva Sede — Centro',rede:'n1',lead:'Pr. Eduardo Nunes'},{id:'g2',n:'Alva Zona Norte',rede:'n1',lead:'Pr. Marcelo Reis'},{id:'g3',n:'Alva Campinas',rede:'n2',lead:'Pra. Helena Prado'}];
@@ -24,7 +26,7 @@ const ALL=PM(Object.fromEntries(AREAS_P.map(a=>[a,ACTS])));
 const USERS=[
  U('Rafael Pereira','rafael@alvaigreja.com.br','Administrador',['g1','g2','g3'],ALL,'agora','ceu'),
  U('Ana Lima','ana.lima@alvaigreja.com.br','Líder',['g1','g2'],PM({Membros:['Ver','Editar'],Comunidade:['Ver','Criar','Editar'],Eventos:['Ver']}),'há 2 h','rosado'),
- U('Marcos Souza','marcos@alvaigreja.com.br','Pastor',['g1','g2'],PM({Membros:['Ver','Editar'],Integração:['Ver','Editar'],Cuidado:ACTS,Comunidade:['Ver'],Eventos:['Ver']}),'ontem','salvia'),
+ U('Marcos Souza','marcos@alvaigreja.com.br','Pastor',['g1','g2'],PM({Membros:['Ver','Editar'],Integração:['Ver','Editar'],...Object.fromEntries(CUI.map(m=>[m,ACTS])),Comunidade:['Ver'],Eventos:['Ver']}),'ontem','salvia'),
  U('Juliana Prado','juliana@alvaigreja.com.br','Voluntário',['g1'],PM({Eventos:['Ver','Editar'],Kids:['Ver']}),'há 3 dias','lima'),
  U('Patrícia Oliveira','patricia@alvaigreja.com.br','Secretaria',['g1','g2'],PM({Membros:ACTS,Integração:ACTS,Eventos:['Ver','Criar','Editar'],Financeiro:['Ver']}),'hoje','damasco'),
  U('Diego Martins','diego@alvaigreja.com.br','Líder',['g3'],PM({Comunidade:['Ver','Editar'],Eventos:ACTS}),'convite enviado','menta'),
@@ -36,6 +38,10 @@ const LOG=[
  {u:'Sistema',a:'Aprovou',e:'Integração',x:'Bruno Carvalho',det:'Aceita → Integrado',d:'2026-09-17',t:'12:15'},
  {u:'Rafael Pereira',a:'Transferiu',e:'Cuidado pastoral',x:'Maria Santos',det:'para Pr. Marcos Lima',d:'2026-09-16',t:'15:30'},
 ];
+/* campos crus de uma entrada do log (AUD-UC-11): sem tradução; os valores aqui são só para mostrar que existe */
+const AUD_RAW={'Membro':['membership','Member'],'Ministério':['ministry','Ministry'],'Item de almoxarifado':['warehouse','Item'],'Integração':['membership','Integration'],'Cuidado pastoral':['pastoral','Case'],'Escala':['scheduling','Scale'],'Exceção de escala':['scheduling','MonthlyException'],'Regras de escala':['scheduling','MonthlyLimit'],'Pedido LGPD':['audit','DataSubjectRequest']};
+const AUD_VB={Excluiu:'deleted',Editou:'changed',Adicionou:'created',Aprovou:'approved',Transferiu:'transferred',Alterou:'changed'};
+const audHash=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(16).padStart(8,'0');};
 const ACOL={Excluiu:'var(--st-rec)',Editou:'var(--st-ace)',Adicionou:'var(--st-int)',Aprovou:'var(--st-int)',Transferiu:'var(--st-sol)',Alterou:'var(--st-ace)'};
 const LGPD=[{id:'l1',n:'Ricardo Santos',type:'Exportação de dados',st:'concluido',d:'2026-09-10',done:'2026-09-11'},{id:'l2',n:'Fernanda Lima',type:'Exclusão de conta',st:'pendente',d:'2026-09-15'}];
 Object.assign(S,{user:null,uq:'',atab:'log',aq:'',af:'todas'});
@@ -47,10 +53,10 @@ const dBRs=d=>{const [y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;};
 const admHead=(t,sub,act)=>`<header class="ph rise"><div><p class="eb">Administração</p><h1>${t}</h1><p class="lede">${sub}</p></div><div class="pact">${act||''}</div></header>`;
 
 /* ---------- Usuários ---------- */
-const MODS=['Membros','Integração','Cuidado','Comunidade','Kids','Agenda e eventos','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Conteúdo','Comunicação','Financeiro','Multi-igreja'];
+const MODS=['Membros','Integração',...CUI,'Comunidade','Kids','Agenda e eventos','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Conteúdo','Comunicação','Financeiro','Multi-igreja'];
 const RPERM={};const rp=o=>Object.fromEntries(MODS.map(m=>[m,o[m]||[]]));
 RPERM.Administrador=rp(Object.fromEntries(MODS.map(m=>[m,ACTS])));
-RPERM.Pastor=rp({Membros:ACTS,Integração:ACTS,Cuidado:ACTS,Comunidade:ACTS,Kids:['Ver'],'Agenda e eventos':['Ver','Criar','Editar'],Conteúdo:['Ver','Criar','Editar'],Comunicação:['Ver','Criar'],Financeiro:['Ver']});
+RPERM.Pastor=rp({Membros:ACTS,Integração:ACTS,...Object.fromEntries(CUI.map(m=>[m,ACTS])),Comunidade:ACTS,Kids:['Ver'],'Agenda e eventos':['Ver','Criar','Editar'],Conteúdo:['Ver','Criar','Editar'],Comunicação:['Ver','Criar'],Financeiro:['Ver']});
 RPERM['Líder']=rp({Membros:['Ver'],Comunidade:['Ver','Editar'],'Agenda e eventos':['Ver','Criar','Editar'],Espaços:['Ver','Criar'],Almoxarifado:['Ver','Criar']});
 RPERM.Secretaria=rp({Membros:ACTS,Integração:ACTS,'Agenda e eventos':ACTS,Espaços:ACTS,Comunicação:['Ver','Criar','Editar'],Financeiro:['Ver']});
 RPERM['Voluntário']=rp({'Agenda e eventos':['Ver'],Kids:['Ver'],Espaços:['Ver']});
@@ -157,7 +163,7 @@ function aLog(){
  const days={};l.forEach(x=>(days[x.d]=days[x.d]||[]).push(x));
  return `<section class="card mtab"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="aq" placeholder="Buscar por usuário ou registro" value="${esc(S.aq)}" autocomplete="off"></label>
   <div class="chips">${[['todas','Todas'],...acts.map(a=>[a,a])].map(c=>`<button class="chipf ${S.af===c[0]?'on':''}" data-a="aFilter" data-v="${c[0]}">${c[0]!=='todas'?`<i style="background:${ACOL[c[0]]}"></i>`:''}${c[1]}</button>`).join('')}</div></div>
-  ${l.length?Object.keys(days).sort().reverse().map(d=>`<div class="mgh" style="position:static"><span>${inDays(d)===0?'Hoje':wd(d)+', '+fmtD(d)}</span></div><ol class="alog">${days[d].map(x=>`<li><span class="at">${x.t}</span><span class="adot" style="background:${ACOL[x.a]}"></span><span class="ab"><span><b>${esc(x.u)}</b> <span class="aa" style="color:${ACOL[x.a]}">${x.a.toLowerCase()}</span> ${x.e.toLowerCase()} <b>${esc(x.x)}</b>${x.det?` <span class="soft">· ${esc(x.det)}</span>`:''}</span></span>${x.u==='Sistema'?'<em class="tag">Automático</em>':''}</li>`).join('')}</ol>`).join(''):'<div class="mempty"><p>Nada encontrado.</p><span>Nenhum registro corresponde a esse filtro.</span></div>'}
+  ${l.length?Object.keys(days).sort().reverse().map(d=>`<div class="mgh" style="position:static"><span>${inDays(d)===0?'Hoje':wd(d)+', '+fmtD(d)}</span></div><ol class="alog">${days[d].map(x=>`<li tabindex="0" data-a="aLogOpen" data-v="${LOG.indexOf(x)}" style="cursor:pointer"><span class="at">${x.t}</span><span class="adot" style="background:${ACOL[x.a]}"></span><span class="ab"><span><b>${esc(x.u)}</b> <span class="aa" style="color:${ACOL[x.a]}">${x.a.toLowerCase()}</span> ${x.e.toLowerCase()} <b>${esc(x.x)}</b>${x.det?` <span class="soft">· ${esc(x.det)}</span>`:''}</span></span>${x.u==='Sistema'?'<em class="tag">Automático</em>':''}</li>`).join('')}</ol>`).join(''):'<div class="mempty"><p>Nada encontrado.</p><span>Nenhum registro corresponde a esse filtro.</span></div>'}
   <div class="tfoot"><span>Os registros são mantidos por 5 anos e não podem ser editados.</span></div></section>`;
 }
 function accRoleLabel(x){
@@ -211,13 +217,13 @@ const CHP={
   values:['Presença de Deus','Comunidade autêntica','Discipulado intencional','Missão local e global'],
   social:[SR('instagram','Instagram','@igrejaalva','instagram.com/igrejaalva'),SR('tiktok','TikTok','@igrejaalva','tiktok.com/@igrejaalva'),SR('facebook','Facebook','Igreja Alva','facebook.com/igrejaalva')],live:'youtube.com/@igrejaalva/live',
   hours:'Segunda a sexta, das 9h às 18h',wa:'(11) 99123-4455',phone:'(11) 3456-7890',email:'secretaria@alvaigreja.com.br',
-  street:'Rua das Acácias, 500',district:'Jardins',city:'São Paulo',sub:'SP',country:'BR',cep:'01404-000',
+  street:'Rua das Acácias',num:'500',comp:'',district:'Jardins',city:'São Paulo',sub:'SP',country:'BR',cep:'01404-000',
   requests:['Declaração de membro','Agendar batismo ou casamento','Atualizar cadastro da família','Segunda via de recibo'],
   services:[{d:'Domingo',h:'10h',n:'Culto da família'},{d:'Domingo',h:'18h30',n:'Culto de celebração'},{d:'Quarta',h:'20h',n:'Culto de oração'}]},
  g2:{tagline:'Uma família na Zona Norte, de portas abertas.',story:'',founded:'2019',stats:true,values:['Presença de Deus','Comunidade autêntica'],
   social:[SR('instagram','Instagram Zona Norte','@alvazonanorte','instagram.com/alvazonanorte')],live:'',
   hours:'Terça a sexta, das 14h às 19h',wa:'(11) 98877-1020',phone:'',email:'',
-  street:'Av. Cruzeiro do Sul, 1800',district:'Santana',city:'São Paulo',sub:'SP',country:'BR',cep:'02031-000',
+  street:'Av. Cruzeiro do Sul',num:'1800',comp:'',district:'Santana',city:'São Paulo',sub:'SP',country:'BR',cep:'02031-000',
   requests:['Declaração de membro'],services:[{d:'Domingo',h:'10h',n:'Culto da família'}]},
  g3:{tagline:'',story:'',founded:'',stats:false,values:[],social:[],live:'',
   hours:'',wa:'',phone:'',email:'',street:'',district:'',city:'Campinas',sub:'SP',country:'BR',cep:'',requests:[],services:[]},
@@ -289,8 +295,8 @@ function chpBody(){const c=CHP[S.chp],t=S.chpTab||'quem';
    `<dl class="kv grid">${kvv('Horário de atendimento',esc(c.hours),1)}${kvv('WhatsApp',esc(c.wa))}${kvv('Telefone',esc(c.phone))}${kvv('E-mail',esc(c.email),1)}</dl>`,
    `${fIn('hours','Horário de atendimento',c.hours,{wide:1,ph:'Segunda a sexta, das 9h às 18h'})}${fIn('wa','WhatsApp',c.wa,{ph:'(11) 99999-9999',attr:'inputmode="tel" data-tel',hint:'Abre a conversa pelo botão do app.'})}${fIn('phone','Telefone',c.phone,{opt:1,ph:'(11) 3333-3333',attr:'inputmode="tel" data-tel'})}${fIn('email','E-mail',c.email,{wide:1,ph:'secretaria@suaigreja.com.br',attr:'type="email" inputmode="email"'})}`)
   +chpSec('end','Endereço','Também aparece em Onde estamos.',
-   `<dl class="kv grid">${kvv('Rua e número',esc(c.street),1)}${kvv('Bairro',esc(c.district))}${kvv('CEP',esc(c.cep))}${kvv('Cidade',esc(c.city))}${kvv(NX_COUNTRIES[c.country||'BR'].div,esc(chpPlace({city:'',sub:c.sub,country:c.country})))}${kvv('País',esc(NX_COUNTRIES[c.country||'BR'].n))}</dl>`,
-   `${fIn('street','Rua e número',c.street,{wide:1,ph:'Rua das Acácias, 500'})}${fIn('district','Bairro',c.district,{ph:'Jardins'})}${(c.country||'BR')==='BR'?fIn('cep','CEP',c.cep,{opt:1,ph:'00000-000',attr:'inputmode="numeric" maxlength="9" data-cep'}):fIn('cep','Código postal',c.cep,{opt:1,ph:'',attr:'maxlength="12"'})}${fIn('city','Cidade',c.city,{ph:'São Paulo'})}<label class="fld"><span class="fl">${NX_COUNTRIES[c.country||'BR'].div}</span><span class="selw"><select name="sub">${nxSubOpts(c.country||'BR',c.sub)}</select>${ic('updown',14)}</span></label><label class="fld wide"><span class="fl">País</span><input value="${esc(NX_COUNTRIES[c.country||'BR'].n)}" disabled><span class="hint">Definido ao criar a igreja. Não muda depois que a igreja tem dados, porque define a moeda e as divisões do endereço.</span></label>`)
+   `<dl class="kv grid">${kvv('Rua',esc(c.street),1)}${kvv('Número',esc(c.num))}${kvv('Complemento',esc(c.comp))}${kvv('Bairro ou distrito',esc(c.district))}${kvv('Código postal',esc(c.cep))}${kvv('Cidade',esc(c.city))}${kvv(NX_COUNTRIES[c.country||'BR'].div,esc(chpPlace({city:'',sub:c.sub,country:c.country})))}${kvv('País',esc(NX_COUNTRIES[c.country||'BR'].n))}</dl>`,
+   `${fIn('street','Rua',c.street,{wide:1,ph:'Rua das Acácias'})}${fIn('num','Número',c.num,{opt:1,ph:'500'})}${fIn('comp','Complemento',c.comp,{opt:1})}${fIn('district','Bairro ou distrito',c.district,{ph:'Jardins'})}${(c.country||'BR')==='BR'?fIn('cep','Código postal',c.cep,{opt:1,ph:'00000-000',attr:'inputmode="numeric" maxlength="9" data-cep'}):fIn('cep','Código postal',c.cep,{opt:1,ph:'',attr:'maxlength="12"'})}${fIn('city','Cidade',c.city,{ph:'São Paulo'})}<label class="fld"><span class="fl">${NX_COUNTRIES[c.country||'BR'].div}</span><span class="selw"><select name="sub">${nxSubOpts(c.country||'BR',c.sub)}</select>${ic('updown',14)}</span></label><label class="fld wide"><span class="fl">País</span><input value="${esc(NX_COUNTRIES[c.country||'BR'].n)}" disabled><span class="hint">Definido ao criar a igreja. Não muda depois que a igreja tem dados, porque define a moeda e as divisões do endereço.</span></label>`)
   +chpSec('req','Pedidos mais comuns','Atalhos que o membro toca para pedir algo à secretaria.',
    c.requests.length?`<ul class="cip-reqs">${c.requests.map(v=>`<li>${esc(v)}${ic('chevR',14,2)}</li>`).join('')}</ul>`:'<div class="soft-empty"><p>Nenhum pedido cadastrado.</p><span class="who">Sem pedidos, a lista não aparece no app.</span></div>',
    fList('requests','Pedidos',c.requests,CHP_LISTS.requests));
@@ -339,7 +345,7 @@ function chpRead(f){const k=f.dataset.chsec,c=JSON.parse(JSON.stringify(CHP[S.ch
  if(k==='num'){c.founded=v('founded');c.stats=f.querySelector('[name=stats]:checked')?.value==='1';}
  if(k==='val'||k==='req'){const n=k==='val'?'values':'requests';c[n]=$$(`[name="${n}"]`,f).map(i=>i.value.trim()).filter(Boolean);}
  if(k==='at'){c.hours=v('hours');c.wa=v('wa');c.phone=v('phone');c.email=v('email');}
- if(k==='end'){c.street=v('street');c.district=v('district');c.cep=v('cep');c.city=v('city');c.sub=v('sub');}
+ if(k==='end'){c.street=v('street');c.num=v('num');c.comp=v('comp');c.district=v('district');c.cep=v('cep');c.city=v('city');c.sub=v('sub');}
  if(k==='soc')c.social=$$('.cip-srow',f).map(r=>{const g=n=>r.querySelector(`[name=${n}]`).value.trim(),t=g('st');return SR(t,g('sn'),g('sh'),g('su').replace(/^https?:\/\//,'').replace(/\/+$/,'')||socUrl(t,g('sh')));}).filter(x=>x.n||x.h||x.u);
  if(k==='cul')c.services=$$('.cip-row',f).map(r=>({d:r.querySelector('[name=sd]').value,h:r.querySelector('[name=sh]').value.trim(),n:r.querySelector('[name=sn]').value.trim()})).filter(x=>x.h||x.n);
  return c;}
@@ -450,6 +456,10 @@ const AA={
  gAdd:v=>{closePops();simpleDlg('Adicionar igreja','Nome da igreja','Ex.: Alva Santos',x=>{IGREJAS.push({id:'g'+Date.now(),n:x,rede:v});render();toast(`${x} adicionada`);});},
  aTab:v=>{S.atab=v;render();},
  aFilter:v=>{S.af=v;$('#abody').innerHTML=aLog();admAfter();},
+ aLogOpen:v=>{const x=LOG[+v],[dom,ent]=AUD_RAW[x.e]||['system',x.e.replace(/\s+/g,'')],h=audHash(x.u+x.e+x.x+x.d+x.t),vb=AUD_VB[x.a]||'changed',ac=dom+'.'+ent.toLowerCase()+'.'+vb,sd=x.det?(x.det.includes(' → ')?{from:x.det.split(' → ')[0],to:x.det.split(' → ')[1]}:{detail:x.det}):null;
+  const row=(k,val)=>`<div><dt>${k}</dt><dd class="mono">${esc(String(val))}</dd></div>`;
+  openDlg(`${dlgHead('Detalhe da entrada',`${esc(x.u)} ${x.a.toLowerCase()} ${esc(x.e.toLowerCase())} ${esc(x.x)}`)}<dl class="kv grid2">${[['Domain',dom],['Entity',ent],['TargetId',`${h}-0000-4000-8000-${h}0000`],['Action',ac],['ActorName',x.u],['Result','Success'],['CorrelationId','c-'+h],['OccurredAt',`${x.d}T${x.t}:00-03:00`]].map(r=>row(r[0],r[1])).join('')}</dl>
+   <p class="fl" style="margin:18px 0 8px">SafeDetail</p>${sd?`<dl class="kv grid2">${Object.entries(sd).map(r=>row(r[0],r[1])).join('')}</dl>`:'<p class="who" style="margin:0">Sem detalhe.</p>'}<div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`);},
  aAccFilter:v=>{S.aar=v;$('#abody').innerHTML=aAccess();admAfter();},
  aAccPage:v=>{S.aap=+v;$('#abody').innerHTML=aAccess();admAfter();$('#abody').scrollIntoView({block:'nearest',behavior:'smooth'});},
  lProc:v=>{const x=LGPD.find(l=>l.id===v),fin=()=>{x.st='concluido';x.done='2026-09-30';LOG.unshift({u:'Rafael Pereira',a:x.type.startsWith('Exclus')?'Excluiu':'Aprovou',e:'Pedido LGPD',x:x.n,det:x.type,d:'2026-09-30',t:new Date().toTimeString().slice(0,5)});render();};

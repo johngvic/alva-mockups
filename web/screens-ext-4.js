@@ -31,10 +31,10 @@ Object.assign(A,{tkAll:()=>tkAllDlg(),myTask:v=>{closeDlg();const [bid,tid]=v.sp
  if(b.ownerType==='min'){S.active='ministerios';S.mini=b.ownerId;S.mtab='quad';}else{const e=eById(b.ownerId);S.active=e&&e.kind==='culto'?'cultos':'eventos';S.evt=b.ownerId;S.etab='quad';}
  S.bd=b.id;render();window.scrollTo(0,0);setTimeout(()=>bdTaskDlg(b.id,t.col,t.id),80);}});
 
-/* Como estou me sentindo: só para quem tem acesso ao módulo Cuidado */
-const feelOK=()=>{const u=USERS.find(x=>x.n==='Rafael Pereira');return !!(u&&((u.perm||{}).Cuidado||[]).includes('Ver'));};
+/* Como estou me sentindo: só para quem tem acesso ao módulo Como estou me sentindo */
+const feelOK=()=>{const u=USERS.find(x=>x.n==='Rafael Pereira');return !!(u&&((u.perm||{})['Como estou me sentindo']||[]).includes('Ver'));};
 {const _sb=sidebar;sidebar=function(){const g=NAV.find(x=>x[0]==='Geral')[1].find(i=>i[0]==='cuidado')[3],i=g.findIndex(x=>x[0]==='sentimentos');let rm=null;if(!feelOK()&&i>=0)rm=g.splice(i,1)[0];try{return _sb();}finally{if(rm)g.splice(i,0,rm);}};
- const _fl=feelList;feelList=function(){if(!feelOK())return '<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Como estou me sentindo</h1></div></header><section class="card mempty rise" style="--d:1"><p>Sem acesso a esta página.</p><span>Ela aparece só para quem tem acesso ao módulo Cuidado.</span></section>';return _fl();};}
+ const _fl=feelList;feelList=function(){if(!feelOK())return '<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Como estou me sentindo</h1></div></header><section class="card mempty rise" style="--d:1"><p>Sem acesso a esta página.</p><span>Ela aparece só para quem tem acesso ao módulo Como estou me sentindo.</span></section>';return _fl();};}
 
 /* ---------- Encontros: lista e modal ---------- */
 const encPost=h=>h.replace(/presença (\d+)\/(\d+)/g,(_,x,y)=>'<span class="epr"><i style="--p:'+Math.round(x/y*100)+'%"></i>'+x+' de '+y+' presentes</span>')
@@ -114,7 +114,7 @@ seEncounters=function(k,o){
 seDetail=function(){
  const k=S.seK,o=SE_O(k,S.seId);if(!o){S.seK=null;S.seId=null;return k==='net'?multiList():redesList();}
  const isNet=k==='net',pool=sePool(k,o),units=isNet?netChurches(o).length:o.casas.length,unitL=isNet?(units===1?'igreja':'igrejas'):(units===1?'casa':'casas');
- const crumb='<nav class="crumb rise" aria-label="Você está em"><span class="soft">'+(isNet?'Administração':'Comunidade')+'</span>'+ic('chevR',13,2)+'<button class="lnk back" data-a="seBack">'+(isNet?'Multi-igreja':'Redes de célula')+'</button>'+ic('chevR',13,2)+'<span>'+esc(o.n)+'</span></nav>';
+ const crumb='<nav class="crumb rise" aria-label="Você está em"><span class="soft">'+(isNet?'Administração':'Comunidade')+'</span>'+ic('chevR',13,2)+'<button class="lnk back" data-a="seBack">'+(isNet?'Multi-igreja':'Redes de casa')+'</button>'+ic('chevR',13,2)+'<span>'+esc(o.n)+'</span></nav>';
  if(!seCanSee(o))return crumb+'<section class="card mempty rise"><p>Sem acesso aos encontros desta rede.</p><span>Só o supervisor e quem tem Editar ou Admin na rede veem os encontros e as respostas.</span></section>';
  o.meets.forEach(m=>seInv(k,o,m));
  const done=o.meets.filter(m=>m.done&&!m.cancelled),sched=o.meets.filter(m=>!m.done&&!m.cancelled).sort((a,b)=>a.d.localeCompare(b.d)),nx=sched[0];

@@ -154,9 +154,9 @@ rpDef('oracao','Pedidos de oração','Pedidos de oração e quantas pessoas est�
   cols:[rpCol('n','Solicitante',r=>r.priv?'Pedido privado':r.n),rpCol('when','Há',r=>r.when===0?'hoje':r.when+' dias',{raw:r=>r.when}),rpCol('cnt','Intercessores',r=>r.count,{n:1}),rpCol('st','Situação',r=>r.st==='ativo'?'Em oração':r.st==='respondido'?'Respondido':r.st),rpCol('priv','Privado',r=>rpYes(r.priv))]}
 ]);
 
-rpDef('casas','Casas de Apascentamento','Casas, participantes, presença nos últimos encontros e redes de célula.',[
+rpDef('casas','Casas de Apascentamento','Casas, participantes, presença nos últimos encontros e redes de casa.',[
  {k:'casas',l:'Casas',rows:()=>CASAS.slice(),
-  chip:{l:'Encontros',by:r=>(rpDays(r.meets[0]&&r.meets[0].d)||0)>21?'atrasada':'emdia',items:[rpC('emdia','Em dia (até 21 dias)',rpOk),rpC('atrasada','Sem encontro há mais de 21 dias',rpWarn)]},
+  chip:{l:'Encontros',by:r=>(rpDays(r.meets[0]&&r.meets[0].d)||0)>(r.late||14)?'atrasada':'emdia',items:[rpC('emdia','Em dia (dentro do limite da casa)',rpOk),rpC('atrasada','Atrasada (acima do limite da casa)',rpWarn)]},
   fl:[{k:'rede',l:'Rede',opts:()=>REDES.map(r=>[r.n,r.n]),ok:(r,v)=>{const x=casaRede(r.id);return x&&x.n===v;}}],
   cols:[rpCol('n','Casa',r=>r.n),rpCol('leader','Líder',r=>r.leader),rpCol('host','Anfitrião',r=>r.host),rpCol('q','Participantes',r=>r.ppl.length,{n:1}),rpCol('enc','Encontros',r=>r.meets.length,{n:1}),rpCol('last','Último encontro',r=>rpD(r.meets[0]&&r.meets[0].d),{raw:r=>r.meets[0]?r.meets[0].d:''}),rpCol('pr','Presença média',r=>rpPres(r)+'%',{n:1,raw:r=>rpPres(r)}),rpCol('rede','Rede',r=>{const x=casaRede(r.id);return x?x.n:'—';}),rpCol('addr','Endereço',r=>r.addr||'—',{s:1,off:true}),rpCol('ph','Telefone',r=>r.phone||'—',{s:1,off:true})]},
  {k:'participantes',l:'Participantes',rows:()=>CASAS.flatMap(c=>c.ppl.map(p=>Object.assign({casa:c.n,c},p))),

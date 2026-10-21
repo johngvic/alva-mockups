@@ -70,6 +70,7 @@ function ntForm(id){
    <label class="fld wide"><span class="fl">Título</span><input name="t" value="${esc(v.t)}" maxlength="90" placeholder="Ex.: Culto especial de Ação de Graças" autocomplete="off"></label>
    <div class="fld wide"><span class="fl">Categoria</span><div class="cm-catpick" id="ntCats">${ntCatPick(v.c)}</div></div>
    <div class="fld wide"><span class="fl">Sai do ar em</span><div class="cm-exp"><div class="cm-q">${[[7,'1 semana'],[30,'1 mês'],[90,'3 meses'],[0,'Nunca']].map(x=>`<button type="button" data-q="${x[0]}">${x[1]}</button>`).join('')}</div><input type="date" name="exp" value="${v.exp||''}" min="${NOWD}"></div></div>
+   <div class="fld wide"><span class="fl">Quem vê</span><div class="cm-dpick">${[['Public','Pública'],['Internal','Interna'],['Restricted','Um ministério']].map(([k,l])=>`<label><input type="radio" name="vis" value="${k}" ${(v.vis||'Internal')===k?'checked':''}><span>${l}</span></label>`).join('')}</div></div>
    <div class="fld wide"><span class="fl">Foto de capa <small>opcional</small></span><div class="cm-drop" id="ntDrop"><span>${ic('image',18)}</span><div><b>Arraste uma imagem ou <u>escolha um arquivo</u></b><small>JPG ou PNG, 1200 × 630 px</small></div><input type="url" name="cover" value="${esc(v.cover)}" placeholder="ou cole uma URL"></div></div>
    <label class="fld wide"><span class="fl">Link ao tocar <small>opcional</small></span><span class="cm-pre">${ic('link',14)}<input name="url" value="${esc(v.url)}" placeholder="https://… ou /eventos/…" autocomplete="off"></span></label>
    <div class="fld wide"><span class="fl">Descrição</span><div class="cm-fmt"><button type="button" data-w="*" title="Negrito"><b>B</b></button><button type="button" data-w="_" title="Itálico"><i>I</i></button><button type="button" data-w="~" title="Riscado"><s>S</s></button><span class="hint">Como no WhatsApp: *negrito*, _itálico_, ~riscado~</span></div><textarea class="ta" name="desc" rows="4" placeholder="O que os membros precisam saber?">${esc(v.desc)}</textarea></div>
@@ -85,8 +86,8 @@ function ntForm(id){
  $$('.cm-fmt button',f).forEach(b=>b.onclick=()=>{const ta=f.desc,s=ta.selectionStart,e=ta.selectionEnd,w=b.dataset.w,sel=ta.value.slice(s,e)||'texto';ta.setRangeText(w+sel+w,s,e,'select');ta.focus();prev();});
  $('#ntDrop').addEventListener('click',e=>{if(e.target.tagName==='INPUT')return;f.cover.value='';toast('Upload de imagem: em breve no protótipo — cole uma URL por enquanto');});
  prev();setTimeout(()=>f.t.focus(),80);
- f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{const o={t:f.t.value.trim(),c:f.dataset.c,exp:f.exp.value,url:f.url.value.trim(),desc:f.desc.value.trim(),cover:f.cover.value.trim()};
-  if(n)Object.assign(n,o);else NEWS.push({...NW(o.t,o.c,NOWD,o.exp,o.desc,o.url),cover:o.cover});closeDlg();S.ntab='news';if(!n)S.ntf='ativas';cmRe();toast(n?'Notícia atualizada':'Notícia publicada no app');},650);});
+ f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{const o={t:f.t.value.trim(),c:f.dataset.c,exp:f.exp.value,url:f.url.value.trim(),desc:f.desc.value.trim(),cover:f.cover.value.trim(),vis:f.vis.value};
+  if(n)Object.assign(n,o);else NEWS.push({...NW(o.t,o.c,NOWD,o.exp,o.desc,o.url),cover:o.cover,vis:o.vis});closeDlg();S.ntab='news';if(!n)S.ntf='ativas';cmRe();toast(n?'Notícia atualizada':'Notícia publicada no app');},650);});
 }
 function ntCatPick(sel){return NCATS.map(c=>`<button type="button" class="${c.id===sel?'on':''}" data-c="${c.id}" style="--t:var(--tone-${c.tone});--ti:var(--tone-${c.tone}-ink)"><i></i>${esc(c.n)}</button>`).join('')+`<button type="button" class="new" data-new>${ic('plus',13,2.2)}Nova</button>`;}
 function ntInlineCat(){const w=$('#ntCats');if($('#ntNc'))return;w.insertAdjacentHTML('beforeend',`<span class="cm-inl" id="ntNc"><input placeholder="Nome da categoria" maxlength="24"><button type="button" class="btn pri sm">Criar</button><button type="button" class="ibtn sm" aria-label="Cancelar">${ic('x',13)}</button></span>`);
@@ -105,7 +106,7 @@ const PUSHES=[
  PS('Inscrições abertas — Retiro de Jovens 2026','Últimas vagas! Garanta a sua pelo app.','jovens','manual','enviado','2026-09-01 12:00',['push','email'],58),
  PS('Conferência Missões começa sexta','Confira a programação e escolha suas oficinas.','todos','manual','agendado','2026-10-08 18:00',['push','email']),
 ];
-const AUTOS=[{id:'au1',n:'Aniversário',d:'No dia, às 8h, para o aniversariante',icon:'gift',on:true},{id:'au2',n:'Escala',d:'1 dia antes, para quem está escalado',icon:'calendar',on:true},{id:'au3',n:'Boas-vindas',d:'Quando um membro é integrado',icon:'smile',on:false}];
+const AUTOS=[{id:'au10',n:'Lembrete de reserva de espaço',d:'1 dia e 15 minutos antes, para quem reservou',icon:'calendar',on:true},{id:'au4',n:'Lembrete de evento',d:'7 dias, 1 dia e 1 hora antes, para inscritos e confirmados',icon:'calendar',on:true},{id:'au5',n:'Lembrete de encontro',d:'1 dia e 1 hora antes, para quem não recusou',icon:'users',on:true},{id:'au6',n:'Lembrete de tarefa',d:'24 horas antes e ao vencer',icon:'check',on:true},{id:'au7',n:'Live ou culto',d:'1 hora antes, só push, para quem tem o app',icon:'video',on:true},{id:'au1',n:'Aniversário',d:'No dia, às 8h, para o aniversariante',icon:'gift',on:true},{id:'au2',n:'Escala',d:'1 dia antes, para quem está escalado',icon:'calendar',on:true},{id:'au3',n:'Boas-vindas',d:'Quando um membro é integrado',icon:'smile',on:false}];
 Object.assign(S,{puf:'prox',pw:null});
 const segOf=k=>k.startsWith('mini:')?['mini','Ministério de '+k.slice(5),(MINIS.find(m=>m.n===k.slice(5))||{m:24}).m||24,'music']:SEGS.find(s=>s[0]===k);
 const dtFmt=dt=>{const [d,t]=dt.split(' ');return `${wd(d)}, ${fmtD(d)} · ${hm(t)}`;};
@@ -130,7 +131,7 @@ function puPage(){
 }
 const PSTEPS=['Conteúdo','Público','Quando','Revisão'];
 function puWizard(){const w=S.pw,s=segOf(w.seg==='mini'?'mini:'+w.mini:w.seg);
- return `<nav class="crumb rise"><span class="soft">Comunicação</span>${ic('chevR',13,2)}<button class="lnk back" data-a="puBack">Push e e-mail</button>${ic('chevR',13,2)}<span>Novo envio</span></nav>
+ return `<nav class="crumb rise"><span class="soft">Comunicação</span>${ic('chevR',13,2)}<button class="lnk back" data-a="puBack">Notificações</button>${ic('chevR',13,2)}<span>Novo envio</span></nav>
  <header class="ph rise" style="--d:1"><div><h1>Novo envio</h1><p class="lede">Escreva, escolha quem recebe e quando</p></div></header>
  ${w.done?puDone(w,s):`<ol class="cm-steps rise" style="--d:1">${PSTEPS.map((t,i)=>`<li class="${i<w.step?'done':i===w.step?'on':''}"><button ${i<w.step?`data-a="puStep" data-v="${i}"`:'disabled'}><i>${i<w.step?ic('check',12,3):i+1}</i>${t}</button></li>`).join('')}</ol>
  <div class="cm-wz rise" style="--d:2"><section class="card cm-wc" id="puCard">${puStepHtml(w,s)}</section>
@@ -222,8 +223,8 @@ function bnForm(id){const b=id?BANNERS.find(x=>x.id===id):null,v=b?{...b}:{t:'',
 
 /* ---------- Transmissões ---------- */
 let _chid=0;const CH=(n,pl,url,sch,act=true)=>({id:'ch'+(++_chid),n,pl,url,sch,act});
-const CHANS=[CH('Canal Principal','youtube','youtube.com/@AlvaIgreja',[[0,'09:00'],[0,'19:00']]),CH('Canal de Jovens','youtube','youtube.com/@AlvaJovens',[[3,'20:00']]),CH('Instagram da igreja','instagram','instagram.com/alvasede',[],false)];
-const PLAT={youtube:['YouTube','#e62117'],instagram:['Instagram','#c13584'],facebook:['Facebook','#1877f2']};
+const CHANS=[CH('Culto de domingo','youtube','youtube.com/@AlvaIgreja',[[0,'09:00'],[0,'19:00']]),CH('Canal de Jovens','youtube','youtube.com/@AlvaJovens',[[3,'20:00']]),CH('Instagram da igreja','instagram','instagram.com/alvasede',[],false)];
+const PLAT={youtube:['YouTube','#e62117'],instagram:['Instagram','#c13584'],facebook:['Facebook','#1877f2'],tiktok:['TikTok','#111827']};
 const WDN=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 const chById=id=>CHANS.find(c=>c.id===id);
 function nextLive(){let best=null;CHANS.filter(c=>c.act).forEach(c=>c.sch.forEach(([d,t])=>{for(let i=0;i<8;i++){const iso=addD(NOWD,i);if(dow(iso)===d&&(i>0||mm(t)>NOWM)){const k=iso+' '+t;if(!best||k<best.k)best={k,c,iso,t};break;}}}));return best;}
@@ -240,14 +241,17 @@ function txPage(){
    <div class="cm-sch">${c.sch.length?c.sch.map(([d,t])=>`<span><b>${WDN[d].slice(0,3)}</b>${hm(t)}</span>`).join(''):'<span class="soft">Sem horário fixo</span>'}</div>
    <footer><label class="tog cm-bt"><input type="checkbox" data-ch2="${c.id}" ${c.act?'checked':''}><span class="sw"></span><span>${c.act?'Visível no app':'Oculto'}</span></label></footer></article>`).join('')}</div></div>`;
 }
+const chPlHtml=sel=>Object.entries(PLAT).map(([k,p])=>`<label><input type="radio" name="pl" value="${k}" ${sel===k?'checked':''}><span><i style="width:8px;height:8px;border-radius:50%;background:${p[1]}"></i>${p[0]}</span></label>`).join('')+`<button type="button" class="new" data-new style="border:1px dashed var(--line,rgba(0,0,0,.25));border-radius:999px;padding:4px 12px;background:none">${ic('plus',13,2.2)}Nova</button>`;
 function chForm(id){const c=id?chById(id):null,v=c?{...c,sch:c.sch.map(x=>[...x])}:{n:'',pl:'youtube',url:'',sch:[[0,'09:00']]};
  openDlg(`${dlgHead(c?'Editar canal':'Novo canal','As lives desse canal aparecem na aba Ao vivo do app.')}<form id="chF" class="fgrid one" novalidate>
-  <label class="fld"><span class="fl">Nome</span><input name="n" value="${esc(v.n)}" placeholder="Ex.: Canal Principal" autocomplete="off"></label>
-  <div class="fld"><span class="fl">Plataforma</span><div class="cm-dpick">${Object.entries(PLAT).map(([k,p])=>`<label><input type="radio" name="pl" value="${k}" ${v.pl===k?'checked':''}><span><i style="width:8px;height:8px;border-radius:50%;background:${p[1]}"></i>${p[0]}</span></label>`).join('')}</div></div>
+  <label class="fld"><span class="fl">Nome</span><input name="n" value="${esc(v.n)}" placeholder="Ex.: Culto de domingo" autocomplete="off"></label>
+  <div class="fld"><span class="fl">Plataforma</span><div class="cm-dpick" id="chPl">${chPlHtml(v.pl)}</div></div>
   <label class="fld"><span class="fl">Link do canal</span><span class="cm-pre">${ic('link',14)}<input name="url" value="${esc(v.url)}" placeholder="youtube.com/@suaigreja" autocomplete="off"></span><span class="err"></span></label>
   <div class="fld"><span class="fl">Horários das lives <small>opcional</small></span><div id="chS"></div><button type="button" class="btn ghost sm" id="chAdd" style="align-self:flex-start">${ic('plus',13,2.2)}Adicionar horário</button></div>
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="chOk">${c?'Salvar':'Adicionar canal'}</button></div></form>`,'sm');
  const f=$('#chF'),ok=$('#chOk');
+ const chPlBind=()=>{const w=$('#chPl');const nb=w.querySelector('[data-new]');if(nb)nb.onclick=()=>{if($('#chPlN'))return;w.insertAdjacentHTML('beforeend',`<span class="cm-inl" id="chPlN"><input placeholder="Nome da plataforma" maxlength="24"><button type="button" class="btn pri sm">Criar</button><button type="button" class="ibtn sm" aria-label="Cancelar">${ic('x',13)}</button></span>`);const b=$('#chPlN'),i=b.querySelector('input'),go=()=>{const n=i.value.trim();if(!n)return;const k=n.toLowerCase().replace(/\W+/g,'')||('p'+Date.now());if(!PLAT[k])PLAT[k]=[n,'#6b7280'];w.innerHTML=chPlHtml(k);chPlBind();};b.querySelector('.btn').onclick=go;b.querySelector('.ibtn').onclick=()=>b.remove();i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});setTimeout(()=>i.focus(),30);};};
+ chPlBind();
  const rs=()=>{$('#chS').innerHTML=v.sch.map(([d,t],i)=>`<div class="cm-sr"><span class="selw"><select data-i="${i}" data-k="d">${WDN.map((w,j)=>`<option value="${j}" ${j===d?'selected':''}>${w}</option>`).join('')}</select>${ic('updown',14)}</span><input type="time" data-i="${i}" data-k="t" value="${t}" step="900"><button type="button" class="ibtn sm" data-rm="${i}" aria-label="Remover">${ic('x',13)}</button></div>`).join('');};
  const val=()=>{const u=f.url.value.trim(),bad=u&&!/\.(com|tv|be)\//.test(u);f.url.closest('.fld').classList.toggle('bad',!!bad);f.url.closest('.fld').querySelector('.err').textContent=bad?'Cole o link do canal, ex.: youtube.com/@suaigreja':'';ok.disabled=!f.n.value.trim()||!u||bad;};
  $('#chS').addEventListener('change',e=>{const el=e.target;if(el.dataset.i==null)return;v.sch[+el.dataset.i][el.dataset.k==='d'?0:1]=el.dataset.k==='d'?+el.value:el.value;});

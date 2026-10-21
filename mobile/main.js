@@ -379,7 +379,7 @@ V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tab
    <div id="moodAfter" aria-live="polite">${moodAfter()}</div>
   </section>
   <nav class="pad jump" aria-label="Atalhos">
-   ${(S.role==='visitante'?[['Agenda','tab','agenda',0],['Casas','tab','grupos',0],['Oração','prayer','',0],['Quem somos','sub','quemSomos',0],['Ao vivo','sub','aoVivo','live']]:[['Agenda','tab','agenda',S.escalas.filter(x=>x.st==='pendente').length+S.discs.filter(x=>x.st==='pendente').length+invPend()],['Grupos','tab','grupos',0],['Cursos','tab','cursos',0],['Oração','prayer','',0],['Contribuir','give','',0],['Apresentações','sub','bebes',0],['Ao vivo','sub','aoVivo','live']]).map(j=>`<button class="jw" data-a="${j[1]}" data-v="${j[2]}"><span>${j[0]}</span>${j[3]==='live'?'<sup class="jlive" aria-label="ao vivo agora"></sup>':j[3]?`<sup aria-label="${j[3]} pendentes">${j[3]}</sup>`:''}</button>`).join('')}
+   ${(S.role==='visitante'?[['Agenda','tab','agenda',0],['Casas','tab','grupos',0],['Pregações','sub','nxPregs',0],['Vídeos','sub','nxVideos',0],['Séries','sub','nxSeries',0],['Músicas','sub','nxSongs',0],['Oração','prayer','',0],['Quem somos','sub','quemSomos',0],['Ao vivo','sub','aoVivo','live']]:[['Agenda','tab','agenda',S.escalas.filter(x=>x.st==='pendente').length+S.discs.filter(x=>x.st==='pendente').length+invPend()],['Grupos','tab','grupos',0],['Cursos','tab','cursos',0],['Pregações','sub','nxPregs',0],['Vídeos','sub','nxVideos',0],['Séries','sub','nxSeries',0],['Músicas','sub','nxSongs',0],['Oração','prayer','',0],['Contribuir','give','',0],['Apresentações','sub','bebes',0],['Ao vivo','sub','aoVivo','live']]).map(j=>`<button class="jw" data-a="${j[1]}" data-v="${j[2]}"><span>${j[0]}</span>${j[3]==='live'?'<sup class="jlive" aria-label="ao vivo agora"></sup>':j[3]?`<sup aria-label="${j[3]} pendentes">${j[3]}</sup>`:''}</button>`).join('')}
   </nav>
   <section class="pad stack g3">
    <div class="row g3" style="align-items:stretch">
@@ -435,11 +435,11 @@ function escCard(x,i){const k=K(x.y,x.m,x.d),bl=blockedAt(k),o=KD(k),tn=MINTONE[
  return `<article class="ev-c es2 ${off?'off':''} ${x.over&&!off?'lim-ov':''}" style="--t:var(--tone-${tn});--i:${i}">
   <div class="es2-r"><span class="ev-dt"><b>${o.d}</b><small>${WD[dow(o.y,o.m,o.d)].toLowerCase()}</small></span>
    <span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-cat"><i></i>${esc(x.min)}<em>· ${x.h}</em></span><span class="ev-t">${esc(x.fn)}</span><span class="ev-m">${esc(x.what||x.area)}</span></span>
-   ${x.st==='confirmado'?ST2('ok','Confirmado'):off?ST2('mute','Recusado'):ST2('warn','Aguardando')}</div>
+   ${x.st==='confirmado'?ST2('ok','Aceito'):off?ST2('mute','Recusado'):ST2('warn','Pendente')}</div>
   ${x.id==='s0'?svcBox():''}
   ${x.over&&!off?`<div class="lim-note">${ic('alert',16,2.2)}<div><b>Acima do seu limite do mês</b><span>${x.st==='confirmado'?'Você topou servir além do limite. Obrigado!':`O líder pediu mesmo assim${x.why?': “'+esc(x.why)+'”':''}. Tudo bem recusar.`}</span></div></div>`:''}
   ${bl&&!off?`<div class="es2-warn">${ic('alert',14,2)}Conflita com seu bloqueio de ${fmtK(bl.a)}${bl.a!==bl.b?' a '+fmtK(bl.b):''}</div>`:''}
-  ${x.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="escalaOk" data-v="${x.id}">Confirmar</button><button class="btn ghost2 sm" data-a="escalaNo" data-v="${x.id}">Recusar</button></div>`:x.st==='confirmado'?`<div class="es2-a"><button class="tlink sm2" data-a="escalaNo" data-v="${x.id}">Não vou conseguir ir</button></div>`:''}
+  ${x.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="escalaOk" data-v="${x.id}">Aceitar</button><button class="btn ghost2 sm" data-a="escalaNo" data-v="${x.id}">Recusar</button></div>`:x.st==='confirmado'?`<div class="es2-a"><button class="tlink sm2" data-a="escalaNo" data-v="${x.id}">Não vou conseguir ir</button></div>`:''}
  </article>`;}
 function discCard(x,i){const k=K(x.y,x.m,x.d),o=KD(k),off=x.st==='recusado';
  return `<article class="ev-c es2 ${off?'off':''}" style="--t:var(--tone-${x.tone||'ceu'});--i:${i}">
@@ -488,10 +488,28 @@ V.grupos=()=>({sb:'var(--ink)',tabs:'grupos',html:`${appHead(`<div class="stack 
 
 /* cursos */
 const pct=c=>Math.round(c.done/c.lessons.length*100);
+/* minhas trilhas (discipulado): mesmos cartões dos cursos; tudo em etapas; quem conclui é o próprio discípulo */
+S.trail=[
+ {k:'Jornada',t:'Primeiros passos',courses:['fund','oracao'],g:'mar'},
+ {k:'Curso',t:'Liderança Cristã',course:'lider',g:'vinho'},
+ {k:'Pregação',t:'Série: Frutos do Espírito',n:3,done:1,g:'brasa'},
+ {k:'Música',t:'Grande é o Senhor',n:1,done:0,g:'lima',note:'Ouvir antes do nosso próximo encontro'},
+ {k:'Curso',t:'Evangelismo na Prática',course:'evang',g:'brasa',from:'Acompanhamento'}
+];
+const trProg=it=>it.courses?{n:it.courses.length,done:it.courses.filter(id=>COURSES[id].done===COURSES[id].lessons.length).length}:it.course?{n:COURSES[it.course].lessons.length,done:COURSES[it.course].done}:{n:it.n,done:it.done};
+const trailHtml=()=>`<div class="stack g4"><p class="callout">Itens que o seu discipulador ou quem acompanha você separou, na ordem. Cada um é contado em etapas.</p>${S.trail.map((it,i)=>{const {n,done}=trProg(it),p=Math.round(done/n*100),fin=done>=n;
+ return `<article class="card" style="overflow:hidden"><div class="course-top gr-${it.g}" style="${it.g==='lima'?'color:#010f12':''}"><span class="eyebrow" style="color:inherit;opacity:.85">${it.k} · ${i+1} de ${S.trail.length}${it.from?' · '+it.from:''}</span><h3 class="t2" style="text-transform:uppercase;font-weight:800;letter-spacing:-.03em">${esc(it.t)}</h3></div>
+ <div class="stack g3" style="padding:16px"><div class="row between"><span class="callout">${fin?'Todas as etapas concluídas':`${done} de ${n} ${n===1?'etapa':'etapas'}`}</span><b style="font-variant-numeric:tabular-nums">${p}%</b></div><div class="bar"><i style="width:${p}%"></i></div>
+ ${it.courses?`<div class="stack" style="gap:4px">${it.courses.map(id=>{const c=COURSES[id],f=c.done===c.lessons.length;return `<span class="callout" style="display:flex;gap:8px;align-items:center"><span style="width:16px;text-align:center">${f?ic('check',13,2.6):'○'}</span>${esc(c.t)}</span>`;}).join('')}</div>`:''}
+ ${it.note?`<p class="callout" style="font-style:italic;margin:0">${esc(it.note)}</p>`:''}
+ ${it.courses?`<button type="button" class="tlink" data-a="cmtSheet" data-v="journey:${esc(it.t)}">Comentários (${(S.cmts['journey:'+it.t]||[]).length})</button>`:''}
+ ${fin?`<div class="row between">${status('success','Concluído')}</div>`
+  :it.courses||it.course?`<button class="btn primary block md split" data-a="openCourse" data-v="${it.course||it.courses.find(id=>COURSES[id].done<COURSES[id].lessons.length)}"><span>${done?'Continuar':'Começar'}</span><span class="meta">Etapa ${done+1}</span></button>`
+  :`<button class="btn primary block md" data-a="trStep" data-v="${i}">${done?'Continuar':'Abrir'}</button>`}</div></article>`;}).join('')}</div>`;
 V.cursos=()=>{const act=Object.values(COURSES).filter(c=>c.started),cat=Object.values(COURSES).filter(c=>!c.started);return{sb:'var(--ink)',tabs:'cursos',html:`${appHead(`<div class="stack g2"><p class="eyebrow">Formação</p><h1 class="t1">Cursos e jornadas</h1><p class="callout">Crescimento espiritual no seu ritmo.</p></div>`,['#07486e','#a9c8da'])}
  <div class="pad stack g5">
-  <div class="seg" role="tablist">${[['andamento','Em andamento'],['catalogo','Catálogo']].map(t=>`<button role="tab" aria-selected="${S.cu.tab===t[0]}" data-a="cuTab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
-  ${S.cu.tab==='andamento'?(act.length?act.map(c=>{const p=pct(c),fin=c.done===c.lessons.length;return `<article class="card" style="overflow:hidden"><div class="course-top gr-${c.g}" style="${c.g==='lima'?'color:#010f12':''}"><span class="eyebrow" style="color:inherit;opacity:.85">${c.cat}</span><h3 class="t2" style="text-transform:uppercase;font-weight:800;letter-spacing:-.03em">${c.t}</h3></div><div class="stack g3" style="padding:16px"><div class="row between"><span class="callout">${fin?'Todas as aulas concluídas':`Aula ${c.done} de ${c.lessons.length}`}</span><b style="font-variant-numeric:tabular-nums">${p}%</b></div><div class="bar"><i style="width:${p}%"></i></div>${fin?`<div class="row between">${status('success','Concluído')}<button class="btn secondary md" data-a="openCourse" data-v="${c.id}">Rever curso</button></div>`:`<button class="btn primary block md split" data-a="openCourse" data-v="${c.id}"><span>${c.done?'Continuar':'Começar'}</span><span class="meta">Aula ${c.done+1}</span></button>`}</div></article>`;}).join(''):'')
+  <div class="seg" role="tablist">${[['andamento','Em andamento'],['catalogo','Catálogo'],['trilhas','Minhas trilhas']].map(t=>`<button role="tab" aria-selected="${S.cu.tab===t[0]}" data-a="cuTab" data-v="${t[0]}" style="font-size:14px">${t[1]}</button>`).join('')}</div>
+  ${S.cu.tab==='trilhas'?trailHtml():S.cu.tab==='andamento'?(act.length?act.map(c=>{const p=pct(c),fin=c.done===c.lessons.length;return `<article class="card" style="overflow:hidden"><div class="course-top gr-${c.g}" style="${c.g==='lima'?'color:#010f12':''}"><span class="eyebrow" style="color:inherit;opacity:.85">${c.cat}</span><h3 class="t2" style="text-transform:uppercase;font-weight:800;letter-spacing:-.03em">${c.t}</h3></div><div class="stack g3" style="padding:16px"><div class="row between"><span class="callout">${fin?'Todas as aulas concluídas':`Aula ${c.done} de ${c.lessons.length}`}</span><b style="font-variant-numeric:tabular-nums">${p}%</b></div><div class="bar"><i style="width:${p}%"></i></div>${fin?`<div class="row between">${status('success','Concluído')}<button class="btn secondary md" data-a="openCourse" data-v="${c.id}">Rever curso</button></div>`:`<button class="btn primary block md split" data-a="openCourse" data-v="${c.id}"><span>${c.done?'Continuar':'Começar'}</span><span class="meta">Aula ${c.done+1}</span></button>`}</div></article>`;}).join(''):'')
   :(cat.length?`<div class="list">${cat.map(c=>`<div class="item" style="cursor:default"><span class="gr-${c.g}" style="width:56px;height:56px;border-radius:var(--r-sm);flex:none"></span><span class="grow stack" style="gap:2px"><span class="it-title">${c.t}</span><span class="it-sub">${c.cat} · ${c.lessons.length} aulas</span></span><button class="btn secondary sm" data-a="startCourse" data-v="${c.id}">Iniciar</button></div>`).join('')}</div>`:`<div class="empty"><span class="iconbox">${ic('award',22)}</span><span class="it-title" style="color:var(--ink)">Você já começou todos os cursos</span><span class="callout">Novos cursos aparecem aqui assim que forem publicados.</span></div>`)}
  </div>`};};
 
@@ -505,14 +523,16 @@ V.curso=()=>{const c=COURSES[S.cu.open];const total=c.lessons.length,fin=c.done=
    <div class="verse"><div class="orb gr-aurora"></div><p>${esc(li.v)}</p><div class="ref">${li.r}</div></div>
    ${isReview?`<button class="btn secondary block" data-a="resumeLesson">Voltar para a aula ${Math.min(c.done+1,total)}</button>`:`<button class="btn primary block split" data-a="completeLesson"><span>Concluir aula</span><span class="meta">${cur+1<total?'Próxima: '+(cur+2):'Última'}</span></button>`}
   </div>`}
+  ${fin&&S.cu.view==null?'':cmtHtml('lesson:'+c.id+':'+cur,'Comentários da aula')}
   <section class="stack g3"><p class="eyebrow" style="color:var(--ink-muted)">Aulas do curso</p>
    <div class="list">${c.lessons.map((l,i)=>{const st=i<c.done?'done':i===c.done?'cur':'lock';return `<button class="lesson ${st}" data-a="lesson" data-v="${i}"><span class="ck">${st==='done'?ic('check',14,3):st==='lock'?ic('lock',12,2.25):i+1}</span><span class="grow">${esc(l)}</span>${S.cu.view===i?'<span class="foot">vendo</span>':''}</button>`;}).join('')}</div>
   </section>
+ ${cmtHtml('course:'+S.cu.open,'Comentários do curso')}
  </div>`};};
 
 /* mais */
 const MAIS_ITEMS=[['Meus dados','user','damasco','meusDados'],['Notificações','bell','ambar','notifs'],['Quem somos','church','brasa','quemSomos'],['Acompanhamento','care','rosado','cuidado'],['Contribuir','gift','lima','contribuir'],['Inscrições','ticket','laranja','inscricoes'],['Ao vivo','radio','brasa','aoVivo'],['Meus ministérios','flame','laranja','meusMin'],['Pedidos de oração','hands','vinho','oracao'],['Fale com a secretaria','phone','ceu','secretaria'],['Assistente no WhatsApp','message','salvia','assistente'],['Privacidade e dados','lock','oceano','privacidade']];
-V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).length,ins=S.insc.mine.length,prW=S.prayers.filter(p=>p.st==='aguardando').length,care=S.care.next&&S.care.next.st==='pendente';
+V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).length,ins=S.insc.mine.filter(m=>m.st!=='cancelada').length,prW=S.prayers.filter(p=>p.st==='aguardando').length,care=S.care.next&&S.care.next.st==='pendente';
  const row=(label,v,meta,hot)=>`<button class="mrow" data-a="sub" data-v="${v}"><span class="mt">${label}</span>${meta?`<span class="mm ${hot?'hot':''}">${meta}</span>`:''}<span class="ma" aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
  const grp=(t,rows)=>`<section class="mgrp"><p class="eb2">${t}</p>${rows}</section>`;
  return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
@@ -520,6 +540,7 @@ V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).leng
   ${S.role==='visitante'?'':ccMini()}
   ${grp('Você',row('Meus dados','meusDados',miss?miss+' dados faltando':'')+row('Notificações','notifs',nN?nN+(nN>1?' novas':' nova'):'',nN>0)+row('Privacidade e dados','privacidade',''))}
   ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')+row('Batismo','batismo',S.bat.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
+  ${grp('Conteúdo',row('Pregações','nxPregs','')+row('Músicas','nxSongs',''))}
   ${['lider','admin'].includes(S.role)?grp('Liderança',row('Acompanhamentos','urgentes',URG.length+' urgentes',true)):''}
   ${grp('A igreja',row('Quem somos','quemSomos','')+row('Fale com a secretaria','secretaria','Seg a sex')+row('Assistente no WhatsApp','assistente',''))}
   <section class="stack g3">
@@ -615,9 +636,9 @@ function eventSheet(id){
  const e=EVENTS.find(x=>x.id===id);const on=S.rsvp[e.id];
  sheet(`<div class="sheet-hero gr-${e.g}" style="margin-top:-10px;border-radius:var(--r-xl) var(--r-xl) 0 0">${tag(e.tone,e.cat,true)}<h3>${esc(e.t)}</h3><div class="row g4" style="font:400 15px/20px var(--font-text);flex-wrap:wrap"><span class="row" style="gap:4px">${ic('calendar',16)}${e.range||WD[dow(e.y,e.m,e.d)]+', '+e.d+' de '+MONTHS[e.m-1]}</span><span class="row" style="gap:4px">${ic('clock',16)}${e.h}</span><span class="row" style="gap:4px">${ic('pin',16)}${esc(e.p)}</span></div></div>
  <div class="stack g5"><p class="body">${DESC[e.cat]||''}</p>
-  <div class="row between">${avs(4,(e.n+(on?1:0))+(e.sign?' inscritos':' confirmados'),'var(--surface-raised)')}${on?status('success',e.sign?'Inscrito':'Confirmado'):''}</div>
+  <div class="row between"><span class="callout">${(e.n+(on?1:0))} ${e.sign?'inscritos':'confirmados'}</span>${on?status('success',e.sign?'Inscrito':'Confirmado'):''}</div>
   ${apbEvBlock(e)}
-  <div class="stack g3">${on?`<button class="btn outline block" data-a="rsvp" data-v="${e.id}">${e.sign?'Cancelar inscrição':'Cancelar presença'}</button>`:`<button class="btn primary block split" data-a="rsvp" data-v="${e.id}"><span>${e.sign?'Inscrever-se':'Confirmar presença'}</span><span class="meta">${e.sign?'Gratuito':WD[dow(e.y,e.m,e.d)]+' '+e.d+'/'+String(e.m).padStart(2,'0')}</span></button>`}
+  <div class="stack g3">${on?(e.sign&&e.id==='e11'?`<button class="btn outline block" data-a="rgFromEv" data-v="i1">Ver minha inscrição</button>`:`<button class="btn outline block" data-a="rsvp" data-v="${e.id}">${e.sign?'Cancelar inscrição':'Cancelar presença'}</button>`):`<button class="btn primary block split" data-a="rsvp" data-v="${e.id}"><span>${e.sign?'Inscrever-se':'Confirmar presença'}</span><span class="meta">${e.sign?'Gratuito':WD[dow(e.y,e.m,e.d)]+' '+e.d+'/'+String(e.m).padStart(2,'0')}</span></button>`}
   <div class="row g3"><button class="btn secondary md grow" data-a="addCal">Salvar na agenda</button><button class="btn secondary md grow" data-a="shareEv">Compartilhar</button></div></div></div>`);
 }
 function groupSheet(id){
@@ -634,7 +655,7 @@ function groupSheet(id){
   <button class="btn secondary block talkbtn" data-a="talkLeader" data-v="g|${id}">${ic('message',18)}Falar com o líder</button>
  </div>`);
 }
-function serveBox(m,on,note){return on?`<div class="servecard"><span class="svdot"></span><span class="grow stack" style="gap:2px"><b>Interesse enviado</b><span>${m.lead} vai falar com você em até 3 dias.</span></span></div><button class="btn outline block md" data-a="serve" data-v="${m.id}">Cancelar interesse</button>`:`${note?`<p class="svnote">${note}</p>`:''}<button class="btn primary block split" data-a="serve" data-v="${m.id}"><span>Quero servir</span><span class="meta">Resposta em até 3 dias</span></button>`;}
+function serveBox(m,on,note){return on?`<div class="servecard"><span class="svdot"></span><span class="grow stack" style="gap:2px"><b>Interesse enviado</b><span>${m.lead} vai entrar em contato com você.</span></span></div><button class="btn outline block md" data-a="serve" data-v="${m.id}">Cancelar interesse</button>`:`${note?`<p class="svnote">${note}</p>`:''}<button class="btn primary block" data-a="serve" data-v="${m.id}">Quero servir</button>`;}
 function miniSheet(id){const m=MINIS.find(x=>x.id===id);const on=S.serving[id];
  sheet(`<div class="stack g5"><div class="row between" style="align-items:flex-start;gap:16px"><div class="stack" style="gap:6px"><p class="eb2">Ministério</p><h3 class="gname" style="font-size:${m.t.length>14?30:40}px;line-height:1">${m.t}</h3></div><span class="mico" style="color:${MK[m.tone]||'var(--tone-'+m.tone+'-ink)'};width:auto;margin-top:18px">${ic(m.i,34,1.5)}</span></div>
   <p class="body" style="color:var(--ink);margin:0">${m.d}</p>
@@ -662,7 +683,7 @@ function giveSheet(){
 function prayerSheet(){
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Pedido de oração</h3><p class="callout">A equipe de intercessão ora por cada pedido durante a semana.</p></div>
   ${field({id:'pText',label:'Seu pedido',area:true,ph:'Pelo que podemos orar?',hint:'0/500',max:500})}
-  <div class="list"><div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">Enviar anonimamente</span><span class="it-sub">Seu nome não aparece para a equipe</span></span><button type="button" class="switch" role="switch" aria-checked="false" aria-label="Anônimo" data-a="sw"></button></div><div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">Compartilhar com minha Casa</span><span class="it-sub">Casa Jardins</span></span><button type="button" class="switch" role="switch" aria-checked="true" aria-label="Compartilhar com minha Casa" data-a="sw"></button></div></div>
+  <div class="list"><div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">Enviar anonimamente</span><span class="it-sub">Só quem administra os pedidos vê seu nome</span></span><button type="button" class="switch" role="switch" aria-checked="false" aria-label="Anônimo" data-a="sw"></button></div></div>
   <button class="btn primary block" id="pGo">Enviar pedido</button></div>`,sh=>{
   const ta=$('#pText',sh);ta.addEventListener('input',()=>{clearErr('pText');$('#f-pText .hint').textContent=ta.value.length+'/500';$('#f-pText .hint').dataset.hint=ta.value.length+'/500';});
   $('#pGo',sh).addEventListener('click',async e=>{const v=ta.value.trim();if(!v){setErr('pText','Escreva seu pedido para enviarmos à equipe.');return;}if(v.length<10){setErr('pText','Conte um pouco mais para a equipe saber como orar.');return;}
@@ -672,8 +693,8 @@ function prayerSheet(){
 const NDESC={Eventos:'Cultos, conferências e eventos da sua igreja','Escalas':'Novas escalas e lembretes de confirmação','Pedidos de oração':'Quando alguém orar pelo seu pedido','Cursos':'Novas aulas e lembretes de estudo','Avisos gerais':'Comunicados da secretaria e da liderança'};
 function notifSheet(){sheet(`<div class="stack g5"><div class="row between" style="align-items:center"><h3 class="t2">Preferências</h3><span class="saved" id="nSaved" aria-live="polite"></span></div>
  <section class="stack"><p class="eb2" style="margin-bottom:4px">O que avisar</p><div class="chlist">${Object.keys(S.notif).map(k=>`<div class="prow"><span class="grow stack" style="gap:2px"><span class="pt">${k}</span><span class="chm">${NDESC[k]}</span></span><button type="button" class="switch" role="switch" aria-checked="${S.notif[k]}" aria-label="${k}" data-a="notifSw" data-v="${k}"></button></div>`).join('')}</div></section>
- <section class="stack g3"><p class="eb2">Como avisar</p><div class="row g2" style="flex-wrap:wrap">${Object.keys(S.nch).map(k=>`<button type="button" class="chip" aria-pressed="${S.nch[k]}" data-a="nch" data-v="${k}">${k}</button>`).join('')}</div></section>
- <div class="chlist"><div class="prow"><span class="grow stack" style="gap:2px"><span class="pt">Silenciar à noite</span><span class="chm">Das 22h às 7h, exceto avisos urgentes</span></span><button type="button" class="switch" role="switch" aria-checked="${S.quiet}" aria-label="Silenciar à noite" data-a="quietSw"></button></div></div>
+ <section class="stack g3"><p class="eb2">Como avisar</p><div class="row g2" style="flex-wrap:wrap">${Object.keys(S.nch).map(k=>k==='WhatsApp'?`<button type="button" class="chip" disabled aria-disabled="true" style="opacity:.55">WhatsApp · em breve</button>`:`<button type="button" class="chip" aria-pressed="${S.nch[k]}" data-a="nch" data-v="${k}">${k}</button>`).join('')}</div></section>
+ <div class="chlist"><div class="prow"><span class="grow stack" style="gap:2px"><span class="pt">Silenciar à noite</span><span class="chm">Das 22h às 7h</span></span><button type="button" class="switch" role="switch" aria-checked="${S.quiet}" aria-label="Silenciar à noite" data-a="quietSw"></button></div></div>
 </div>`);}
 function churchSheet(){sheet(`<div class="stack g4"><h3 class="t2">Trocar de igreja</h3><div class="chlist">${CHURCHES.map(c=>{const cur=S.church&&S.church.id===c.id;return `<button class="chrow ${cur?'current':''}" data-a="setChurch" data-v="${c.id}" ${cur?'aria-current="true"':''}><span class="chdot" style="background:${MK[c.tone==='ceu'?'oceano':c.tone]}"></span><span class="grow stack" style="gap:2px"><span class="row" style="gap:10px;align-items:baseline"><span class="chn">${CH_META[c.id].short}</span>${cur?'<span class="chl">Atual</span>':''}</span><span class="chm">${c.city} · ${c.members} membros</span></span>${cur?`<span class="chk" aria-hidden="true">${ic('check',18,2.5)}</span>`:`<span class="ma" aria-hidden="true">${ic('arrowR',18,2)}</span>`}</button>`;}).join('')}</div></div>`);}
 function forgotSheet(){sheet(`<form class="stack g5" data-submit="forgotSend" novalidate><div class="stack g2"><h3 class="t2">Redefinir senha</h3><p class="callout">Enviamos um botão e um código para criar sua nova senha. Botão e código válidos por 1 hora.</p></div>${field({id:'fEmail',label:'E-mail',type:'email',ph:'seu@email.com',val:val('lEmail')||S.email,im:'email'})}<button class="btn primary block" type="submit">Continuar</button></form>`);}
@@ -805,7 +826,7 @@ const A={
    paint(sh);$('#lpM',sh).addEventListener('click',()=>{if(v>1){v--;paint(sh);}});$('#lpP',sh).addEventListener('click',()=>{if(v<S.lim.church){v++;paint(sh);}else toast('info','Esse é o limite da igreja','Para servir mais vezes, fale com o líder do seu ministério.');});
    $('#lpGo',sh).addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Salvo');S.lim.pref=v;await closeSheet();$('#agBody').innerHTML=agendaTab();toast('success','Preferência salva','Até '+v+(v===1?' vez':' vezes')+' por mês. Os líderes veem isso ao te escalar.');});
    const c=$('#lpClr',sh);if(c)c.addEventListener('click',async()=>{S.lim.pref=null;await closeSheet();$('#agBody').innerHTML=agendaTab();toast('info','Preferência removida','Vale só o limite da igreja: '+S.lim.church+' por mês.');});});},
- escalaOk:async(v,el)=>{const x=S.escalas.find(e=>e.id===v);const k=K(x.y,x.m,x.d);if(blockedAt(k)){toast('error','Essa data está bloqueada','Remova o bloqueio em Escalas › Disponibilidade para confirmar.');return;}await busy(el,600,null,'Confirmado');x.st='confirmado';$('#agBody').innerHTML=agendaTab();const u=limUse(x.y,x.m);toast('success','Escala confirmada',x.over?'Obrigado por topar! Essa foi uma exceção ao seu limite de '+MONTHS[x.m-1]+'.':u.reg>=u.lim&&u.pend===0?x.min+' · '+fmtK(k)+'. Você fechou seu mês: '+u.reg+' de '+u.lim+'.':x.min+' · '+fmtK(k)+' · '+x.h+'.');},
+ escalaOk:async(v,el)=>{const x=S.escalas.find(e=>e.id===v);const k=K(x.y,x.m,x.d);if(blockedAt(k)){toast('error','Essa data está bloqueada','Remova o bloqueio em Escalas › Disponibilidade para aceitar.');return;}await busy(el,600,null,'Aceito');x.st='confirmado';$('#agBody').innerHTML=agendaTab();const u=limUse(x.y,x.m);toast('success','Escala aceita',x.over?'Obrigado por topar! Essa foi uma exceção ao seu limite de '+MONTHS[x.m-1]+'.':u.reg>=u.lim&&u.pend===0?x.min+' · '+fmtK(k)+'. Você fechou seu mês: '+u.reg+' de '+u.lim+'.':x.min+' · '+fmtK(k)+' · '+x.h+'.');},
  escalaNo:v=>refuseSheet('escala',v),
  discOk:async(v,el)=>{const x=S.discs.find(e=>e.id===v);await busy(el,600,null,'Aceito');x.st='aceito';$('#agBody').innerHTML=agendaTab();toast('success','Encontro aceito',x.who.split(' ')[0]+' recebeu sua confirmação.');},
  discNo:v=>refuseSheet('disc',v),
@@ -827,6 +848,7 @@ const A={
   if(S.screen==='grupos'){const sc=$('#scr');const t=sc.scrollTop;const ov=$('#overlay').innerHTML;render('none');$('#scr').scrollTop=t;}},
  /* cursos */
  cuTab:v=>{S.cu.tab=v;softRender();},
+ trStep:async(v,el)=>{const it=S.trail[+v];await busy(el,600,null,'Concluída');it.done=Math.min(it.done+1,it.n);toast('success',it.done>=it.n?'Item concluído':`Etapa ${it.done} concluída`,it.done>=it.n?`${it.t} está concluído.`:`Faltam ${it.n-it.done} para terminar ${it.t}.`);softRender();},
  startCourse:async(v,el)=>{await busy(el,600,null,'Adicionado');COURSES[v].started=true;S.cu.tab='andamento';toast('success','Curso adicionado',COURSES[v].t+' está em Em andamento.');softRender();},
  openCourse:v=>{S.cu.open=v;S.cu.view=null;S.cu.playing=false;if(S.screen==='curso')softRender();else go('curso');},
  play:()=>{S.cu.playing=!S.cu.playing;const b=$('.pbtn');b.innerHTML=ic(S.cu.playing?'pause':'play',28,2.5);b.setAttribute('aria-label',S.cu.playing?'Pausar':'Assistir');if(S.cu.playing)startPlay();else clearInterval(playTimer);},
@@ -892,7 +914,7 @@ phone.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el|
 phone.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role=button][data-a]')){e.preventDefault();e.target.click();}if(e.key==='Escape'&&$('#overlay .scrim'))closeSheet();});
 phone.addEventListener('submit',e=>{const f=e.target;e.preventDefault();const fn=F[f.dataset.submit];if(fn)fn(f);});
 phone.addEventListener('input',e=>{if(e.target.id)clearErr(e.target.id);const t=e.target;
- if(t.id==='mCep'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;if(d.length===8&&!val('mRua')){[['mRua','Rua das Acácias'],['mBairro','Jardins'],['mCid','São Paulo'],['mUf','SP']].forEach(([i,v])=>{const x=$('#'+i);if(x&&!x.value)x.value=v;});$('#mNum')&&$('#mNum').focus();}}
+ if(t.id==='mCep'&&(($('#mPais')||{}).value||'Brasil')==='Brasil'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;if(d.length===8&&!val('mRua')){[['mRua','Rua das Acácias'],['mBairro','Jardins'],['mCid','São Paulo'],['mUf','SP']].forEach(([i,v])=>{const x=$('#'+i);if(x&&!x.value)x.value=v;});$('#mNum')&&$('#mNum').focus();}}
  if(t.id==='mNasc'||t.id==='fNasc'){const d=t.value.replace(/\D/g,'').slice(0,8);t.value=d.length>4?d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4):d.length>2?d.slice(0,2)+'/'+d.slice(2):d;}
  if(t.id==='mTel')t.value=maskPhone(t.value);});
 
@@ -925,15 +947,15 @@ APP.push(...SUBS);
 const brl=n=>'R$ '+Number(n).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 Object.assign(S,{
  me:{nome:'Rafael Pereira',email:'rafael@alvaigreja.com.br',tel:'(11) 99123-4455',nasc:'',end:'',upd:'12/03/2026',gen:'Masculino',civil:'Casado(a)',
-  cep:'',rua:'',num:'',comp:'',bairro:'',cid:'',uf:'',
+  pais:'Brasil',cep:'',rua:'',num:'',comp:'',bairro:'',cid:'',uf:'',
   since:'2019',integ:'Integrado',bap:'12/05/2019',conv:'Mais de 5 anos',casa:'Casa Jardins',casaLead:'Gabriela Nunes',disc:'Gabriel Souza',
   fam:[{id:'f1',n:'Camila Pereira',rel:'Esposa',g:'sp',app:true,tone:'rosado'},{id:'f2',n:'Lucas Pereira',rel:'Filho',g:'kid',age:'3 anos',kids:true,tone:'ambar'},{id:'f3',n:'Helena Pereira',rel:'Filha',g:'kid',age:'7 meses',kids:true,tone:'lima'},{id:'f4',n:'Antônio Pereira',rel:'Pai',g:'par',app:false,tone:'salvia'},{id:'f5',n:'Marta Pereira',rel:'Mãe',g:'par',app:true,tone:'menta'}],
   hist:[['Cadastro criado','pelo app','12/03/2019'],['Integração aceita','por Pr. Rafael Pereira','02/04/2019'],['Batismo','Culto de Celebração','12/05/2019'],['Integrado(a) à comunidade','por Pr. Rafael Pereira','26/05/2019'],['Entrou na Casa Jardins','com Gabriela Nunes','08/09/2019'],['Começou a servir no Louvor','Vocal','03/2021'],['Família vinculada','Camila, Lucas e Helena','14/05/2023']]},meEdit:false,meTab:'dados',
- notifs:[{id:'n0',t:'Convite acima do seu limite: Louvor · Vocal',s:'Dom, 25 out. Você já tem 3 escalas em outubro. Tudo bem recusar.',when:'Hoje · 09h05',grp:'Hoje',tone:'vinho',i:'alert',go:'escalas',unread:true},{id:'n1',t:'Você tem uma nova escala: Infantil · Monitor',s:'Dom, 18 out · 9h. Confirme até sexta.',when:'Hoje · 08h12',grp:'Hoje',tone:'lima',i:'calendar',go:'escalas',unread:true},
+ notifs:[{id:'n0',t:'Convite acima do seu limite: Louvor · Vocal',s:'Dom, 25 out. Você já tem 3 escalas em outubro. Tudo bem recusar.',when:'Hoje · 09h05',grp:'Hoje',tone:'vinho',i:'alert',go:'escalas',unread:true},{id:'n1',t:'Você tem uma nova escala: Infantil · Monitor',s:'Dom, 18 out · 9h. Aceite até sexta.',when:'Hoje · 08h12',grp:'Hoje',tone:'lima',i:'calendar',go:'escalas',unread:true},
   {id:'n2',t:'Inscrições abertas: Conferência Anual 2026',s:'18 a 20 de outubro · gratuito',when:'Hoje · 07h30',grp:'Hoje',tone:'brasa',i:'ticket',go:'inscricoes',unread:true},
   {id:'n3b',t:'Você chegou ao limite de escalas de outubro',s:'3 de 3. Novos convites só chegam como exceção, com aviso.',when:'Hoje · 08h12',grp:'Hoje',tone:'damasco',i:'calendar',go:'escalas',unread:false},
-  {id:'n3',t:'Sua escala de domingo foi confirmada',s:'Louvor · Vocal · Dom, 4 out',when:'Sex, 25 set · 09h20',grp:'Esta semana',tone:'laranja',i:'check',go:'escalas',unread:false},
-  {id:'n4',t:'Seu pedido de oração foi respondido',s:'Pr. Marcos Lima orou por você',when:'Qua, 23 set · 08h16',grp:'Esta semana',tone:'vinho',i:'hands',go:'oracao',unread:false},
+  {id:'n3',t:'Sua escala de domingo foi aprovada',s:'Louvor · Vocal · Dom, 4 out',when:'Sex, 25 set · 09h20',grp:'Esta semana',tone:'laranja',i:'check',go:'escalas',unread:false},
+  {id:'n4',t:'Seu pedido de oração foi respondido',s:'Pr. Marcos Lima está orando por você',when:'Qua, 23 set · 08h16',grp:'Esta semana',tone:'vinho',i:'hands',go:'oracao',unread:false},
   {id:'n5',t:'Feliz aniversário! A Alva ora por você hoje.',s:'Que seu novo ano seja cheio da graça de Deus.',when:'12 set',grp:'Anteriores',tone:'damasco',i:'sparkle',go:null,unread:true}],
  care:{urg:'Normal',next:{who:'Pr. Marcos Lima',when:'Qui, 8 out · 19h',remote:true,st:'pendente'},list:[{t:'Conversa sobre pressão no trabalho',d:'10/09/2026',who:'Pr. Marcos Lima',st:'urgente'},{t:'Aconselhamento familiar',d:'02/08/2026',who:'Diac. Ana Costa',st:'andamento'}]},
  give:{dest:'livre',amt:null,method:'Pix',hist:[]},
@@ -956,14 +978,15 @@ const sub=(title,lede,body,right)=>({sb:'var(--ink)',tabs:'mais',html:`${subHead
 
 /* 1. Meus dados */
 const ME_ADDR=m=>[m.rua&&(m.rua+(m.num?', '+m.num:'')),m.comp,m.bairro,m.cid&&(m.cid+(m.uf?' - '+m.uf:''))].filter(Boolean).join(' · ');
-const ME_MISS=m=>[['nasc','Data de nascimento'],['rua','Endereço'],['cep','CEP']].filter(x=>!m[x[0]]);
+const ME_DIV={Brasil:'Estado (sigla)',Argentina:'Província',Chile:'Região'};
+const ME_MISS=m=>[['nasc','Data de nascimento'],['rua','Endereço'],['cep','Código postal']].filter(x=>!m[x[0]]);
 const FAMG=[['par','Pais'],['me','Você'],['kid','Filhos'],['oth','Outros familiares']];
 /* valor longo ou com detalhe vai para baixo do rótulo, alinhado à esquerda */
 function meRow(l,v,ph,sub){const st=sub||String(v||'').length>24;return `<div class="kr${st?' kr-st':''}"><span>${l}</span><span${v?'':' class="kr-none"'}>${v?esc(v):(ph||'Não informado')}${v&&sub?`<small>${esc(sub)}</small>`:''}</span></div>`;}
 function meDados(m,member){const miss=ME_MISS(m);
- return `${miss.length?`<div class="panel" style="animation:none"><div class="ph"><span class="bang">!</span><div><b>Faltam ${miss.length} ${miss.length>1?'dados':'dado'}</b><p>${miss.map(x=>x[1].toLowerCase().replace('cep','CEP')).join(', ').replace(/, ([^,]*)$/,' e $1').replace(/^./,c=>c.toUpperCase())}. Com aniversário e endereço, sua Casa consegue te visitar e celebrar com você.</p></div></div><button class="btn primary md block" data-a="meEdit">Completar agora</button></div>`:''}
+ return `${miss.length?`<div class="panel" style="animation:none"><div class="ph"><span class="bang">!</span><div><b>Faltam ${miss.length} ${miss.length>1?'dados':'dado'}</b><p>${miss.map(x=>x[1].toLowerCase()).join(', ').replace(/, ([^,]*)$/,' e $1').replace(/^./,c=>c.toUpperCase())}. Com aniversário e endereço, sua Casa consegue te visitar e celebrar com você.</p></div></div><button class="btn primary md block" data-a="meEdit">Completar agora</button></div>`:''}
   <div class="kv"><div class="kh"><span>Pessoais</span><span>você edita</span></div>${meRow('Nome completo',m.nome)}${meRow('E-mail',m.email)}${meRow('Telefone',m.tel)}${meRow('Nascimento',m.nasc)}${meRow('Gênero',m.gen)}${meRow('Estado civil',m.civil)}</div>
-  <div class="kv"><div class="kh"><span>Endereço</span><span>você edita</span></div>${meRow('Rua e número',m.rua&&(m.rua+(m.num?', '+m.num:'')))}${meRow('Complemento',m.comp,'—')}${meRow('Bairro',m.bairro)}${meRow('Cidade',m.cid&&(m.cid+(m.uf?' - '+m.uf:'')))}${meRow('CEP',m.cep)}</div>
+  <div class="kv"><div class="kh"><span>Endereço</span><span>você edita</span></div>${meRow('País',m.pais||'Brasil')}${meRow('Rua e número',m.rua&&(m.rua+(m.num?', '+m.num:'')))}${meRow('Complemento',m.comp,'—')}${meRow('Bairro ou distrito',m.bairro)}${meRow('Cidade',m.cid)}${meRow((ME_DIV[m.pais||'Brasil']||'Estado').replace(' (sigla)',''),m.uf)}${meRow('Código postal',m.cep)}</div>
   <div class="kv"><div class="kh"><span>Na igreja</span><span>definido pela secretaria</span></div>${meRow('Igreja',S.church.name)}${meRow('Perfil',ROLES[S.role][0])}${member?meRow('Membro desde',m.since)+meRow('Integração',m.integ)+meRow('Batismo',m.bap)+meRow('Tempo de conversão',m.conv)+meRow('Casa de Apascentamento',m.casa,'',m.casaLead?'Liderada por '+m.casaLead:'')+meRow('Discipulado',m.disc,'',m.disc?'Seu discipulador':'')+meRow('Ministérios',MYMIN.length?MYMIN.length+(MYMIN.length>1?' ministérios':' ministério'):'','',MYMIN.map(x=>x.t).join(' · ')):''}</div>
   <button class="btn primary block" data-a="meEdit">Editar meus dados</button>
   ${member?`<button class="tlink" data-a="go" data-v="secretaria">Algo errado em “Na igreja”? Fale com a secretaria</button>`:''}`;}
@@ -998,19 +1021,21 @@ V.meusDados=()=>{const m=S.me,member=S.role!=='visitante';
   ${opt('mGen','Gênero',['Feminino','Masculino'],m.gen)}
   ${opt('mCivil','Estado civil',['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)'],m.civil)}</section>
   <section class="stack g4"><p class="eb2">Endereço</p>
-  ${field({id:'mCep',label:'CEP',val:m.cep,ph:'00000-000',im:'numeric',max:9,hint:'Preenchemos rua, bairro e cidade a partir do CEP.'})}
+  ${opt('mPais','País',['Brasil','Argentina','Chile'],m.pais||'Brasil')}
+  ${field({id:'mCep',label:'Código postal',val:m.cep,ph:'00000-000',im:'numeric',max:9,hint:'No Brasil, preenchemos rua, bairro e cidade a partir do CEP.'})}
   ${field({id:'mRua',label:'Rua',val:m.rua,ac:'address-line1'})}
   <div class="frow">${field({id:'mNum',label:'Número',val:m.num,im:'numeric',max:8})}${field({id:'mComp',label:'Complemento',val:m.comp,ph:'Opcional'})}</div>
-  ${field({id:'mBairro',label:'Bairro',val:m.bairro})}
-  <div class="frow r">${field({id:'mCid',label:'Cidade',val:m.cid})}${field({id:'mUf',label:'UF',val:m.uf,max:2})}</div></section>
+  ${field({id:'mBairro',label:'Bairro ou distrito',val:m.bairro})}
+  <div class="frow r">${field({id:'mCid',label:'Cidade',val:m.cid})}${field({id:'mUf',label:ME_DIV[m.pais||'Brasil'],val:m.uf,max:(m.pais||'Brasil')==='Brasil'?2:40})}</div></section>
   <div class="stack g3"><button class="btn primary block" type="submit">Salvar alterações</button><button type="button" class="tlink" data-a="meCancel">Cancelar</button></div></form>`);};
 
 /* 2. Notificações */
 V.notifs=()=>{const n=S.notifs.filter(x=>x.unread).length;const grps=['Hoje','Esta semana','Anteriores'];
  return {sb:'var(--ink)',tabs:'mais',html:`<header class="subhead"><div class="row between"><button class="iconbtn" data-a="back" aria-label="Voltar">${ic('chevL',20,2.25)}</button><button class="iconbtn" data-a="notif" aria-label="Preferências de notificação">${ic('sliders',19,1.9)}</button></div><h1 class="big" style="margin-top:18px">Notificações</h1>
-  <div class="row between" style="margin-top:8px;min-height:28px"><span class="lede" style="margin:0">${n?`<b style="color:var(--ink)">${n}</b> ${n>1?'novas':'nova'}`:'Tudo em dia'}</span>${n?`<button class="link" data-a="readAll">Marcar como lidas</button>`:''}</div></header>
+  <div class="row between" style="margin-top:8px;min-height:28px"><span class="lede" style="margin:0">${n?`<b style="color:var(--ink)">${n}</b> ${n>1?'novas':'nova'}`:'Tudo em dia'}</span>${n?`<button class="link" data-a="readAll">Marcar como lidas</button>`:''}${S.notifs.some(x=>!x.unread)?`<button class="link" data-a="delRead">Apagar as lidas</button>`:''}</div></header>
  <div class="pad stack g6" style="padding-top:4px">
   ${grps.map(g=>{const l=S.notifs.filter(x=>x.grp===g);return l.length?`<section class="stack"><p class="eb2" style="margin-bottom:4px">${g}</p><div class="chlist">${l.map(x=>`<button class="nrow ${x.unread?'unread':''}" data-a="openNotif" data-v="${x.id}"><span class="ndot" aria-hidden="true"></span><span class="grow stack" style="gap:3px"><span class="row between" style="gap:12px;align-items:baseline"><span class="nt">${esc(x.t)}</span><span class="nwhen">${x.when.split(' · ').pop()}</span></span><span class="chm">${esc(x.s)}</span></span></button>`).join('')}</div></section>`:'';}).join('')}
+  <p class="foot" style="margin:0;text-align:center">As notificações ficam guardadas por 90 dias.</p>
  </div>`};};
 
 /* redes da igreja: mesmo formato do Alva Web (t = tipo, n = nome exibido, h = perfil, u = link) */
@@ -1027,7 +1052,7 @@ V.quemSomos=()=>sub('Quem somos','',`
 /* 4. Cuidado pastoral */
 function careBody(inTab){const c=S.care,nx=c.next;return `${inTab===false?'':'<p class="callout" style="margin:0">Passando por um momento difícil ou precisa conversar com um pastor? Conte aqui: alguém da equipe pastoral entra em contato.</p>'}<div class="stack g6">
   <form class="stack g4" data-submit="sendCare" novalidate>
-   ${field({id:'cText',label:'Como podemos te ajudar?',area:true,ph:'Conte o que está acontecendo',max:600,hint:'Só o pastor responsável lê.'})}
+   ${field({id:'cText',label:'Como podemos te ajudar?',area:true,ph:'Conte o que está acontecendo',max:600,hint:'Só a equipe pastoral lê.'})}
    <div class="stack g2"><span class="eb2">Urgência</span><div class="seg" id="urgSeg">${['Normal','Urgente'].map(u=>`<button type="button" aria-selected="${c.urg===u}" data-a="urg" data-v="${u}">${u}</button>`).join('')}</div>
    ${c.urg==='Urgente'?`<p class="foot" style="margin:4px 0 0">Respondemos pedidos urgentes no mesmo dia. Em risco imediato, ligue 188 (CVV) ou 192 (SAMU).</p>`:''}</div>
    <button class="btn primary block" type="submit">Solicitar atendimento</button>
@@ -1037,8 +1062,8 @@ function careBody(inTab){const c=S.care,nx=c.next;return `${inTab===false?'':'<p
    ${nx.st==='aceito'?ST2('ok','Confirmado'):nx.st==='recusado'?ST2('mute','Recusado'):ST2('warn','Responda')}</div>
    ${nx.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="careOk">Aceitar</button><button class="btn ghost2 sm" data-a="careNo">Recusar</button></div>`:`<p class="es2-note">${nx.st==='aceito'?'O link da chamada aparece aqui 15 minutos antes.':'Avisamos o pastor. Ele vai propor outro horário.'}</p>`}</article></section>`:''}
   <section class="stack g3"><div class="row between"><p class="eb2">Meus atendimentos</p><span class="foot">urgentes primeiro</span></div>
-   <div class="ev-list">${[...c.list].sort((a,b)=>(a.st==='urgente'?0:1)-(b.st==='urgente'?0:1)).map((x,i)=>{const k=x.st==='urgente'?['bad','Urgente','vinho','alert']:x.st==='novo'?['info','Recebido','ceu','mail']:['info','Em andamento','menta','care'];return `<div class="ev-c es2 care2" style="--t:var(--tone-${k[2]});--i:${i};cursor:default"><div class="es2-r"><span class="care-i">${ic(k[3],17,2)}</span><span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-t" style="font-size:15px">${esc(x.t)}</span><span class="ev-m">${x.d.slice(0,5)}<span class="ev-dot"></span><span class="ev-pl">${esc(x.who)}</span></span></span>${ST2(k[0],k[1])}</div></div>`;}).join('')}</div>
-   <p class="foot" style="text-align:center;margin:2px 0 0">O histórico completo fica com a equipe pastoral.</p></section></div>`;}
+   <div class="ev-list">${[...c.list].sort((a,b)=>(a.st==='urgente'?0:1)-(b.st==='urgente'?0:1)).map((x,i)=>{const k=x.st==='urgente'?['bad','Urgente','vinho','alert']:x.st==='novo'?['info','Recebido','ceu','mail']:['info','Em atendimento','menta','care'];return `<div class="ev-c es2 care2" style="--t:var(--tone-${k[2]});--i:${i};cursor:default"><div class="es2-r"><span class="care-i">${ic(k[3],17,2)}</span><span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-t" style="font-size:15px">${esc(x.t)}</span><span class="ev-m">${x.d.slice(0,5)}<span class="ev-dot"></span><span class="ev-pl">${esc(x.who)}</span></span></span>${ST2(k[0],k[1])}</div></div>`;}).join('')}</div>
+   <p class="foot" style="text-align:center;margin:2px 0 0">As anotações e o histórico completo ficam com a equipe pastoral.</p></section></div>`;}
 V.cuidado=()=>sub('Acompanhamento','Passando por um momento difícil ou precisa conversar com um pastor? Conte um pouco aqui e alguém da equipe pastoral entra em contato.',careBody(false));
 
 /* 5. Contribuir */
@@ -1090,7 +1115,7 @@ V.tarefas=()=>{const op=tkOpen(),dn=MYTASKS.filter(x=>x.done);
 V.oracao=()=>sub('Pedidos de oração','A equipe de intercessão ora por cada pedido durante a semana.',`
   <form class="stack g4" data-submit="sendPrayer" novalidate>
    ${field({id:'prText',label:'Seu pedido',area:true,ph:'Pelo que podemos orar?',max:500,hint:'0/500'})}
-   <div class="list"><div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">Manter anônimo</span><span class="it-sub">Outros membros não veem seu nome</span></span><button type="button" class="switch" role="switch" aria-checked="false" id="prAnon" aria-label="Manter anônimo" data-a="sw"></button></div><div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">Compartilhar com minha Casa</span><span class="it-sub">Casa Jardins ora junto</span></span><button type="button" class="switch" role="switch" aria-checked="true" aria-label="Compartilhar com minha Casa" data-a="sw"></button></div></div>
+   <div class="list"><div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">Manter anônimo</span><span class="it-sub">Só quem administra os pedidos vê seu nome</span></span><button type="button" class="switch" role="switch" aria-checked="false" id="prAnon" aria-label="Manter anônimo" data-a="sw"></button></div></div>
    <button class="btn primary block" type="submit">Enviar pedido</button>
   </form>
   <section class="stack g3"><p class="eb2">Meus pedidos</p><div class="list">${S.prayers.map(p=>`<div class="item" style="cursor:default;align-items:flex-start;padding-block:14px;flex-direction:column;gap:6px"><span class="it-title" style="font-weight:500">${esc(p.t)}</span><span class="row between" style="width:100%;gap:8px"><span class="foot">${p.d}${p.anon?' · anônimo':''}</span>${p.st==='orado'?status('success','Orado'):p.st==='respondido'?status('info','Respondido'):status('warning','Aguardando')}</span>${p.st==='orado'?`<span class="foot">${p.by} orou por você em ${p.at}.</span><button class="link" data-a="answered" data-v="${p.id}" style="font-size:14px">Deus respondeu? Conte pra gente</button>`:''}</div>`).join('')}</div></section>`);
@@ -1110,7 +1135,7 @@ V.assistente=()=>sub('Assistente no WhatsApp','Um jeito rápido de resolver algu
   <p class="foot" style="margin:0;text-align:center">Protótipo ilustrativo: as respostas acima são simuladas.</p>`);
 
 /* 12. Privacidade */
-/* carteirinha digital do membro: QR de validação, vale enquanto a situação for Ativo ou Afastado (Secretaria no Alva Web) */
+/* carteirinha digital do membro: QR de validação, vale só com a situação Ativa; fica inválida no Afastado (Secretaria no Alva Web) */
 const ccNum=()=>'AV-2026-'+String(1000+S.user.name.split('').reduce((a,c)=>(a*31+c.charCodeAt(0))%9000,7)).slice(-4);
 const ccMini=()=>`<button class="ccm" data-a="sub" data-v="carteirinha" aria-label="Abrir carteirinha de membro"><span class="ccm-qr">${ic('qr',22,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="ccm-k">Carteirinha</span><span class="ccm-n">Membro · ${ccNum()}</span></span><span class="ccm-st"><i></i>Ativa</span><span class="ccm-a" aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
 V.carteirinha=()=>{const nm=S.user.name,num=ccNum();
@@ -1124,7 +1149,7 @@ V.carteirinha=()=>{const nm=S.user.name,num=ccNum();
   <section class="cci" aria-label="Como funciona">
    <div class="cci-r"><span class="cci-i">${ic('qr',18,2)}</span><span><b>Confere na hora</b><small>Quem lê o QR vê se você é membro, sem precisar de documento.</small></span></div>
    <div class="cci-r"><span class="cci-i">${ic('eyeOff',18,2)}</span><span><b>Mostra só o essencial</b><small>Aparecem apenas o seu nome e se a carteirinha está válida.</small></span></div>
-   <div class="cci-r"><span class="cci-i warn">${ic('info',18,2)}</span><span><b>Quando deixa de valer</b><small>Se a sua situação mudar para <b>transferido</b>, <b>desligado</b> ou <b>falecido</b>.</small></span></div>
+   <div class="cci-r"><span class="cci-i warn">${ic('info',18,2)}</span><span><b>Quando deixa de valer</b><small>Se a sua situação mudar para <b>afastado</b>, <b>transferido</b>, <b>desligado</b> ou <b>falecido</b>. Ao voltar a Ativo, ela volta a valer.</small></span></div>
   </section>`);};
 /* meus documentos: o que a secretaria emitiu para a pessoa (e certificados de curso). Só consulta e download; o app não edita nem gera nada */
 const IG_FILA=5; /* pessoas já na fila da integração (igual ao protótipo web) */
@@ -1136,11 +1161,11 @@ V.documentos=()=>{
   <p class="callout" style="margin:4px 0 0">Precisa de uma declaração ou carta? Peça à secretaria: ela emite e o documento aparece aqui. O app só mostra e baixa; não edita nem gera documentos.</p>
   <button class="btn outline block" data-a="sub" data-v="secretaria">Fale com a secretaria</button>`);};
 V.privacidade=()=>sub('Privacidade e dados','Você controla o que a igreja vê e guarda sobre você (LGPD).',`
-  <section class="stack g3"><p class="eb2">Visibilidade</p><div class="list">${[['aniv','Mostrar meu aniversário','Para sua Casa e ministérios'],['lista','Aparecer na lista de membros','Outros membros podem te encontrar'],['fotos','Usar minha foto em divulgação','Fotos de eventos nas redes da igreja']].map(r=>`<div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">${r[1]}</span><span class="it-sub">${r[2]}</span></span><button type="button" class="switch" role="switch" aria-checked="${S.priv[r[0]]}" aria-label="${r[1]}" data-a="privSw" data-v="${r[0]}"></button></div>`).join('')}</div></section>
+  <section class="stack g3"><p class="eb2">Minha imagem</p><div class="list">${[['fotos','Usar minha foto em divulgação','Fotos de eventos nas redes da igreja']].map(r=>`<div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">${r[1]}</span><span class="it-sub">${r[2]}</span></span><button type="button" class="switch" role="switch" aria-checked="${S.priv[r[0]]}" aria-label="${r[1]}" data-a="privSw" data-v="${r[0]}"></button></div>`).join('')}</div></section>
   <section class="stack g3"><p class="eb2">Seus dados</p><div class="list">
-   <button class="item" data-a="dlData"><span class="grow stack" style="gap:2px"><span class="it-title">Baixar meus dados</span><span class="it-sub">Prepare e baixe uma cópia dos seus dados</span></span><span class="chev">${ic('chevR',18,2)}</span></button>
+   <button class="item" data-a="dlData"><span class="grow stack" style="gap:2px"><span class="it-title">Pedir meus dados</span><span class="it-sub">Receba o link do arquivo por e-mail</span></span><span class="chev">${ic('chevR',18,2)}</span></button>
    <button class="item" data-a="policy"><span class="grow stack" style="gap:2px"><span class="it-title">Política de privacidade</span><span class="it-sub">Atualizada em março de 2026</span></span><span class="chev">${ic('chevR',18,2)}</span></button>
-   <button class="item" data-a="delAcc"><span class="grow stack" style="gap:2px"><span class="it-title" style="color:var(--danger-text)">Excluir minha conta</span><span class="it-sub">Apaga seu acesso e seus dados pessoais</span></span><span class="chev">${ic('chevR',18,2)}</span></button>
+   <button class="item" data-a="delAcc"><span class="grow stack" style="gap:2px"><span class="it-title" style="color:var(--danger-text)">Excluir minha conta</span><span class="it-sub">Bloqueia a conta e apaga seus dados; sem volta</span></span><span class="chev">${ic('chevR',18,2)}</span></button>
   </div></section>`);
 
 /* ---------- helpers ---------- */
@@ -1151,7 +1176,7 @@ function qrSVG(seed){let h=0;for(const c of seed)h=(h*31+c.charCodeAt(0))>>>0;co
  return `<svg viewBox="-2 -2 29 29" width="220" height="220" shape-rendering="crispEdges" role="img" aria-label="QR Code da inscrição"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/>${r}${fin(0,0)}${fin(18,0)}${fin(0,18)}</svg>`;}
 async function copyText(t){try{await navigator.clipboard.writeText(t);toast('success','Copiado',t);}catch(_){toast('info','Não deu para copiar',t);}}
 function playerSheet(v){sheet(`<div class="stack g4"><div class="player gr-${v.g}" id="player"><span class="ttl">${v.t}</span>${v.live?'<span class="livebadge" style="position:absolute;right:14px;top:14px"><i></i>Ao vivo</span>':''}<button class="pbtn" data-a="play" aria-label="Assistir">${ic('play',28,2.5)}</button><div class="pbar"><span id="pt">0:00</span><div class="bar"><i id="pp" style="width:0"></i></div><span>${v.live?'ao vivo':v.dur}</span></div></div>
- <div class="stack g2"><h3 class="t2">${v.t}</h3><p class="callout" style="margin:0">${v.live?v.n:v.s}</p></div><div class="row g2"><button class="btn secondary md grow" data-a="shareEv">Compartilhar</button><button class="btn secondary md grow" data-a="notesSoon">Anotações</button></div></div>`);}
+ <div class="stack g2"><h3 class="t2">${v.t}</h3><p class="callout" style="margin:0">${v.live?v.n:v.s}</p></div><div class="row g2"><button class="btn secondary md grow" data-a="shareEv">Compartilhar</button><button class="btn secondary md grow" data-a="notesSoon">Anotações</button></div>${v.cm?cmtHtml(v.cm):''}</div>`);}
 
 /* ---------- actions ---------- */
 Object.assign(A,{
@@ -1166,7 +1191,8 @@ Object.assign(A,{
  inscr:()=>go('inscricoes'),
  meEdit:()=>{S.meEdit=true;softRender();},meCancel:()=>{S.meEdit=false;softRender();},
   meTab:v=>{S.meTab=v;softRender();},
-  meOpt:(v,el)=>{const [id,o]=v.split('|');$('#'+id).value=o;$$('button',el.parentElement).forEach(b=>{const on=b===el;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on);});},
+  meOpt:(v,el)=>{const [id,o]=v.split('|');$('#'+id).value=o;$$('button',el.parentElement).forEach(b=>{const on=b===el;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on);});
+  if(id==='mPais'){const lb=$('#f-mUf label'),ip=$('#mUf');if(lb)lb.textContent=ME_DIV[o]||'Estado';if(ip){ip.maxLength=o==='Brasil'?2:40;ip.value='';}}},
   famOpen:v=>{const p=S.me.fam.find(x=>x.id===v);if(!p)return;sheet(`<div class="stack g5"><div class="row g4"><span class="avatar lg" style="${tone(p.tone||'ceu')}">${initials(p.n)}</span><div class="stack" style="gap:4px"><h3 class="t2">${esc(p.n)}</h3><span class="foot">${esc(p.rel)}${p.age?' · '+esc(p.age):''}</span></div></div>
    <div class="kv">${meRow('Parentesco',p.rel)}${meRow('No app',p.kids?'Pelo seu cadastro (Kids)':p.pend?'Aguardando a secretaria':p.app?'Sim, tem conta própria':'Ainda não')}${p.kids?meRow('Check-in Kids','Você é responsável'):''}</div>
    ${!p.app&&!p.kids&&!p.pend?`<button class="btn primary block" data-a="famInvite" data-v="${p.id}">Convidar para o app</button>`:''}
@@ -1181,6 +1207,7 @@ Object.assign(A,{
    <div class="stack g3"><button class="btn primary block" type="submit">Enviar para a secretaria</button><button type="button" class="tlink" data-a="closeSheet">Cancelar</button></div></form>`);},
 
  readAll:()=>{S.notifs.forEach(n=>n.unread=false);softRender();toast('success','Tudo lido','');},
+ delRead:()=>{S.notifs=S.notifs.filter(n=>n.unread);softRender();toast('success','Notificações lidas apagadas','');},
  openNotif:v=>{const n=S.notifs.find(x=>x.id===v);n.unread=false;if(n.go==='escalas'){S.ag.tab='Escalas';A.tab('agenda');}else if(n.go){go(n.go);}else softRender();},
  urg:v=>{S.care.urg=v;const t=$('#cText');const keep=t?t.value:'';softRender();$('#cText').value=keep;},
  careOk:async(v,el)=>{await busy(el,600,null,'Confirmado');S.care.next.st='aceito';softRender();toast('success','Encontro confirmado',S.care.next.who+' recebeu sua confirmação.');},
@@ -1225,15 +1252,15 @@ Object.assign(A,{
   $('#delGo').addEventListener('click',async ev=>{if(val('delTxt').toUpperCase()!=='EXCLUIR'){setErr('delTxt','Digite EXCLUIR, em letras maiúsculas.');return;}await busy(ev.currentTarget,1000,null,'Solicitado');await closeSheet();toast('info','Pedido de exclusão registrado','A secretaria confirma por e-mail em até 15 dias.');});}
 });
 Object.assign(F,{
- async saveMe(f){let ok=true;const n=val('mNome'),e=val('mEmail'),t=val('mTel'),d=val('mNasc'),cep=val('mCep'),uf=val('mUf').toUpperCase();
+ async saveMe(f){let ok=true;const n=val('mNome'),e=val('mEmail'),t=val('mTel'),d=val('mNasc'),pais=val('mPais')||'Brasil',cep=val('mCep'),uf=pais==='Brasil'?val('mUf').toUpperCase():val('mUf');
   if(n.split(' ').filter(Boolean).length<2){setErr('mNome','Informe nome e sobrenome.');ok=false;}
   if(!EMAIL_RE.test(e)){setErr('mEmail','Esse e-mail parece incompleto. Ex.: nome@email.com');ok=false;}
   if(t.replace(/\D/g,'').length<10){setErr('mTel','Use DDD + número.');ok=false;}
   if(d){const m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);const dt=m&&new Date(+m[3],+m[2]-1,+m[1]);if(!m||dt.getDate()!==+m[1]||dt>new Date(2026,8,29)||+m[3]<1900){setErr('mNasc','Data inválida. Use dd/mm/aaaa.');ok=false;}}
-  if(cep&&cep.replace(/\D/g,'').length!==8){setErr('mCep','O CEP tem 8 números.');ok=false;}
-  if(uf&&!/^[A-Z]{2}$/.test(uf)){setErr('mUf','Use a sigla, ex.: SP');ok=false;}
+  if(pais==='Brasil'&&cep&&cep.replace(/\D/g,'').length!==8){setErr('mCep','O CEP tem 8 números.');ok=false;}
+  if(pais==='Brasil'&&uf&&!/^[A-Z]{2}$/.test(uf)){setErr('mUf','Use a sigla, ex.: SP');ok=false;}
   if(!ok){const x=$('.field.invalid');x&&x.scrollIntoView({block:'center',behavior:'smooth'});return;}
-  await busy($('button[type=submit]',f),900,null,'Salvo');Object.assign(S.me,{nome:n,email:e,tel:t,nasc:d,gen:val('mGen'),civil:val('mCivil'),cep,rua:val('mRua'),num:val('mNum'),comp:val('mComp'),bairro:val('mBairro'),cid:val('mCid'),uf,upd:'29/09/2026'});S.me.end=ME_ADDR(S.me);S.user={first:n.split(' ')[0],name:n};S.meEdit=false;softRender();toast('success','Dados atualizados','');},
+  await busy($('button[type=submit]',f),900,null,'Salvo');Object.assign(S.me,{nome:n,email:e,tel:t,nasc:d,gen:val('mGen'),civil:val('mCivil'),pais,cep,rua:val('mRua'),num:val('mNum'),comp:val('mComp'),bairro:val('mBairro'),cid:val('mCid'),uf,upd:'29/09/2026'});S.me.end=ME_ADDR(S.me);S.user={first:n.split(' ')[0],name:n};S.meEdit=false;softRender();toast('success','Dados atualizados','');},
  async famReq(f){const n=val('fNome'),r=val('fRel'),d=val('fNasc');let ok=true;
   if(n.split(' ').filter(Boolean).length<2){setErr('fNome','Informe nome e sobrenome.');ok=false;}
   if(d){const m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);const dt=m&&new Date(+m[3],+m[2]-1,+m[1]);if(!m||dt.getDate()!==+m[1]||dt>new Date(2026,8,29)){setErr('fNasc','Data inválida. Use dd/mm/aaaa.');ok=false;}}
@@ -1289,88 +1316,62 @@ RAIL.push(['urgentes','Liderança › Acompanhamentos']);$('#railNav').innerHTML
 $('#railNav').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.s==='urgentes'&&!['lider','admin'].includes(S.role)){S.role='lider';}},true);
 
 
-/* ================= Escala › presença no dia (check-in com localização) ================= */
+/* ================= Escala › presença no dia (o check-in da pessoa já é Presente) ================= */
 S.escalas.unshift({id:'s0',min:'Louvor',area:'Ministério de Louvor',fn:'Vocal',y:2026,m:9,d:29,h:'20h',st:'confirmado',what:'Ensaio do Louvor',place:'Templo principal'});
-S.svc={now:18*60+40,geo:'perto',perm:null,leader:'Daniela Rocha',
- team:[{n:'Rafael Pereira',fn:'Vocal',me:true},{n:'Elisa Moura',fn:'Vocal',ck:{at:'18h22',dist:12}},{n:'Diego Faria',fn:'Bateria',ck:{at:'18h31',dist:85}},{n:'Igor Santana',fn:'Baixo'},{n:'Clara Nunes',fn:'Teclado',ck:{at:'18h05',dist:30},pr:'ok'}]};
-const SVC_R=150,SVC_GEO={perto:{dist:40,acc:12},longe:{dist:2300,acc:20},fraco:{dist:90,acc:600},negado:null};
+S.svc={now:18*60+40,leader:'Daniela Rocha',
+ team:[{n:'Rafael Pereira',fn:'Vocal',me:true},{n:'Elisa Moura',fn:'Vocal',ck:{at:'18h22'},pr:'ok'},{n:'Diego Faria',fn:'Bateria',ck:{at:'18h31'},pr:'ok'},{n:'Igor Santana',fn:'Baixo'},{n:'Clara Nunes',fn:'Teclado',ck:{at:'18h05'},pr:'ok'}]};
 const svcHM=m=>`${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}`.replace('h00','h');
 const svcEsc=()=>S.escalas.find(x=>x.id==='s0');
 const svcWin=()=>{const st=20*60;return {open:st-120,start:st,close:st+120};};
 const svcPhase=()=>{const w=svcWin(),n=S.svc.now;return n<w.open?'antes':n>w.close?'fim':'aberto';};
 const svcMe=()=>S.svc.team.find(p=>p.me);
-const svcOf=p=>p.pr==='ok'?'ok':p.pr==='falta'?'falta':p.ck?'ck':'pend';
-const svcDist=d=>d>=1000?(d/1000).toFixed(1).replace('.',',')+' km':d+' m';
+const svcOf=p=>p.pr==='ok'?'ok':p.pr==='falta'?'falta':'pend';
 function svcStatus(){const x=svcEsc(),me=svcMe(),ph=svcPhase(),w=svcWin(),k=svcOf(me);
  if(!x||x.st==='recusado')return null;
- if(x.st==='pendente')return {k:'conf',t:'Confirme a escala para liberar o check-in',s:'O check-in abre às '+svcHM(w.open)+', 2h antes.',btn:['Confirmar escala','escalaOk','s0']};
- if(k==='ok')return {k:'ok',t:'Presença confirmada',s:me.manual?'Marcada por '+S.svc.leader.split(' ')[0]+' · '+me.why:'Check-in às '+me.ck.at+' · confirmado por '+S.svc.leader.split(' ')[0]};
- if(k==='falta')return {k:'falta',t:'Falta registrada',s:'Se você esteve lá, fale com '+S.svc.leader.split(' ')[0]+' para corrigir.',btn:['Falar com o líder','svcTalk','']};
- if(k==='ck')return {k:'ck',t:'Check-in feito às '+me.ck.at,s:'A '+svcDist(me.ck.dist)+' do local · aguardando '+S.svc.leader.split(' ')[0]+' confirmar'};
- if(ph==='antes')return {k:'antes',t:'Check-in abre às '+svcHM(w.open),s:'Faltam '+svcHM(w.open-S.svc.now).replace('h',' h ').replace(/ $/,'')+'. Você precisa estar no local.'};
+ if(x.st==='pendente')return {k:'conf',t:'Aceite a escala para liberar o check-in',s:'O check-in abre às '+svcHM(w.open)+', 2h antes.',btn:['Aceitar escala','escalaOk','s0']};
+ if(k==='ok')return {k:'ok',t:'Você está presente',s:me.manual?'Marcada por '+S.svc.leader.split(' ')[0]+(me.why?' · '+me.why:''):'Check-in às '+me.ck.at};
+ if(k==='falta')return {k:'falta',t:'Ausência registrada',s:'Se você esteve lá, fale com '+S.svc.leader.split(' ')[0]+' para corrigir.',btn:['Falar com o líder','svcTalk','']};
+ if(ph==='antes')return {k:'antes',t:'Check-in abre às '+svcHM(w.open),s:'Faltam '+svcHM(w.open-S.svc.now).replace('h',' h ').replace(/ $/,'')+'.'};
  if(ph==='fim')return {k:'fim',t:'Check-in encerrado às '+svcHM(w.close),s:'Se você esteve lá, avise '+S.svc.leader.split(' ')[0]+': o líder pode marcar sua presença.',btn:['Avisar o líder','svcTalk','']};
- return {k:'aberto',t:'Check-in aberto até '+svcHM(w.close),s:'Funciona a até '+SVC_R+' m de '+x.place+'.',btn:['Fazer check-in','svcStart','']};}
+ return {k:'aberto',t:'Check-in aberto até '+svcHM(w.close),s:'Toque para registrar sua presença.',btn:['Fazer check-in','svcStart','']};}
 function svcBox(compact){const st=svcStatus();if(!st)return '';const x=svcEsc();
  return `<div class="svc-box ${st.k}"><div class="row g3" style="align-items:center"><span class="svc-ic">${ic(st.k==='ok'?'check':st.k==='falta'?'x':st.k==='conf'?'alert':'pin',18,2.2)}</span><div class="grow stack" style="gap:2px"><span class="svc-t">${st.t}</span><span class="svc-s">${st.s}</span></div></div>${st.btn?`<button type="button" class="btn ${st.k==='aberto'||st.k==='conf'?'primary':'outline'} md block" data-a="${st.btn[1]}" data-v="${st.btn[2]}">${st.k==='aberto'?ic('pin',16,2.2):''}${st.btn[0]}</button>`:''}</div>`;}
 function svcHome(){const x=svcEsc();if(!x||x.st==='recusado'||S.role==='visitante')return '';
  const lead=['lider','admin'].includes(S.role),team=S.svc.team,c=k=>team.filter(p=>svcOf(p)===k).length;
  return `<div class="pad" style="margin:-4px 0 22px"><section class="svc-card"><div class="row between" style="align-items:flex-start"><div class="stack" style="gap:3px"><span class="eb2" style="color:inherit;opacity:.8">Hoje você serve</span><span class="svc-h">${x.what}</span><span class="svc-m">${x.min} · ${x.fn} · ${x.h} · ${x.place}</span></div><span class="svc-day"><b>${x.d}</b>${MONTHS[x.m-1].slice(0,3)}</span></div>${svcBox()}</section>
-  ${lead?`<button class="scard svc-lead" data-a="svcTeam" style="margin-top:12px"><span class="grow stack" style="gap:4px"><span class="eb2">Você lidera hoje</span><span class="chn" style="font-size:19px">Presença do time</span><span class="chm">${c('ok')} presentes · ${c('ck')} para confirmar · ${c('pend')} sem check-in</span></span><span class="ring sm" style="--p:${Math.round((c('ok'))/team.length*100)}"><span>${c('ok')}/${team.length}</span></span></button>`:''}</div>`;}
-/* sheet de check-in */
-function svcSheet(){const x=svcEsc();
- sheet(`<div class="stack g5" id="svcSh"><div class="stack g2"><h3 class="t2">Check-in da escala</h3><p class="callout">${x.what} · ${x.fn} · hoje, ${x.h}</p></div>
-  <div class="svc-map" id="svcMap"><div class="svc-rad"><i></i><i></i><i></i></div><span class="svc-pin">${ic('church',16,2)}</span><span class="svc-me" id="svcMe"></span><span class="svc-lbl">${x.place} · raio de ${SVC_R} m</span></div>
-  <div id="svcMsg"></div><div class="stack g3" id="svcAct"></div></div>`,sh=>{svcStep(sh,S.svc.perm?'ready':'perm');});}
-function svcStep(sh,step,data){const msg=$('#svcMsg',sh),act=$('#svcAct',sh),map=$('#svcMap',sh),me=$('#svcMe',sh);map.className='svc-map '+step;
- const B=(lab,id,pri=true)=>`<button type="button" class="btn ${pri?'primary':'outline'} block" id="${id}">${lab}</button>`;
- if(step==='perm'){msg.innerHTML=`<div class="svc-note">${ic('pin',16,2)}<div><b>Precisamos da sua localização</b><span>Só no momento do check-in, para confirmar que você está no local. Não acompanhamos você depois.</span></div></div>`;act.innerHTML=B('Permitir localização','svP')+'<button type="button" class="tlink" data-a="closeSheet">Agora não</button>';
-  $('#svP',sh).onclick=()=>{if(S.svc.geo==='negado'){S.svc.perm='negado';return svcStep(sh,'negado');}S.svc.perm='ok';svcStep(sh,'ready');};return;}
- if(step==='ready'){msg.innerHTML=`<p class="callout" style="text-align:center">Chegou? Confirme sua presença. O check-in só vale a até ${SVC_R} m do local.</p>`;act.innerHTML=B(ic('pin',16,2.2)+'Estou aqui','svGo');
-  $('#svGo',sh).onclick=async e=>{if(S.svc.geo==='negado'){S.svc.perm='negado';return svcStep(sh,'negado');}const b=e.currentTarget;svcStep(sh,'loc');};return;}
- if(step==='loc'){msg.innerHTML=`<p class="callout" style="text-align:center">Buscando sua localização…</p>`;act.innerHTML='';
-  setTimeout(()=>{const g=SVC_GEO[S.svc.geo];if(!g)return svcStep(sh,'negado');if(g.acc>SVC_R)return svcStep(sh,'fraco',g);if(g.dist>SVC_R)return svcStep(sh,'longe',g);svcStep(sh,'ok',g);},1400);return;}
- if(step==='longe'){me.style.setProperty('--d','1');msg.innerHTML=`<div class="svc-note bad">${ic('alert',16,2.2)}<div><b>Você está a ${svcDist(data.dist)} do local</b><span>O check-in só funciona a até ${SVC_R} m de ${svcEsc().place}. Chegue lá e tente de novo.</span></div></div>`;act.innerHTML=B('Tentar de novo','svR')+B('Ver no mapa','svM',false);$('#svR',sh).onclick=()=>svcStep(sh,'loc');$('#svM',sh).onclick=()=>toast('info','Abrindo o mapa',svcEsc().place+' · Rua das Flores, 120');return;}
- if(step==='fraco'){msg.innerHTML=`<div class="svc-note warn">${ic('alert',16,2.2)}<div><b>Localização imprecisa (± ${svcDist(data.acc)})</b><span>Não dá para confirmar que você está no local. Ligue o Wi-Fi ou vá para perto de uma janela e tente de novo.</span></div></div>`;act.innerHTML=B('Tentar de novo','svR');$('#svR',sh).onclick=()=>svcStep(sh,'loc');return;}
- if(step==='negado'){msg.innerHTML=`<div class="svc-note bad">${ic('lock',16,2.2)}<div><b>Localização bloqueada</b><span>Ative em Ajustes › Alva › Localização. Se não der, avise ${S.svc.leader.split(' ')[0]}: o líder pode marcar sua presença.</span></div></div>`;act.innerHTML=B('Abrir ajustes','svA')+B('Avisar o líder','svL',false);$('#svA',sh).onclick=()=>toast('info','Abrindo os ajustes do aparelho','Volte aqui depois de permitir.');$('#svL',sh).onclick=async()=>{await closeSheet();A.svcTalk();};return;}
- if(step==='ok'){msg.innerHTML=`<div class="svc-note ok">${ic('check',16,2.4)}<div><b>Você está no local · a ${svcDist(data.dist)}</b><span>Confirme para registrar sua presença.</span></div></div>`;act.innerHTML=B('Confirmar presença','svC');
-  $('#svC',sh).onclick=async e=>{await busy(e.currentTarget,700,null,'Presença registrada');const m=svcMe();m.ck={at:svcHM(S.svc.now),dist:data.dist};await wait(250);await closeSheet();softRender();toast('success','Check-in feito às '+m.ck.at,S.svc.leader.split(' ')[0]+' vai confirmar sua presença. Bom serviço!');};}
-}
+  ${lead?`<button class="scard svc-lead" data-a="svcTeam" style="margin-top:12px"><span class="grow stack" style="gap:4px"><span class="eb2">Você lidera hoje</span><span class="chn" style="font-size:19px">Presença do time</span><span class="chm">${c('ok')} presentes · ${c('pend')} sem check-in</span></span><span class="ring sm" style="--p:${Math.round((c('ok'))/team.length*100)}"><span>${c('ok')}/${team.length}</span></span></button>`:''}</div>`;}
 /* tela do líder */
-V.svcTeam=()=>{const x=svcEsc(),t=S.svc.team,c=k=>t.filter(p=>svcOf(p)===k).length,ph=svcPhase(),w=svcWin(),nck=c('ck');
+V.svcTeam=()=>{const x=svcEsc(),t=S.svc.team,c=k=>t.filter(p=>svcOf(p)===k).length,ph=svcPhase(),w=svcWin();
  return {sb:'var(--ink)',html:`${subHead('Presença do time',`${x.what} · hoje, ${x.h} · ${x.place}`)}
  <div class="pad stack g5" style="padding-bottom:40px">
   <div class="svc-sum ${ph}"><div class="row g4" style="align-items:center"><span class="ring" style="--p:${Math.round(c('ok')/t.length*100)}"><span><b style="font:700 20px/1 var(--font-display)">${c('ok')}</b><small style="display:block;font-size:10px;opacity:.7">de ${t.length}</small></span></span>
-   <div class="grow stack" style="gap:6px"><span class="it-title">${ph==='antes'?'Check-in abre às '+svcHM(w.open):ph==='fim'?'Check-in encerrado às '+svcHM(w.close):'Check-in aberto até '+svcHM(w.close)}</span><div class="svc-cn"><span class="ck"><b>${nck}</b> para confirmar</span><span><b>${c('pend')}</b> sem check-in</span>${c('falta')?`<span class="falta"><b>${c('falta')}</b> falta${c('falta')===1?'':'s'}</span>`:''}</div></div></div>
-   ${nck?`<button type="button" class="btn primary md block" data-a="svcAll" style="margin-top:14px">Confirmar ${nck} check-in${nck===1?'':'s'}</button>`:''}</div>
+   <div class="grow stack" style="gap:6px"><span class="it-title">${ph==='antes'?'Check-in abre às '+svcHM(w.open):ph==='fim'?'Check-in encerrado às '+svcHM(w.close):'Check-in aberto até '+svcHM(w.close)}</span><div class="svc-cn"><span><b>${c('pend')}</b> sem check-in</span>${c('falta')?`<span class="falta"><b>${c('falta')}</b> ausente${c('falta')===1?'':'s'}</span>`:''}</div></div></div>
+   </div>
   <div class="stack g3"><p class="eb2">Time</p><div class="svc-list">${t.map((p,i)=>{const k=svcOf(p);return `<div class="svc-row ${k}"><span class="avatar" style="${tone(['ceu','menta','lima','damasco','vinho'][i%5])};width:40px;height:40px;font-size:13px">${initials(p.n)}</span>
-   <div class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(p.n.split(' ')[0])}${p.me?' <span class="it-sub">· você</span>':' '+esc(p.n.split(' ').slice(1).join(' '))}</span><span class="it-sub">${p.fn} · ${k==='ok'?(p.manual?'marcado por você · '+p.why:'presente · check-in '+p.ck.at):k==='ck'?'check-in '+p.ck.at+' · a '+svcDist(p.ck.dist):k==='falta'?'falta registrada':'sem check-in'}</span></div>
-   ${k==='ck'?`<button type="button" class="btn primary sm" data-a="svcOk" data-v="${i}">Confirmar</button>`:k==='pend'?`<button type="button" class="svc-more" data-a="svcPend" data-v="${i}" aria-label="Opções para ${esc(p.n)}">${ic('dots',18,2)}</button>`:`${status(k==='ok'?'success':'danger',k==='ok'?'Presente':'Faltou')}<button type="button" class="svc-more" data-a="svcUndo" data-v="${i}" aria-label="Desfazer">${ic('swap',16,2)}</button>`}</div>`;}).join('')}</div></div>
-  <p class="foot" style="text-align:center">Check-in só vale a até ${SVC_R} m do local. Quem esqueceu ou ficou sem sinal, você marca aqui.</p></div>`};};
+   <div class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(p.n.split(' ')[0])}${p.me?' <span class="it-sub">· você</span>':' '+esc(p.n.split(' ').slice(1).join(' '))}</span><span class="it-sub">${p.fn} · ${k==='ok'?(p.manual?'marcado por você'+(p.why?' · '+p.why:''):'presente · check-in '+p.ck.at):k==='falta'?'ausente':'sem check-in'}</span></div>
+   ${k==='pend'?'':status(k==='ok'?'success':'danger',k==='ok'?'Presente':'Ausente')}<button type="button" class="svc-more" data-a="svcPend" data-v="${i}" aria-label="Opções para ${esc(p.n)}">${ic('dots',18,2)}</button></div>`;}).join('')}</div></div>
+  <p class="foot" style="text-align:center">O check-in da pessoa já a deixa presente. Quem esqueceu, você marca aqui.</p></div>`};};
 APP.push('svcTeam');SUBS.push('svcTeam');
 Object.assign(A,{
- svcStart:()=>{const ph=svcPhase();if(ph!=='aberto'){toast('error',ph==='antes'?'O check-in ainda não abriu':'O check-in já encerrou',ph==='antes'?'Abre às '+svcHM(svcWin().open)+'.':'Fale com o líder para marcar sua presença.');return;}svcSheet();},
+ svcStart:async(v,el)=>{const ph=svcPhase();if(ph!=='aberto'){toast('error',ph==='antes'?'O check-in ainda não abriu':'O check-in já encerrou',ph==='antes'?'Abre às '+svcHM(svcWin().open)+'.':'Fale com o líder para marcar sua presença.');return;}const m=svcMe();if(el)await busy(el,600,null,'Presente');m.ck={at:svcHM(S.svc.now)};m.pr='ok';softRender();toast('success','Check-in feito às '+m.ck.at,'Você está presente. Bom serviço!');},
  svcTalk:async(v,el)=>{if(el)await busy(el,600,null,'Avisado');toast('success','Aviso enviado para '+S.svc.leader.split(' ')[0],'Ela pode marcar sua presença pelo app.');},
  svcTeam:()=>go('svcTeam'),
- svcOk:async(v,el)=>{const p=S.svc.team[+v];await busy(el,500,null,'Confirmado');p.pr='ok';softRender();toast('success','Presença confirmada',p.n.split(' ')[0]+' recebe a confirmação no app.');},
- svcAll:async(v,el)=>{const l=S.svc.team.filter(p=>svcOf(p)==='ck');await busy(el,700,null,'Confirmados');l.forEach(p=>p.pr='ok');softRender();toast('success',l.length+' presenças confirmadas',l.map(p=>p.n.split(' ')[0]).join(', ')+'.');},
- svcUndo:v=>{const p=S.svc.team[+v],o={pr:p.pr,manual:p.manual,why:p.why};delete p.pr;delete p.manual;delete p.why;softRender();toast('info','Presença reaberta',p.n.split(' ')[0]+' volta para '+(p.ck?'“para confirmar”':'“sem check-in”')+'.');},
- svcPend:v=>{const p=S.svc.team[+v],f=p.n.split(' ')[0],w=svcWin(),pre=S.svc.now<w.start;
-  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${esc(p.n)}</h3><p class="callout">Ainda não fez check-in.</p></div>
-   <div class="stack g2"><span class="eb2">Marcar presente · por quê?</span><div class="row g2" style="flex-wrap:wrap" id="svW">${['Esqueceu o celular','Sem internet','Localização bloqueada','Chegou depois'].map(w=>`<button type="button" class="chip" aria-pressed="false" data-v="${w}">${w}</button>`).join('')}</div></div>
-   <div class="otpmsg" id="svE" role="alert" style="min-height:0"></div>
-   <div class="stack g3"><button type="button" class="btn primary block" id="svMan">Marcar presente</button><button type="button" class="btn outline block" id="svF" ${pre?'disabled':''}>Registrar falta</button>${pre?`<p class="foot" style="text-align:center;margin-top:-4px">Falta só pode ser registrada depois do início (${svcHM(w.start)}).</p>`:''}<button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
-   let why=null;$('#svW',sh).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('#svW button',sh).forEach(z=>z.setAttribute('aria-pressed',z===b));why=b.dataset.v;$('#svE',sh).textContent='';});
-   $('#svMan',sh).addEventListener('click',async e=>{if(!why){$('#svE',sh).textContent='Escolha um motivo. Fica no histórico.';return;}await busy(e.currentTarget,600,null,'Marcado');Object.assign(p,{pr:'ok',manual:true,why});await closeSheet();softRender();toast('success',f+' marcado(a) como presente',why+'.');});
-   $('#svF',sh).addEventListener('click',()=>{sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Registrar falta de ${esc(f)}?</h3><p class="callout">${esc(p.n)} recebe um aviso gentil no app. A falta fica no histórico de serviço e dá para desfazer.</p></div><div class="stack g3"><button type="button" class="btn primary block danger" id="svFOk">Registrar falta</button><button type="button" class="tlink" data-a="closeSheet">Cancelar</button></div></div>`,s2=>{$('#svFOk',s2).addEventListener('click',async ev=>{await busy(ev.currentTarget,600,null,'Registrada');p.pr='falta';await closeSheet();softRender();toast('info','Falta de '+f+' registrada','Dá para desfazer na lista.');});});});});},
+ svcUndo:v=>{const p=S.svc.team[+v],o={pr:p.pr,manual:p.manual,why:p.why};delete p.pr;delete p.manual;delete p.why;softRender();toast('info','Presença reaberta',p.n.split(' ')[0]+' volta para “sem check-in”.');},
+ svcPend:v=>{const p=S.svc.team[+v],f=p.n.split(' ')[0],w=svcWin(),pre=S.svc.now<w.start,k=svcOf(p);
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${esc(p.n)}</h3><p class="callout">${k==='pend'?'Ainda não fez check-in.':k==='ok'?'Está presente.':'Está ausente.'}</p></div>
+   ${k==='ok'?'':`<div class="stack g2"><span class="eb2">Motivo <small>opcional</small></span><div class="row g2" style="flex-wrap:wrap" id="svW">${['Esqueceu o celular','Sem internet','Chegou depois'].map(w=>`<button type="button" class="chip" aria-pressed="false" data-v="${w}">${w}</button>`).join('')}</div></div>`}
+   <div class="stack g3">${k==='ok'?'':`<button type="button" class="btn primary block" id="svMan">Marcar presente</button>`}${k==='falta'?'':`<button type="button" class="btn outline block" id="svF" ${pre&&k==='pend'?'disabled':''}>Ausente</button>`}${k==='pend'?'':`<button type="button" class="btn outline block" id="svU">Desfazer</button>`}${pre&&k==='pend'?`<p class="foot" style="text-align:center;margin-top:-4px">Ausente só pode ser marcado depois do início (${svcHM(w.start)}).</p>`:''}<button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
+   let why='';const W=$('#svW',sh);if(W)W.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const on=b.getAttribute('aria-pressed')==='true';$$('#svW button',sh).forEach(z=>z.setAttribute('aria-pressed',z===b&&!on));why=on?'':b.dataset.v;});
+   const man=$('#svMan',sh);if(man)man.addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Marcado');Object.assign(p,{pr:'ok',manual:true,why});await closeSheet();softRender();toast('success',f+' marcado(a) como presente',why||undefined);});
+   const fa=$('#svF',sh);if(fa)fa.addEventListener('click',async e=>{await busy(e.currentTarget,600,null,'Marcado');delete p.manual;delete p.why;p.pr='falta';await closeSheet();softRender();toast('info',f+' marcado(a) como ausente','Dá para desfazer na lista.');});
+   const un=$('#svU',sh);if(un)un.addEventListener('click',async()=>{await closeSheet();A.svcUndo(v);});});},
 });
-/* rail: simulação de horário e localização */
+/* rail: simulação de horário */
 (function(){const nav=$('#demoUsers');if(!nav)return;const sec=nav.closest('.rail-sec');const box=document.createElement('div');box.className='rail-sec';
- box.innerHTML=`<span class="rail-lbl">Check-in de escala · horário</span><div class="rail-chips" id="svcT">${[[16*60+30,'16h30 · antes'],[18*60+40,'18h40 · aberto'],[20*60+25,'20h25 · durante'],[22*60+30,'22h30 · encerrado']].map(t=>`<button type="button" data-v="${t[0]}" aria-pressed="${S.svc.now===t[0]}">${t[1]}</button>`).join('')}</div>
-  <span class="rail-lbl" style="margin-top:10px">Check-in de escala · localização</span><div class="rail-chips" id="svcG">${[['perto','No local (40 m)'],['longe','Longe (2,3 km)'],['fraco','GPS fraco'],['negado','Sem permissão']].map(g=>`<button type="button" data-v="${g[0]}" aria-pressed="${S.svc.geo===g[0]}">${g[1]}</button>`).join('')}</div>`;
+ box.innerHTML=`<span class="rail-lbl">Check-in de escala · horário</span><div class="rail-chips" id="svcT">${[[16*60+30,'16h30 · antes'],[18*60+40,'18h40 · aberto'],[20*60+25,'20h25 · durante'],[22*60+30,'22h30 · encerrado']].map(t=>`<button type="button" data-v="${t[0]}" aria-pressed="${S.svc.now===t[0]}">${t[1]}</button>`).join('')}</div>`;
  sec.parentNode.insertBefore(box,sec);
  const clock=()=>{const s=$('.statusbar span');if(s)s.textContent=Math.floor(S.svc.now/60)+':'+String(S.svc.now%60).padStart(2,'0');};clock();
  $('#svcT').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.svc.now=+b.dataset.v;$$('#svcT button').forEach(x=>x.setAttribute('aria-pressed',x===b));clock();if(['home','agenda','svcTeam'].includes(S.screen))softRender();});
- $('#svcG').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.svc.geo=b.dataset.v;if(b.dataset.v!=='negado'&&S.svc.perm==='negado')S.svc.perm=null;$$('#svcG button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
  RAIL.push(['svcTeam','Líder › Presença do time']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
  $('#railNav').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.dataset.s==='svcTeam'&&!['lider','admin'].includes(S.role)){S.role='lider';}},true);
 })();
@@ -1515,24 +1516,23 @@ function showSplash(){const ph=$('#phone');if(!ph)return;const old=$('#splash');
  box.innerHTML=`<span class="rail-lbl">Abertura</span><div class="rail-nav"><button type="button" id="spReplay">Rever splash screen</button></div>`;sec.parentNode.insertBefore(box,sec);
  $('#spReplay').addEventListener('click',()=>{S.hist=[];S.screen='welcome';$('#overlay').innerHTML='';render('none');showSplash();});})();
 /* Identity E: preserve profile layout; add preference and security sheets. */
-S.identityPrefs={email:true,push:true,resumo:true,urg:true,lang:'Português'};
+S.identityPrefs={email:true,push:true,resumo:true,urg:true};
 const idMeView=V.meusDados;
 V.meusDados=()=>{const result=idMeView();if(!S.meEdit&&(S.meTab||'dados')==='dados'){const actions=`<section class="stack g3"><p class="eb2">Conta e preferências</p><div class="list">${[['Preferências','idMobilePrefs'],['Alterar e-mail','idMobileEmail'],['Alterar senha','idMobilePassword'],['Sair dos outros aparelhos','idMobileSessions']].map(([t,a])=>`<button class="item" data-a="${a}"><span class="grow it-title">${t}</span>${ic('chevR',18,2)}</button>`).join('')}</div></section>`;result.html=result.html.replace(/<\/div>$/,actions+'</div>');}if(S.meEdit)result.html=result.html.replace('id="mEmail"','readonly id="mEmail"').replace('id="mEmail"', 'aria-description="Use Alterar e-mail no perfil para confirmar o novo endereço" id="mEmail"');return result;};
 function idMobileCode(title,email,done){sheet(`<div class="stack g4"><h3 class="t2">${title}</h3><p class="callout">Código enviado para ${esc(email)}. Demonstração: 123456.</p>${field({id:'identityCode',label:'Código de 6 dígitos',im:'numeric',max:6})}<button class="btn primary block" id="identityConfirm">Confirmar</button><button class="tlink" data-a="closeSheet">Cancelar</button></div>`,()=>{$('#identityConfirm').onclick=async()=>{if(val('identityCode')!=='123456'){setErr('identityCode','Use 123456 nesta demonstração.');return;}await closeSheet();done();};});}
 function idMobileFile(){const url=URL.createObjectURL(new Blob([JSON.stringify({demonstracao:true,nome:S.me.nome,email:S.me.email},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='alva-dados-demonstracao.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('success','Arquivo baixado','Dados demonstrativos.');}
 Object.assign(A,{
- idMobilePrefs:()=>sheet(`<div class="stack g5"><h3 class="t2">Preferências</h3><div class="list">${[['email','Por e-mail'],['push','No celular'],['resumo','Resumo semanal'],['urg','Casos urgentes de cuidado']].map(([k,t])=>`<div class="item"><span class="grow it-title">${t}</span><button class="switch" role="switch" aria-label="${t}" aria-checked="${S.identityPrefs[k]}" data-a="idMobileNotif" data-v="${k}"></button></div>`).join('')}</div><div class="stack g2"><p class="eb2">Tema</p><div class="seg">${[['dia','Dia'],['noite','Noite']].map(([k,t])=>`<button data-a="idMobileTheme" data-v="${k}" aria-selected="${S.theme===k}">${t}</button>`).join('')}</div></div><div class="stack g2"><p class="eb2">Idioma</p><div class="seg">${['Português','Español','English'].map(l=>`<button data-a="idMobileLanguage" data-v="${l}" aria-selected="${S.identityPrefs.lang===l}">${l}</button>`).join('')}</div></div><button class="btn primary block" data-a="closeSheet">Concluir</button></div>`),
- idMobileLanguage:(v,el)=>{S.identityPrefs.lang=v;el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b===el));},
+ idMobilePrefs:()=>sheet(`<div class="stack g5"><h3 class="t2">Preferências</h3><div class="list">${[['email','Por e-mail'],['push','No celular'],['resumo','Resumo semanal'],['urg','Casos urgentes de cuidado']].map(([k,t])=>`<div class="item"><span class="grow it-title">${t}</span><button class="switch" role="switch" aria-label="${t}" aria-checked="${S.identityPrefs[k]}" data-a="idMobileNotif" data-v="${k}"></button></div>`).join('')}</div><div class="stack g2"><p class="eb2">Tema</p><div class="seg">${[['dia','Dia'],['noite','Noite']].map(([k,t])=>`<button data-a="idMobileTheme" data-v="${k}" aria-selected="${S.theme===k}">${t}</button>`).join('')}</div></div><button class="btn primary block" data-a="closeSheet">Concluir</button></div>`),
  idMobileNotif:(k,el)=>{S.identityPrefs[k]=!S.identityPrefs[k];el.setAttribute('aria-checked',S.identityPrefs[k]);},
  idMobileTheme:(v,el)=>{S.theme=v;phone.classList.toggle('dia',v==='dia');el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b===el));$$('#themeSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===v));},
  idMobileEmail:()=>sheet(`<div class="stack g4"><h3 class="t2">Alterar e-mail</h3>${field({id:'identityPassword',label:'Senha atual',type:'password'})}${field({id:'identityEmail',label:'Novo e-mail',type:'email'})}<button class="btn primary block" id="identityEmailGo">Enviar código</button></div>`,()=>{$('#identityEmailGo').onclick=async()=>{const email=val('identityEmail');if(!val('identityPassword'))return setErr('identityPassword','Informe a senha atual.');if(!EMAIL_RE.test(email))return setErr('identityEmail','Informe um e-mail válido.');await closeSheet();idMobileCode('Confirmar novo e-mail',email,()=>{S.me.email=email;softRender();toast('success','E-mail atualizado','Demonstração');});};}),
  idMobilePassword:()=>sheet(`<div class="stack g4"><h3 class="t2">Alterar senha</h3><p class="callout">As outras sessões serão encerradas. Você continua neste aparelho.</p>${field({id:'identityOld',label:'Senha atual',type:'password'})}${field({id:'identityNew',label:'Nova senha',type:'password',hint:'Mínimo de 8 caracteres, com letras e números.'})}${field({id:'identityRepeat',label:'Repita a nova senha',type:'password'})}<button class="btn primary block" id="identityPasswordGo">Salvar senha</button></div>`,()=>{$('#identityPasswordGo').onclick=async()=>{if(!val('identityOld'))return setErr('identityOld','Informe a senha atual.');const p=val('identityNew');if(p.length<8||!/[a-z]/i.test(p)||!/[0-9]/.test(p))return setErr('identityNew','Use 8 caracteres, com letras e números.');if(p!==val('identityRepeat'))return setErr('identityRepeat','As senhas não conferem.');await closeSheet();toast('success','Senha alterada','Outras sessões encerradas · demonstração.');};}),
  idMobileSessions:()=>sheet(`<div class="stack g4"><h3 class="t2">Sair dos outros aparelhos?</h3><p class="callout">Você continua conectado neste aparelho.</p><button class="btn primary block" data-a="idMobileSessionsDone">Confirmar</button><button class="tlink" data-a="closeSheet">Cancelar</button></div>`),
  idMobileSessionsDone:async()=>{await closeSheet();toast('success','Outras sessões encerradas','Demonstração');},
- dlData:()=>sheet(`<div class="stack g4"><h3 class="t2">Baixar meus dados</h3><p class="callout">Prepare uma cópia dos seus dados. O arquivo deste protótipo contém apenas informações demonstrativas.</p><button class="btn primary block" data-a="dlGo">Preparar arquivo</button></div>`),
- dlGo:async(v,el)=>{await busy(el,700,null,'Pronto');await closeSheet();sheet(`<div class="stack g4"><h3 class="t2">Arquivo pronto</h3><p class="callout">Seus dados de demonstração estão disponíveis.</p><button class="btn primary block" data-a="idMobileFile">Baixar arquivo</button></div>`);},idMobileFile:idMobileFile,
- delAcc:()=>sheet(`<div class="stack g4"><h3 class="t2">Excluir minha conta</h3><p class="callout">A exclusão não pode ser desfeita. Permanecem o nome, os registros de retenção obrigatória e a auditoria. Baixe seus dados antes de continuar.</p><button class="btn outline block" data-a="idMobileFile">Baixar meus dados</button><button class="btn dangerfill block" data-a="idMobileDeleteCode">Enviar código de confirmação</button><button class="tlink" data-a="closeSheet">Manter minha conta</button></div>`),
- idMobileDeleteCode:async()=>{await closeSheet();idMobileCode('Confirmar exclusão',S.me.email,()=>sheet(`<div class="stack g4"><h3 class="t2">Exclusão concluída</h3><p class="callout">Fim da demonstração. Nenhuma conta real foi excluída.</p><button class="btn primary block" data-a="closeSheet">Fechar</button></div>`));}
+ dlData:()=>sheet(`<div class="stack g4"><h3 class="t2">Pedir meus dados</h3><p class="callout">Preparamos um arquivo com os seus dados e enviamos o link para o seu e-mail quando estiver pronto. O arquivo deste protótipo contém apenas informações demonstrativas.</p><button class="btn primary block" data-a="dlGo">Pedir arquivo</button></div>`),
+ dlGo:async(v,el)=>{await busy(el,700,null,'Pedido feito');await closeSheet();sheet(`<div class="stack g4"><h3 class="t2">Pedido registrado</h3><p class="callout">Avisamos você e enviamos o link por e-mail quando o arquivo estiver pronto.</p><button class="btn primary block" data-a="closeSheet">Fechar</button></div>`);},idMobileFile:idMobileFile,
+ delAcc:()=>sheet(`<div class="stack g4"><h3 class="t2">Excluir minha conta</h3><p class="callout">Sua conta será bloqueada e você sairá da igreja. Não há como voltar atrás nem reativar: quem voltar precisa criar uma conta nova, sem o histórico. Os dados são apagados quando o arquivo com eles estiver pronto, e o link do arquivo chega por e-mail e vale 90 dias. Permanecem o nome, os registros de retenção obrigatória e a auditoria.</p><button class="btn dangerfill block" data-a="idMobileDeleteCode">Enviar código de confirmação</button><button class="tlink" data-a="closeSheet">Manter minha conta</button></div>`),
+ idMobileDeleteCode:async()=>{await closeSheet();idMobileCode('Confirmar exclusão',S.me.email,()=>sheet(`<div class="stack g4"><h3 class="t2">Exclusão solicitada</h3><p class="callout">Fim da demonstração. Nenhuma conta real foi excluída. O link dos seus dados será enviado por e-mail.</p><button class="btn primary block" data-a="closeSheet">Fechar</button></div>`));}
 });
 
 /* ---------- Conteúdo: Vídeos e Séries (no Início) ---------- */
@@ -1547,6 +1547,8 @@ const NX_MSERIES=[
  {id:'s2',t:'Fundamentos da fé',type:'Pregação',g:'vinho',desc:'Mensagens para firmar sua caminhada.',public:false,items:[{t:'Uma nova vida',dur:'41:10'},{t:'Fé no cotidiano',dur:'36:45'},{t:'Oração que transforma',dur:'39:02'},{t:'Firmes na Palavra',dur:'44:18'}]},
  {id:'s3',t:'Canções de adoração',type:'Música',g:'brasa',desc:'Uma seleção para ouvir e compartilhar.',public:true,items:[{t:'Majestade',dur:'5:21'},{t:'Oceanos',dur:'8:56'},{t:'Grande é o Senhor',dur:'4:40'}]},
  {id:'s4',t:'Família no centro',type:'Pregação',g:'aurora',desc:'Casamento, filhos e lar à luz da Bíblia.',public:true,items:[{t:'O lar como altar',dur:'37:30'},{t:'Pais que discipulam',dur:'40:05'},{t:'Amor que permanece',dur:'35:48'}]}];
+NX_MSERIES.push({id:'s5',t:'Primeiros passos na fé',type:'Pregação',g:'mar',desc:'Uma pregação, um vídeo e uma música para quem está começando.',public:true,items:[{t:'Uma nova vida',dur:'41:10'},{t:'Servir com propósito',dur:'6:12',k:'Vídeo'},{t:'Majestade',dur:'5:21',k:'Música'}]});
+NX_MSERIES.forEach(s=>{s.items.forEach(it=>{it.k=it.k||s.type;});delete s.type;});
 S.nxSeriesProgress={s2:[0,2],s3:[1]};S.nxVf='Todos';S.nxSf='Todas';
 const nxPub=l=>l.filter(x=>S.role!=='visitante'||x.public);
 const nxTypeIc=t=>t==='Música'?'music':t==='Vídeo'?'play':'book';
@@ -1556,7 +1558,7 @@ const nxTrack=s=>S.role!=='visitante';
 const nxThumb=(v,cls='')=>`<span class="vth gr-${v.g} ${cls}"><span class="vpl">${ic('play',cls==='lg'?24:16,2.5)}</span><span class="vdu">${v.dur}</span></span>`;
 const nxVCard=v=>`<button class="vcard" data-a="nxPlay" data-v="${v.id}">${nxThumb(v)}<span class="vct">${esc(v.t)}</span><span class="vcm">${v.cat} · ${v.when}</span></button>`;
 const nxProg=s=>{const p=S.nxSeriesProgress[s.id];return p&&nxTrack(s)?{n:p.length,pct:Math.round(p.length/s.items.length*100)}:null;};
-const nxSCard=s=>{const p=nxProg(s);return `<button class="scard" data-a="nxSeriesOpen" data-v="${s.id}"><span class="scv gr-${s.g}"><span class="sct">${ic(nxTypeIc(s.type),13,2.25)}${s.type}</span><b>${esc(s.t)}</b></span><span class="scmeta">${p?(p.pct===100?'Concluída':p.n+' de '+s.items.length+' concluídos'):s.items.length+' itens · '+nxTotal(s)}</span>${p?`<span class="sbar"><i style="width:${p.pct}%"></i></span>`:''}</button>`;};
+const nxSCard=s=>{const p=nxProg(s);return `<button class="scard" data-a="nxSeriesOpen" data-v="${s.id}"><span class="scv gr-${s.g}"><span class="sct">${ic('layers',13,2.25)}Série</span><b>${esc(s.t)}</b></span><span class="scmeta">${p?(p.pct===100?'Concluída':p.n+' de '+s.items.length+' concluídos'):s.items.length+' itens · '+nxTotal(s)}</span>${p?`<span class="sbar"><i style="width:${p.pct}%"></i></span>`:''}</button>`;};
 const nxScreen=(title,lede,body)=>({sb:'var(--ink)',tabs:'home',amb:'home',html:`${subHead(title,lede)}<div class="pad stack g6" style="padding-top:8px">${body}</div>`});
 const nxChips=(opts,cur,act)=>`<div class="nxchips" role="tablist">${opts.map(o=>`<button class="chip" aria-pressed="${o===cur}" data-a="${act}" data-v="${o}">${o}</button>`).join('')}</div>`;
 V.nxVideos=()=>{const all=nxPub(NX_MVIDEOS),f=all[0],cats=['Todos',...new Set(all.map(v=>v.cat))],l=all.slice(1).filter(v=>S.nxVf==='Todos'||v.cat===S.nxVf);
@@ -1564,35 +1566,52 @@ V.nxVideos=()=>{const all=nxPub(NX_MVIDEOS),f=all[0],cats=['Todos',...new Set(al
   <button class="vfeat" data-a="nxPlay" data-v="${f.id}">${nxThumb(f,'lg')}<span class="vfb"><span class="eyebrow">Mais recente · ${f.cat}</span><span class="t3">${esc(f.t)}</span><span class="callout">${esc(f.desc)}</span></span></button>
   <section class="stack g4">${nxChips(cats,S.nxVf,'nxVf')}
    ${l.length?`<div class="list">${l.map(v=>`<button class="item vrow" data-a="nxPlay" data-v="${v.id}">${nxThumb(v,'sm')}<span class="grow stack" style="gap:3px;min-width:0"><span class="it-title vrt">${esc(v.t)}</span><span class="it-sub">${v.cat} · ${v.when}</span></span></button>`).join('')}</div>`:'<p class="foot" style="text-align:center">Nenhum vídeo nesta categoria.</p>'}</section>`);};
-V.nxSeries=()=>{const all=nxPub(NX_MSERIES),types=['Todas',...new Set(all.map(s=>s.type))],l=all.filter(s=>S.nxSf==='Todas'||s.type===S.nxSf),going=all.filter(s=>{const p=nxProg(s);return p&&p.pct<100;});
+V.nxSeries=()=>{const all=nxPub(NX_MSERIES),l=all,going=all.filter(s=>{const p=nxProg(s);return p&&p.pct<100;});
  return nxScreen('Séries','Conteúdos em sequência para a sua caminhada.',`
-  ${going.length?`<section class="stack g3"><p class="eb2">Continuar</p>${going.map(s=>{const p=nxProg(s),nx=s.items.find((_,i)=>!S.nxSeriesProgress[s.id].includes(i));return `<button class="scont gr-${s.g}" data-a="nxSeriesOpen" data-v="${s.id}"><span class="stack" style="gap:4px;min-width:0"><span class="sct">${ic(nxTypeIc(s.type),13,2.25)}${s.type}</span><b>${esc(s.t)}</b><span class="scn">Próximo: ${esc(nx?nx.t:'')}</span></span><span class="sring" style="--p:${p.pct}"><span>${p.pct}%</span></span></button>`;}).join('')}</section>`:''}
-  <section class="stack g4">${nxChips(types,S.nxSf,'nxSf')}
-   <div class="stack g3">${l.map(s=>{const p=nxProg(s);return `<button class="srow" data-a="nxSeriesOpen" data-v="${s.id}"><span class="scover gr-${s.g}">${ic(nxTypeIc(s.type),24,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="srt">${s.type}</span><span class="it-title">${esc(s.t)}</span><span class="it-sub">${p?(p.pct===100?'Concluída':p.n+' de '+s.items.length+' concluídos'):s.items.length+' itens · '+nxTotal(s)}</span>${p?`<span class="sbar"><i style="width:${p.pct}%"></i></span>`:''}</span>${ic('chevR',18,2)}</button>`;}).join('')}</div></section>`);};
-V.nxSeriesDetail=()=>{const s=NX_MSERIES.find(x=>x.id===S.nxSeries),tr=nxTrack(s),p=S.nxSeriesProgress[s.id],pr=nxProg(s),nxi=p?s.items.findIndex((_,i)=>!p.includes(i)):0,mus=s.type==='Música';
- const cta=!tr?`<button class="btn primary block" data-a="nxItem" data-v="0">${ic('play',18,2.5)}${mus?'Ouvir a primeira':'Assistir o primeiro'}</button>`
+  ${going.length?`<section class="stack g3"><p class="eb2">Continuar</p>${going.map(s=>{const p=nxProg(s),nx=s.items.find((_,i)=>!S.nxSeriesProgress[s.id].includes(i));return `<button class="scont gr-${s.g}" data-a="nxSeriesOpen" data-v="${s.id}"><span class="stack" style="gap:4px;min-width:0"><span class="sct">${ic('layers',13,2.25)}Série</span><b>${esc(s.t)}</b><span class="scn">Próximo: ${esc(nx?nx.t:'')}</span></span><span class="sring" style="--p:${p.pct}"><span>${p.pct}%</span></span></button>`;}).join('')}</section>`:''}
+  <section class="stack g4">
+   <div class="stack g3">${l.map(s=>{const p=nxProg(s);return `<button class="srow" data-a="nxSeriesOpen" data-v="${s.id}"><span class="scover gr-${s.g}">${ic('layers',24,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="srt">Série</span><span class="it-title">${esc(s.t)}</span><span class="it-sub">${p?(p.pct===100?'Concluída':p.n+' de '+s.items.length+' concluídos'):s.items.length+' itens · '+nxTotal(s)}</span>${p?`<span class="sbar"><i style="width:${p.pct}%"></i></span>`:''}</span>${ic('chevR',18,2)}</button>`;}).join('')}</div></section>`);};
+V.nxSeriesDetail=()=>{const s=NX_MSERIES.find(x=>x.id===S.nxSeries),tr=nxTrack(s),p=S.nxSeriesProgress[s.id],pr=nxProg(s),nxi=p?s.items.findIndex((_,i)=>!p.includes(i)):0,mus=false;
+ const cta=!tr?`<button class="btn primary block" data-a="nxItem" data-v="0">${ic('play',18,2.5)}Abrir o primeiro</button>`
   :!p?`<button class="btn primary block" data-a="nxSeriesStart">Começar série</button>`
   :pr.pct===100?`<div class="sdone">${status('success','Série concluída')}<span class="foot">${mus?'Você ouviu as '+s.items.length+' faixas.':'Você concluiu os '+s.items.length+' itens.'}</span></div>`
   :`<button class="btn primary block" data-a="nxItem" data-v="${nxi}">${ic('play',18,2.5)}Continuar · ${esc(s.items[nxi].t)}</button>`;
- return {sb:'#fff',tabs:'home',amb:'home',html:`<div class="shero gr-${s.g}"><button class="iconbtn" data-a="back" aria-label="Voltar">${ic('chevL',20,2.25)}</button><div class="stack g2"><span class="sct">${ic(nxTypeIc(s.type),13,2.25)}${s.type}</span><h1 class="t1">${esc(s.t)}</h1><p>${esc(s.desc)}</p><span class="shm">${s.items.length} itens · ${nxTotal(s)}</span></div>${pr?`<div class="shp"><span class="sbar on"><i style="width:${pr.pct}%"></i></span><span>${pr.n} de ${s.items.length}</span></div>`:''}</div>
+ return {sb:'#fff',tabs:'home',amb:'home',html:`<div class="shero gr-${s.g}"><button class="iconbtn" data-a="back" aria-label="Voltar">${ic('chevL',20,2.25)}</button><div class="stack g2"><span class="sct">${ic('layers',13,2.25)}Série</span><h1 class="t1">${esc(s.t)}</h1><p>${esc(s.desc)}</p><span class="shm">${s.items.length} itens · ${nxTotal(s)}</span></div>${pr?`<div class="shp"><span class="sbar on"><i style="width:${pr.pct}%"></i></span><span>${pr.n} de ${s.items.length}</span></div>`:''}</div>
  <div class="pad stack g5" style="padding-top:20px">${cta}
-  <section class="stack g3"><div class="row between" style="align-items:baseline"><p class="eb2">${mus?'Faixas':'Episódios'}</p>${tr&&p?'<span class="foot">Em qualquer ordem</span>':''}</div><div class="list">${s.items.map((it,i)=>{const d=p&&p.includes(i),nx=tr&&p&&i===nxi;return `<div class="sitem ${d?'done':''} ${nx?'next':''}"><button class="sib" data-a="nxItem" data-v="${i}"><span class="snum">${d?ic('check',14,2.75):i+1}</span><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(it.t)}</span><span class="it-sub">${nx?'Próximo · ':''}${it.dur}</span></span></button>${tr&&p?`<button class="sck ${d?'on':''}" data-a="nxSeriesDone" data-v="${i}" aria-label="${d?'Desmarcar':mus?'Marcar faixa como concluída':'Marcar como concluído'}" aria-pressed="${d}">${ic('check',14,2.75)}</button>`:''}</div>`;}).join('')}</div></section></div>`};};
+  <section class="stack g3"><div class="row between" style="align-items:baseline"><p class="eb2">Itens</p>${tr&&p?'<span class="foot">Em qualquer ordem</span>':''}</div><div class="list">${s.items.map((it,i)=>{const d=p&&p.includes(i),nx=tr&&p&&i===nxi;return `<div class="sitem ${d?'done':''} ${nx?'next':''}"><button class="sib" data-a="nxItem" data-v="${i}"><span class="snum">${d?ic('check',14,2.75):i+1}</span><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(it.t)}</span><span class="it-sub">${nx?'Próximo · ':''}${it.k} · ${it.dur}</span></span></button>${tr&&p?`<button class="sck ${d?'on':''}" data-a="nxSeriesDone" data-v="${i}" aria-label="${d?'Desmarcar':mus?'Marcar faixa como concluída':'Marcar como concluído'}" aria-pressed="${d}">${ic('check',14,2.75)}</button>`:''}</div>`;}).join('')}</div></section>${cmtHtml('series:'+s.id)}</div>`};};
+/* comentários: lista e caixa de texto; cada pessoa apaga o seu */
+S.cmts={'lesson:fund:0':[{n:'Helena Duarte',t:'A aula sobre a graça me ajudou muito.',at:'há 4 dias'}],'lesson:fund:9':[{n:'Bruno Reis',t:'Boa reflexão para o dia a dia.',at:'há 2 dias'}],'course:fund':[{n:'Helena Duarte',t:'A aula sobre a graça me ajudou muito.',at:'há 4 dias'}],'journey:Primeiros passos':[{n:'Bruno Reis',t:'Boa sequência para quem está começando.',at:'há 1 semana'}],'series:s2':[{n:'Ana Lima',t:'Cada mensagem me ajudou muito.',at:'há 2 dias'}],'sermon:pg1':[{n:'Bruno Reis',t:'Fortaleceu a minha semana.',at:'há 1 dia'}],'video:v3':[{n:'Helena Duarte',t:'Compartilhei com a minha casa.',at:'há 3 dias'}]};
+const cmtId=k=>'cmtIn_'+k.replace(/\W/g,'_');
+const cmtHtml=(k,title='Comentários')=>{const l=S.cmts[k]||(S.cmts[k]=[]);return `<section class="stack g3 cmt-m" data-k="${k}"><div class="row between" style="align-items:baseline"><p class="eb2">${title}</p><span class="foot">${l.length}</span></div>
+  ${l.length?`<div class="list">${l.map((c,i)=>`<div class="item" style="align-items:flex-start"><span class="avatar" style="${tone('ceu')};width:34px;height:34px;font-size:12px">${initials(c.n)}</span><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(c.n)} <span class="it-sub">· ${c.at}</span></span><span class="callout" style="margin:0;white-space:normal">${esc(c.t)}</span></span>${c.me?`<button type="button" class="svc-more" data-a="cmtDelM" data-v="${k}|${i}" aria-label="Apagar meu comentário">${ic('x',16,2)}</button>`:''}</div>`).join('')}</div>`:'<p class="foot">Seja a primeira pessoa a comentar.</p>'}
+  ${field({id:cmtId(k),label:'Seu comentário',area:true,ph:'Escreva um comentário',max:500})}<button type="button" class="btn secondary md block" data-a="cmtAddM" data-v="${k}">Comentar</button></section>`;};
+const cmtPaintM=k=>{const el=document.querySelector(`.cmt-m[data-k="${k}"]`);if(el)el.outerHTML=cmtHtml(k,el.querySelector('.eb2').textContent);};
 Object.assign(A,{
- nxPlay:v=>{const x=NX_MVIDEOS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.cat+' · '+x.when});},
+ cmtSheet:v=>sheet(`<div class="stack g5"><h3 class="t2">${esc(v.slice(v.indexOf(':')+1))}</h3>${cmtHtml(v)}</div>`),
+ cmtAddM:v=>{const el=document.getElementById(cmtId(v)),x=el?el.value.trim():'';if(!x){toast('error','Escreva o comentário','');return;}(S.cmts[v]||(S.cmts[v]=[])).push({n:S.user.name,t:x,at:'agora',me:true});cmtPaintM(v);toast('success','Comentário publicado','');},
+ cmtDelM:v=>{const i=v.lastIndexOf('|'),k=v.slice(0,i);S.cmts[k].splice(+v.slice(i+1),1);cmtPaintM(k);toast('info','Comentário apagado','');},
+ nxPlay:v=>{const x=NX_MVIDEOS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.cat+' · '+x.when,cm:'video:'+v});},
  nxItem:v=>{const s=NX_MSERIES.find(x=>x.id===S.nxSeries),it=s.items[+v];playerSheet({t:it.t,g:s.g,dur:it.dur,s:s.t+' · '+(+v+1)+' de '+s.items.length});},
  nxVf:v=>{S.nxVf=v;softRender();},nxSf:v=>{S.nxSf=v;softRender();},
  nxSeriesOpen:id=>{S.nxSeries=id;go('nxSeriesDetail');},
- nxSeriesStart:()=>{S.nxSeriesProgress[S.nxSeries]=[];softRender();toast('success','Série iniciada',(NX_MSERIES.find(x=>x.id===S.nxSeries).type==='Música'?'Marque cada faixa':'Marque cada episódio')+' quando terminar, na ordem que quiser.');},
+ nxSeriesStart:()=>{S.nxSeriesProgress[S.nxSeries]=[];softRender();toast('success','Série iniciada','Marque cada item'+' quando terminar, na ordem que quiser.');},
  nxSeriesDone:v=>{const p=S.nxSeriesProgress[S.nxSeries],i=+v,k=p.indexOf(i);if(k>=0)p.splice(k,1);else p.push(i);softRender();}});
 {const oh=V.home;V.home=()=>{const r=oh(),vs=nxPub(NX_MVIDEOS),f=vs[0],ss=nxPub(NX_MSERIES).slice().sort((a,b)=>((nxProg(b)&&nxProg(b).pct<100)?1:0)-((nxProg(a)&&nxProg(a).pct<100)?1:0)).slice(0,3);
  const vrow=v=>`<button class="item vrow" data-a="nxPlay" data-v="${v.id}">${nxThumb(v,'sm')}<span class="grow stack" style="gap:3px;min-width:0"><span class="it-title vrt">${esc(v.t)}</span><span class="it-sub">${v.cat} · ${v.when}</span></span></button>`;
- const srow=s=>{const p=nxProg(s);return `<button class="item hsr" data-a="nxSeriesOpen" data-v="${s.id}"><span class="scover sm gr-${s.g}">${ic(nxTypeIc(s.type),20,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="it-title">${esc(s.t)}</span><span class="it-sub">${s.type} · ${p?(p.pct===100?'concluída':p.n+' de '+s.items.length+' concluídos'):s.items.length+' itens · '+nxTotal(s)}</span>${p&&p.pct<100?`<span class="sbar"><i style="width:${p.pct}%"></i></span>`:''}</span>${ic('chevR',18,2)}</button>`;};
+ const srow=s=>{const p=nxProg(s);return `<button class="item hsr" data-a="nxSeriesOpen" data-v="${s.id}"><span class="scover sm gr-${s.g}">${ic('layers',20,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="it-title">${esc(s.t)}</span><span class="it-sub">${p?(p.pct===100?'concluída':p.n+' de '+s.items.length+' concluídos'):s.items.length+' itens · '+nxTotal(s)}</span>${p&&p.pct<100?`<span class="sbar"><i style="width:${p.pct}%"></i></span>`:''}</span>${ic('chevR',18,2)}</button>`;};
  const add=`<section class="stack g4">${sectionHead('Conteúdo','Para assistir','Ver todos','go','nxVideos')}
   <div class="pad stack g3"><button class="hfeat gr-${f.g}" data-a="nxPlay" data-v="${f.id}"><span class="hf-top"><span class="sct">${f.cat}</span><span class="vdu">${f.dur}</span></span><span class="hf-pl">${ic('play',22,2.5)}</span><span class="hf-bot"><b>${esc(f.t)}</b><span>${esc(f.desc)}</span></span></button>
   <div class="list">${vs.slice(1,3).map(vrow).join('')}</div></div></section>
  <section class="stack g4">${sectionHead('','Séries','Ver todas','go','nxSeries')}<div class="pad"><div class="list">${ss.map(srow).join('')}</div></div></section>`;
  const k=r.html.lastIndexOf('</div>');r.html=r.html.slice(0,k)+add+r.html.slice(k);return r;};}
-SUBS.push('nxVideos','nxSeries','nxSeriesDetail');RAIL.push(['nxVideos','Início › Vídeos'],['nxSeries','Início › Séries']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
+const NX_MPREGS=[{id:'pg1',t:'Uma nova vida',who:'Pr. Rafael Pereira',when:'há 3 dias',dur:'41:10',g:'vinho',public:true},{id:'pg2',t:'Fé no cotidiano',who:'Pr. Rafael Pereira',when:'há 1 semana',dur:'36:45',g:'aurora',public:true},{id:'pg3',t:'Oração que transforma',who:'Pr. Marcos Lima',when:'há 2 semanas',dur:'39:02',g:'mar',public:false},{id:'pg4',t:'O lar como altar',who:'Pr. Rafael Pereira',when:'há 3 semanas',dur:'37:30',g:'brasa',public:true}];
+const NX_MSONGS=[{id:'mu1',t:'Majestade',art:'Fernandinho',dur:'5:21',g:'brasa',public:true},{id:'mu2',t:'Oceanos',art:'Hillsong',dur:'8:56',g:'mar',public:true},{id:'mu3',t:'Grande é o Senhor',art:'Aline Barros',dur:'4:40',g:'aurora',public:false},{id:'mu4',t:'Deus Cuida de Mim',art:'Ministério Zoe',dur:'3:48',g:'lima',public:true}];
+S.nxSeen={};
+const nxMRow=(x,act,sub)=>`<button class="item vrow" data-a="${act}" data-v="${x.id}">${nxThumb(x,'sm')}<span class="grow stack" style="gap:3px;min-width:0"><span class="it-title vrt">${esc(x.t)}</span><span class="it-sub">${sub}</span></span>${S.nxSeen[x.id]?status('success','Visto'):''}</button>`;
+V.nxPregs=()=>nxScreen('Pregações','Mensagens da sua igreja.',`<div class="list">${nxPub(NX_MPREGS).map(p=>nxMRow(p,'nxOpenP',p.who+' · '+p.when)).join('')}</div>`);
+V.nxSongs=()=>nxScreen('Músicas','Para ouvir e cantar.',`<div class="list">${nxPub(NX_MSONGS).map(m=>nxMRow(m,'nxOpenS',esc(m.art))).join('')}</div>`);
+Object.assign(A,{nxOpenP:v=>{S.nxSeen[v]=true;softRender();const x=NX_MPREGS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.who+' · '+x.when,cm:'sermon:'+v});},nxOpenS:v=>{S.nxSeen[v]=true;softRender();const x=NX_MSONGS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.art,cm:'song:'+v});}});
+SUBS.push('nxVideos','nxSeries','nxSeriesDetail','nxPregs','nxSongs');RAIL.push(['nxVideos','Início › Vídeos'],['nxSeries','Início › Séries'],['nxPregs','Mais › Pregações'],['nxSongs','Mais › Músicas']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
 /* ---------- Convites de encontros: Casa e supervisor ---------- */
 S.minv=[
@@ -1762,7 +1781,11 @@ function rgCodes(m){
  const buy=m.buy.map(id=>rgItOf(e,id)).filter(Boolean).map(i=>({k:'i:'+i.id,n:rgLbl(i),tag:'Compra',code:`ALVA-${num}-${rgSlug(rgLbl(i))}`}));
  return e.checkin==='off'?[]:[...acc,...inc,...buy];
 }
-const rgSt=m=>m.st==='ok'?ST2('ok','Confirmada'):ST2('warn','Aguardando pagamento');
+const rgSt=m=>m.st==='cancelada'?ST2('mute','Cancelada'):m.st==='ok'?ST2('ok','Confirmada'):ST2('warn','Aguardando pagamento');
+/* uma inscrição é uma compra: pode ter vários ingressos; o primeiro é da própria pessoa */
+const rgTks=m=>[{n:0,id:m.id,tk:m.tk,buy:m.buy||[],ck:m.ck,who:'Você'},...(m.more||[]).map((x,i)=>({n:i+1,id:m.id,tk:x.tk,buy:[],ck:x.ck||(x.ck={}),who:x.who}))];
+const rgActive=m=>m.st!=='cancelada';
+const rgPayTxt=m=>m.st==='cancelada'?(m.refund==='solicitado'?'Reembolso solicitado':m.refund==='reembolsado'?'Reembolsado':'Sem cobrança'):m.st==='ok'?(m.total?'Pago · '+m.method:'Gratuito'):'Aguardando · '+m.method;
 /* cálculo da inscrição em andamento */
 function vDiscM(v,price){return v.type==='pct'?Math.min(price,Math.round(price*v.disc)/100):Math.min(price,v.disc);}
 function rgCalc(){
@@ -1772,12 +1795,12 @@ function rgCalc(){
 }
 const rgFull=t=>t.left===0;
 
-V.inscricoes=()=>{const I_=S.insc;I_.mine.forEach(rgNorm);const mineIds=I_.mine.map(m=>m.id);
+V.inscricoes=()=>{const I_=S.insc;I_.mine.forEach(rgNorm);const mineIds=I_.mine.filter(rgActive).map(m=>m.id);
  const open=I_.open.filter(e=>!mineIds.includes(e.id));
  return sub('Inscrições','',`
   <section class="stack g3"><p class="eb2">Eventos abertos</p>${open.map(e=>{const from=rgFrom(e),multi=e.tickets.length>1;return `<article class="card" style="overflow:hidden"><div class="gr-${e.g}" style="height:10px"></div><div class="stack g3" style="padding:16px 18px 18px"><div class="row between g3" style="align-items:flex-start"><div class="stack" style="gap:2px"><span class="t3">${e.t}</span><span class="it-sub">${e.when} · ${from?(multi?'a partir de ':'')+brl(from):'Gratuito'}</span></div>${e.left<20?status('warning',e.left+' vagas'):''}</div>${multi||e.items.length?`<p class="it-sub" style="margin:0">${multi?e.tickets.length+' tipos de ingresso':''}${multi&&e.items.length?' · ':''}${e.items.length?'compras adicionais':''}</p>`:''}<button class="btn primary md block ${from?'split':''}" data-a="inscrever" data-v="${e.id}">${from?`<span>Inscrever-se</span><span class="meta">${multi?'a partir de ':''}${brl(from)}</span>`:'Inscrever-se'}</button></div></article>`;}).join('')||'<p class="callout">Você já está inscrito em todos os eventos abertos.</p>'}
    <p class="foot" style="margin:0">Em eventos pagos, a inscrição confirma quando o pagamento cai.</p></section>
-  <section class="stack g3"><p class="eb2">Meus ingressos</p>${I_.mine.length?`<div class="list">${I_.mine.map(m=>{const e=rgEv(m.id),tk=rgTkOf(e,m.tk),n=rgCodes(m).length,used=rgCodes(m).filter(c=>m.ck[c.k]).length;return `<button class="item" data-a="rgOpen" data-v="${m.rid}"><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${e.t}</span><span class="it-sub">${e.when} · ${tk.n}${m.buy.length?' · +'+m.buy.length+(m.buy.length===1?' compra':' compras'):''}</span><span class="it-sub">${n?n+(n===1?' código':' códigos')+(used?' · '+used+' usado'+(used===1?'':'s'):''):'Sem controle de entrada'}${m.total?' · '+brl(m.total):''}</span></span>${rgSt(m)}${ic('chevR',16,2.25)}</button>`;}).join('')}</div>`:`<p class="callout" style="margin:0">Você ainda não tem ingresso em nenhum evento.</p>`}</section>`);};
+  <section class="stack g3"><p class="eb2">Minhas inscrições</p>${I_.mine.length?`<div class="list">${I_.mine.map(m=>{const e=rgEv(m.id),n=rgTks(m).length;return `<button class="item" data-a="rgOpen" data-v="${m.rid}"><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${e.t}</span><span class="it-sub">${e.when}</span><span class="it-sub">${n} ${n===1?'ingresso':'ingressos'}${m.buy.length?' · +'+m.buy.length+(m.buy.length===1?' compra':' compras'):''}${m.total?' · '+brl(m.total):''}</span></span>${rgSt(m)}${ic('chevR',16,2.25)}</button>`;}).join('')}</div>`:`<p class="callout" style="margin:0">Você ainda não tem inscrição em nenhum evento.</p>`}</section>`);};
 
 /* escolha de ingresso, compras e pagamento */
 V.inscCheckout=()=>{const c=rgCalc(),g=S.rg,{e,t}=c,tks=e.tickets;
@@ -1790,16 +1813,27 @@ V.inscCheckout=()=>{const c=rgCalc(),g=S.rg,{e,t}=c,tks=e.tickets;
   <button class="btn primary block" data-a="rgGo">${c.total?(g.pay==='pix'?'Pagar com Pix':'Pagar com cartão')+' · '+brl(c.total):'Confirmar inscrição'}</button>
   <p class="foot" style="margin:0">${c.total?'Sua vaga fica reservada por 30 minutos. Os códigos são liberados quando o pagamento confirmar.':'Seus códigos aparecem em Meus ingressos.'}</p></div>`};};
 
-/* meus ingressos: um QR por código */
+/* um ingresso: os códigos (QR) dele; a compra inteira fica na tela da inscrição */
 V.ingresso=()=>{const m=S.insc.mine.find(x=>x.rid===S.tkReg);if(!m)return sub('Ingresso','','<p class="callout">Ingresso não encontrado.</p>');rgNorm(m);
- const e=rgEv(m.id),tk=rgTkOf(e,m.tk),codes=rgCodes(m),locked=m.st!=='ok';
+ const l=rgTks(m),tt=l[S.tkN||0]||l[0],e=rgEv(m.id),tk=rgTkOf(e,tt.tk),codes=rgCodes(tt),locked=m.st!=='ok';
  return sub(e.t,e.when+' · '+tk.n,`
-  ${locked?`<div class="svc-note"><span>${ic('alert',16,2)}</span><div><b>Aguardando pagamento</b><span>Os códigos são liberados quando o ${m.method||'pagamento'} confirmar.</span></div></div>`:''}
-  <div class="kv"><div class="kr"><span>Ingresso</span><span>${esc(tk.n)}</span></div>${m.buy.length?`<div class="kr stack2"><span>Compras adicionais</span><span>${m.buy.map(id=>esc(rgLbl(rgItOf(e,id)))).join(', ')}</span></div>`:''}${m.vch?`<div class="kr"><span>Voucher</span><span class="mask">${esc(m.vch)}</span></div>`:''}<div class="kr"><span>Total</span><span>${m.total?brl(m.total)+(m.method&&m.method!=='-'?' · '+m.method:''):'Grátis'}</span></div></div>
-  ${codes.length?`<section class="stack g4"><p class="eb2">${codes.length} ${codes.length===1?'código':'códigos'} · mostre cada um no momento certo</p>${codes.map(c=>{const at=m.ck[c.k];return `<article class="card rg-code ${at?'used':''} ${locked?'locked':''}"><div class="row between g3" style="align-items:flex-start"><div class="stack" style="gap:2px"><span class="it-title" style="font-size:16px">${esc(c.n)}</span><span class="it-sub">${c.tag==='Acesso'?'Entrada':c.tag==='Incluso'?'Incluso no ingresso':'Compra adicional'}</span></div>${at?ST2('mute','Usado às '+at):locked?ST2('warn','Bloqueado'):ST2('ok','Válido')}</div>
+  ${locked?`<div class="svc-note"><span>${ic('alert',16,2)}</span><div><b>${m.st==='cancelada'?'Inscrição cancelada':'Aguardando pagamento'}</b><span>${m.st==='cancelada'?'Estes códigos não valem mais.':'Os códigos são liberados quando o '+(m.method||'pagamento')+' confirmar.'}</span></div></div>`:''}
+  <div class="kv"><div class="kr"><span>Ingresso</span><span>${esc(tk.n)}</span></div><div class="kr"><span>Titular</span><span>${esc(tt.who)}</span></div>${tt.buy.length?`<div class="kr stack2"><span>Compras adicionais</span><span>${tt.buy.map(id=>esc(rgLbl(rgItOf(e,id)))).join(', ')}</span></div>`:''}</div>
+  ${codes.length?`<section class="stack g4"><p class="eb2">${codes.length} ${codes.length===1?'código':'códigos'} · mostre cada um no momento certo</p>${codes.map(c=>{const at=tt.ck[c.k];return `<article class="card rg-code ${at?'used':''} ${locked?'locked':''}"><div class="row between g3" style="align-items:flex-start"><div class="stack" style="gap:2px"><span class="it-title" style="font-size:16px">${esc(c.n)}</span><span class="it-sub">${c.tag==='Acesso'?'Entrada':c.tag==='Incluso'?'Incluso no ingresso':'Compra adicional'}</span></div>${at?ST2('mute','Usado às '+at):locked?ST2('warn','Bloqueado'):ST2('ok','Válido')}</div>
    <div class="qr rgq">${locked?`<span class="rg-lock">${ic('lock',28,1.9)}</span>`:qrSVG(c.code)}</div><p class="mask" style="margin:0;text-align:center">${c.code}</p></article>`;}).join('')}
    <p class="foot" style="margin:0">A equipe confirma a entrada lendo o QR no app do VEM. Os códigos funcionam sem internet.</p>
-   ${locked?'':`<button type="button" class="tlink" data-a="rgSim">Demonstração: simular leitura do QR</button>`}</section>`:`<div class="card" style="padding:20px 18px;border-radius:var(--r-lg)"><p class="it-title">Inscrição confirmada</p><p class="foot" style="margin:4px 0 0">Este evento não tem controle de entrada por QR.</p></div>`}`);};
+   ${locked?'':`<button type="button" class="tlink" data-a="rgSim">Demonstração: simular leitura do QR</button>`}</section>`:`<div class="card" style="padding:20px 18px;border-radius:var(--r-lg)"><p class="it-title">Inscrição confirmada</p><p class="foot" style="margin:4px 0 0">Este evento não tem controle de entrada por QR.</p></div>`}
+  <button type="button" class="tlink" data-a="rgToCompra">Ver a inscrição completa</button>`);};
+
+/* a inscrição (compra): ingressos, itens, pagamento e cancelamento da compra inteira */
+V.compra=()=>{const m=S.insc.mine.find(x=>x.rid===S.tkReg);if(!m)return sub('Inscrição','','<p class="callout">Inscrição não encontrada.</p>');rgNorm(m);
+ const e=rgEv(m.id),l=rgTks(m),canc=m.st==='cancelada',wait=m.st==='wait',used=l.some(x=>Object.keys(x.ck).length),paid=m.st==='ok'&&m.total>0;
+ return sub(e.t,e.when,`
+  ${canc?`<div class="svc-note"><span>${ic('x',16,2)}</span><div><b>Inscrição cancelada</b><span>${m.refund==='solicitado'?'Reembolso de '+brl(m.total)+' solicitado ao provedor. Ele volta pelo mesmo meio de pagamento.':m.refund==='reembolsado'?'Reembolso de '+brl(m.total)+' concluído.':'Nada foi cobrado.'}</span></div></div>`:wait?`<div class="svc-note"><span>${ic('alert',16,2)}</span><div><b>Aguardando pagamento</b><span>Os códigos são liberados quando o ${m.method||'pagamento'} confirmar.</span></div></div>`:''}
+  <section class="stack g3"><p class="eb2">${l.length} ${l.length===1?'ingresso':'ingressos'}</p><div class="list">${l.map((x,i)=>{const tk=rgTkOf(e,x.tk),n=rgCodes(x).length,u=Object.keys(x.ck).length;return `<button class="item" data-a="rgTkOpen" data-v="${i}" ${canc?'disabled':''}><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(tk.n)}</span><span class="it-sub">${esc(x.who)}${n?' · '+n+(n===1?' código':' códigos'):''}</span></span>${canc?'':u?ST2('mute','Usado'):wait?ST2('warn','Bloqueado'):n?ST2('ok','Ver código'):''}${canc?'':ic('chevR',16,2.25)}</button>`;}).join('')}</div></section>
+  ${m.buy.length?`<section class="stack g3"><p class="eb2">Compras adicionais</p><div class="kv">${m.buy.map(id=>{const i=rgItOf(e,id);return `<div class="kr"><span>${esc(rgLbl(i))}</span><span>${brl(i.price)}</span></div>`;}).join('')}</div></section>`:''}
+  <div class="kv"><div class="kr"><span>Pagamento</span><span>${rgPayTxt(m)}</span></div>${m.vch?`<div class="kr"><span>Voucher</span><span class="mask">${esc(m.vch)}</span></div>`:''}<div class="kr"><span style="color:var(--ink);font-weight:600">Total</span><span>${m.total?brl(m.total):'Grátis'}</span></div></div>
+  ${canc?'':used?`<p class="foot" style="margin:0">Já houve check-in em um dos ingressos, então a inscrição não pode mais ser cancelada.</p>`:`<div class="stack g2"><button type="button" class="btn outline block" data-a="rgCancel">Cancelar compra</button><p class="foot" style="margin:0">O cancelamento é da compra inteira, com todos os ingressos${m.buy.length?' e as compras adicionais':''}.</p></div>`}`);};
 
 /* pagamento simulado */
 function rgPaySheet(total,kind,onPaid){
@@ -1809,13 +1843,13 @@ function rgPaySheet(total,kind,onPaid){
 }
 function rgPlace(){
  const c=rgCalc(),g=S.rg,e=c.e,rec={id:e.id,rid:'r'+Date.now(),st:c.total?'wait':'ok',method:c.total?(g.pay==='pix'?'Pix':'Cartão'):'-',tk:g.tk,buy:c.adds.map(i=>i.id),vch:c.vc?c.vc.code:'',total:c.total,ck:{}};
- S.insc.mine.push(rec);e.left=Math.max(0,e.left-1);if(c.t.left)c.t.left--;S.tkReg=rec.rid;S.screen='ingresso';$('#overlay').innerHTML='';render();
- if(c.total){toast('info','Aguardando pagamento','Assim que o '+rec.method+' cair, seus códigos são liberados.');setTimeout(()=>{rec.st='ok';if(S.screen==='ingresso'||S.screen==='inscricoes')softRender();toast('success','Pagamento confirmado','Inscrição em '+e.t+' garantida.');},3500);}
- else toast('success','Inscrição confirmada','Seus códigos estão em Meus ingressos.');
+ S.insc.mine.push(rec);e.left=Math.max(0,e.left-1);if(c.t.left)c.t.left--;S.tkReg=rec.rid;S.screen='compra';$('#overlay').innerHTML='';render();
+ if(c.total){toast('info','Aguardando pagamento','Assim que o '+rec.method+' cair, seus códigos são liberados.');setTimeout(()=>{rec.st='ok';if(['ingresso','compra','inscricoes'].includes(S.screen))softRender();toast('success','Pagamento confirmado','Inscrição em '+e.t+' garantida.');},3500);}
+ else toast('success','Inscrição confirmada','Seus ingressos estão em Mais › Inscrições.');
 }
 Object.assign(A,{
  inscrever:async(v,el)=>{const e=rgEv(v),t=e.tickets[0];
-  if(e.tickets.length===1&&!t.price&&!e.items.length){await busy(el,700,null,'Inscrito');const rec={id:v,rid:'r'+v,st:'ok',method:'-',tk:t.id,buy:[],vch:'',total:0,ck:{}};S.insc.mine.push(rec);e.left=Math.max(0,e.left-1);S.tkReg=rec.rid;softRender();toast('success','Inscrição confirmada','Seu QR Code está em Meus ingressos.');return;}
+  if(e.tickets.length===1&&!t.price&&!e.items.length){await busy(el,700,null,'Inscrito');const rec={id:v,rid:'r'+v,st:'ok',method:'-',tk:t.id,buy:[],vch:'',total:0,ck:{}};S.insc.mine.push(rec);e.left=Math.max(0,e.left-1);S.tkReg=rec.rid;softRender();toast('success','Inscrição confirmada','Seus ingressos estão em Mais › Inscrições.');return;}
   S.rg={ev:v,tk:(e.tickets.find(x=>!rgFull(x))||t).id,buy:[],vc:'',vcTxt:'',pay:'pix'};go('inscCheckout');},
  rgTk:v=>{const g=S.rg,t=rgTkOf(rgEv(g.ev),v);g.tk=v;g.buy=g.buy.filter(id=>!t.incl.includes(id));softRender();},
  rgAdd:v=>{const g=S.rg;g.buy=g.buy.includes(v)?g.buy.filter(x=>x!==v):[...g.buy,v];softRender();},
@@ -1825,17 +1859,27 @@ Object.assign(A,{
  rgVcClear:()=>{S.rg.vc='';softRender();},
  rgPayM:v=>{S.rg.pay=v;softRender();},
  rgGo:()=>{const c=rgCalc();if(!c.total){rgPlace();return;}rgPaySheet(c.total,S.rg.pay,rgPlace);},
- rgOpen:v=>{S.tkReg=v;go('ingresso');},
- rgSim:()=>{const m=S.insc.mine.find(x=>x.rid===S.tkReg),c=rgCodes(m).find(x=>!m.ck[x.k]);if(!c){toast('info','Todos os códigos já foram usados','');return;}m.ck[c.k]=new Date().toTimeString().slice(0,5);softRender();toast('success','Leitura simulada',c.n+' marcado como usado.');},
- showQR:v=>{const m=S.insc.mine.find(x=>x.id===v);if(m){S.tkReg=m.rid;go('ingresso');}},
+ rgOpen:v=>{S.tkReg=v;S.tkN=0;go('compra');},
+ rgTkOpen:v=>{S.tkN=+v;go('ingresso');},
+ rgToCompra:()=>{go('compra');},
+ rgFromEv:async v=>{let m=S.insc.mine.find(x=>x.id===v&&rgActive(x));if(!m){const e=rgEv(v),tk=e.tickets[0];m={id:v,rid:'r'+v,st:'ok',method:'-',tk:tk.id,buy:[],vch:'',total:0,ck:{}};S.insc.mine.push(m);}S.tkReg=m.rid;await closeSheet();go('compra');},
+ rgSim:()=>{const m=S.insc.mine.find(x=>x.rid===S.tkReg),tt=rgTks(m)[S.tkN||0],c=rgCodes(tt).find(x=>!tt.ck[x.k]);if(!c){toast('info','Todos os códigos já foram usados','');return;}tt.ck[c.k]=new Date().toTimeString().slice(0,5);softRender();toast('success','Leitura simulada',c.n+' marcado como usado.');},
+ rgCancel:()=>{const m=S.insc.mine.find(x=>x.rid===S.tkReg),n=rgTks(m).length,pay=m.st==='ok'&&m.total>0;
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Cancelar a compra?</h3><p class="callout">Cancela a compra inteira: ${n} ${n===1?'ingresso':'ingressos'}${m.buy.length?' e as compras adicionais':''}. Não dá para cancelar só um ingresso.</p></div>
+   ${pay?`<div class="kv"><div class="kr"><span>Política do evento</span><span>100% até 24 h antes</span></div><div class="kr"><span style="color:var(--ink);font-weight:600">Você recebe de volta</span><span>${brl(m.total)}</span></div></div><p class="foot" style="margin:0">O reembolso é pedido ao provedor e volta pelo mesmo meio de pagamento (${m.method}).</p>`:`<p class="foot" style="margin:0">${m.st==='ok'?'A inscrição é gratuita: só deixa de valer e a vaga é liberada.':'Como o pagamento ainda não caiu, nada será cobrado.'}</p>`}
+   <div class="stack g3"><button type="button" class="btn primary block danger" id="rgCx">Cancelar compra</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{$('#rgCx',sh).addEventListener('click',async ev=>{await busy(ev.currentTarget,700,null,'Cancelada');
+   m.st='cancelada';m.refund=pay?'solicitado':'';const e=rgEv(m.id);e.left+=1;if(m.id==='i1')S.rsvp.e11=false;await closeSheet();softRender();toast('info','Compra cancelada',pay?'Reembolso de '+brl(m.total)+' solicitado.':'Sua vaga foi liberada.');
+   if(pay)setTimeout(()=>{m.refund='reembolsado';if(S.screen==='compra'||S.screen==='inscricoes')softRender();},4000);});});},
+ showQR:v=>{const m=S.insc.mine.find(x=>x.id===v&&rgActive(x));if(m){S.tkReg=m.rid;go('compra');}},
 });
 document.addEventListener('input',e=>{if(e.target.id==='rgVc'&&S.rg)S.rg.vcTxt=e.target.value;});
 S.rg=null;S.tkReg=null;
-APP.push('inscCheckout','ingresso');SUBS.push('inscCheckout','ingresso');
-[['inscricoes','Mais › Inscrições'],['inscCheckout','Mais › Inscrições › Ingresso'],['ingresso','Mais › Inscrições › Meus ingressos']].forEach(r=>{if(!RAIL.some(x=>x[0]===r[0]))RAIL.push(r);});
+APP.push('inscCheckout','ingresso','compra');SUBS.push('inscCheckout','ingresso','compra');
+[['inscricoes','Mais › Inscrições'],['inscCheckout','Mais › Inscrições › Ingresso'],['compra','Mais › Inscrições › Inscrição (compra)'],['ingresso','Mais › Inscrições › Ingresso']].forEach(r=>{if(!RAIL.some(x=>x[0]===r[0]))RAIL.push(r);});
 $('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 /* demonstração: duas inscrições já feitas */
 S.insc.mine.push({id:'i3',rid:'r-i3',st:'ok',method:'Cartão',tk:'t2',buy:[],vch:'RETIRO10',total:140,ck:{}});
+S.insc.mine.push({id:'i4',rid:'r-i4',st:'ok',method:'Pix',tk:'t3',buy:['c3'],vch:'',total:240,ck:{},more:[{tk:'t2',who:'Ana Lima',ck:{}}]});
 
 showSplash();
 

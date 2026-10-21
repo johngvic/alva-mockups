@@ -40,7 +40,7 @@ function nxHouseEncounters(c){
  if(!all.length)return nxEncEmpty(btns);
  const item=(m,kind)=>{const pend=!m.scheduled&&!m.done,n=c.ppl.filter(p=>m.pres&&m.pres[p.id]).length;
   const title=kind==='done'?'<button class="lnk record-title" data-a="hViewMeet" data-v="'+m.id+'">'+esc(m.desc||'Encontro realizado')+'</button>':kind==='canc'?esc(m.desc||'Encontro cancelado'):(m.desc?esc(m.desc):(m.mode==='Remoto'?'Encontro remoto':'Encontro presencial'));
-  const meta=[wd(m.d),nxEncTime(m.start,m.end),m.mode,(m.mode==='Presencial'&&m.where?esc(m.where):''),kind==='sched'?(pend?'chamada pendente':nxEncWhen(m.d)):kind==='done'?'presença '+n+'/'+c.ppl.length:'cancelado',m.mat?esc(m.mat):''].filter(Boolean).join(' · ');
+  const meta=[wd(m.d),nxEncTime(m.start,m.end),m.mode,(m.mode==='Presencial'&&m.where?esc(m.where):''),kind==='sched'?(pend?'chamada pendente':nxEncWhen(m.d)):kind==='done'?'presença '+n+'/'+c.ppl.length:'cancelado',m.series&&kind==='sched'?'repete':'',m.mat?esc(m.mat):''].filter(Boolean).join(' · ');
   let act='';
   if(kind==='sched'){ if(pend)act='<button class="btn pri sm" data-a="hCall" data-v="'+m.id+'">Chamada</button><button class="ibtn sm" data-a="hDelM" data-v="'+m.id+'" aria-label="Excluir encontro" title="Excluir encontro">'+ic('x',14)+'</button>';
    else act=(m.mode==='Remoto'&&m.url?'<button class="btn sec sm" data-a="copy" data-v="'+esc(m.url)+'">Copiar link</button>':'')+'<button class="ibtn sm" data-a="nxHouseSchedule" data-v="'+m.id+'" aria-label="Editar encontro" title="Editar encontro">'+ic('pen',14)+'</button><button class="btn pri sm" data-a="nxHouseRegister" data-v="'+m.id+'">Registrar</button><button class="ibtn sm" data-a="nxHouseCancel" data-v="'+m.id+'" aria-label="Cancelar encontro" title="Cancelar encontro">'+ic('x',14)+'</button>'; }
@@ -64,7 +64,7 @@ careMeetings=function(c){
  return '<section class="card pc"><div class="sh"><h2>Encontros</h2><div class="row2"><button class="btn sec sm" data-a="cReg" data-v="'+c.id+'">Registrar</button><button class="btn pri sm" data-a="cSched" data-v="'+c.id+'">Agendar</button></div></div>'+nxEncList('Agendados',sItems)+nxEncList('Realizados',dItems)+nxEncList('Cancelados',cItems)+'</section>';
 };
 
-/* ---- Tenant: Organização → Redes → Igrejas, e encontros do supervisor (rede de células e rede regional) ---- */
+/* ---- Tenant: Organização → Redes → Igrejas, e encontros do supervisor (rede de casa e rede regional) ---- */
 const NX_PL={Rede:'Redes',Regional:'Regionais','Região':'Regiões',Bloco:'Blocos',Campo:'Campos'};
 const NX_LABELS=Object.keys(NX_PL);
 const NL=()=>{const l=ORG.label,m=l==='Bloco'||l==='Campo',p=NX_PL[l]||l+'s';return {s:l,p,lo:l.toLowerCase(),plo:p.toLowerCase(),nova:m?'Novo':'Nova',da:m?'do':'da',art:m?'o':'a',um:m?'um':'uma',outra:m?'outro':'outra'};};
@@ -105,7 +105,7 @@ function seDetail(){
  const isNet=k==='net',leaders=seLeaders(k,o),done=o.meets.filter(m=>m.done&&!m.cancelled),sched=o.meets.filter(m=>!m.done&&!m.cancelled);
  const avg=done.length&&leaders.length?Math.round(done.reduce((a,m)=>a+leaders.filter(n=>m.pres&&m.pres[n]).length,0)/(done.length*leaders.length)*100):0;
  const who=isNet?(leaders.length===1?'líder de igreja':'líderes de igreja'):(leaders.length===1?'líder de casa':'líderes de casa');
- return '<nav class="crumb rise" aria-label="Você está em"><span class="soft">'+(isNet?'Administração':'Comunidade')+'</span>'+ic('chevR',13,2)+'<button class="lnk back" data-a="seBack">'+(isNet?'Multi-igreja':'Redes de célula')+'</button>'+ic('chevR',13,2)+'<span>'+esc(o.n)+'</span></nav>'
+ return '<nav class="crumb rise" aria-label="Você está em"><span class="soft">'+(isNet?'Administração':'Comunidade')+'</span>'+ic('chevR',13,2)+'<button class="lnk back" data-a="seBack">'+(isNet?'Multi-igreja':'Redes de casa')+'</button>'+ic('chevR',13,2)+'<span>'+esc(o.n)+'</span></nav>'
   +'<header class="ph rise"><div><p class="eb">Encontros do supervisor</p><h1>'+esc(o.n)+'</h1><p class="lede">'+(o.sup?'Supervisor: '+esc(o.sup):'Sem supervisor definido')+' · '+leaders.length+' '+who+'</p></div></header>'
   +'<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Realizados</span><span class="kv">'+done.length+'</span><span class="kd">encontros com os líderes</span></div><div class="k4"><span class="kl">Agendados</span><span class="kv">'+sched.length+'</span><span class="kd">'+(sched.length?'próximo em '+fmtD(sched.slice().sort((a,b)=>a.d.localeCompare(b.d))[0].d):'nenhum marcado')+'</span></div><div class="k4"><span class="kl">Presença média</span><span class="kv">'+(done.length?avg+'%':'—')+'</span><span class="kd">dos líderes nos encontros</span></div></section>'
   +'<section class="card pc rise" style="--d:2"><div class="sh"><h2>Líderes convocados</h2></div>'+(leaders.length?'<div class="kmem">'+leaders.map((n,i)=>'<span class="kmc"><span class="av" style="background:var(--tone-'+TONES[i%6]+');color:var(--tone-'+TONES[i%6]+'-ink)">'+initials(n)+'</span>'+esc(n)+'</span>').join('')+'</div>':'<p class="who">'+(isNet?'Nenhuma igreja nesta rede ainda.':'Nenhuma casa vinculada a esta rede ainda.')+'</p>')+'</section>'
@@ -182,6 +182,7 @@ Object.assign(A,{
    +'<label class="fld"><span class="fl">País</span><span class="selw"><select name="country">'+Object.entries(NX_COUNTRIES).map(([k,c])=>'<option value="'+k+'">'+c.n+'</option>').join('')+'</select>'+ic('updown',14)+'</span></label>'
    +'<label class="fld"><span class="fl" id="gnDiv">Estado</span><span class="selw"><select name="sub">'+nxSubOpts('BR','')+'</select>'+ic('updown',14)+'</span><span class="err"></span></label>'
    +'<label class="fld wide"><span class="fl">Cidade</span><input name="city" placeholder="Ex.: Santos" maxlength="60" autocomplete="off"><span class="err"></span></label>'
+   +'<label class="fld"><span class="fl">Bairro ou distrito <small>opcional</small></span><input name="district" maxlength="60" autocomplete="off"></label><label class="fld"><span class="fl">Código postal <small>opcional</small></span><input name="cep" maxlength="12" autocomplete="off"></label><label class="fld wide"><span class="fl">Rua <small>opcional</small></span><input name="street" maxlength="80" autocomplete="off"></label><label class="fld"><span class="fl">Número <small>opcional</small></span><input name="num" maxlength="20" autocomplete="off"></label><label class="fld"><span class="fl">Complemento <small>opcional</small></span><input name="comp" maxlength="60" autocomplete="off"></label>'
    +(multi?'<label class="fld wide"><span class="fl">'+L.s+'</span><span class="selw"><select name="r">'+NETS.map(n=>'<option value="'+n.id+'"'+(n.id===rid?' selected':'')+'>'+esc(n.n)+(n.main?' (principal)':'')+'</option>').join('')+'</select>'+ic('updown',14)+'</span></label>':'')
    +'<p class="hint wide" id="gnCur">A moeda da igreja será real (BRL) e não muda depois. O país também não muda depois que a igreja tem dados.</p>'
    +'<div class="dfoot wide"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit">Criar igreja</button></div></form>');
@@ -190,7 +191,7 @@ Object.assign(A,{
   f.elements.country.addEventListener('change',()=>{const c=NX_COUNTRIES[f.elements.country.value];$('#gnDiv').textContent=c.div;f.elements.sub.innerHTML=nxSubOpts(f.elements.country.value,'');$('#gnCur').textContent='A moeda da igreja será '+c.cur+' e não muda depois. O país também não muda depois que a igreja tem dados.';});
   f.onsubmit=e=>{e.preventDefault();const n=f.elements.n.value.trim(),city=f.elements.city.value.trim(),co=f.elements.country.value,sub=f.elements.sub.value;
    if(!n){bad('n','Dê um nome à igreja');return;}if(IGREJAS.some(g=>norm(g.n)===norm(n))){bad('n','Já existe uma igreja com esse nome');return;}if(!sub){bad('sub','Escolha '+(co==='CL'?'a região':co==='AR'?'a província':'o estado'));return;}if(!city){bad('city','Informe a cidade');return;}
-   const id='g'+Date.now();IGREJAS.push({id,n,rede:multi?f.elements.r.value:netMain().id,lead:''});CHP[id]={tagline:'',story:'',founded:'',stats:false,values:[],social:[],live:'',hours:'',wa:'',phone:'',email:'',street:'',district:'',city,sub,country:co,cep:'',requests:[],services:[]};CHP_MEM[id]=0;CHP_CASAS[id]=0;
+   const id='g'+Date.now();IGREJAS.push({id,n,rede:multi?f.elements.r.value:netMain().id,lead:''});CHP[id]={tagline:'',story:'',founded:'',stats:false,values:[],social:[],live:'',hours:'',wa:'',phone:'',email:'',street:f.elements.street.value.trim(),num:f.elements.num.value.trim(),comp:f.elements.comp.value.trim(),district:f.elements.district.value.trim(),city,sub,country:co,cep:f.elements.cep.value.trim(),requests:[],services:[]};CHP_MEM[id]=0;CHP_CASAS[id]=0;
    closeDlg();admRe();toast(n+' criada');};}
 });
 /* dados de demonstração dos encontros do supervisor */
@@ -200,12 +201,14 @@ Object.assign(A,{
 
 /* ---- Jornada: vincular curso que já existe; Série: mesma trilha da Jornada, com ícone, duração e progresso por item ---- */
 NX_VIDEOS.forEach((v,i)=>{if(!v.dur)v.dur=[9,14,18][i]||0;});
-const NX_TYPE_IC={'Pregação':'book','Vídeo':'play','Música':'music'};
-const NX_TYPE_PL={'Pregação':'pregações','Vídeo':'vídeos','Música':'músicas'};
-const NX_TYPE_LO={'Pregação':'pregação','Vídeo':'vídeo','Música':'música'};
+const NX_TYPE_IC={'Pregação':'book','Vídeo':'play','Música':'music','Material':'file','Misto':'layers'};
+const NX_TYPE_PL={'Pregação':'pregações','Vídeo':'vídeos','Música':'músicas','Material':'materiais','Misto':'conteúdos'};
+const NX_TYPE_LO={'Pregação':'pregação','Vídeo':'vídeo','Música':'música','Material':'material','Misto':'conteúdo'};
 const nxMin=m=>m>=60?Math.floor(m/60)+' h'+(m%60?' '+String(m%60).padStart(2,'0'):''):m+' min';
-const nxItemObj=(type,id)=>type==='Vídeo'?NX_VIDEOS.find(x=>x.id===id):type==='Música'?SONGS.find(x=>x.id===id):PREGS.find(x=>x.id===id);
-const nxItemInfo=(type,o)=>!o?{t:'Conteúdo indisponível',sub:'Foi removido da biblioteca',dur:0}:type==='Vídeo'?{t:o.t,sub:o.tag||o.desc||'',dur:o.dur||0}:type==='Música'?{t:o.n,sub:[o.art,o.key?'Tom '+o.key:''].filter(Boolean).join(' · '),dur:0}:{t:o.t,sub:[o.who,o.ref].filter(Boolean).join(' · '),dur:o.dur||0};
+/* série mista: cada item é de um tipo; o tipo vem do próprio item */
+const nxKind=o=>!o?'':PREGS.includes(o)?'Pregação':NX_VIDEOS.includes(o)?'Vídeo':SONGS.includes(o)?'Música':'Material';
+const nxItemObj=(type,id)=>[PREGS,NX_VIDEOS,SONGS,MATS].map(l=>l.find(x=>x.id===id)).find(Boolean);
+const nxItemInfo=(type,o)=>{const k=nxKind(o);return !o?{t:'Conteúdo indisponível',sub:'Foi removido da biblioteca',dur:0}:k==='Vídeo'?{t:o.t,sub:[k,o.tag||o.desc||''].filter(Boolean).join(' · '),dur:o.dur||0}:k==='Música'?{t:o.n,sub:[k,o.art,o.key?'Tom '+o.key:''].filter(Boolean).join(' · '),dur:0}:k==='Material'?{t:o.t,sub:k+' · '+o.files.length+' arquivo'+(o.files.length===1?'':'s'),dur:0}:{t:o.t,sub:[k,o.who,o.ref].filter(Boolean).join(' · '),dur:o.dur||0};};
 function nxSerTotal(s){return s.items.reduce((a,id)=>a+nxItemInfo(s.type,nxItemObj(s.type,id)).dur,0);}
 function nxSerDur(s){const t=nxSerTotal(s);return t?' · '+nxMin(t):'';}
 const nxSerCur=()=>NX_SERIES.find(x=>x.id===S.nxSeries);
@@ -236,16 +239,22 @@ nxSeriesPage=function(){
  return head+'<div class="rise" style="--d:2">'+body+'</div>';
 };
 function nxSeriesAddDlg(){
- const s=nxSerCur();if(!s)return;const ti=NX_TYPE_IC[s.type],one=NX_TYPE_LO[s.type],many=NX_TYPE_PL[s.type];
- const lib=(s.type==='Vídeo'?NX_VIDEOS:s.type==='Música'?SONGS:PREGS).filter(o=>!s.items.includes(o.id));
- const other=()=>null;
- const row=(o,i)=>{const f=nxItemInfo(s.type,o),x=other(o);return '<label class="'+(x?'taken':'')+'" data-q="'+esc(norm(f.t+' '+f.sub))+'"'+(x?' style="opacity:.55;pointer-events:none"':'')+'><input type="checkbox" name="i" value="'+o.id+'"'+(x?' disabled':'')+'><span class="htile" style="--s:30px;background:'+thumbBg(i%6)+';color:#fff">'+ic(ti,14)+'</span><span><b>'+esc(f.t)+'</b><small>'+(x?'Já está na série '+esc(x.n):esc([f.sub,f.dur?nxMin(f.dur):''].filter(Boolean).join(' · ')))+'</small></span><i class="cb">'+ic('check',12,2.8)+'</i></label>';};
- openDlg(dlgHead('Adicionar '+one,'Escolha na biblioteca de '+many+'. Pode marcar mais de um.')+'<form id="nxSaF" class="fgrid one" novalidate>'
-  +(lib.length?(lib.length>5?'<label class="sbox">'+ic('search',16)+'<input id="nxSaQ" placeholder="Buscar" autocomplete="off"></label>':'')+'<div class="cpick" id="nxSaL" style="max-height:340px;overflow:auto">'+lib.map(row).join('')+'</div>':'<p class="who">Todos os conteúdos da biblioteca já estão nesta série.</p>')
-  +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" disabled>Adicionar</button></div></form>');
- const f=$('#nxSaF'),b=f.querySelector('[type=submit]'),upd=()=>{const k=$$('[name=i]:checked',f).length;b.disabled=!k;b.textContent=k>1?'Adicionar '+k:'Adicionar';};f.addEventListener('change',upd);
- const q=$('#nxSaQ');if(q)q.addEventListener('input',()=>{const t=norm(q.value);$$('#nxSaL label').forEach(l=>{l.hidden=!!t&&!l.dataset.q.includes(t);});});
- f.onsubmit=e=>{e.preventDefault();const ids=$$('[name=i]:checked',f).map(i=>i.value);if(!ids.length)return;ids.forEach(id=>{s.items.push(id);if(s.type==='Pregação'){const p=PREGS.find(p=>p.id===id);if(p)p.sr=s.id;}});nxSyncSr();closeDlg();render();toast(ids.length>1?ids.length+' itens adicionados à série':'Item adicionado à série');};
+ const s=nxSerCur();if(!s)return;
+ const TY=[['Pregação',PREGS,'pregacoes'],['Vídeo',NX_VIDEOS,'videos'],['Música',SONGS,'musicas'],['Material',MATS,'material']],lib=k=>TY.find(t=>t[0]===k)[1].filter(o=>!s.items.includes(o.id));
+ let type=TY[0][0],sel=[],q='';
+ openDlg(dlgHead('Adicionar à série','Escolha o tipo e selecione os itens. Dá para misturar tipos na mesma série.')+'<div class="mcp"><div class="mcp-ty">'+TY.map(t=>'<button type="button" data-ty="'+t[0]+'" class="'+(t[0]===type?'on':'')+'"><span class="mc-i t-'+t[2]+'">'+ic(NX_TYPE_IC[t[0]],15,1.8)+'</span>'+t[0]+'<small id="saN-'+t[0]+'"></small></button>').join('')+'</div>'
+  +'<div class="mcp-r"><label class="sbox">'+ic('search',16)+'<input id="saQ" placeholder="Buscar na biblioteca" autocomplete="off"></label><div class="mtf-list" id="saL" style="max-height:300px"></div></div></div>'
+  +'<div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" id="saOk" disabled>Adicionar</button></div>','lg');
+ const cls=TY.reduce((m,t)=>{m[t[0]]=t[2];return m;},{});
+ const paint=()=>{const ql=norm(q),l=lib(type).filter(o=>{const f=nxItemInfo(type,o);return !ql||norm(f.t+' '+f.sub).includes(ql);});
+  $('#saL').innerHTML=l.map(o=>{const f=nxItemInfo(type,o),on=sel.includes(o.id);return '<button type="button" class="mtf-p '+(on?'on':'')+'" data-k="'+o.id+'"><span class="mc-i t-'+cls[type]+'">'+ic(NX_TYPE_IC[type],14,1.8)+'</span><span class="dkt"><b>'+esc(f.t)+'</b><span>'+esc([f.sub.replace(/^[^·]+(· )?/,''),f.dur?nxMin(f.dur):''].filter(Boolean).join(' · ')||type)+'</span></span><i class="mtf-ck">'+ic('check',12,2.6)+'</i></button>';}).join('')||'<p class="who" style="padding:10px">'+(lib(type).length?'Nada encontrado.':'Tudo desta biblioteca já está na série.')+'</p>';
+  TY.forEach(t=>{const n=sel.filter(id=>t[1].some(o=>o.id===id)).length;$('#saN-'+t[0]).textContent=n||'';});
+  const ok=$('#saOk');ok.disabled=!sel.length;ok.textContent=sel.length?'Adicionar '+sel.length+(sel.length===1?' item':' itens'):'Adicionar';};
+ const D=$('.mcp');D.addEventListener('click',e=>{const t=e.target.closest('[data-ty],[data-k]');if(!t)return;
+  if(t.dataset.ty){type=t.dataset.ty;D.querySelectorAll('[data-ty]').forEach(x=>x.classList.toggle('on',x===t));paint();}
+  if(t.dataset.k){const k=t.dataset.k,i=sel.indexOf(k);if(i>-1)sel.splice(i,1);else sel.push(k);paint();}});
+ $('#saQ').addEventListener('input',e=>{q=e.target.value;paint();});paint();
+ $('#saOk').onclick=()=>{if(!sel.length)return;const ids=sel.slice();ids.forEach(id=>{s.items.push(id);const p=PREGS.find(p=>p.id===id);if(p)p.sr=s.id;});nxSyncSr();closeDlg();render();toast(ids.length>1?ids.length+' itens adicionados à série':'Item adicionado à série');};
 }
 function nxLinkCourseDlg(){
  const j=jById(S.jor);if(!j)return;
@@ -271,9 +280,9 @@ Object.assign(A,{
  sortable(b,'li[data-id]','.cm-grip',ids=>{const s=nxSerCur();if(!s)return;const old=s.items.slice(),next=ids.filter(id=>old.includes(id));if(next.join()===old.join())return;s.items=next;render();toast('Ordem da série atualizada',()=>{s.items=old;render();});});}).observe(main,{childList:true,subtree:true});}
 
 /* ---- Item em várias séries; curso em várias jornadas; visibilidade própria (a série e a jornada filtram, não herdam) ---- */
-function nxSyncSr(){PREGS.forEach(p=>{p.sr=(NX_SERIES.find(s=>s.type==='Pregação'&&s.items.includes(p.id))||{}).id||'';});}
-function nxApplySeries(type,id,ids){NX_SERIES.filter(s=>s.type===type).forEach(s=>{const has=s.items.includes(id),want=ids.includes(s.id);if(want&&!has)s.items.push(id);if(!want&&has)s.items.splice(s.items.indexOf(id),1);});nxSyncSr();}
-function nxSerField(type,id){const list=NX_SERIES.filter(s=>s.type===type);
+function nxSyncSr(){PREGS.forEach(p=>{p.sr=(NX_SERIES.find(s=>s.items.includes(p.id))||{}).id||'';});}
+function nxApplySeries(type,id,ids){NX_SERIES.forEach(s=>{const has=s.items.includes(id),want=ids.includes(s.id);if(want&&!has)s.items.push(id);if(!want&&has)s.items.splice(s.items.indexOf(id),1);});nxSyncSr();}
+function nxSerField(type,id){const list=NX_SERIES.slice();
  return '<div class="fld wide"><span class="fl">Séries <small>opcional</small></span>'+(list.length?'<div class="cpick nx-serpick">'+list.map(s=>'<label><input type="checkbox" name="sr" value="'+s.id+'"'+(id&&s.items.includes(id)?' checked':'')+'><span class="htile" style="--s:26px;background:var(--brand-soft);color:var(--brand-text)">'+ic(NX_TYPE_IC[type],13)+'</span><span><b>'+esc(s.n)+'</b></span><i class="cb">'+ic('check',12,2.8)+'</i></label>').join('')+'</div><span class="hint">Pode estar em mais de uma série. Também dá para adicionar pela página da série.</span>':'<span class="hint">Ainda não há séries de '+NX_TYPE_PL[type]+'. Crie em Conteúdo › Séries.</span>')+'</div>';}
 {const ids=['sr1','sr2'];if(!NX_SERIES.some(s=>s.id==='sr5')){PSERIES.push({id:'sr5',n:'Abraão e a fé',h:1});NX_SERIES.push({id:'sr5',n:'Abraão e a fé',type:'Pregação',desc:'A caminhada de Abraão, mensagem por mensagem.',min:'',visibility:'Interno',items:[PREGS[0].id,PREGS[1].id],people:[{n:'Ana Lima',done:1}]});}nxSyncSr();}
 
