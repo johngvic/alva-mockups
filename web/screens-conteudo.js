@@ -45,12 +45,12 @@ function pgEdit(){const p=PREGS.find(x=>x.id===S.preg);if(!p){S.preg=null;return
  <div class="ct-ed rise" style="--d:2"><section class="card ct-ef"><h2>Sobre a mensagem</h2><form id="pgF" class="fgrid" novalidate>
    <label class="fld wide"><span class="fl">Título</span><input name="t" value="${esc(p.t)}"></label>
    <label class="fld"><span class="fl">Pregador(a)</span><input name="who" value="${esc(p.who)}" list="pgWho" autocomplete="off"><datalist id="pgWho">${PREACHERS.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>
-   ${nxSerField('Pregação',p.id)}
    <label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${p.d}"></label>
    <label class="fld"><span class="fl">Duração</span><span class="sp-unit"><input type="number" name="dur" min="1" value="${p.dur}"><em>min</em></span></label>
-   <label class="fld wide"><span class="fl">Referência bíblica</span><span class="cm-pre">${ic('book',14)}<input name="ref" value="${esc(p.ref)}" placeholder="Ex.: Efésios 1:3-14"></span></label>
+   <label class="fld"><span class="fl">Referência bíblica</span><span class="cm-pre">${ic('book',14)}<input name="ref" value="${esc(p.ref)}" placeholder="Ex.: Efésios 1:3-14"></span></label>
    <label class="fld wide"><span class="fl">Descrição</span><textarea class="ta" name="desc" rows="3" placeholder="Um resumo curto que aparece no app">${esc(p.desc)}</textarea></label>
    <div class="fld wide"><span class="fl">Vínculo <small>opcional</small></span><div class="ct-vin"><div class="cm-q"><button type="button" data-vin="0" class="${p.min?'':'on'}">Avulsa</button><button type="button" data-vin="1" class="${p.min?'on':''}">Ministério</button></div><span class="selw ${p.min?'':'ct-hide'}" id="pgMinW"><select name="min">${MINIS.filter(m=>m.active).map(m=>`<option ${m.n===p.min?'selected':''}>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></div></div>
+   ${nxSerField('Pregação',p.id)}
   </form><div class="ct-danger"><button class="btn ghostd" data-a="pgDel" data-v="${p.id}">Excluir pregação</button></div></section>
   <aside class="ct-side"><section class="card ct-media"><h2>${ic('play',15)} Vídeo</h2>${pgThumb(p,true)}<label class="fld"><span class="fl">Link do YouTube</span><span class="cm-pre">${ic('link',14)}<input id="pgYt" value="${esc(p.yt)}" placeholder="https://youtube.com/watch?v=…"></span><span class="hint" id="pgYtH">${p.yt?'Miniatura e duração vêm do YouTube.':'Sem vídeo? Tudo bem — dá para publicar só o áudio ou o esboço.'}</span></label></section>
    <section class="card ct-files"><div class="sh"><h2>${ic('file',15)} Arquivos</h2><button class="btn ghost sm" data-a="pgFile">${ic('upload',13)}Enviar</button></div>
@@ -62,8 +62,8 @@ const pgFiles=p=>p.files.length?p.files.map((f,i)=>`<div class="ct-file"><span c
 function pgForm(){openDlg(`${dlgHead('Nova pregação','Depois você adiciona vídeo, passagem e arquivos.')}<form id="pgNF" class="fgrid" novalidate>
   <label class="fld wide"><span class="fl">Título</span><input name="t" placeholder="Ex.: O Chamado de Abraão" autocomplete="off"></label>
   <label class="fld"><span class="fl">Pregador(a)</span><input name="who" list="pgWho2" placeholder="Nome" autocomplete="off"><datalist id="pgWho2">${PREACHERS.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>
-  ${nxSerField('Pregação','')}
   <div class="fld wide"><span class="fl">Vínculo <small>opcional</small></span><div class="ct-vin"><div class="cm-q"><button type="button" data-vin="0" class="on">Avulsa</button><button type="button" data-vin="1">Ministério</button></div><span class="selw ct-hide" id="pgNMin"><select name="min">${MINIS.filter(m=>m.active).map(m=>`<option>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></div><span class="hint">Uma pregação não precisa pertencer a nenhum ministério.</span></div>
+  ${nxSerField('Pregação','')}
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" disabled>Criar e continuar</button></div></form>`);
  const f=$('#pgNF'),ok=f.querySelector('[type=submit]');let vin=0;f.addEventListener('input',()=>ok.disabled=!f.t.value.trim()||!f.who.value.trim());setTimeout(()=>f.t.focus(),80);
  $$('[data-vin]',f).forEach(b=>b.onclick=()=>{vin=+b.dataset.vin;$$('[data-vin]',f).forEach(x=>x.classList.toggle('on',x===b));$('#pgNMin').classList.toggle('ct-hide',!vin);});
