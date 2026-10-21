@@ -1,4 +1,4 @@
-/* ================= Conteúdo › Pregações, Músicas, Jornadas ================= */
+﻿/* ================= Conteúdo › Pregações, Músicas, Jornadas ================= */
 Object.assign(I,{
  anchor:'<path d="M12 22V8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><circle cx="12" cy="5" r="3"/>',
  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
@@ -11,26 +11,31 @@ const thumbBg=i=>`linear-gradient(135deg,${HUES[i%6][0]},${HUES[i%6][1]})`;
 /* ---------- Pregações ---------- */
 const PSERIES=[{id:'sr1',n:'Fé que Transforma',h:0},{id:'sr2',n:'Graça & Verdade',h:2},{id:'sr3',n:'Quem Sou Eu?',h:3},{id:'sr4',n:'Vida no Espírito',h:4}];
 const PREACHERS=['Pr. Rafael Pereira','Pr. Marcos Lima','Pra. Ana Costa','Pr. Otávio Lins'];
-let _pgid=0;const PG=(t,who,sr,d,dur,ref,views,desc='',yt='',files=[],min='')=>({id:'pg'+(++_pgid),t,who,sr,d,dur,ref,views,desc,yt,files,link:'',min});
+let _pgid=0;const PG=(t,who,sr,d,dur,ref,views,desc='',yt='',files=[],min='',vis='Interno')=>({id:'pg'+(++_pgid),t,who,sr,d,dur,ref,views,desc,yt,files,link:'',min,visibility:vis});
 const PREGS=[
  PG('O Chamado de Abraão','Pr. Rafael Pereira','sr1','2026-09-15',52,'Gênesis 12:1-9',2140,'Deus chama, Abraão vai. O que isso diz sobre os nossos próprios chamados?','https://youtube.com/watch?v=aBr4a0',['Esboço-O-Chamado.pdf']),
  PG('Graça Suficiente','Pr. Marcos Lima','sr2','2026-09-08',44,'2 Coríntios 12:9',1876,'Quando a fraqueza vira lugar de encontro.','https://youtube.com/watch?v=Gr4c4'),
  PG('Identidade em Cristo','Pr. Rafael Pereira','sr3','2026-09-01',48,'Efésios 1:3-14',1420,'Quem Deus diz que você é — e por que isso muda a forma como você vive.','https://www.youtube.com/watch?v=M7lc1UVf-VE',['Slides-Identidade-em-Cristo.pdf']),
  PG('O Espírito Santo no Cotidiano','Pra. Ana Costa','sr4','2026-08-25',39,'Gálatas 5:16-25',908,'','',[],'Jovens e Adolescentes'),
- PG('Um coração grato','Pr. Otávio Lins','','2026-08-18',36,'Salmos 103',612,'Mensagem avulsa de Ação de Graças.'),
+ PG('Um coração grato','Pr. Otávio Lins','','2026-08-18',36,'Salmos 103',612,'Mensagem avulsa de Ação de Graças.','',[],'','Público'),
 ];
-Object.assign(S,{pgq:'',pgf:'todas',pgSr:null,preg:null});
+Object.assign(S,{pgq:'',pgf:'todas',pgv:null,preg:null});
 const srById=id=>PSERIES.find(s=>s.id===id);
 const pgThumb=(p,big)=>{const s=srById(p.sr),h=s?s.h:5;return `<div class="ct-th ${big?'big':''}" style="background:${thumbBg(h)}"><span class="ct-q">“</span><b>${esc(p.ref||p.t)}</b>${s?`<small>${esc(s.n)}</small>`:''}<em>${p.dur} min</em>${p.yt?`<i class="ct-play">${ic('play',big?22:16)}</i>`:''}</div>`;};
 const nfmt=n=>n>=1000?(n/1000).toFixed(1).replace('.0','').replace('.',',')+' mil':String(n);
+/* visibilidade padrão de Conteúdo:{min -> Restrito; senão a explícita; senão Interno */
+const ctVis=o=>o.min?'Restrito':(o.visibility||'Interno');
+/* chips de visibilidade (Público · Interno · Restrito) com contagem — padrão de Conteúdo */
+const VIS_ALL=['Público','Interno','Restrito'];
+const visChips=(act,cur,count)=>`<span class="ct-sep"></span>${VIS_ALL.map(v=>`<button class="chipf ${cur===v?'on':''}" data-a="${act}" data-v="${v}">${v}<small>${count(v)}</small></button>`).join('')}`;
 function pgPage(){
  if(S.preg)return pgEdit();
- const q=norm(S.pgq),l=PREGS.filter(p=>(S.pgf==='todas'||(S.pgf==='serie'?p.sr:!p.sr))&&(!S.pgSr||(NX_SERIES.find(x=>x.id===S.pgSr)||{items:[]}).items.includes(p.id))&&(!q||norm(p.t+' '+p.who+' '+p.ref+' '+(srById(p.sr)?.n||'')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
+  const q=norm(S.pgq),l=PREGS.filter(p=>(S.pgf==='todas'||(S.pgf==='serie'?p.sr:!p.sr))&&(!S.pgv||ctVis(p)===S.pgv)&&(!q||norm(p.t+' '+p.who+' '+p.ref+' '+(srById(p.sr)?.n||'')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
  const top=PREGS.slice().sort((a,b)=>b.views-a.views)[0];
  return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Pregações</h1><p class="lede">Vídeos e áudios das mensagens</p></div><div class="pact">${rpBtn('conteudo','pregacoes')}<button class="btn pri" data-a="pgNew">${ic('plus',15,2.2)}Nova pregação</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Pregações</span><span class="kv">${PREGS.length}</span><span class="kd">${PREGS.filter(p=>p.d>=addD(NOWD,-30)).length} no último mês</span></div><div class="k4"><span class="kl">Visualizações</span><span class="kv">${nfmt(PREGS.reduce((a,p)=>a+p.views,0))}</span><span class="kd">somando todas</span></div><div class="k4"><span class="kl">Séries</span><span class="kv">${PSERIES.length}</span><span class="kd">${PREGS.filter(p=>!p.sr).length} avulsa${PREGS.filter(p=>!p.sr).length===1?'':'s'}</span></div><div class="k4"><span class="kl">Mais assistida</span><span class="kv sp-kvt">${esc(top.t)}</span><span class="kd">${nfmt(top.views)} visualizações</span></div></section>
- <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="pgq" placeholder="Buscar título, pregador ou passagem" value="${esc(S.pgq)}" autocomplete="off"></label>
-  <div class="chips">${[['todas','Todas'],['serie','Em série'],['avulsa','Avulsas']].map(c=>`<button class="chipf ${S.pgf===c[0]&&!S.pgSr?'on':''}" data-a="pgF" data-v="${c[0]}">${c[1]}</button>`).join('')}<span class="ct-sep"></span>${PSERIES.map(s=>`<button class="chipf ct-src ${S.pgSr===s.id?'on':''}" data-a="pgSr" data-v="${s.id}"><i style="background:${HUES[s.h][1]}"></i>${esc(s.n)}<small>${PREGS.filter(p=>p.sr===s.id).length}</small></button>`).join('')}</div></div>
+  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="pgq" placeholder="Buscar título, pregador ou passagem" value="${esc(S.pgq)}" autocomplete="off"></label>
+   <div class="chips ct-scope">${[['todas','Todas'],['serie','Em série'],['avulsa','Avulsas']].map(c=>`<button class="chipf ${S.pgf===c[0]?'on':''}" data-a="pgF" data-v="${c[0]}">${c[1]}</button>`).join('')}${visChips('pgV',S.pgv,v=>PREGS.filter(p=>ctVis(p)===v).length)}</div></div>
  ${l.length?`<div class="ct-grid rise" style="--d:3">${l.map(p=>`<article class="card ct-pc" tabindex="0" data-a="pgOpen" data-v="${p.id}">${pgThumb(p)}<div class="ct-pb"><b>${esc(p.t)}</b><span class="ct-who">${avN(p.who.replace(/^Pra?\. /,''))}${esc(p.who)}</span><div class="ct-pm"><span>${fmtD(p.d)}</span><span>${ic('eye',13)}${nfmt(p.views)}</span>${p.min?`<span class="ct-min">${esc(p.min)}</span>`:''}${p.files.length?`<span>${ic('file',13)}${p.files.length}</span>`:''}</div></div></article>`).join('')}</div>`
  :'<section class="card mempty rise"><p>Nenhuma pregação aqui.</p><span>Nada corresponde a esse filtro.</span></section>'}`;
 }
@@ -73,23 +78,31 @@ function pgAfter(){const p=S.preg&&PREGS.find(x=>x.id===S.preg);
 /* ---------- Músicas ---------- */
 const SCATS=['Adoração','Louvor','Hino','Infantil'];
 const KEYS=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-let _sgid=0;const SG=(n,art,key,bpm,cat,yt=true,res={},min='')=>({id:'sg'+(++_sgid),n,art,key,bpm,cat,yt:yt?'https://youtube.com/watch?v=x'+_sgid:'',res,min});
-const SONGS=[SG('Majestade','Fernandinho','G',68,'Adoração',true,{cifra:1,vs:1}),SG('Oceanos','Hillsong','D',72,'Adoração',true,{cifra:1,mp3:1,kit:1}),SG('Deus Cuida de Mim','Ministério Zoe','A',124,'Infantil',false,{cifra:1},'Kids'),SG('Quão Grande és Tu','Tradicional','E',80,'Hino',true,{cifra:1,mapa:1}),SG('Aclame ao Senhor','Diante do Trono','A',132,'Louvor',true,{cifra:1,vs:1,kit:1},'Louvor'),SG('Grande é o Senhor','Adhemar de Campos','G',96,'Louvor',true,{})];
+let _sgid=0;const SG=(n,art,key,bpm,cat,yt=true,res={},min='',vis='Interno')=>({id:'sg'+(++_sgid),n,art,key,bpm,cat,yt:yt?'https://youtube.com/watch?v=x'+_sgid:'',res,min,visibility:vis});
+const SONGS=[SG('Majestade','Fernandinho','G',68,'Adoração',true,{cifra:1,vs:1},'','Público'),SG('Oceanos','Hillsong','D',72,'Adoração',true,{cifra:1,mp3:1,kit:1},'','Público'),SG('Deus Cuida de Mim','Ministério Zoe','A',124,'Infantil',false,{cifra:1},'Kids'),SG('Quão Grande és Tu','Tradicional','E',80,'Hino',true,{cifra:1,mapa:1},'','Público'),SG('Aclame ao Senhor','Diante do Trono','A',132,'Louvor',true,{cifra:1,vs:1,kit:1},'Louvor'),SG('Grande é o Senhor','Adhemar de Campos','G',96,'Louvor',true,{})];
 const SRES=[['cifra','Cifra','file'],['mp3','MP3','music'],['vs','VS','layers'],['kit','Kit de voz','mic'],['mapa','Mapa vocal','route']];
-Object.assign(S,{sgq:'',sgf:'todas'});
+/* apoio ao cantor: tom com relativo, andamento com o clima, recursos legíveis */
+const SG_KEY_REL={C:'Am',D:'Bm',E:'Cm',F:'Dm',G:'Em',A:'Bm',B:'C#m','C#':'D#m','D#':'F#m','F#':'A#m',Am:'C',Bm:'D',Cm:'Eb',Dm:'F',Em:'G',Fm:'Ab',Gm:'Bb'};
+const sgKeyRel=k=>SG_KEY_REL[k]||'';
+const BPM_FEEL=[[80,'Lento'],[100,'Moderado'],[120,'Animado'],[1e4,'Rápido']];
+const bpmFeel=b=>(BPM_FEEL.find(f=>b<f[0])||[0,'Rápido'])[1];
+Object.assign(S,{sgq:'',sgf:'todas',sgv:null});
+const sgRes=s=>{const r=SRES.filter(x=>s.res[x[0]]);return r.length?r.map(x=>`<span class="sg-rp ${x[0]==='cifra'?'':'x'}" title="${x[1]}">${x[1]}</span>`).join(''):'<span class="sg-no">sem material</span>';};
+const sgRow=s=>`<div class="sg-row" tabindex="0" data-a="sgEdit" data-v="${s.id}">
+    <span class="ct-sv" style="${s.yt?`background:${thumbBg(SONGS.indexOf(s))}`:''}">${s.yt?ic('play',14):`<small>sem<br>vídeo</small>`}</span>
+    <span class="ct-sn"><b>${esc(s.n)}</b><span class="sg-ar">${esc(s.art)}<i class="sg-vis nx-v-${ctVis(s)==='Público'?'pub':ctVis(s)==='Interno'?'int':'res'}">${ctVis(s)}</i>${s.min?`<i class="sg-min">${esc(s.min)}</i>`:''}</span></span>
+    <span class="ct-key" title="Tom ${esc(s.key)}${sgKeyRel(s.key)?' · relativo '+esc(sgKeyRel(s.key)):''}"><b>${esc(s.key)}</b>${sgKeyRel(s.key)?`<small>${esc(sgKeyRel(s.key))}</small>`:''}</span>
+    <span class="ct-bpm" style="--bt:${(60/s.bpm).toFixed(3)}s"><i></i><b>${s.bpm}</b><small>bpm · ${bpmFeel(s.bpm)}</small></span>
+    <span class="ct-res">${sgRes(s)}</span></div>`;
 function sgPage(){
- const q=norm(S.sgq),l=SONGS.filter(s=>(S.sgf==='todas'||(S.sgf==='novideo'?!s.yt:s.cat===S.sgf))&&(!q||norm(s.n+' '+s.art).includes(q)));const nov=SONGS.filter(s=>!s.yt).length;
- return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Músicas</h1><p class="lede">O repertório do louvor, com tom, andamento e materiais de ensaio</p></div><div class="pact">${rpBtn('conteudo','musicas')}<button class="btn pri" data-a="sgNew">${ic('plus',15,2.2)}Nova música</button></div></header>
- <section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Músicas</span><span class="kv">${SONGS.length}</span><span class="kd">em ${new Set(SONGS.map(s=>s.cat)).size} categorias</span></div><div class="k4"><span class="kl">Com material de ensaio</span><span class="kv">${SONGS.filter(s=>Object.keys(s.res).length>1).length}</span><span class="kd">cifra e mais algum recurso</span></div><div class="k4"><span class="kl">Sem vídeo</span><span class="kv" style="${nov?'color:var(--st-sol)':''}">${nov}</span><span class="kd">${nov?'vale adicionar uma referência':'todas com vídeo'}</span></div></section>
- <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="sgq" placeholder="Buscar música ou artista" value="${esc(S.sgq)}" autocomplete="off"></label><div class="chips">${[['todas','Todas'],...SCATS.map(c=>[c,c]),['novideo','Sem vídeo']].map(c=>`<button class="chipf ${S.sgf===c[0]?'on':''}" data-a="sgF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
-  ${l.length?`<div class="ct-sl">${l.map((s,i)=>`<div class="ct-sr" tabindex="0" data-a="sgEdit" data-v="${s.id}">
-   <span class="ct-sv" style="${s.yt?`background:${thumbBg(SONGS.indexOf(s))}`:''}">${s.yt?ic('play',14):`<small>sem<br>vídeo</small>`}</span>
-   <span class="ct-sn"><b>${esc(s.n)}</b><span>${esc(s.art)}</span></span>
-   <span class="ct-key" title="Tom">${esc(s.key)}</span>
-   <span class="ct-bpm" style="--bt:${(60/s.bpm).toFixed(3)}s"><i></i><b>${s.bpm}</b><small>bpm</small></span>
-   <span class="ct-cat">${esc(s.cat)}${s.min?`<small>${esc(s.min)}</small>`:''}</span>
-   <span class="ct-res">${SRES.map(r=>`<i class="${s.res[r[0]]?'on':''}" title="${r[1]}${s.res[r[0]]?'':' (não tem)'}">${ic(r[2],12)}</i>`).join('')}</span></div>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma música aqui.</p><span>Nada corresponde a esse filtro.</span></div>'}
-  <div class="tfoot"><span>${l.length} música${l.length===1?'':'s'}</span><span class="soft">O ponto pulsa no andamento da música</span></div></section>`;
+  const q=norm(S.sgq),l=SONGS.filter(s=>(S.sgf==='todas'||(S.sgf==='novideo'?!s.yt:s.cat===S.sgf))&&(!S.sgv||ctVis(s)===S.sgv)&&(!q||norm(s.n+' '+s.art).includes(q)));const nov=SONGS.filter(s=>!s.yt).length;
+  const cats=[...SCATS,...new Set(l.map(s=>s.cat).filter(c=>!SCATS.includes(c)))].filter(c=>l.some(s=>s.cat===c));
+  const groups=cats.map(c=>({c,items:l.filter(s=>s.cat===c)}));
+  return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Músicas</h1><p class="lede">O repertório do louvor, com tom, andamento e materiais de ensaio</p></div><div class="pact">${rpBtn('conteudo','musicas')}<button class="btn pri" data-a="sgNew">${ic('plus',15,2.2)}Nova música</button></div></header>
+  <section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Músicas</span><span class="kv">${SONGS.length}</span><span class="kd">em ${new Set(SONGS.map(s=>s.cat)).size} categorias</span></div><div class="k4"><span class="kl">Com material de ensaio</span><span class="kv">${SONGS.filter(s=>Object.keys(s.res).length>1).length}</span><span class="kd">cifra e mais algum recurso</span></div><div class="k4"><span class="kl">Sem vídeo</span><span class="kv" style="${nov?'color:var(--st-sol)':''}">${nov}</span><span class="kd">${nov?'vale adicionar uma referência':'todas com vídeo'}</span></div></section>
+  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="sgq" placeholder="Buscar música ou artista" value="${esc(S.sgq)}" autocomplete="off"></label><div class="chips ct-scope">${[['todas','Todas'],...SCATS.map(c=>[c,c]),['novideo','Sem vídeo']].map(c=>`<button class="chipf ${S.sgf===c[0]?'on':''}" data-a="sgF" data-v="${c[0]}">${c[1]}</button>`).join('')}${visChips('sgV',S.sgv,v=>SONGS.filter(s=>ctVis(s)===v).length)}</div></div>
+   ${l.length?`<div class="sg-rep">${groups.map(g=>`<div class="sg-grp"><div class="sg-gh"><span class="sg-gt">${esc(g.c)}</span><span class="sg-gn">${g.items.length} música${g.items.length===1?'':'s'}</span></div>${g.items.map(sgRow).join('')}</div>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma música aqui.</p><span>Nada corresponde a esse filtro.</span></div>'}
+   <div class="tfoot"><span>${l.length} música${l.length===1?'':'s'}</span><span class="soft">O ponto pulsa no andamento da música</span></div></section>`;
 }
 function sgForm(id){const s=id?SONGS.find(x=>x.id===id):null,v=s?{...s,res:{...s.res}}:{n:'',art:'',key:'G',bpm:'',cat:'Louvor',yt:'',res:{},min:''};let minor=v.key.endsWith('m');let k=v.key.replace(/m$/,'');
  openDlg(`${dlgHead(s?esc(s.n):'Nova música',s?esc(s.art):'Tom e andamento ajudam a banda a ensaiar.')}<form id="sgF" class="fgrid" novalidate>
@@ -116,23 +129,23 @@ let _jcid=0,_alid=0;const AL=(t,on=true)=>({id:'al'+(++_alid),t,on,desc:'',yt:''
 const CU=(n,desc,aulas,on=true)=>({id:'cu'+(++_jcid),n,desc,on,aulas:aulas.map(a=>AL(a))});
 const PP=(n,prog,cert=false,certC=[])=>({n,prog,cert,certC});
 const JORNS=[
- {id:'j1',n:'Fundamentos da Fé',icon:'anchor',h:0,wk:12,st:'ativa',courses:[CU('O que é a Fé','Fundamentos racionais e existenciais da fé cristã.',['Por que acreditar em Deus?','A fé como resposta pessoal','Fé e obras']),CU('A Palavra de Deus','Como a Bíblia foi formada, interpretada e vivida no dia a dia.',['Como a Bíblia chegou até nós','Lendo com contexto','A Palavra que transforma','Hábitos de leitura']),CU('Oração e Comunhão','A oração como diálogo com Deus, sozinho e em comunidade.',['O que é orar','O Pai Nosso','Oração em comunidade','Jejum','Perseverança'])],
+ {id:'j1',n:'Fundamentos da Fé',icon:'anchor',h:0,wk:12,st:'ativa',visibility:'Público',courses:[CU('O que é a Fé','Fundamentos racionais e existenciais da fé cristã.',['Por que acreditar em Deus?','A fé como resposta pessoal','Fé e obras']),CU('A Palavra de Deus','Como a Bíblia foi formada, interpretada e vivida no dia a dia.',['Como a Bíblia chegou até nós','Lendo com contexto','A Palavra que transforma','Hábitos de leitura']),CU('Oração e Comunhão','A oração como diálogo com Deus, sozinho e em comunidade.',['O que é orar','O Pai Nosso','Oração em comunidade','Jejum','Perseverança'])],
   people:[PP('Gabriel Souza',[100,100,100]),PP('Isabela Rocha',[100,100,25]),PP('Fernanda Lima',[100,100,100],true,[0,1,2]),PP('Lucas Teixeira',[100,50,0]),PP('Clara Nunes',[67,0,0])],more:79},
- {id:'j2',n:'Vida de Oração',icon:'hands',h:1,wk:6,st:'ativa',courses:[CU('Primeiros passos','Criando o hábito diário.',['Um lugar e um horário','Diário de oração']),CU('Intercessão','Orando pelos outros.',['Quem é o intercessor','Orando pela cidade','Vigílias'])],people:[PP('Renata Campos',[100,50]),PP('Igor Santana',[50,0]),PP('Sofia Barros',[100,100])],more:54},
- {id:'j3',n:'Caráter Cristão',icon:'sparkle',h:2,wk:8,st:'concluida',courses:[CU('O fruto do Espírito','Gálatas 5 na prática.',['Amor','Alegria e paz','Paciência','Domínio próprio'])],people:[PP('Daniela Rocha',[100],true,[0]),PP('Bruno Reis',[100]),PP('Marina Costa',[75])],more:36},
+ {id:'j2',n:'Vida de Oração',icon:'hands',h:1,wk:6,st:'ativa',visibility:'Interno',courses:[CU('Primeiros passos','Criando o hábito diário.',['Um lugar e um horário','Diário de oração']),CU('Intercessão','Orando pelos outros.',['Quem é o intercessor','Orando pela cidade','Vigílias'])],people:[PP('Renata Campos',[100,50]),PP('Igor Santana',[50,0]),PP('Sofia Barros',[100,100])],more:54},
+ {id:'j3',n:'Caráter Cristão',icon:'sparkle',h:2,wk:8,st:'concluida',visibility:'Público',courses:[CU('O fruto do Espírito','Gálatas 5 na prática.',['Amor','Alegria e paz','Paciência','Domínio próprio'])],people:[PP('Daniela Rocha',[100],true,[0]),PP('Bruno Reis',[100]),PP('Marina Costa',[75])],more:36},
  {id:'j4',n:'Liderança Servidora',icon:'users',h:4,wk:10,st:'rascunho',courses:[],people:[],more:0},
 ];
-Object.assign(S,{jf:'todas',jq:'',jor:null,jtab:'trilha',cur:null,ctab:'det'});
+Object.assign(S,{jf:'todas',jq:'',jv:null,jor:null,jtab:'trilha',cur:null,ctab:'det'});
 const CSOLO=[
- {id:'cs1',n:'',solo:true,min:'Louvor',courses:[CU('Fundamentos de Louvor','Treinamento básico para novos integrantes do ministério de louvor.',['O que é adoração','Postura no altar'])],people:[PP('Helena Duarte',[100]),PP('Bruno Reis',[50]),PP('Elisa Moura',[100],true,[0])],more:0},
- {id:'cs2',n:'',solo:true,min:'Louvor',courses:[CU('Teoria Musical Básica','Fundamentos de teoria musical para músicos do ministério.',['Notas, escalas e acordes'])],people:[PP('Bruno Reis',[100]),PP('Diego Faria',[0])],more:0},
- {id:'cs3',n:'',solo:true,min:'',courses:[CU('Primeiros passos na Bíblia','Para quem está começando a ler a Bíblia agora.',['Como ler a Bíblia','Antigo e Novo Testamento','Montando um plano de leitura'],false)],people:[],more:0},
+ {id:'cs1',n:'',solo:true,min:'Louvor',visibility:'Restrito',courses:[CU('Fundamentos de Louvor','Treinamento básico para novos integrantes do ministério de louvor.',['O que é adoração','Postura no altar'])],people:[PP('Helena Duarte',[100]),PP('Bruno Reis',[50]),PP('Elisa Moura',[100],true,[0])],more:0},
+ {id:'cs2',n:'',solo:true,min:'Louvor',visibility:'Restrito',courses:[CU('Teoria Musical Básica','Fundamentos de teoria musical para músicos do ministério.',['Notas, escalas e acordes'])],people:[PP('Bruno Reis',[100]),PP('Diego Faria',[0])],more:0},
+ {id:'cs3',n:'',solo:true,min:'',visibility:'Público',courses:[CU('Primeiros passos na Bíblia','Para quem está começando a ler a Bíblia agora.',['Como ler a Bíblia','Antigo e Novo Testamento','Montando um plano de leitura'],false)],people:[],more:0},
 ];
 (()=>{const c=JORNS[0].courses[0].aulas,o=JORNS[1].courses[0].aulas,f=CSOLO[1].courses[0].aulas;c[0].yt='https://youtube.com/watch?v=fe01';c[0].files=[{n:'Slides-Por-que-acreditar.pdf',kb:1840}];c[1].yt='https://youtube.com/watch?v=fe02';o[1].files=[{n:'Modelo-Diario-de-Oracao.pdf',kb:420},{n:'Plano-30-dias.docx',kb:96}];f[0].files=[{n:'Apostila-Teoria-Musical.pdf',kb:3260},{n:'Exercicios-escalas.pdf',kb:880},{n:'Audio-intervalos.mp3',kb:5400}];})();
 const alSum=a=>{const p=[];if(a.yt)p.push(`${ic('play',11)}Vídeo`);if(a.files.length)p.push(`${ic('file',11)}${a.files.length} arquivo${a.files.length===1?'':'s'}`);if(a.ref)p.push(esc(a.ref));return p.length?p.join(' · '):`<span class="al-none">${ic('alert',11,2.4)}Sem vídeo nem arquivos</span>`;};
 const alFiles=fs=>fs.length?fs.map((f,i)=>`<div class="ct-file">${fTile(f.n,38)}<span class="dkt"><b>${esc(f.n)}</b><span>${fSize(f.kb)}</span></span><button type="button" class="ibtn sm" data-a="alFDel" data-v="${i}" aria-label="Remover ${esc(f.n)}">${ic('x',13)}</button></div>`).join('')+`<button type="button" class="btn ghost sm" data-a="alFUp" style="margin-top:8px">${ic('upload',13)}Enviar mais</button>`:`<div class="ct-drop" data-a="alFUp">${ic('upload',18)}<span><b>Apostila, slides, áudio ou exercícios</b><small>Arraste aqui ou clique para enviar · PDF, DOCX, PPTX, MP3 até 50 MB</small></span></div>`;
 const jById=id=>JORNS.find(j=>j.id===id)||CSOLO.find(j=>j.id===id);
-Object.assign(S,{csq:'',csf:'todos'});
+Object.assign(S,{csq:'',csf:'todos',csv:null});
 const csAll=()=>{const seen=new Set(),out=[];[...JORNS.flatMap(j=>j.courses.map(c=>({c,j}))),...CSOLO.map(j=>({c:j.courses[0],j}))].forEach(r=>{if(seen.has(r.c.id))return;seen.add(r.c.id);out.push(r);});return out;};
 const csKind=r=>r.j.solo?(r.j.min?'min':'av'):'jor';
 function csPage(){
@@ -173,10 +186,10 @@ const jPill=s=>`<span class="stp" style="--c:${JST[s][1]};--b:${JST[s][2]}"><i><
 const ring=(pct,sz=56,col)=>{const r=(sz-8)/2,c=2*Math.PI*r;return `<svg class="ct-ring" width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${col||'var(--brand)'}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct/100)}" transform="rotate(-90 ${sz/2} ${sz/2})" style="--c:${c}"/><text x="50%" y="50%" dy=".35em" text-anchor="middle">${pct}%</text></svg>`;};
 function joPage(){
  if(S.jor&&S.cur)return cuDetail();if(S.jor)return joDetail();
- const q=norm(S.jq),l=JORNS.filter(j=>(S.jf==='todas'||j.st===S.jf)&&(!q||norm(j.n).includes(q)));const act=JORNS.filter(j=>j.st==='ativa');
+  const q=norm(S.jq),l=JORNS.filter(j=>(S.jf==='todas'||j.st===S.jf)&&(!S.jv||ctVis(j)===S.jv)&&(!q||norm(j.n).includes(q)));const act=JORNS.filter(j=>j.st==='ativa');
  return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Jornadas</h1><p class="lede">Trilhas de discipulado em várias semanas, curso a curso</p></div><div class="pact">${rpBtn('conteudo','jornadas')}<button class="btn pri" data-a="joNew">${ic('plus',15,2.2)}Nova jornada</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Jornadas ativas</span><span class="kv">${act.length}</span><span class="kd">${JORNS.length-act.length} entre rascunho e concluídas</span></div><div class="k4"><span class="kl">Pessoas inscritas</span><span class="kv">${JORNS.reduce((a,j)=>a+jCount(j),0)}</span><span class="kd">somando todas</span></div><div class="k4"><span class="kl">Progresso médio</span><span class="kv">${Math.round(act.reduce((a,j)=>a+jProg(j),0)/Math.max(1,act.length))}<small style="font-size:.55em">%</small></span><span class="kd">nas jornadas ativas</span></div><div class="k4"><span class="kl">Certificados prontos</span><span class="kv" style="color:var(--st-int)">${JORNS.reduce((a,j)=>a+j.people.filter(p=>pAvg(p.prog)===100&&!p.cert).length,0)}</span><span class="kd">pessoas concluíram e aguardam</span></div></section>
- <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="jq" placeholder="Buscar jornada" value="${esc(S.jq)}" autocomplete="off"></label><div class="chips">${[['todas','Todas'],['ativa','Ativas'],['concluida','Concluídas'],['rascunho','Rascunho']].map(c=>`<button class="chipf ${S.jf===c[0]?'on':''}" data-a="joF" data-v="${c[0]}">${c[1]}<small>${c[0]==='todas'?JORNS.length:JORNS.filter(j=>j.st===c[0]).length}</small></button>`).join('')}</div></div>
+  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="jq" placeholder="Buscar jornada" value="${esc(S.jq)}" autocomplete="off"></label><div class="chips ct-scope">${[['todas','Todas'],['ativa','Ativas'],['concluida','Concluídas'],['rascunho','Rascunho']].map(c=>`<button class="chipf ${S.jf===c[0]?'on':''}" data-a="joF" data-v="${c[0]}">${c[1]}<small>${c[0]==='todas'?JORNS.length:JORNS.filter(j=>j.st===c[0]).length}</small></button>`).join('')}${visChips('joV',S.jv,v=>JORNS.filter(j=>ctVis(j)===v).length)}</div></div>
  <div class="ct-jg rise" style="--d:3">${l.map(j=>{const pr=jProg(j),au=j.courses.reduce((a,c)=>a+c.aulas.length,0);return `<article class="card ct-jc" tabindex="0" data-a="joOpen" data-v="${j.id}"><div class="ct-jh" style="background:${thumbBg(j.h)}"><span class="ct-ji">${ic(j.icon,22)}</span>${jPill(j.st)}</div>
   <div class="ct-jb"><b>${esc(j.n)}</b><span class="ct-jm">${j.wk} semanas · ${j.courses.length} curso${j.courses.length===1?'':'s'} · ${au} aulas</span>
    <div class="ct-path">${j.courses.length?j.courses.map((c,i)=>`<i title="${esc(c.n)}" class="${pAvg(j.people.map(p=>p.prog[i]||0))>=60?'hi':''}"></i>`).join('<em></em>'):'<span class="soft">Nenhum curso ainda</span>'}</div>
@@ -250,15 +263,15 @@ function simpleForm(title,sub,fields,label,onOk){openDlg(`${dlgHead(title,sub)}<
  f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{closeDlg();onOk(f);},500);});}
 const CTA={
  pgNew:()=>pgForm(),pgOpen:v=>{S.preg=v;ctGo();},pgBack:()=>{S.preg=null;ctGo();},
- pgF:v=>{S.pgf=v;S.pgSr=null;ctRe();},pgSr:v=>{S.pgSr=S.pgSr===v?null:v;S.pgf='todas';ctRe();},
+  pgF:v=>{S.pgf=v;S.pgv=null;ctRe();},pgV:v=>{S.pgv=S.pgv===v?null:v;S.pgf='todas';ctRe();},
  pgFile:()=>{const p=PREGS.find(x=>x.id===S.preg);p.files.push(['Esboço','Slides','Áudio'][p.files.length%3]+'-'+p.t.split(' ').slice(0,2).join('-')+(p.files.length%3===2?'.mp3':'.pdf'));$('#pgFl').innerHTML=pgFiles(p);toast('Arquivo enviado');},
  pgFileDel:v=>{const p=PREGS.find(x=>x.id===S.preg),f=p.files.splice(+v,1)[0];$('#pgFl').innerHTML=pgFiles(p);toast(`${f} removido`,()=>{p.files.splice(+v,0,f);$('#pgFl').innerHTML=pgFiles(p);});},
  pgDel:v=>{const p=PREGS.find(x=>x.id===v);confirmDel({title:'Excluir esta pregação?',body:`“${esc(p.t)}” sai do app, junto com os arquivos anexados.`,onConfirm:()=>{const i=PREGS.indexOf(p);PREGS.splice(i,1);S.preg=null;ctGo();toast('Pregação excluída',()=>{PREGS.splice(i,0,p);ctRe();});}});},
- sgNew:()=>sgForm(),sgEdit:v=>sgForm(v),sgF:v=>{S.sgf=v;ctRe();},
+  sgNew:()=>sgForm(),sgEdit:v=>sgForm(v),sgF:v=>{S.sgf=v;S.sgv=null;ctRe();},sgV:v=>{S.sgv=S.sgv===v?null:v;S.sgf='todas';ctRe();},
  sgDel:v=>{const s=SONGS.find(x=>x.id===v);confirmDel({title:`Excluir ${esc(s.n)}?`,body:'Ela sai do repertório e das escalas futuras de louvor.',onConfirm:()=>{const i=SONGS.indexOf(s);SONGS.splice(i,1);ctRe();toast('Música excluída',()=>{SONGS.splice(i,0,s);ctRe();});}});},
- joF:v=>{S.jf=v;ctRe();},joOpen:v=>{S.jor=v;S.jtab='trilha';S.cur=null;ctGo();},joBack:()=>{S.jor=null;S.cur=null;ctGo();},joTab:v=>{S.jtab=v;ctRe();},
+ joF:v=>{S.jf=v;S.jv=null;ctRe();},joV:v=>{S.jv=S.jv===v?null:v;S.jf='todas';ctRe();},joOpen:v=>{S.jor=v;S.jtab='trilha';S.cur=null;ctGo();},joBack:()=>{S.jor=null;S.cur=null;ctGo();},joTab:v=>{S.jtab=v;ctRe();},
  joNew:()=>simpleForm('Nova jornada','Uma trilha de discipulado com vários cursos.',`<label class="fld"><span class="fl">Título</span><input name="n" data-req placeholder="Ex.: Liderança Servidora" autocomplete="off"></label><div class="fld"><span class="fl">Ícone</span><div class="cm-sw ct-icp">${['anchor','hands','sparkle','book','flame','heart'].map((x,i)=>`<label><input type="radio" name="icon" value="${x}" ${i?'':'checked'}><span>${ic(x,16)}</span></label>`).join('')}</div></div><label class="fld"><span class="fl">Duração</span><span class="sp-unit"><input type="number" name="wk" value="8" min="1"><em>semanas</em></span></label><label class="tog wide"><input type="checkbox" name="cert" checked><span class="sw"></span><span><b>Gera certificado</b><small>Quem concluir todos os cursos recebe um certificado, emitido por quem tem Conteúdo.</small></span></label>`,'Criar jornada',f=>{const j={id:'j'+Date.now(),n:f.n.value.trim(),icon:f.icon.value,h:JORNS.length%6,wk:+f.wk.value||8,st:'rascunho',cert:f.cert.checked,courses:[],people:[],more:0};JORNS.push(j);S.jor=j.id;S.jtab='trilha';ctGo();toast('Jornada criada como rascunho — adicione os cursos');}),
- cuOpen:(v,b,e)=>{if(e&&e.target.closest('.cm-grip'))return;S.cur=v;S.ctab='det';ctGo();},cuBack:()=>{S.cur=null;S.jtab='trilha';if(S.active==='cursos')S.jor=null;ctGo();},cuTrail:()=>{S.active='jornadas';S.cur=null;S.jtab='trilha';ctGo();},csF:v=>{S.csf=v;ctRe();},csNew:()=>csForm(),csOpen:v=>{const [j,c]=v.split('|');S.jor=j;S.cur=c;S.ctab='det';ctGo();},cuTab:v=>{S.ctab=v;ctRe();},
+ cuOpen:(v,b,e)=>{if(e&&e.target.closest('.cm-grip'))return;S.cur=v;S.ctab='det';ctGo();},cuBack:()=>{S.cur=null;S.jtab='trilha';if(S.active==='cursos')S.jor=null;ctGo();},cuTrail:()=>{S.active='jornadas';S.cur=null;S.jtab='trilha';ctGo();},csF:v=>{S.csf=v;S.csv=null;ctRe();},csV:v=>{S.csv=S.csv===v?null:v;S.csf='todos';ctRe();},csNew:()=>csForm(),csOpen:v=>{const [j,c]=v.split('|');S.jor=j;S.cur=c;S.ctab='det';ctGo();},cuTab:v=>{S.ctab=v;ctRe();},
  cuNew:()=>{const j=jById(S.jor);simpleForm('Novo curso',`Entra como curso ${j.courses.length+1} da trilha.`,`<label class="fld"><span class="fl">Nome do curso</span><input name="n" data-req autocomplete="off"></label><label class="fld"><span class="fl cm-cnt">Descrição <small>opcional</small></span><textarea class="ta" name="desc" rows="3" maxlength="500"></textarea></label>`,'Adicionar curso',f=>{const c=CU(f.n.value.trim(),f.desc.value.trim(),[]);j.courses.push(c);j.people.forEach(p=>p.prog.push(0));ctRe();toast(`${c.n} adicionado à trilha`);});},
  cuDel:v=>{const j=jById(S.jor),c=cuById(j,v);confirmDel({title:`Excluir ${esc(c.n)}?`,body:`As ${c.aulas.length} aulas e o progresso dos inscritos neste curso serão apagados.`,typed:c.n,onConfirm:()=>{if(j.solo){CSOLO.splice(CSOLO.indexOf(j),1);}else{const i=j.courses.indexOf(c);j.courses.splice(i,1);j.people.forEach(p=>p.prog.splice(i,1));}S.cur=null;S.jtab='trilha';if(S.active==='cursos'||j.solo)S.jor=null;ctGo();toast('Curso excluído');}});},
  alNew:()=>{const c=cuById(jById(S.jor),S.cur);simpleForm('Nova aula',`Aula ${c.aulas.length+1} do curso. Vídeo, arquivos e versículo você adiciona clicando nela.`,`<label class="fld"><span class="fl">Título</span><input name="t" data-req autocomplete="off"></label>`,'Adicionar aula',f=>{c.aulas.push(AL(f.t.value.trim()));ctRe();toast('Aula adicionada');});},
@@ -294,14 +307,14 @@ const CTA={
 
 /* ---------- Material de apoio ---------- */
 const MLINKS=[['jornada','Jornada','route'],['disc','Discipulado','heart'],['casas','Casas de Apascentamento','home'],['curso','Curso','book'],['outro','Outro','layers']];
-let _mtid=0;const MTR=(t,desc,d,lk,ref,files,min='',url='')=>({id:'mt'+(++_mtid),t,desc,d,lk,ref,files:files.map((f,i)=>({n:f,kb:[820,1430,2310,640][i%4]})),min,url,dl:Math.round(20+Math.random()*120)});
+let _mtid=0;const MTR=(t,desc,d,lk,ref,files,min='',url='',vis='Interno')=>({id:'mt'+(++_mtid),t,desc,d,lk,ref,files:files.map((f,i)=>({n:f,kb:[820,1430,2310,640][i%4]})),min,url,visibility:vis,dl:Math.round(20+Math.random()*120)});
 const MATS=[
- MTR('Apostila — Fundamentos da Fé','Apostila de apoio para as 3 primeiras semanas da jornada.','2026-09-02','jornada','j1',['Apostila-Fundamentos-da-Fe.pdf']),
- MTR('Roteiro de Encontro — Discipulado Inicial','Roteiro passo a passo para o primeiro encontro de discipulado.','2026-08-18','disc','',['Roteiro-Discipulado-Inicial.pdf']),
- MTR('Guia do Líder de Casa','Boas práticas para condução de encontros nas Casas de Apascentamento.','2026-03-03','casas','',['Casas-de-Apascentamento_03MAR1.pdf','Dinamicas-quebra-gelo.docx','Lista-de-presenca.xlsx'],'','https://drive.google.com/casas-guia'),
+ MTR('Apostila — Fundamentos da Fé','Apostila de apoio para as 3 primeiras semanas da jornada.','2026-09-02','jornada','j1',['Apostila-Fundamentos-da-Fe.pdf'],'','','Público'),
+ MTR('Roteiro de Encontro — Discipulado Inicial','Roteiro passo a passo para o primeiro encontro de discipulado.','2026-08-18','disc','',['Roteiro-Discipulado-Inicial.pdf'],'','','Público'),
+ MTR('Guia do Líder de Casa','Boas práticas para condução de encontros nas Casas de Apascentamento.','2026-03-03','casas','',['Casas-de-Apascentamento_03MAR1.pdf','Dinamicas-quebra-gelo.docx','Lista-de-presenca.xlsx'],'','https://drive.google.com/casas-guia','Público'),
  MTR('Escala de ensaio — Louvor','Planilha com o cronograma de ensaios do semestre.','2026-07-10','outro','Ensaios',['Ensaios-2026-2.xlsx'],'Louvor','https://drive.google.com/…'),
 ];
-Object.assign(S,{mtq:'',mtf:'todos',mat:null});
+Object.assign(S,{mtq:'',mtf:'todos',mtv:null,mat:null});
 const fExt=n=>n.split('.').pop().toLowerCase();
 const fCol=e=>({pdf:['var(--st-rec-bg)','var(--st-rec)'],doc:['var(--brand-soft)','var(--brand-text)'],docx:['var(--brand-soft)','var(--brand-text)'],xlsx:['var(--st-int-bg)','var(--st-int)'],pptx:['var(--st-sol-bg)','var(--st-sol)']})[e]||['var(--surface-2)','var(--ink-muted)'];
 const fSize=kb=>kb>=1000?(kb/1000).toFixed(1).replace('.',',')+' MB':kb+' KB';
@@ -309,11 +322,11 @@ const mtLink=m=>{const L=MLINKS.find(x=>x[0]===m.lk)||MLINKS[4];const tx=m.lk===
 const fTile=(n,sz=34)=>{const e=fExt(n),c=fCol(e);return `<span class="mt-ft" style="--s:${sz}px;background:${c[0]};color:${c[1]}">${e.toUpperCase().slice(0,4)}</span>`;};
 function mtPage(){
  if(S.mat)return mtEdit();
- const q=norm(S.mtq),l=MATS.filter(m=>(S.mtf==='todos'||m.lk===S.mtf||(S.mtf==='min'&&m.min))&&(!q||norm(m.t+' '+m.desc+' '+mtLink(m).tx+' '+m.files.map(f=>f.n).join(' ')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
+  const q=norm(S.mtq),l=MATS.filter(m=>(S.mtf==='todos'||m.lk===S.mtf||(S.mtf==='min'&&m.min))&&(!S.mtv||ctVis(m)===S.mtv)&&(!q||norm(m.t+' '+m.desc+' '+mtLink(m).tx+' '+m.files.map(f=>f.n).join(' ')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
  const nf=MATS.reduce((a,m)=>a+m.files.length,0),kb=MATS.reduce((a,m)=>a+m.files.reduce((x,f)=>x+f.kb,0),0);
  return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Material de apoio</h1><p class="lede">Apostilas, roteiros e arquivos para jornadas, discipulado e Casas</p></div><div class="pact">${rpBtn('conteudo','materiais')}<button class="btn pri" data-a="mtNew">${ic('plus',15,2.2)}Novo material</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Materiais</span><span class="kv">${MATS.length}</span><span class="kd">${MATS.filter(m=>m.min).length} de ministérios</span></div><div class="k4"><span class="kl">Arquivos anexados</span><span class="kv">${nf}</span><span class="kd">${fSize(kb)} no total</span></div><div class="k4"><span class="kl">Downloads no mês</span><span class="kv">${MATS.reduce((a,m)=>a+m.dl,0)}</span><span class="kd">pelos líderes no app</span></div><div class="k4"><span class="kl">Mais baixado</span><span class="kv sp-kvt">${esc(MATS.slice().sort((a,b)=>b.dl-a.dl)[0].t.split(' — ')[0])}</span><span class="kd">${MATS.slice().sort((a,b)=>b.dl-a.dl)[0].dl} downloads</span></div></section>
- <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="mtq" placeholder="Buscar material ou arquivo" value="${esc(S.mtq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos'],...MLINKS.slice(0,4).map(x=>[x[0],x[1]]),['min','De ministério']].map(c=>`<button class="chipf ${S.mtf===c[0]?'on':''}" data-a="mtF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
+  <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="mtq" placeholder="Buscar material ou arquivo" value="${esc(S.mtq)}" autocomplete="off"></label><div class="chips ct-scope">${[['todos','Todos'],...MLINKS.slice(0,4).map(x=>[x[0],x[1]]),['min','De ministério']].map(c=>`<button class="chipf ${S.mtf===c[0]?'on':''}" data-a="mtF" data-v="${c[0]}">${c[1]}</button>`).join('')}${visChips('mtV',S.mtv,v=>MATS.filter(m=>ctVis(m)===v).length)}</div></div>
  ${l.length?`<div class="mt-grid rise" style="--d:3">${l.map(m=>{const {L,tx}=mtLink(m);return `<article class="card mt-c" tabindex="0" data-a="mtOpen" data-v="${m.id}">
   <div class="mt-stack">${m.files.slice(0,3).map((f,i)=>`<span class="mt-pg" style="--i:${i}">${fTile(f.n,30)}</span>`).join('')||`<span class="mt-pg empty">${ic('file',20)}</span>`}</div>
   <div class="mt-b"><span class="mt-lk">${ic(L[2],12)}${esc(tx)}</span><b>${esc(m.t)}</b><p>${esc(m.desc)}</p></div>
@@ -353,7 +366,7 @@ function mtAfter(){const q=$('#mtq');if(q)q.addEventListener('input',e=>{S.mtq=e
  const get=mtBind(f,m,sv);f.addEventListener('input',sv);}
 Object.assign(CTA,{
  mtLinkOpen:()=>{const u=$('#mtE [name=url]').value.trim();if(!u){toast('Cole um link primeiro');return;}window.open(/^https?:/.test(u)?u:'https://'+u,'_blank','noopener');},
- mtNew:()=>mtForm(),mtOpen:(v,b,e)=>{if(e&&e.target.closest('.mt-dl'))return;S.mat=v;ctGo();},mtBack:()=>{S.mat=null;ctGo();},mtF:v=>{S.mtf=v;ctRe();},
+ mtNew:()=>mtForm(),mtOpen:(v,b,e)=>{if(e&&e.target.closest('.mt-dl'))return;S.mat=v;ctGo();},mtBack:()=>{S.mat=null;ctGo();},mtF:v=>{S.mtf=v;S.mtv=null;ctRe();},mtV:v=>{S.mtv=S.mtv===v?null:v;S.mtf='todos';ctRe();},
  mtDl:(v,b)=>{const m=MATS.find(x=>x.id===v);if(!m.files.length){toast('Este material ainda não tem arquivos');return;}m.dl++;toast(m.files.length>1?`Baixando ${m.files.length} arquivos (.zip)`:`Baixando ${m.files[0].n}`);},
  mtFDl:v=>{const m=MATS.find(x=>x.id===S.mat);toast(`Baixando ${m.files[+v].n}`);},
  mtUp:()=>{const m=MATS.find(x=>x.id===S.mat),nm=['Slides','Roteiro','Planilha','Apostila'][m.files.length%4],ex=['pptx','pdf','xlsx','pdf'][m.files.length%4];m.files.push({n:`${nm}-${m.t.split(' ')[0]}.${ex}`,kb:300+m.files.length*410});$('#mtFl').innerHTML=mtFiles(m);toast('Arquivo enviado');},
