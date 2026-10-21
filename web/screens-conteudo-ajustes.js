@@ -24,8 +24,9 @@ function cmtCard(kind,id){const k=kind+':'+id,l=cmtList(k);
 const cmtPaint=k=>{const el=document.querySelector(`.cmt[data-k="${k}"]`);if(el){const i=k.indexOf(':');el.outerHTML=cmtCard(k.slice(0,i),k.slice(i+1));}};
 Object.assign(A,{
  cmtDel:v=>{const i=v.lastIndexOf('|'),k=v.slice(0,i),id=v.slice(i+1),l=cmtList(k),n=l.findIndex(c=>c.id===id),c=l[n];if(!c)return;l.splice(n,1);cmtPaint(k);toast('Comentário apagado',()=>{l.splice(n,0,c);cmtPaint(k);});}});
-{const o=pgEdit;pgEdit=function(){const h=o.apply(this,arguments);return S.preg&&PREGS.some(x=>x.id===S.preg)?h+cmtCard('content.sermon',S.preg):h;};}
-{const o=nxVideoPage;nxVideoPage=function(){const h=o.apply(this,arguments);return S.nxVideo&&NX_VIDEOS.some(v=>v.id===S.nxVideo)?h+cmtCard('content.video',S.nxVideo):h;};}
+const cmtSide=(h,c)=>{const a='<section class="card ct-ef">',b='<aside class="ct-side">',i=h.indexOf(a),j=h.indexOf(b);if(i<0||j<0)return h+c;return h.slice(0,i)+'<div class="ct-col">'+h.slice(i,j)+c.replace(' style="margin-top:16px"','')+'</div>'+h.slice(j);};
+{const o=pgEdit;pgEdit=function(){const h=o.apply(this,arguments);return S.preg&&PREGS.some(x=>x.id===S.preg)?cmtSide(h,cmtCard('content.sermon',S.preg)):h;};}
+{const o=nxVideoPage;nxVideoPage=function(){const h=o.apply(this,arguments);return S.nxVideo&&NX_VIDEOS.some(v=>v.id===S.nxVideo)?cmtSide(h,cmtCard('content.video',S.nxVideo)):h;};}
 {const o=nxSeriesPage;nxSeriesPage=function(){let h=o.apply(this,arguments);const s=S.nxSeries&&NX_SERIES.find(x=>x.id===S.nxSeries);if(!s)return h;
  h=h.replace('<ol class="ct-tl" id="nxSerList">','<label class="tog" style="margin:4px 0 14px"><input type="checkbox" data-cert="series|'+s.id+'" '+(s.cert?'checked':'')+'><span class="sw"></span><span><b>Gera certificado</b><small>Ao concluir todos os itens da série</small></span></label><ol class="ct-tl" id="nxSerList">');
  return h+cmtCard('learning.series',S.nxSeries);};}

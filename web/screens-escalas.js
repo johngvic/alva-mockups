@@ -45,7 +45,7 @@ const esIsPast=d=>{const e=eById(d.ev);return !!(e&&past(e));};
 const esPillDone='<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Realizada</span>';
 const attPill=m=>{if(m.st==='recusado')return msPill(m);const k=ckOf(m);return `<span class="stp" style="--c:${CKPR[k][1]};--b:${CKPR[k][2]}"><i></i>${k==='pend'?'Sem registro':CKPR[k][0]}</span>`;};
 const esPill=s=>`<span class="stp" style="--c:${EST[s][1]};--b:${EST[s][2]}"><i></i>${EST[s][0]}</span>`;
-const msPill=(m,clickable,ref)=>`<${clickable?`button data-a="esMst" data-v="${ref}" title="Marcar como aceito"`:'span'} class="stp ${clickable?'clk':''}" style="--c:${MST[m.st][1]};--b:${MST[m.st][2]}"><i></i>${MST[m.st][0]}</${clickable?'button':'span'}>`;
+let msPill=(m,clickable,ref)=>`<${clickable?`button data-a="esMst" data-v="${ref}" title="Marcar como aceito"`:'span'} class="stp ${clickable?'clk':''}" style="--c:${MST[m.st][1]};--b:${MST[m.st][2]}"><i></i>${MST[m.st][0]}</${clickable?'button':'span'}>`;
 const esMembers=x=>x.dates.flatMap(d=>d.blocks.flatMap(b=>b.members));
 const esSorted=x=>x.dates.slice().sort((a,b)=>(eById(a.ev)?.d||'')<(eById(b.ev)?.d||'')?-1:1);
 const dateState=d=>{const e=eById(d.ev);if(e&&past(e))return 'past';const ms=d.blocks.flatMap(b=>b.members);if(!ms.length)return 'empty';if(ms.some(m=>m.st==='recusado')||d.blocks.some(b=>!b.members.length))return 'acao';if(ms.some(m=>m.st!=='confirmado'))return 'wait';return 'ok';};

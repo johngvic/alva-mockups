@@ -29,6 +29,7 @@ const raised=e=>e.regs.filter(r=>r.pay==='pago').reduce((a,r)=>a+regTot(e,r),0);
 const past=e=>e.d&&inDays(e.d)<0;
 const tTag=t=>`<span class="stp" style="--c:var(--tone-${ETONE[t]}-ink);--b:color-mix(in srgb,var(--tone-${ETONE[t]}) 55%,transparent)"><i></i>${t}</span>`;
 const sPill=e=>e.st==='previsao'?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Previsão</span>':past(e)?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Realizado</span>':'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Confirmado</span>';
+const cfLink=e=>`<button class="lnk inl cf-lnk" data-a="evConfirm" data-v="${e.id}">${ic('calendar',12,2)}Confirmar data</button>`;
 const dTile=e=>e.st==='previsao'?`<span class="edt prev"><small>prev.</small><b>${e.prev.split('/')[0]}</b><small>${e.prev.split('/')[1]}</small></span>`:`<span class="edt ${past(e)?'past':''}"><small>${wd(e.d)}</small><b>${+e.d.slice(8)}</b><small>${MONTHS[+e.d.slice(5,7)-1].slice(0,3)}</small></span>`;
 const minOpts=v=>`<option value="">Nenhum · evento geral da igreja</option>${MINIS.filter(m=>m.active).map(m=>`<option value="${esc(m.n)}" ${v===m.n?'selected':''}>Ministério de ${esc(m.n)}</option>`).join('')}`;
 
@@ -50,12 +51,12 @@ function evList(kind){
   <div id="erows">${evRows(all,!!only)}</div></section>`;
 }
 function evRows(all,fixed){
- const q=norm(S.eq),l=all.filter(e=>(S.ef==='todos'||e.st===S.ef)&&(fixed||S.etype==='todos'||e.type===S.etype)&&(!q||norm(e.t).includes(q))).sort((a,b)=>(a.d||'9'+a.prev)<(b.d||'9'+b.prev)?-1:1);
+ const q=norm(S.eq),l=all.filter(e=>(S.ef==='todos'||e.st===S.ef)&&(fixed||S.etype==='todos'||e.type===S.etype)&&(!q||norm(e.t).includes(q))).sort((a,b)=>{const g=e=>e.st==='previsao'?1:past(e)?2:0,x=g(a),y=g(b);if(x!==y)return x-y;const da=a.d||'9'+a.prev,db=b.d||'9'+b.prev;return x===2?(da<db?1:-1):(da<db?-1:1);});
  if(!l.length)return `<div class="mempty"><p>Nada por aqui.</p><span>Nenhum item corresponde a esses filtros.</span></div>`;
  return `<div class="trow ev thead"><span>Evento</span><span>Tipo</span><span>Status</span><span>Participação</span><span></span></div>${l.map(e=>`<div class="trow ev ${past(e)?'off':''}" tabindex="0" data-a="evOpen" data-v="${e.id}">
-  <span class="tn">${dTile(e)}<span class="hn"><b>${esc(e.t)}</b><span>${e.st==='previsao'?`Previsto para ${e.prev}`:`${e.time} · ${esc(e.place)}`}${e.min?` · ${esc(e.min)}`:''}${e.rep!=='none'?` · ${ic('swap',11,2)} semanal`:''}</span></span></span>
+  <span class="tn">${dTile(e)}<span class="hn"><b>${esc(e.t)}</b><span>${e.st==='previsao'?`Previsto para ${e.prev} · ${cfLink(e)}`:`${e.time} · ${esc(e.place)}`}${e.min?` · ${esc(e.min)}`:''}${e.rep!=='none'?` · ${ic('swap',11,2)} semanal`:''}</span></span></span>
   <span class="ety">${tTag(e.type)}</span><span class="ts">${sPill(e)}</span>
-  <span class="ein">${e.st==='previsao'?`<button class="btn sec sm" data-a="evConfirm" data-v="${e.id}">Confirmar data</button>`:isCer(e)?ceBadge(e):`<span class="eib"><b>${e.regs.length}${e.cap?`<span class="soft">/${e.cap}</span>`:''}</b> ${e.regs.length===1?'inscrito':'inscritos'}${e.cap?`<span class="tr"><i style="width:${Math.min(100,e.regs.length/e.cap*100)}%"></i></span>`:''}</span><span class="eip">${e.paid?evFromTxt(e):'Gratuito'}</span>`}</span>
+  <span class="ein">${e.st==='previsao'?`<span class="soft">Inscrições abrem com a data</span>`:isCer(e)?ceBadge(e):`<span class="eib"><b>${e.regs.length}${e.cap?`<span class="soft">/${e.cap}</span>`:''}</b> ${e.regs.length===1?'inscrito':'inscritos'}${e.cap?`<span class="tr"><i style="width:${Math.min(100,e.regs.length/e.cap*100)}%"></i></span>`:''}</span><span class="eip">${e.paid?evFromTxt(e):'Gratuito'}</span>`}</span>
   <span class="tc">${ic('chevR',16)}</span></div>`).join('')}<div class="tfoot"><span>${l.length} ${l.length===1?'item':'itens'}</span></div>`;
 }
 
