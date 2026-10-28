@@ -86,3 +86,42 @@ function setDone(id,v){const t=TASKS.find(x=>x.id===id);t.done=v;const el=$('#'+
  $('#allDone').style.display=openCount()?'none':'';
  const n=openCount(),c=$('#cnt');c.textContent=n;c.style.visibility=n?'':'hidden';c.animate([{transform:'scale(1.3)'},{transform:'none'}],{duration:320,easing:'cubic-bezier(.2,.8,.2,1)'});
  $('#undoAll').style.display=n<3&&n>0?'':'none';$('#lede').innerHTML=lede(n);softSide();}
+
+/* ---------- Paginação padrão das listas ----------
+   Toda lista em cartão (.mtab / .sx-list) com mais linhas do que cabem na tela ganha páginas, sem cada tela precisar implementar.
+   Telas que já têm o próprio paginador (.mpg) ou o das Lojas (.fd-pf) ficam como estão. */
+const LP={busy:false,st:{},mo:null,rows:'.trow:not(.thead),.sx-r,.igq-r:not(.igq-h)'};
+function lpBox(box,key){
+ const mine=box.querySelector(':scope > .lp-f');
+ const own=[...box.querySelectorAll('.mpg')].some(m=>!m.closest('.lp-f'))||!!box.querySelector('.fd-pf');
+ const rows=own?[]:[...box.querySelectorAll(LP.rows)];
+ rows.forEach(r=>{r.style.display='';});
+ const olds=[...box.querySelectorAll('.tfoot:not(.lp-f)')];
+ const rest=()=>{olds.forEach(o=>{o.style.display='';});if(mine)mine.remove();};
+ if(!rows.length)return rest();
+ const rh=rows[0].offsetHeight||60,top=rows[0].getBoundingClientRect().top+window.scrollY;
+ const pp=Math.max(4,Math.min(30,Math.floor((window.innerHeight-Math.min(top,window.innerHeight*.55)-52-28)/rh))),P=Math.ceil(rows.length/pp);
+ if(P<=1)return rest();
+ const sig=rows.length+'|'+rows[0].textContent.slice(0,60)+'|'+rows[rows.length-1].textContent.slice(0,40);
+ const st=LP.st[key]=LP.st[key]&&LP.st[key].sig===sig?LP.st[key]:{sig,pg:1};
+ const c=st.pg=Math.min(Math.max(1,st.pg),P);
+ rows.forEach((r,i)=>{r.style.display=i>=(c-1)*pp&&i<c*pp?'':'none';});
+ olds.forEach(o=>{o.style.display='none';});
+ const n=[];for(let i=1;i<=P;i++){if(i===1||i===P||Math.abs(i-c)<=1)n.push(i);else if(n[n.length-1]!=='…')n.push('…');}
+ let f=mine;if(!f){f=document.createElement('div');f.className='tfoot lp-f';box.appendChild(f);}
+ f.innerHTML=`<span>${(c-1)*pp+1}–${Math.min(rows.length,c*pp)} de ${rows.length}</span><div class="mpg" role="navigation" aria-label="Páginas"><button type="button" class="ibtn sm" data-lp="${key}|${c-1}" ${c===1?'disabled':''} aria-label="Página anterior">${ic('chevL',14,2)}</button>${n.map(i=>i==='…'?'<span class="mpg-e">…</span>':`<button type="button" class="mpg-n ${i===c?'on':''}" data-lp="${key}|${i}">${i}</button>`).join('')}<button type="button" class="ibtn sm" data-lp="${key}|${c+1}" ${c===P?'disabled':''} aria-label="Próxima página">${ic('chevR',14,2)}</button></div>`;
+}
+function lpPaginate(){
+ const main=document.getElementById('main');if(!main||LP.busy)return;
+ try{if(fdPagedPage())return;}catch(e){}/* Lojas (Itens e Vendas) têm o próprio paginador */
+ LP.busy=true;
+ try{[...main.querySelectorAll('.mtab,.sx-list')].forEach((box,bi)=>{try{lpBox(box,(S.active||'')+'|'+bi);}catch(e){console.error('paginação',e);}});}
+ finally{if(LP.mo)LP.mo.takeRecords();LP.busy=false;}
+}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-lp]');if(!b||b.disabled)return;
+ const v=b.dataset.lp,i=v.lastIndexOf('|'),key=v.slice(0,i);if(LP.st[key])LP.st[key].pg=+v.slice(i+1);
+ const box=b.closest('.mtab,.sx-list');lpPaginate();if(box)box.scrollIntoView({block:'nearest',behavior:'smooth'});});
+LP.mo=new MutationObserver(ms=>{if(LP.busy)return;if(ms.some(m=>{const t=m.target;return t&&t.nodeType===1&&t.closest&&t.closest('#main');}))requestAnimationFrame(lpPaginate);});
+LP.mo.observe(document.body,{childList:true,subtree:true});
+window.addEventListener('resize',()=>{clearTimeout(window._lpT);window._lpT=setTimeout(lpPaginate,150);});
+requestAnimationFrame(lpPaginate);

@@ -43,4 +43,5 @@
 //#include ./screens-ext-5.js
 //#include ./screens-ext-6.js
 //#include ./screens-parametros.js
+//#include ./ui-pickers.js
 render();
