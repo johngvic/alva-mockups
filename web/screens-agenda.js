@@ -46,16 +46,16 @@ const minOpts=v=>`<option value="">Nenhum · evento geral da igreja</option>${MI
 /* ---------- list ---------- */
 function evList(kind){
  /* Eventos lista só Retiro, Conferência e Evento especial (filtrável por Tipo); cultos e cerimônias têm menu próprio */
- const only=kind==='cultos'?'Culto':'',all=EVTS.filter(e=>only?e.type===only:SPECIAL.includes(e.type)),conf=all.filter(e=>e.st==='confirmado'&&!past(e)),regs=all.reduce((a,e)=>a+e.regs.length,0),paid=all.filter(e=>e.paid);
- return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>${only?'Cultos':'Eventos'}</h1><p class="lede">${only?'Cultos recorrentes da igreja':'Retiros, conferências e eventos especiais. Filtre pelo tipo.'}</p></div>
+ const only=kind==='cultos'?'Culto':kind==='integracoes'?'Integração':'',ig=kind==='integracoes',all=EVTS.filter(e=>only?e.type===only:SPECIAL.includes(e.type)),conf=all.filter(e=>e.st==='confirmado'&&!past(e)),regs=all.reduce((a,e)=>a+e.regs.length,0),paid=all.filter(e=>e.paid);
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>${ig?'Integrações':only?'Cultos':'Eventos'}</h1><p class="lede">${ig?'O dia de cada integração, com quem foi aceito. Não é público; cada integração tem um só evento. O processo (pedidos, etapas e fila) fica em Pessoas › Integração.':only?'Cultos recorrentes da igreja':'Retiros, conferências e eventos especiais. Filtre pelo tipo.'}</p></div>
   <div class="pact">${rpBtn('agenda','eventos')}${S.etype==='Apresentação'?`<button class="btn sec" data-a="bbRules">${ic('sliders',15)}Regras da apresentação</button>`:''}<button class="btn sec" data-a="export" data-v="o calendário (.ics)">Calendário (.ics)</button>
-  <button class="btn pri" data-a="evAdd" data-v="${only?'culto':'evento'}">${ic('plus',15,2.2)}${only?'Novo culto':'Novo evento'}</button></div></header>
+  <button class="btn pri" data-a="evAdd" data-v="${ig?'integracao':only?'culto':'evento'}">${ic('plus',15,2.2)}${ig?'Novo evento de integração':only?'Novo culto':'Novo evento'}</button></div></header>
  <section class="card kpis4 k3 ${only?'k1 ':''}rise" style="--d:1">
   <div class="k4"><span class="kl">Próximos confirmados</span><span class="kv">${conf.length}</span><span class="kd">${all.filter(e=>e.st==='previsao').length} em previsão</span></div>
   ${only?'':`<div class="k4"><span class="kl">Inscritos</span><span class="kv">${regs}</span><span class="kd">em ${all.filter(e=>e.regs.length).length} eventos</span></div>
   <div class="k4"><span class="kl">Arrecadado</span><span class="kv">${brl(paid.reduce((a,e)=>a+raised(e),0))}</span><span class="kd">${paid.length} eventos pagos</span></div>`}
  </section>
- ${qdRenewBanner(evRenewable(!!only),'evRenew')}
+ ${ig?'':qdRenewBanner(evRenewable(!!only),'evRenew')}
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="eq" placeholder="Buscar por título" value="${esc(S.eq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todos'],['confirmado','Confirmados'],['previsao','Previsão']].map(c=>`<button class="chipf ${S.ef===c[0]?'on':''}" data-a="evF" data-v="${c[0]}">${c[1]}<small>${c[0]==='todos'?all.length:all.filter(e=>e.st===c[0]).length}</small></button>`).join('')}</div>
   ${only?'':`<div style="position:relative"><button class="btn sec sel" data-a="etMenu">${S.etype==='todos'?'Todos os tipos':S.etype}${ic('updown',14)}</button><div class="pop" id="etPop" style="right:0;top:calc(100% + 6px)">${['todos',...SPECIAL].map(t=>`<button class="pi" data-a="evT" data-v="${t}">${t==='todos'?'Todos os tipos':t}${S.etype===t?`<span class="ck">${ic('check',16,2.25)}</span>`:''}</button>`).join('')}</div></div>`}</div>
@@ -65,7 +65,7 @@ function evRows(all,fixed){
  const q=norm(S.eq),l=all.filter(e=>(S.ef==='todos'||e.st===S.ef)&&(fixed||S.etype==='todos'||e.type===S.etype)&&(!q||norm(e.t).includes(q))).sort((a,b)=>(a.d||'9'+a.prev)<(b.d||'9'+b.prev)?-1:1);
  if(!l.length)return `<div class="mempty"><p>Nada por aqui.</p><span>Nenhum item corresponde a esses filtros.</span></div>`;
  return `${fixed?`<div class="trow ev e1 thead"><span>Evento</span><span>Situação</span><span></span></div>`:`<div class="trow ev e2 thead"><span>Evento</span><span>Tipo</span><span>Participação</span><span>Situação</span><span></span></div>`}${l.map(e=>`<div class="trow ev ${fixed?'e1':'e2'} ${past(e)?'off':''}" tabindex="0" data-a="evOpen" data-v="${e.id}">
-  <span class="tn">${dTile(e)}<span class="hn"><b>${esc(e.t)}</b><span>${e.st==='previsao'?`Previsto para ${e.prev}`:`${e.time} · ${esc(e.place)}`}${e.min?` · ${esc(e.min)}`:''}${e.rep!=='none'?` · ${ic('swap',11,2)} semanal`:''}</span></span></span>
+  <span class="tn">${dTile(e)}<span class="hn"><b>${esc(e.t)}</b><span>${e.st==='previsao'?`Previsto para ${e.prev}`:`${e.time} · ${esc(e.place)}`}${e.min?` · ${esc(e.min)}`:''}${e.type==='Integração'?` · ${igiCount(e)} ${igiCount(e)===1?'inscrito':'inscritos'}`:''}${e.rep!=='none'?` · ${ic('swap',11,2)} semanal`:''}</span></span></span>
   ${fixed?'':`<span class="ety">${tTag(e.type)}</span>`}<span class="ts">${sPill(e)}</span>
   <span class="ein">${e.st==='previsao'?`<button class="btn sec sm" data-a="evConfirm" data-v="${e.id}">Confirmar data</button>`:fixed?'':isCer(e)?ceBadge(e):`<span class="eib"><b>${e.regs.length}${e.cap?`<span class="soft">/${e.cap}</span>`:''}</b> ${e.regs.length===1?'inscrito':'inscritos'}${e.cap?`<span class="tr"><i style="width:${Math.min(100,e.regs.length/e.cap*100)}%"></i></span>`:''}</span><span class="eip">${e.paid?evFromTxt(e):'Gratuito'}</span>`}</span>
   <span class="tc">${ic('chevR',16)}</span></div>`).join('')}<div class="tfoot"><span>${l.length} ${l.length===1?'item':'itens'}</span></div>`;
@@ -437,7 +437,7 @@ const GA={
  evEdit:()=>{const e=eById(S.evt);evForm(e.kind,{edit:e.id});},
  evEditAt:v=>{const e=eById(S.evt);evForm(e.kind,{edit:e.id,step:v});},
  evCancel:()=>{S.eedit=false;rerEv();},
- evAdd:v=>evForm(v),
+ evAdd:v=>v==='integracao'?evForm('evento',{type:'Integração',back:'integracoes'}):evForm(v),
  evConfirm:(v,b,x)=>{x&&x.stopPropagation();const e=eById(v);
   openDlg(`${dlgHead('Confirmar evento',`Defina a data de <b>${esc(e.t)}</b> (previsto para ${e.prev})${isCer(e)?'.':' e se a inscrição é gratuita ou paga.'}`)}
   <form class="fgrid" id="cfF" novalidate style="grid-template-columns:1fr 1fr">
@@ -518,3 +518,5 @@ const GA={
  iqF:v=>{S.iqf=v;render();},
 };
 
+/* demonstração: o dia da integração de agosto (já realizado). A integração atual fica sem evento, para testar "Criar evento da integração" */
+{const g=INTEGS.find(x=>x.n==='Agosto/2026');if(g){const ev=EV({kind:'evento',t:'Integração Agosto/2026',type:'Integração',d:'2026-09-12',time:'8h',place:'Salão social',min:'Integração',ig:g.id});EVTS.push(ev);g.ev=ev.id;}}

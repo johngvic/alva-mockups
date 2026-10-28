@@ -9,7 +9,7 @@ const CERT={
  'Consagração':{k:'consagracao',un:'pessoa',pl:'pessoas',tab:'Consagrandos',ic:'flame',add:'Adicionar pessoa',srch:'Buscar pessoa'},
  'Casamento':{k:'casamento',un:'casal',pl:'casais',tab:'Casais',ic:'heart',add:'Adicionar casal',srch:'Buscar noivo ou noiva'}};
 const isCer=e=>!!CERT[e.type];
-const evFromLbl=()=>({eventos:'Eventos',cultos:'Cultos',bebes:'Apresentações',batismos:'Batismos',consagracoes:'Consagrações',casamentos:'Casamentos'})[S.evFrom]||'Calendário';
+const evFromLbl=()=>({eventos:'Eventos',cultos:'Cultos',bebes:'Apresentações',batismos:'Batismos',consagracoes:'Consagrações',casamentos:'Casamentos',integracoes:'Integrações'})[S.evFrom]||'Calendário';
 const CE_TODAY='2026-09-30';
 let _cep=0;
 const CEP=[]; /* pessoas (batismo, consagração) e casais (casamento) dos eventos; a apresentação continua em BBP */
@@ -129,7 +129,7 @@ Object.assign(A,{
    Mesma tela que a Apresentação já tinha: números no alto, lista de datas (Próximas, Realizadas, Todas) com vagas e pedidos, e a data abre o evento com a lista de pessoas.
    "Eventos" continua sendo a lista geral, onde dá para criar qualquer tipo. */
 const CERPG={bebes:'Apresentação',batismos:'Batismo',consagracoes:'Consagração',casamentos:'Casamento'};
-const EVLISTS=['eventos','cultos',...Object.keys(CERPG)];
+const EVLISTS=['eventos','cultos','integracoes',...Object.keys(CERPG)];
 const CERPG_T={bebes:['Apresentações','Bebês apresentados ao Senhor, com a igreja reunida · <em class="bb-ref">Lucas 2:22</em>'],batismos:['Batismos','Pessoas que vão ser batizadas nas águas. Cada data é um evento, com a lista de quem será batizado.'],consagracoes:['Consagrações','Obreiros e líderes consagrados. Cada data é um evento, com a lista de quem será consagrado.'],casamentos:['Casamentos','Casais que vão se casar na igreja. Pode haver vários casais na mesma data.']};
 const ceSt=e=>e.st==='previsao'?stpill('var(--ink-muted)','var(--surface-2)','Previsão'):past(e)?stpill('var(--ink-muted)','var(--surface-2)','Realizada'):(ceCapOf(e)&&ceUsed(e)>=ceCapOf(e))?stpill('var(--st-rec)','var(--st-rec-bg)','Esgotada'):stpill('var(--st-int)','var(--st-int-bg)','Aberta');
 const CE_DOC={batismo:'Certidão de batismo',consagracao:'Certificado de consagração',casamento:'Certidão de casamento'};
