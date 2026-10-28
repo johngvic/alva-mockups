@@ -50,6 +50,8 @@
 | `screens-relatorios.js` | 7808–8141 | Relatórios |
 | `screens-ajuda.js` | 8142–8473 | Central de ajuda |
 | `screens-ext-5.js`, `-6.js` | 8474–9189 | camadas de ajustes (tabelas, paginação, Lojas) |
+| `screens-parametros.js` | — | Parâmetros do sistema |
+| `screens-automacoes.js` | — | Administração › Automações (jobs da plataforma; dados de exemplo gerados na carga) |
 
 Não existem mais arquivos `*-ajustes.js`: os ajustes de Casas (e do endereço do membro), Notificações e Conteúdo (comentários, série mista, aba Conteúdo do ministério, trilha do Acompanhamento) foram fundidos na tela dona. Ajuste novo vai direto no arquivo da tela, não em arquivo à parte.
 
