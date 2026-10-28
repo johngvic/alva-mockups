@@ -81,7 +81,8 @@ Object.assign(A,{hViewMeet,dViewMeet,careMeet,
 const RS_L={sim:'Aceitou',nao:'Recusou','':'Sem resposta'};
 const NET_PPL={g1:[['Ana Clara Lima','Líder de louvor'],['Diego Martins','Líder de eventos'],['Juliana Reis','Líder de recepção']],g2:[['Felipe Andrade','Líder de jovens'],['Renata Campos','Líder de intercessão']],g3:[['Bruno Carvalho','Líder de casas'],['Larissa Moura','Líder de kids']]};
 function sePool(k,o){const out=[],seen=new Set(),add=(n,from,role)=>{if(n&&!seen.has(n)){seen.add(n);out.push({n,from,role});}};
- if(k==='net')netChurches(o).forEach(g=>{add(g.lead,g.n,'Líder da igreja');(NET_PPL[g.id]||[]).forEach(([n,r])=>add(n,g.n,r));});
+ if(k==='min')mnPpl(o).forEach(p=>{const ts=mnTeamsOf(o,p.n);add(p.n,ts.length?ts[0].n:'Sem time',p.n===o.lead?'Líder do ministério':p.role);});
+ else if(k==='net')netChurches(o).forEach(g=>{add(g.lead,g.n,'Líder da igreja');(NET_PPL[g.id]||[]).forEach(([n,r])=>add(n,g.n,r));});
  else o.casas.map(hById).filter(Boolean).forEach(c=>{add(c.leader,c.n,'Líder da casa');c.ppl.filter(p=>p.n!==c.leader).slice(0,5).forEach(p=>add(p.n,c.n,'Participante'));});
  return out;}
 const SE_SEED_R=['sim','sim','','nao','sim','','sim'];
@@ -108,7 +109,7 @@ seEncounters=function(k,o){
   if(kind==='sched')act=(m.mode==='Remoto'&&m.url?'<button class="btn sec sm" data-a="copy" data-v="'+esc(m.url)+'">Copiar link</button>':'')+'<button class="ibtn sm" data-a="seSched" data-v="'+key+'" aria-label="Editar encontro" title="Editar encontro">'+ic('pen',14)+'</button><button class="btn pri sm" data-a="seCall" data-v="'+key+'">Registrar</button><button class="ibtn sm" data-a="seCancel" data-v="'+key+'" aria-label="Cancelar encontro" title="Cancelar encontro">'+ic('x',14)+'</button>';
   else act='<button class="ibtn sm" data-a="seDel" data-v="'+key+'" aria-label="Excluir encontro" title="Excluir encontro">'+ic('x',14)+'</button>';
   return '<li class="'+(kind==='canc'?'cancel':kind)+'">'+nxEncDate(m.d)+'<div class="eb2"><div class="et"><div><b>'+title+'</b><span class="who">'+meta+'</span>'+(kind==='sched'?rsSum(inv,'seInvView',key):'')+'</div><div class="ea">'+act+'</div></div></div></li>';};
- return '<section class="card pc"><div class="sh"><h2>Encontros</h2><div class="row2"><button class="btn sec sm" data-a="seReg" data-v="'+seKey(k,o)+'">Registrar</button><button class="btn pri sm" data-a="seSched" data-v="'+seKey(k,o)+'">Agendar</button></div></div>'
+ return qdRenewFor(o.meets,{act:'seRenew',pre:seKey(k,o)+'|',title:m=>m.topic||'Encontro com os convocados'})+'<section class="card pc"><div class="sh"><h2>Encontros</h2><div class="row2"><button class="btn sec sm" data-a="seReg" data-v="'+seKey(k,o)+'">Registrar</button><button class="btn pri sm" data-a="seSched" data-v="'+seKey(k,o)+'">Agendar</button></div></div>'
   +nxEncList('Agendados',sched.map(m=>item(m,'sched')))+nxEncList('Realizados',done.map(m=>item(m,'done')))+nxEncList('Cancelados',canc.map(m=>item(m,'canc')))+'</section>';};
 {const _s=seEncounters;seEncounters=function(){return encPost(_s.apply(this,arguments));};}
 seDetail=function(){
@@ -128,24 +129,33 @@ seDetail=function(){
    +'<p class="rs-note">'+ic('lock',13,2)+'Visível ao supervisor e a quem tem Editar ou Admin nesta rede.</p></section>':'')
   +'<div class="rise" style="--d:3">'+seEncounters(k,o)+'</div>';};
 function seConvPicker(k,o,sel){const pool=sePool(k,o),groups={};pool.forEach(p=>{(groups[p.from]=groups[p.from]||[]).push(p);});
- return '<div class="fld wide scv" id="seCv"><span class="fl">Convocados <em id="seCn"></em></span><div class="scv-bar"><label class="sbox">'+ic('search',15)+'<input id="seQ" placeholder="Buscar pessoa, '+(k==='net'?'igreja':'casa')+' ou função" autocomplete="off"></label><button type="button" class="btn sec sm" id="seAllL">'+ic('users',14)+'Todos os líderes</button></div>'
-  +'<div class="scv-list">'+Object.entries(groups).map(([g,l],gi)=>'<div class="scv-g" data-g="'+gi+'"><div class="scv-gh"><b>'+ic(k==='net'?'church':'home',13,2)+esc(g)+'</b><button type="button" class="lnk" data-gall="'+gi+'">Marcar todos</button></div>'
-   +l.map(p=>'<label class="scv-p" data-q="'+esc(norm(p.n+' '+g+' '+p.role))+'"><input type="checkbox" name="cv" value="'+esc(p.n)+'" data-from="'+esc(g)+'" data-role="'+esc(p.role)+'" data-lead="'+(/^Líder da/.test(p.role)?1:0)+'"'+(sel.includes(p.n)?' checked':'')+'>'+avN(p.n)+'<span><b>'+esc(p.n)+'</b><small>'+esc(p.role)+'</small></span><i class="cb">'+ic('check',12,2.8)+'</i></label>').join('')+'</div>').join('')+'</div><span class="err"></span><span class="hint">Cada convocado recebe o convite na Agenda do app e responde se vai.</span></div>';}
-seForm=function(k,oid,mid){
- const o=SE_O(k,oid),m=mid&&o.meets.find(x=>x.id===mid);if(m)seInv(k,o,m);
- nxSchedDlg({id:'seF',title:m?'Editar encontro':'Agendar encontro',sub:esc(o.n)+'. Escolha quem será convocado.',vals:m?{d:m.d,start:m.start,mode:m.mode,where:m.where,url:m.url}:null,linkReq:true,noPast:!m,submit:m?'Salvar':'Agendar e convidar',wherePh:'Ex.: Sala 3 da igreja sede',
+ const pastors=['Pr. Marcos Souza','Pr. Rafael Pereira'],extra=k==='net'||k==='min'?'':'<div class="scv-g" id="seExtra"><div class="scv-gh"><b>'+ic('users',13,2)+'Pastores e outras pessoas</b></div>'
+  +pastors.map(n=>'<label class="scv-p" data-q="'+esc(norm(n+' pastor'))+'"><input type="checkbox" name="cv" value="'+esc(n)+'" data-from="Igreja" data-role="Pastor" data-lead="0"'+(sel.includes(n)?' checked':'')+'>'+avN(n)+'<span><b>'+esc(n)+'</b><small>Pastor da igreja</small></span><i class="cb">'+ic('check',12,2.8)+'</i></label>').join('')+'</div>'
+  +'<div class="scv-add"><input id="seAddQ" list="seAddL" placeholder="Adicionar outra pessoa: digite o nome de um membro" autocomplete="off"><datalist id="seAddL">'+MEMBERS.filter(m=>m.st==='integrado').map(m=>'<option value="'+esc(m.n)+'">').join('')+'</datalist><button type="button" class="btn sec sm" id="seAddB">'+ic('plus',14,2.2)+'Adicionar</button></div>';
+ return '<div class="fld wide scv" id="seCv"><span class="fl">Convocados <em id="seCn"></em></span><div class="scv-bar"><label class="sbox">'+ic('search',15)+'<input id="seQ" placeholder="Buscar pessoa, '+(k==='min'?'time':k==='net'?'igreja':'casa')+' ou função" autocomplete="off"></label><button type="button" class="btn sec sm" id="seAllL">'+ic('users',14)+(k==='min'?'Convocar todos do ministério':k==='net'?'Todos os líderes':'Adicionar líderes das casas')+'</button></div>'
+  +'<div class="scv-list">'+Object.entries(groups).map(([g,l],gi)=>'<div class="scv-g" data-g="'+gi+'"><div class="scv-gh"><b>'+ic(k==='net'?'church':k==='min'?'users':'home',13,2)+esc(g)+'</b><button type="button" class="lnk" data-gall="'+gi+'">Marcar todos</button></div>'
+   +l.map(p=>'<label class="scv-p" data-q="'+esc(norm(p.n+' '+g+' '+p.role))+'"><input type="checkbox" name="cv" value="'+esc(p.n)+'" data-from="'+esc(g)+'" data-role="'+esc(p.role)+'" data-lead="'+(/^Líder da/.test(p.role)?1:0)+'"'+(sel.includes(p.n)?' checked':'')+'>'+avN(p.n)+'<span><b>'+esc(p.n)+'</b><small>'+esc(p.role)+'</small></span><i class="cb">'+ic('check',12,2.8)+'</i></label>').join('')+'</div>').join('')+'</div>'+extra+'<span class="err"></span><span class="hint">Cada convocado recebe o convite na Agenda do app e responde se vai.</span></div>';}
+seForm=function(k,oid,mid,rn){
+ const o=SE_O(k,oid),m=mid&&o.meets.find(x=>x.id===mid),rp=rn?qdRenewPreset(o.meets,rn):null;if(m)seInv(k,o,m);
+ nxSchedDlg({id:'seF',renew:rp,scopeN:m&&m.ser?o.meets.filter(x=>x.ser===m.ser&&!x.done&&!x.cancelled&&x.d>m.d).length:0,title:m?'Editar encontro':rp?'Renovar para '+rp.q.start.slice(0,4):'Agendar encontro',sub:esc(o.n)+'. Escolha quem será convocado.',vals:m?{d:m.d,start:m.start,mode:m.mode,where:m.where,url:m.url}:null,linkReq:true,noPast:!m,submit:m?'Salvar':rp?'Renovar e convidar':'Agendar e convidar',wherePh:'Ex.: Sala 3 da igreja sede',
   onSubmit:q=>{const f=$('#seF'),ch=$$('[name=cv]:checked',f);if(!ch.length){const fl=$('#seCv');fl.classList.add('bad');fl.querySelector('.err').textContent='Convoque pelo menos uma pessoa';return;}
    const topic=f.elements.topic.value.trim(),old=m?m.inv:[],inv=ch.map(i=>old.find(x=>x.n===i.value)||{n:i.value,from:i.dataset.from,role:i.dataset.role,r:'',why:''});
    const added=inv.filter(x=>!old.includes(x)).length;
-   if(m)Object.assign(m,q,{topic,inv});else{const x=seM(0,'','',{});Object.assign(x,q,{topic,inv});o.meets.push(x);}closeDlg();admRe();toast(m?(added?'Encontro atualizado · '+added+' novo'+(added>1?'s':'')+' convite'+(added>1?'s':''):'Encontro atualizado'):'Encontro agendado · '+inv.length+' convite'+(inv.length>1?'s':'')+' enviado'+(inv.length>1?'s':''));}});
+   if(m){const nx=q.sc==='next'?o.meets.filter(x=>x.ser&&x.ser===m.ser&&!x.done&&!x.cancelled&&x.d>m.d):[];delete q.sc;Object.assign(m,q,{topic,inv});nx.forEach(x=>Object.assign(x,{start:q.start,mode:q.mode,where:q.where,url:q.url,topic}));}else{(q.dates||[q.d]).forEach(dd=>{const x=seM(0,'','',{});Object.assign(x,q,{d:dd,topic,inv:inv.map(i=>({...i}))});delete x.dates;o.meets.push(x);});if(rn)o.meets.forEach(x=>{if(x.ser===rn)x.renewed=true;});}closeDlg();admRe();toast(m?(added?'Encontro atualizado · '+added+' novo'+(added>1?'s':'')+' convite'+(added>1?'s':''):'Encontro atualizado'):(q.dates&&q.dates.length>1?q.dates.length+' encontros agendados':'Encontro agendado')+' · '+inv.length+' convite'+(inv.length>1?'s':'')+' enviado'+(inv.length>1?'s':''));}});
  const f=$('#seF');f.closest('.dlg').classList.add('lg');
- f.querySelector('.fld').insertAdjacentHTML('beforebegin','<label class="fld wide"><span class="fl">Pauta</span><input name="topic" maxlength="80" value="'+esc(m?m.topic:'')+'" placeholder="Ex.: Multiplicação de casas"></label>');
- f.querySelector('.dfoot').insertAdjacentHTML('beforebegin',seConvPicker(k,o,m?m.inv.map(x=>x.n):[]));
+ (f.querySelector('#qdW')||f.querySelector('.fld')).insertAdjacentHTML('beforebegin','<label class="fld wide"><span class="fl">Pauta</span><input name="topic" maxlength="80" value="'+esc(m?m.topic:'')+'" placeholder="Ex.: Multiplicação de casas"></label>');
+ f.querySelector('.dfoot').insertAdjacentHTML('beforebegin',seConvPicker(k,o,m?m.inv.map(x=>x.n):rp&&rp.m0.inv?rp.m0.inv.map(x=>x.n):[]));
  const cnt=()=>{const n=$$('[name=cv]:checked',f).length;$('#seCn').textContent=n?n+' selecionad'+(n>1?'os':'o'):'';$('#seCv').classList.remove('bad');};cnt();
  f.addEventListener('change',e=>{if(e.target.name==='cv')cnt();});
  $('#seQ').addEventListener('input',e=>{const q=norm(e.target.value);$$('.scv-p',f).forEach(l=>l.hidden=q&&!l.dataset.q.includes(q));$$('.scv-g',f).forEach(g=>g.hidden=![...g.querySelectorAll('.scv-p')].some(l=>!l.hidden));});
- $('#seAllL').onclick=()=>{$$('[name=cv][data-lead="1"]',f).forEach(i=>i.checked=true);cnt();};
- f.addEventListener('click',e=>{const b=e.target.closest('[data-gall]');if(!b)return;const ins=$$('.scv-g[data-g="'+b.dataset.gall+'"] [name=cv]',f),all=ins.every(i=>i.checked);ins.forEach(i=>i.checked=!all);cnt();});};
+ $('#seAllL').onclick=()=>{$$(k==='min'?'[name=cv]':'[name=cv][data-lead="1"]',f).forEach(i=>i.checked=true);cnt();};
+ f.addEventListener('click',e=>{const b=e.target.closest('[data-gall]');if(!b)return;const ins=$$('.scv-g[data-g="'+b.dataset.gall+'"] [name=cv]',f),all=ins.every(i=>i.checked);ins.forEach(i=>i.checked=!all);cnt();});
+ const b=$('#seAddB');if(b){
+ b.onclick=()=>{const i=$('#seAddQ'),n=i.value.trim(),m=MEMBERS.find(x=>norm(x.n)===norm(n));if(!m){toast('Digite o nome de um membro da igreja');return;}
+  const ex=$$('[name=cv]').find(x=>x.value===m.n);if(ex){ex.checked=true;ex.dispatchEvent(new Event('change',{bubbles:true}));i.value='';return;}
+  const l=document.createElement('label');l.className='scv-p';l.dataset.q=norm(m.n);l.innerHTML='<input type="checkbox" name="cv" value="'+esc(m.n)+'" data-from="Adicionada" data-role="Convocado(a)" data-lead="0" checked>'+avN(m.n)+'<span><b>'+esc(m.n)+'</b><small>Adicionado pelo supervisor</small></span><i class="cb">'+ic('check',12,2.8)+'</i>';
+  $('#seExtra').appendChild(l);i.value='';l.querySelector('input').dispatchEvent(new Event('change',{bubbles:true}));};
+ }};
 seCallDlg=function(k,oid,mid){
  const o=SE_O(k,oid),m=mid&&o.meets.find(x=>x.id===mid),list=m?seInv(k,o,m):sePool(k,o),t=TODAY.toISOString().slice(0,10);
  openDlg(dlgHead('Registrar encontro',esc(o.n)+(m?' · '+fmtD(m.d):'. Para um encontro que já aconteceu e não foi agendado.'))+'<form id="seC" class="fgrid one" novalidate>'
@@ -159,7 +169,7 @@ seCallDlg=function(k,oid,mid){
 Object.assign(A,{
  seInvView:v=>{const {k,o,m}=SE_PARSE(v),inv=seInv(k,o,m),key=v;
   meetView({title:'Encontro agendado',sub:esc(o.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.topic]],
-   extra:rsBlock(inv.map(x=>({...x,sub:x.from})),{title:'Convocados',note:'Visível ao supervisor e a quem tem Editar ou Admin nesta rede. O convite chega na Agenda do app de cada convocado.'}),
+   extra:rsBlock(inv.map(x=>({...x,sub:x.from})),{title:'Convocados',note:(k==='min'?'Visível a quem tem Editar ou Admin neste ministério.':'Visível ao supervisor e a quem tem Editar ou Admin nesta rede.')+' O convite chega na Agenda do app de cada convocado.'}),
    edit:'<button class="btn sec" data-a="seSchedFromView" data-v="'+key+'" style="margin-right:auto">'+ic('users',14)+'Editar convocados</button>'+(rsCount(inv).pe?'<button class="btn sec" data-a="seNudge" data-v="'+key+'">'+ic('bell',14)+'Lembrar quem não respondeu</button>':'')});},
  seSchedFromView:v=>{closeDlg();setTimeout(()=>A.seSched(v),60);},
  seNudge:v=>{const {k,o,m}=SE_PARSE(v),n=rsCount(seInv(k,o,m)).pe;toast('Lembrete enviado para '+n+' pessoa'+(n>1?'s':''));},
@@ -199,20 +209,20 @@ nxSeriesPage=function(){
  const idx=NX_SERIES.indexOf(s),ti=NX_TYPE_IC[s.type],can=ctCanEdit(),n=s.items.length,total=nxSerTotal(s),one=NX_TYPE_LO[s.type],many=NX_TYPE_PL[s.type];
  const pct=i=>s.people.length?Math.round(s.people.filter(p=>p.ids.includes(s.items[i])).length/s.people.length*100):0;
  const avg=n&&s.people.length?Math.round(s.people.reduce((a,p)=>a+p.done/n,0)/s.people.length*100):0;
- const tab=can&&S.nxSeriesTab==='progress'?'progress':'items';
+ const tab=S.nxSeriesTab==='uso'||S.nxSeriesTab==='cmt'?S.nxSeriesTab:can&&S.nxSeriesTab==='progress'?'progress':'items';
  const kp=[[n,'Itens'],[total?nxMin(total):'—','Duração']].concat(can?[[s.people.length,'Inscritos'],[avg+'<small class="kof">%</small>','Progresso médio']]:[]);
- const tabs=[['items','Itens','nxSeriesTab',n]].concat(can?[['progress','Progresso','nxSeriesTab',s.people.length]]:[]);
+ const tabs=[['items','Itens','nxSeriesTab',n]].concat(can?[['progress','Progresso','nxSeriesTab',s.people.length]]:[],[['cmt','Comentários','nxSeriesTab',cmtList('learning.series:'+s.id).length||null],['uso','Usos','nxSeriesTab',null]]);
  const head=joHead(s,'<span class="soft">Conteúdo</span>'+ic('chevR',13,2)+'<button class="lnk back" data-a="nxSeriesBack">Séries</button>'+ic('chevR',13,2)+'<span>'+esc(s.n)+'</span>',
   '<span class="nx-sh"><span class="nx-si" style="background:'+thumbBg(idx%6)+(s.cover?";background-image:url('"+s.cover+"');background-size:cover;background-position:center":'')+'">'+ic(ti,22)+'</span>'+esc(s.n)+'</span>',
   'Série de '+many+(s.desc?' · '+esc(s.desc):''),kp,tabs,tab,nxBadge(s)+'<button class="btn sec sm" data-a="nxSeriesEdit" data-v="'+s.id+'">'+ic('pen',14)+'Editar série</button>');
  let body;
- if(tab==='progress'){
+ if(tab==='uso'){body=ctUsesCard('series',s.id);}else if(tab==='cmt'){body=cmtCard('learning.series',s.id);}else if(tab==='progress'){
   body='<p class="sr-note">'+ic('info',14,2)+'Ordem livre: cada pessoa marca '+(s.type==='Música'?'as faixas como concluídas':'os itens como concluídos')+' na ordem que quiser. Esta aba aparece só para quem tem Editar ou Admin em Conteúdo.</p>'
    +'<section class="card mtab"><div class="trow pp thead"><span>Pessoa</span><span>Progresso</span><span>'+(s.type==='Música'?'Faixas concluídas':'Itens concluídos')+'</span><span>Situação</span></div>'+(s.people.length?s.people.map(p=>{const pr=n?Math.round(p.done/n*100):0;
    return '<div class="trow pp"><span class="tn">'+avN(p.n)+'<b>'+esc(p.n)+'</b></span><span class="ct-pg"><span class="tr '+(pr===100?'done':'')+'"><i style="width:'+pr+'%"></i></span><b>'+pr+'%</b></span><span class="ct-where"><span class="sr-dots">'+s.items.map((id,i)=>{const d=p.ids.includes(id),f=nxItemInfo(s.type,nxItemObj(s.type,id));return '<i class="'+(d?'on':'')+'" title="'+(i+1)+'. '+esc(f.t)+(d?' · concluído':' · pendente')+'">'+(d?ic('check',10,3):i+1)+'</i>';}).join('')+'</span><small>'+p.done+' de '+n+'</small></span><span class="ts">'+(pr===100?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Concluída</span>':p.done?'<span class="soft">Faltam '+(n-p.done)+'</span>':'<span class="soft">Não começou</span>')+'</span></div>';}).join(''):'<div class="tfoot"><span>Ninguém começou ainda.</span></div>')+'</section>';
  }else{
   body='<section class="card ct-trail"><div class="sh"><p class="who" style="margin:0">'+ic('grip',13,2)+' Arraste para mudar a ordem de exibição. Quem acompanha pode concluir '+(s.type==='Música'?'as faixas':'os itens')+' em qualquer ordem.</p><button class="btn pri sm" data-a="nxSeriesAdd">'+ic('plus',14,2.2)+'Adicionar '+one+'</button></div>'
-   +'<ol class="ct-tl" id="nxSerList">'+s.items.map((id,i)=>{const f=nxItemInfo(s.type,nxItemObj(s.type,id));
+   +'<label class="tog" style="margin:4px 0 14px"><input type="checkbox" data-cert="series|'+s.id+'" '+(s.cert?'checked':'')+'><span class="sw"></span><span><b>Gera certificado</b><small>Ao concluir todos os itens da série</small></span></label><ol class="ct-tl" id="nxSerList">'+s.items.map((id,i)=>{const f=nxItemInfo(s.type,nxItemObj(s.type,id));
     return '<li data-id="'+id+'"><span class="ct-node">'+(i+1)+'</span><div class="ct-cc" tabindex="0" data-a="nxSeriesItem" data-v="'+id+'"><span class="cm-grip" title="Arraste para reordenar">'+ic('grip',14,2)+'</span><div class="ct-ccb"><b>'+esc(f.t)+'</b><span>'+esc(f.sub)+'</span></div><span class="ct-ccm">'+(f.dur?'<b>'+nxMin(f.dur)+'</b>':'')+'</span>'
      +(can?'<span class="ct-ccp"><span class="tr"><i style="width:'+pct(i)+'%"></i></span><small>'+pct(i)+'% concluíram</small></span>':'<span class="ct-ccp"></span>')
      +'<button type="button" class="ibtn sm" data-a="nxSeriesRemove" data-v="'+i+'" aria-label="Remover da série" title="Remover da série">'+ic('x',14)+'</button>'+ic('chevR',16)+'</div></li>';}).join('')
@@ -220,84 +230,6 @@ nxSeriesPage=function(){
  }
  return head+'<div class="rise" style="--d:2">'+body+'</div>';
 };
-
-if(!FOOD_STORES.shop.items.some(x=>x.id==='sh7'))FOOD_STORES.shop.items.push({id:'sh7',sku:'L003',name:'Devocional 365 dias',cat:'books',price:5900,stock:20,min:5,active:true,desc:'Uma leitura curta para cada dia do ano.',app:true},{id:'sh8',sku:'A003',name:'Ecobag Alva',cat:'accessories',price:2900,stock:15,min:5,active:true,desc:'Lona crua, alça longa.',app:true});
-
-/* ---------- Loja: detalhe da venda ---------- */
-nxSaleDetail=function(id){const s=FOOD_SALES.find(x=>x.id===id);if(!s)return;const p=FOOD_PAY[s.method]||FOOD_PAY.Pix,gross=s.lines.reduce((n,l)=>n+l.qty*l.price,0),units=s.lines.reduce((n,l)=>n+l.qty,0),ok=s.status==='completed',who=s.who||'Rafael Pereira',pct=gross&&s.discount?Math.round(s.discount/gross*100):0;
- const fact=(icn,lbl,val)=>'<div class="svd-f"><span class="svd-fi">'+icn+'</span><span><small>'+lbl+'</small><b>'+val+'</b></span></div>';
- openDlg(dlgHead('Venda '+s.id,'Loja · balcão')
-  +'<div class="svd">'
-  +'<div class="svd-hero '+(ok?'':'off')+'"><div class="svd-tot"><small>Total da venda</small><b>'+foodMoney(s.total)+'</b>'+(ok?foodPill('Concluída','ok'):foodPill('Cancelada','off'))+'</div>'
-   +'<div class="svd-fs">'+fact(ic('calendar',15,1.9),'Data',dBR(s.date)+' · '+s.time)+fact('<span class="ax-kt" style="--k:'+p[1]+';--s:28px">'+ic(p[0],13)+'</span>','Pagamento',esc(s.method||'Pix'))+fact(avN(who),'Vendido por',esc(who.split(' ').slice(0,2).join(' ')))+(s.buyer?fact(avN(s.buyer),'Comprador',esc(s.buyer)):'')+fact(ic('bag',15,1.9),'Itens',units+' unidade'+(units>1?'s':''))+'</div></div>'
-  +(ok?'':'<div class="svd-cancel">'+ic('undo',15,2)+'<div><b>Venda cancelada'+(s.reason?' · '+esc(s.reason):'')+'</b><span>O estoque voltou e o estorno foi lançado no Financeiro.</span></div></div>')
-  +'<section class="svd-box"><div class="svd-bh"><h3>Itens</h3><span class="who">'+s.lines.length+' produto'+(s.lines.length>1?'s':'')+' · '+units+' un.</span></div>'
-   +s.lines.map(l=>{const i=foodItem('shop',l.item),c=foodCat('shop',l.cat);return '<div class="svd-ln">'+(i?shThumb(i,c,40):kTile(foodCatK(c),40))+'<span class="svd-lt"><b>'+esc(l.name)+'</b><small>'+(i&&i.sku?esc(i.sku)+' · ':'')+l.qty+' × '+foodMoney(l.price)+'</small></span><b class="svd-lv">'+foodMoney(l.qty*l.price)+'</b></div>';}).join('')
-   +'<div class="svd-sum">'+(s.discount?'<div><span>Subtotal</span><span>'+foodMoney(gross)+'</span></div><div><span>Desconto'+(pct?' <em>'+pct+'%</em>':'')+'</span><span class="neg">− '+foodMoney(s.discount)+'</span></div>':'')+'<div class="big"><span>Total</span><b>'+foodMoney(s.total)+'</b></div></div></section>'
-  +'</div><div class="dfoot">'+(ok?'<button class="btn sec dang-t" data-a="nxSaleCancel" data-v="'+s.id+'" style="margin-right:auto">'+ic('undo',14,2)+'Cancelar venda</button>':'')+'<button class="btn sec" data-a="sdReceipt" data-v="'+s.id+'">'+ic('file',14)+'Recibo</button><button class="btn pri" data-a="closeDlg">Fechar</button></div>','svdd');};
-Object.assign(A,{nxSaleOpen:nxSaleDetail,sdReceipt:v=>toast('Recibo da venda '+v+' gerado em PDF')});
-
-/* ---------- Loja: pedidos do app ---------- */
-const AO_ST={separando:['Separando','sol'],pronto:['Pronto para retirar','int'],retirado:['Retirado','mute'],cancelado:['Cancelado','rec']};
-const aoIt=id=>FOOD_STORES.shop.items.find(x=>x.id===id);
-const AO=(id,code,who,d,time,lines,pay,st,o={})=>{const ls=lines.map(([item,qty,size])=>{const i=aoIt(item);return {item,name:i.name,cat:i.cat,qty,price:i.price,size:size||''};});return Object.assign({id,code,who,d,time,lines:ls,total:ls.reduce((n,l)=>n+l.qty*l.price,0),pay,st},o);};
-const APP_ORDERS=[
- AO('A1036','K9QX','Mariana Costa','2026-09-30','08:12',[['sh2',1,'M'],['sh7',1]],'Pix','separando'),
- AO('A1035','T4ME','Felipe Andrade','2026-09-29','21:40',[['sh4',1]],'Cartão','separando'),
- AO('A1034','B7RA','Juliana Prado','2026-09-29','19:05',[['sh5',2]],'Pix','pronto',{readyAt:'2026-09-30 09:20',readyBy:'Rafael Pereira'}),
- AO('A1033','Z2LD','Otávio Lins','2026-09-28','12:30',[['sh8',1],['sh1',1]],'Pix','pronto',{readyAt:'2026-09-29 10:05',readyBy:'Lucas Mendes'}),
- AO('A1032','H5PN','Ana Clara Lima','2026-09-27','17:48',[['sh2',2,'P']],'Cartão','retirado',{readyAt:'2026-09-27 18:30',readyBy:'Lucas Mendes',pickedAt:'2026-09-28 10:42',pickedBy:'Lucas Mendes'}),
- AO('A1030','R8VC','Bruno Reis','2026-09-25','20:15',[['sh7',1]],'Pix','cancelado',{why:'Pedido em duplicidade'}),
- AO('A1027','M3TS','Rafael Pereira','2026-09-20','11:02',[['sh1',1]],'Pix','retirado',{readyAt:'2026-09-20 12:00',readyBy:'Lucas Mendes',pickedAt:'2026-09-21 09:30',pickedBy:'Lucas Mendes'})];
-APP_ORDERS.forEach(o=>{if(FOOD_SALES.some(x=>x.id===o.id))return;FOOD_SALES.push({id:o.id,store:'shop',date:o.d,time:o.time,status:o.st==='cancelado'?'cancelled':'completed',reason:o.why||'',lines:o.lines.map(l=>({item:l.item,name:l.name,cat:l.cat,qty:l.qty,price:l.price})),total:o.total,discount:0,method:o.pay,who:'App',app:o.id});});
-const aoNow=()=>TODAY.toISOString().slice(0,10)+' '+new Date().toTimeString().slice(0,5);
-const aoWhen=t=>{const [d,h]=t.split(' ');return dBR(d).slice(0,5)+' às '+h;};
-const aoPill=o=>{const [l,k]=AO_ST[o.st];return '<span class="stp" style="--c:var(--st-'+(k==='mute'?'x':k)+',var(--ink-muted));--b:var(--st-'+(k==='mute'?'x':k)+'-bg,var(--surface-2))"><i></i>'+l+'</span>';};
-const aoUnits=o=>o.lines.reduce((n,l)=>n+l.qty,0);
-const aoOpen=()=>APP_ORDERS.filter(o=>o.st==='separando'||o.st==='pronto');
-function aoCard(o){const p=FOOD_PAY[o.pay]||FOOD_PAY.Pix;
- return '<article class="ao-c '+o.st+'" tabindex="0" data-a="aoOpen" data-v="'+o.id+'"><div class="ao-ch"><span class="ao-code">'+o.code+'</span><span class="who">#'+o.id+'</span></div>'
-  +'<div class="ao-who">'+avN(o.who)+'<span><b>'+esc(o.who)+'</b><small>'+dBR(o.d).slice(0,5)+' · '+o.time+'</small></span></div>'
-  +'<p class="ao-it">'+o.lines.map(l=>l.qty+'× '+esc(l.name)+(l.size?' ('+l.size+')':'')).join(', ')+'</p>'
-  +'<div class="ao-cf"><span class="ao-pay"><span class="ax-kt" style="--k:'+p[1]+';--s:22px">'+ic(p[0],11)+'</span>'+foodMoney(o.total)+'</span>'
-  +(o.st==='separando'?'<button class="btn pri sm" data-a="aoReady" data-v="'+o.id+'">Marcar como pronto</button>':o.st==='pronto'?'<button class="btn pri sm" data-a="aoPick" data-v="'+o.id+'">Confirmar retirada</button>':o.st==='retirado'?'<span class="who">Retirado '+aoWhen(o.pickedAt)+'</span>':'<span class="who">'+esc(o.why||'Cancelado')+'</span>')+'</div></article>';}
-function aoPage(){const sep=APP_ORDERS.filter(o=>o.st==='separando'),rdy=APP_ORDERS.filter(o=>o.st==='pronto'),done=APP_ORDERS.filter(o=>o.st==='retirado'),canc=APP_ORDERS.filter(o=>o.st==='cancelado'),openV=aoOpen().reduce((n,o)=>n+o.total,0);
- const col=(t,k,l,empty)=>'<section class="ao-col '+k+'"><header><span class="ao-dot"></span><b>'+t+'</b><small>'+l.length+'</small></header><div class="ao-list">'+(l.map(aoCard).join('')||'<p class="ao-empty">'+empty+'</p>')+'</div></section>';
- return '<header class="ph rise"><div><p class="eb">Loja</p><h1>Pedidos do app</h1><p class="lede">Compras pagas pelo app. Separe, avise o comprador e entregue conferindo o código de retirada.</p></div><div class="pact"><button class="btn pri" data-a="aoPick">'+ic('check',15,2.2)+'Confirmar retirada</button></div></header>'
-  +'<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Para separar</span><span class="kv" style="'+(sep.length?'color:var(--st-sol)':'')+'">'+sep.length+'</span><span class="kd">pagos e aguardando a equipe</span></div><div class="k4"><span class="kl">Prontos para retirar</span><span class="kv" style="color:var(--st-int)">'+rdy.length+'</span><span class="kd">comprador já foi avisado</span></div><div class="k4"><span class="kl">Retirados</span><span class="kv">'+done.length+'</span><span class="kd">entregues com o código</span></div><div class="k4"><span class="kl">Em aberto</span><span class="kv" style="font-size:24px">'+foodMoney(openV)+'</span><span class="kd">pago, ainda na loja</span></div></section>'
-  +'<form class="card ao-find rise" style="--d:2" id="aoFind" novalidate><span class="ao-fi">'+ic('ticket',18,2)+'</span><div class="ao-ft"><b>Buscar pelo código de retirada</b><span class="who">O comprador mostra o código no app. Também dá para buscar pelo nome ou número do pedido.</span></div><div class="ao-qg"><label class="sbox ao-q">'+ic('search',16)+'<input id="aoQ" maxlength="40" placeholder="Código, nome ou pedido" autocomplete="off" aria-label="Buscar pedido"></label><button class="btn pri" type="submit">Buscar</button></div></form>'
-  +'<div class="ao-board rise" style="--d:3">'+col('Separando','sep',sep,'Nada para separar.')+col('Pronto para retirar','rdy',rdy,'Nenhum pedido esperando.')+col('Retirados','done',done.slice(0,6),'Nenhum pedido retirado ainda.')+'</div>'
-  +(canc.length?'<p class="eh" style="margin-top:20px">Cancelados<small>'+canc.length+'</small></p><div class="ao-canc">'+canc.map(aoCard).join('')+'</div>':'');}
-function aoDetail(id){const o=APP_ORDERS.find(x=>x.id===id);if(!o)return;const p=FOOD_PAY[o.pay]||FOOD_PAY.Pix,steps=[['Pago',o.d+' '+o.time,'App'],['Pronto para retirar',o.readyAt,o.readyBy],['Retirado',o.pickedAt,o.pickedBy]],cur=o.st==='retirado'?2:o.st==='pronto'?1:0;
- openDlg(dlgHead('Pedido #'+o.id,'Loja · pedido pelo app')
-  +'<div class="svd"><div class="ao-hero '+o.st+'"><div><small>Código de retirada</small><b>'+o.code+'</b>'+aoPill(o)+'</div><div class="ao-buyer">'+avN(o.who)+'<span><b>'+esc(o.who)+'</b><small>Comprador · '+aoUnits(o)+' unidade'+(aoUnits(o)>1?'s':'')+'</small></span></div></div>'
-  +(o.st==='cancelado'?'<div class="svd-cancel">'+ic('undo',15,2)+'<div><b>Pedido cancelado'+(o.why?' · '+esc(o.why):'')+'</b><span>O valor foi estornado para o comprador e o estoque voltou.</span></div></div>'
-   :'<ol class="ao-steps">'+steps.map((s,i)=>'<li class="'+(i<=cur?'on':'')+(i===cur?' cur':'')+'"><span class="ao-sd">'+(i<cur||(i===cur&&o.st==='retirado')?ic('check',11,3):i+1)+'</span><b>'+s[0]+'</b><small>'+(i<=cur&&s[1]?aoWhen(s[1])+(s[2]?' · '+esc(s[2].split(' ')[0]):''):i===1?'Avisa o comprador no app':'Com o código no balcão')+'</small></li>').join('')+'</ol>')
-  +'<section class="svd-box"><div class="svd-bh"><h3>Itens</h3><span class="who">'+o.lines.length+' produto'+(o.lines.length>1?'s':'')+'</span></div>'+o.lines.map(l=>{const i=aoIt(l.item),c=foodCat('shop',l.cat);return '<div class="svd-ln">'+(i?shThumb(i,c,40):'')+'<span class="svd-lt"><b>'+esc(l.name)+(l.size?' · tamanho '+l.size:'')+'</b><small>'+l.qty+' × '+foodMoney(l.price)+'</small></span><b class="svd-lv">'+foodMoney(l.qty*l.price)+'</b></div>';}).join('')
-  +'<div class="svd-sum"><div><span>Pagamento</span><span class="ao-pay"><span class="ax-kt" style="--k:'+p[1]+';--s:22px">'+ic(p[0],11)+'</span>'+o.pay+' · aprovado</span></div><div class="big"><span>Total pago</span><b>'+foodMoney(o.total)+'</b></div></div></section></div>'
-  +'<div class="dfoot">'+(o.st==='separando'||o.st==='pronto'?'<button class="btn sec dang-t" data-a="aoCancel" data-v="'+o.id+'" style="margin-right:auto">'+ic('undo',14,2)+'Cancelar e estornar</button>':'')+'<button class="btn sec" data-a="closeDlg">Fechar</button>'
-  +(o.st==='separando'?'<button class="btn pri" data-a="aoReady" data-v="'+o.id+'">Marcar como pronto</button>':o.st==='pronto'?'<button class="btn pri" data-a="aoPick" data-v="'+o.id+'">Confirmar retirada</button>':'')+'</div>','svdd');}
-function aoPickDlg(id){const o=id&&APP_ORDERS.find(x=>x.id===id);
- openDlg(dlgHead('Confirmar retirada',o?'Pedido #'+o.id+' · '+esc(o.who):'Digite o código que o comprador mostra no app.')+'<form id="aoPF" class="fgrid one" novalidate><label class="fld"><span class="fl">Código de retirada</span><input name="c" class="ao-cin" maxlength="4" autocomplete="off" placeholder="····" style="text-transform:uppercase"><span class="err"></span><span class="hint">'+(o?'Peça para '+esc(o.who.split(' ')[0])+' mostrar o código na tela do pedido.':'Só pedidos prontos para retirar podem ser entregues.')+'</span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Entregar pedido</button></div></form>','sm');
- const f=$('#aoPF'),i=f.elements.c;setTimeout(()=>i.focus(),60);i.addEventListener('input',()=>{i.value=i.value.toUpperCase().replace(/[^A-Z0-9]/g,'');i.closest('.fld').classList.remove('bad');});
- f.onsubmit=e=>{e.preventDefault();const v=i.value.trim(),bad=m=>{const fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;i.focus();};
-  const x=o?(o.code===v?o:null):APP_ORDERS.find(y=>y.code===v);
-  if(v.length<4)return bad('O código tem 4 caracteres');if(!x)return bad(o?'Código não confere com este pedido':'Nenhum pedido com esse código');
-  if(x.st==='separando')return bad('Este pedido ainda está sendo separado');if(x.st==='retirado')return bad('Pedido já retirado em '+aoWhen(x.pickedAt));if(x.st==='cancelado')return bad('Pedido cancelado');
-  x.st='retirado';x.pickedAt=aoNow();x.pickedBy=ME_NAME;closeDlg();render();toast('Pedido #'+x.id+' entregue para '+x.who.split(' ')[0]);};}
-Object.assign(A,{
- aoOpen:v=>aoDetail(v),
- aoReady:(v,el,e)=>{if(e)e.stopPropagation();const o=APP_ORDERS.find(x=>x.id===v);o.st='pronto';o.readyAt=aoNow();o.readyBy=ME_NAME;closeDlg();render();toast('Pedido #'+o.id+' pronto · '+o.who.split(' ')[0]+' foi avisado no app');},
- aoPick:(v,el,e)=>{if(e)e.stopPropagation();closeDlg(true);setTimeout(()=>aoPickDlg(v),30);},
- aoCancel:v=>{const o=APP_ORDERS.find(x=>x.id===v);closeDlg();setTimeout(()=>confirmDel({title:'Cancelar o pedido #'+o.id+'?',body:'O valor de '+foodMoney(o.total)+' é estornado para '+esc(o.who)+' e os itens voltam ao estoque.',label:'Cancelar e estornar',onConfirm:()=>{o.st='cancelado';o.why='Cancelado pela loja';const sl=FOOD_SALES.find(x=>x.id===o.id);if(sl){sl.status='cancelled';sl.reason='Cancelado pela loja';}render();toast('Pedido cancelado e estornado');}}),50);}});
-document.addEventListener('submit',e=>{if(e.target.id!=='aoFind')return;e.preventDefault();const q=norm($('#aoQ').value.trim());if(!q)return;const o=APP_ORDERS.find(x=>norm(x.code)===q)||APP_ORDERS.find(x=>norm(x.id)===q||norm('#'+x.id)===q)||APP_ORDERS.find(x=>norm(x.who).includes(q));if(o)aoDetail(o.id);else toast('Nenhum pedido encontrado');});
-{const g=NAV.flatMap(x=>x[1]).find(i=>i[0]==='shop');if(g&&!g[3].some(x=>x[0]==='shop-orders'))g[3].splice(g[3].findIndex(x=>x[0]==='shop-sales')+1,0,['shop-orders','Pedidos do app']);}
-{const base=foodPage;foodPage=function(){return S.active==='shop-orders'?aoPage():base.apply(this,arguments);};}
-{const base=nxShopOverview;nxShopOverview=function(){const h=base.apply(this,arguments),sep=APP_ORDERS.filter(o=>o.st==='separando').length,rdy=APP_ORDERS.filter(o=>o.st==='pronto').length;
- const card='<section class="card ao-ov rise" style="--d:1"><span class="ao-ovi">'+ic('bag',20,1.9)+'</span><div class="ao-ft"><b>Pedidos do app</b><span class="who">'+(sep||rdy?(sep?sep+' para separar':'')+(sep&&rdy?' · ':'')+(rdy?rdy+' pronto'+(rdy>1?'s':'')+' para retirar':''):'Nenhum pedido em aberto')+'</span></div><div class="ao-ovk">'+(sep?'<span class="ao-pk sep">'+sep+'</span>':'')+(rdy?'<span class="ao-pk rdy">'+rdy+'</span>':'')+'</div><button class="btn sec sm" data-a="nav" data-v="shop-orders">Ver pedidos'+ic('arrowR',14,2)+'</button></section>';
- const k=h.indexOf('</header>');return k<0?card+h:h.slice(0,k+9)+card+h.slice(k+9);};}
-{const base=nxSaleRows;nxSaleRows=function(){return base.apply(this,arguments).replace(/por App</g,'pelo app<');};}
-{const base=nxSaleDetail;nxSaleDetail=function(id){const s=FOOD_SALES.find(x=>x.id===id);if(s&&s.app){aoDetail(s.app);return;}return base(id);};Object.assign(A,{nxSaleOpen:nxSaleDetail});}
 
 /* ---- Discipulado e Acompanhamento: o encontro agendado mostra a resposta da pessoa convidada (como as Casas, mas com uma pessoa só) ---- */
 const RS1_L={sim:'Aceitou',nao:'Recusou','':'Aguardando resposta'};
@@ -316,7 +248,7 @@ const rsOneInject=(h,find)=>h.replace(/<li class="sched">([\s\S]*?)<\/li>/g,(li,
 {const _d=dEnc;dEnc=function(d){const h=_d.apply(this,arguments);
  return rsOneInject(h,body=>{const id=(body.match(/data-a="dConclude" data-v="([^"]+)"/)||[])[1],m=id&&d.meets.find(x=>x.id===id);return m?{m,act:'dInvView',key:id}:null;});};}
 {const _c=careMeetings;careMeetings=function(c){const h=_c.apply(this,arguments);
- return rsOneInject(h,body=>{const k=(body.match(/data-a="cDone" data-v="([^"]+)"/)||[])[1],i=k&&+k.split('|')[1],m=k&&c.sched[i];return m?{m,act:'careInvView',key:k}:null;});};}
+ return qdRenewFor([...(c.sched||[]),...c.meets],{act:'cRenew',title:()=>'Encontro de acompanhamento'})+rsOneInject(h,body=>{const k=(body.match(/data-a="cDone" data-v="([^"]+)"/)||[])[1],i=k&&+k.split('|')[1],m=k&&c.sched[i];return m?{m,act:'careInvView',key:k}:null;});};}
 Object.assign(A,{
  dInvView:id=>{const d=dById(S.disc),m=d.meets.find(x=>x.id===id);if(!m)return;
   meetView({title:'Encontro agendado',sub:esc(d.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:(m.time||'').replace(':00','h'),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.content],['Material de apoio',m.mat]],
@@ -346,7 +278,7 @@ const cxOwn=(type,id)=>{if(!CAIXAS.some(x=>x.ownerType===type&&x.ownerId===id&&x
  return CAIXAS.filter(x=>x.ownerType===type&&x.ownerId===id).sort((a,b)=>(b.main-a.main)||((a.status==='encerrado')-(b.status==='encerrado'))||a.id.localeCompare(b.id,undefined,{numeric:true}));};
 const cxCount=(type,id)=>cxOwn(type,id).length;
 const cxPill=x=>x.status==='encerrado'?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Encerrado</span>':x.main?'<span class="stp" style="--c:var(--brand-text);--b:var(--brand-soft)"><i></i>Principal</span>':'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Aberto</span>';
-const CX_CATS={in:['Oferta ou doação','Inscrição','Venda','Aporte da igreja','Outros'],out:['Material','Alimentação','Transporte','Hospedagem','Serviços','Outros']};
+const CX_CATS={in:['Oferta ou doação','Inscrição','Venda','Aporte da igreja','Outros'],out:['Material','Alimentação','Transporte','Hospedagem','Serviços','Devolução à igreja','Outros']};
 function cxTab(type,id){
  const all=cxOwn(type,id),multi=true;
  const c=S.cx&&all.find(x=>x.id===S.cx);if(c)return cxView(c);S.cx=null;

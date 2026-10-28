@@ -184,8 +184,8 @@ function sxAtoDecide(id,kind){
    if(m){m[SX_DEC[a.t][0]]=true;if(cons)m.consRole=role;}
    sxLog('Aceitou','Ato',T+' declarado de '+nm+(cons?' · cargo '+role:''),'Outra igreja');closeDlg();render();toast(T+' aceito'+(cons?' como '+role:'')+'. A ficha continua como declarada.');};
  }else{
-  sxDlg('Recusar '+T.toLowerCase(),esc(nm)+' · feito em outra igreja',sxF('Motivo <small>opcional</small>','<input name="w" maxlength="140" placeholder="Ex.: sem comprovação" autocomplete="off">','O que a pessoa declarou na ficha continua exatamente como está.'),sxOk('Recusar'));
-  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();a.dec='recusado';a.decBy=sxMe;a.decAt=SX_TODAY;a.why=f.w.value.trim();
+  sxDlg('Recusar '+T.toLowerCase(),esc(nm)+' · feito em outra igreja',sxF('Motivo','<input name="w" maxlength="200" placeholder="Ex.: sem comprovação" autocomplete="off">','O que a pessoa declarou na ficha continua exatamente como está.'),sxOk('Recusar'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.w.value.trim())return sxErr(f,'w','Informe o motivo');a.dec='recusado';a.decBy=sxMe;a.decAt=SX_TODAY;a.why=f.w.value.trim();
    sxLog('Recusou','Ato',T+' declarado de '+nm,a.why||'Sem motivo');closeDlg();render();toast(T+' recusado. A ficha continua como declarada.');};
  }
 }
@@ -305,7 +305,7 @@ function sxDocDlg(pre){
   const why=T.need(m);if(why)return sxErr(f,fld,why);
   if(!sig.length)return sxErr(f,'sig','Sem signatário: cadastre o mandato do Pastor presidente.');
   if(t==='Carta de transferência'&&!f.dest.value.trim())return sxErr(f,'dest','Informe a igreja de destino');
-  const d=sxNewDoc(t,m,{dest:f.dest.value.trim(),sig:f.sig.value,obs:f.obs.value.trim()});sxLog('Emitiu','Documento',t+' nº '+d.num,m.n);
+  const d=sxNewDoc(t,m,{dest:f.dest.value.trim(),sig:f.sig.value,obs:f.obs.value.trim()});if(window._sxReq&&t==='Declaração de membro'){const rq=SX_DREQ.find(x=>x.id===window._sxReq);if(rq){rq.st='emitido';rq.doc=d.num;}window._sxReq=null;}sxLog('Emitiu','Documento',t+' nº '+d.num,m.n);
   closeDlg();render();toast(t+' nº '+d.num+' emitido(a)');setTimeout(()=>sxDocView(d.id),250);};
 }
 function sxDocView(id){
@@ -375,17 +375,27 @@ Object.assign(A,{
   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button></div>`,'sc-dlg');},
  sxModRe:v=>{const [t,n]=v.split('|'),o=sxModOf(t).find(x=>x.v===+n),x={v:sxModOf(t)[0].v+1,file:o.file,by:sxMe,d:SX_TODAY,sz:o.sz,note:'Reativação da v'+o.v};SX_MOD[t].unshift(x);sxLog('Enviou','Modelo',t+' v'+x.v,'Reativou a v'+o.v);closeDlg();render();toast('v'+x.v+' ativa (a mesma da v'+o.v+')');}
 });
+/* Pedidos de declaração de membro feitos pelo app: a equipe emite (abre a emissão já preenchida) ou recusa com motivo */
+const SX_DREQ=[];
+const sxReqSt={pendente:['Pendente','var(--st-sol)','var(--st-sol-bg)'],emitido:['Emitida','var(--st-int)','var(--st-int-bg)'],recusado:['Recusada','var(--st-rec)','var(--st-rec-bg)']};
+function sxDReqs(){if(!SX_DREQ.length){const m=sxInteg().filter(x=>sxSitOf(x)==='ativo').slice(0,4);[['2026-09-29','pendente'],['2026-09-28','pendente'],['2026-09-24','emitido'],['2026-09-20','recusado']].forEach((z,i)=>{if(m[i])SX_DREQ.push({id:'dr'+(i+1),mid:m[i].id,d:z[0],st:z[1],doc:z[1]==='emitido'?'0042':'',why:z[1]==='recusado'?'Falta atualizar o endereço no cadastro':''});});}return SX_DREQ;}
+function sxReqCard(){const l=sxDReqs();return `<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><span class="who">Pedidos de declaração de membro feitos pelo app. Ao emitir, a declaração aparece em Meus documentos da pessoa.</span></div>${l.length?l.map(r=>{const m=byId(r.mid),s=sxReqSt[r.st];return `<div class="sx-r" style="cursor:default"><span class="sx-ti">${ic('file',20)}</span><span class="sx-m"><b>Declaração de membro</b><small>${esc(m.n)} · pedida em ${dBR(r.d)}${r.st==='emitido'?' · nº '+r.doc:''}${r.st==='recusado'?' · '+esc(r.why):''}</small></span><span class="sx-s">${sxPill(s[0],s[1],s[2])}</span>${r.st==='pendente'?`<span class="row2"><button class="btn sec sm" data-a="sxReqNo" data-v="${r.id}">Recusar</button><button class="btn pri sm" data-a="sxReqOk" data-v="${r.id}">Emitir</button></span>`:''}</div>`;}).join(''):'<div class="mempty"><p>Nenhum pedido.</p><span>Os pedidos feitos no app aparecem aqui.</span></div>'}</section>`;}
 function secDocs(){
  const t=S.sxDocT,val=SX_DOCS.filter(d=>d.st==='valido').length;
- const act=t==='emitidos'?`<button class="btn sec" data-a="sxValidate">${ic('check',15,2.2)}Validar código</button><button class="btn pri" data-a="sxDocNew">${ic('plus',15,2.2)}Emitir documento</button>`:t==='modelos'?'':`<button class="btn pri" data-a="sxArqNew">${ic('upload',15,2)}Enviar arquivo</button>`;
+ const act=t==='emitidos'?`<button class="btn sec" data-a="sxValidate">${ic('check',15,2.2)}Validar código</button><button class="btn pri" data-a="sxDocNew">${ic('plus',15,2.2)}Emitir documento</button>`:t==='modelos'||t==='pedidos'?'':`<button class="btn pri" data-a="sxArqNew">${ic('upload',15,2)}Enviar arquivo</button>`;
  return sxHead('Secretaria','Documentos','Documentos emitidos, o arquivo da secretaria (estatuto, atas, contratos) e os modelos usados para gerar os documentos.',act)
- +sxSeg('sxDocTab',[['emitidos','Emitidos',SX_DOCS.length],['arquivo','Arquivo',SX_ARQ.length],['modelos','Modelos',Object.keys(SX_DOC_T).length]],t)
+ +sxSeg('sxDocTab',[['emitidos','Emitidos',SX_DOCS.length],['pedidos','Pedidos',sxDReqs().filter(r=>r.st==='pendente').length],['arquivo','Arquivo',SX_ARQ.length],['modelos','Modelos',Object.keys(SX_DOC_T).length]],t)
  +(t==='modelos'?`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('info',17,2)}<span><b>Um modelo por tipo de documento.</b> <small>Você envia um arquivo Word (.docx) ou PDF com campos como {{nome}}; ele vira uma versão nova e passa a valer nas próximas emissões. Documentos já emitidos guardam o texto e a versão que usaram. Enviar versão exige Editar ou Administrar em Secretaria e fica na auditoria.</small></span></div><section class="card sx-list rise" style="--d:3">${sxModList()}</section>`:'')
- +(t==='modelos'?'':t==='emitidos'?`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><label class="sbox">${ic('search',16)}<input data-scq="doc" placeholder="Buscar por pessoa, tipo, número ou código" value="${esc(S.sxDocQ||'')}" autocomplete="off"></label><span class="who">${val} válidos · ${SX_DOCS.length-val} revogados</span></div><div id="sxDl">${sxDocList()}</div></section>`
+ +(t==='modelos'?'':t==='pedidos'?sxReqCard():t==='emitidos'?`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><label class="sbox">${ic('search',16)}<input data-scq="doc" placeholder="Buscar por pessoa, tipo, número ou código" value="${esc(S.sxDocQ||'')}" autocomplete="off"></label><span class="who">${val} válidos · ${SX_DOCS.length-val} revogados</span></div><div id="sxDl">${sxDocList()}</div></section>`
  :`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><label class="sbox">${ic('search',16)}<input data-scq="arq" placeholder="Buscar arquivo" value="${esc(S.sxArqQ)}" autocomplete="off"></label><div class="chips">${['todas',...SX_CATS].map(c=>`<button class="chipf ${S.sxArq===c?'on':''}" data-a="sxArqCat" data-v="${c}">${c==='todas'?'Todas':c}<small>${c==='todas'?SX_ARQ.length:SX_ARQ.filter(x=>x.cat===c).length}</small></button>`).join('')}</div></div><p class="sx-priv">${ic('lock',13,2)} Cada arquivo diz quem pode abrir: Secretaria, Administradores ou Liderança. Aberturas ficam na auditoria.</p><div id="sxAl">${sxArqList()}</div></section>`);
 }
 Object.assign(A,{
- sxDocTab:v=>{S.sxDocT=v;render();},sxDocNew:()=>sxDocDlg(),sxDocOpen:v=>sxDocView(v),sxValidate:()=>sxValidate(),sxToast:v=>toast(v),
+ sxDocTab:v=>{S.sxDocT=v;render();},
+ sxReqGo:()=>{S.sxDocT='pedidos';A.nav('sec-docs');},
+ sxReqOk:v=>{const r=SX_DREQ.find(x=>x.id===v);window._sxReq=v;sxDocDlg({t:'Declaração de membro',mid:r.mid});},
+ sxReqNo:v=>{const r=SX_DREQ.find(x=>x.id===v),m=byId(r.mid);sxDlg('Recusar pedido','Declaração de membro · '+m.n,sxF('Motivo','<input name="w" maxlength="200" placeholder="Ex.: falta atualizar o endereço no cadastro" autocomplete="off">','A pessoa vê o motivo no app.'),sxOk('Recusar pedido'));
+  const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.w.value.trim())return sxErr(f,'w','Informe o motivo');r.st='recusado';r.why=f.w.value.trim();sxLog('Encerrou','Documento','Recusou pedido de declaração de membro',m.n);closeDlg();render();toast('Pedido recusado');};},
+sxDocNew:()=>sxDocDlg(),sxDocOpen:v=>sxDocView(v),sxValidate:()=>sxValidate(),sxToast:v=>toast(v),
  sxDocRevoke:v=>{const d=SX_DOCS.find(x=>x.id===v);sxDlg('Revogar documento','Nº '+d.num+' · '+d.t+' · '+d.pessoa,sxF('Motivo','<input name="w" placeholder="Ex.: Emitido com dado incorreto" autocomplete="off">','O documento passa a aparecer como inválido na validação.'),sxOk('Revogar'));
   const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.w.value.trim())return sxErr(f,'w','Informe o motivo');d.st='revogado';d.why=f.w.value.trim();sxLog('Encerrou','Documento','Revogou '+d.t+' nº '+d.num,d.why);closeDlg();render();toast('Documento revogado');};},
  sxArqCat:v=>{S.sxArq=v;render();},
@@ -503,6 +513,7 @@ function secVis(){
  const pend=SX_ATOS.filter(a=>a.auto&&a.dec==='pendente');
  const items=[
   ...sxDiPend().map(p=>({ic:'care',t:p.k==='ret'?`Confirmar a volta de <b>${esc(p.x.m)}</b> à situação Ativo`:`Confirmar ${p.x.req==='Away'?'afastamento':'desligamento'} de <b>${esc(p.x.m)}</b>`,s:'Caso de disciplina · '+(p.k==='ret'?'registro encerrado':'registrado em '+dBR(p.x.d)),a:'sxPendDisc',v:p.x.id,l:'Revisar'})),
+  ...((n=>n?[{ic:'file',t:`<b>${n}</b> ${n===1?'pedido de declaração de membro aguarda':'pedidos de declaração de membro aguardam'} emissão`,s:sxDReqs().filter(r=>r.st==='pendente').slice(0,3).map(r=>esc(byId(r.mid).n)).join(', '),a:'sxReqGo',v:'',l:'Ver pedidos'}]:[])(sxDReqs().filter(r=>r.st==='pendente').length)),
   ...(pend.length?[{ic:'clock',t:`<b>${pend.length}</b> ${pend.length===1?'ato declarado':'atos declarados'} na integração ${pend.length===1?'aguarda':'aguardam'} decisão`,s:pend.slice(0,3).map(a=>esc(a.ppl[0])+' · '+SX_ATO_T[a.t][0].toLowerCase()).join(', '),a:'sxPendGo',v:'',l:'Decidir'}]:[]),
   ...vig.map(x=>({ic:'key',t:`Mandato de <b>${esc(x.pessoa)}</b> (${esc(sxCargo(x.cg).n)}) vence em ${dBR(x.fim)}`,s:`${sxDays(SX_TODAY,x.fim)} dias${x.sc?' · o acesso '+esc(sxCargo(x.cg).ac.area)+' sai junto':''}`,a:'sxGo',v:'sec-cargos',l:'Ver mandatos'})),
   ...prev.map(e=>({ic:SX_ATO_T[CERT[e.type].k][1],t:`${e.type} em ${dBR(e.d)}: <b>${ceUsed(e)} ${ceUsed(e)===1?CERT[e.type].un:CERT[e.type].pl}</b>`,s:esc(e.place||'')+' · evento na Agenda',a:'sxOpenEv',v:e.id,l:'Abrir evento'})),

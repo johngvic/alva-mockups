@@ -1,6 +1,10 @@
 /* ================= Comunidade › Ministérios ================= */
 let _mnid=0;
-const MN=(n,lead,mem,teams,o={})=>({id:'mn'+(++_mnid),n,lead,mem,tone:o.tone||TONES[_mnid%6],icon:o.icon||'users',active:o.active!==false,phone:o.phone||'(11) 9'+(9200+_mnid*37)+'-'+(1000+_mnid*53),desc:o.desc||'',photo:'',teams:(o.teams||['Domingo manhã','Domingo noite','Eventos especiais','Apoio'].slice(0,teams).map((t,i)=>[t,HPOOL[(_mnid*3+i)%HPOOL.length],Math.max(1,Math.round(mem/teams)-(i%2))])).map(t=>({n:t[0],lead:t[1],m:t[2]})),resp:o.resp||[],content:o.content||[],teamsN:teams});
+const mnLeaders=m=>m.leaders||(m.leaders=m.lead?[m.lead]:[]);
+const mnLeadTxt=m=>{const l=mnLeaders(m);return l.length?(l.length>1?'Líderes: ':'Líder: ')+l.map(esc).join(' e '):'Sem líder';};
+const mnPool=m=>[...new Set([...mnLeaders(m),...MEMBERS.filter(x=>x.tit).map(x=>x.n)])];
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.matches&&t.matches('[data-mnq]')){const q=norm(t.value);$$('[data-mnpool] label').forEach(l=>{l.hidden=!!q&&!norm(l.textContent).includes(q);});}});
+const MN=(n,lead,mem,teams,o={})=>({id:'mn'+(++_mnid),n,lead,leaders:lead?[lead]:[],mem,tone:o.tone||TONES[_mnid%6],icon:o.icon||'users',active:o.active!==false,phone:o.phone||'(11) 9'+(9200+_mnid*37)+'-'+(1000+_mnid*53),desc:o.desc||'',photo:'',teams:(o.teams||['Domingo manhã','Domingo noite','Eventos especiais','Apoio'].slice(0,teams).map((t,i)=>[t,HPOOL[(_mnid*3+i)%HPOOL.length],Math.max(1,Math.round(mem/teams)-(i%2))])).map(t=>({n:t[0],lead:t[1],m:t[2]})),resp:o.resp||[],content:o.content||[],teamsN:teams});
 const MINIS=[
  MN('Jovens e Adolescentes','Isabela Rocha',22,3,{icon:'sprout',tone:'lima',desc:'Encontros, discipulado e atividades para adolescentes e jovens.',teams:[['Adolescentes','Gabriel Souza',9],['Jovens','Isabela Rocha',10],['Louvor jovem','Lucas Mendes',3]],resp:['Culto de jovens aos sábados','Retiro anual','Acompanhamento de novos convertidos'],content:[['Curso','O que é a fé'],['Material','Guia do líder de célula jovem']]}),
  MN('Eventos','Diego Martins',10,2,{icon:'ticket',tone:'damasco'}),
@@ -24,7 +28,7 @@ const MINIS=[
  MN('Teatro','Juliana Prado',8,1,{icon:'sparkle',tone:'rosado'}),
 ];
 const CONTENT={Curso:['O que é a fé','Fundamentos da vida cristã','Vida de oração','Liderança servidora'],Pregação:['Série: Frutos do Espírito','Série: Sermão do Monte','Culto de jovens · 20/09'],Música:['Grande é o Senhor','Aclame ao Senhor','Te louvarei'],Material:['Guia do líder de célula jovem','Estudo: Parábolas de Jesus','Apostila de integração']};
-const CTYPE_IC={Curso:'award',Pregação:'play',Música:'music',Material:'book'};
+const CTYPE_IC={Curso:'award',Pregação:'play',Música:'music',Material:'book',Jornada:'route',Série:'layers',Vídeo:'play'};
 Object.assign(S,{mini:null,mtab:'det',mnq:'',mnf:'ativos',mnedit:null});
 const mnById=id=>MINIS.find(m=>m.id===id);
 const mTile=(m,s=36)=>`<span class="htile" style="--s:${s}px;background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${ic(m.icon,Math.round(s*.47),1.9)}</span>`;
@@ -50,7 +54,7 @@ function mnRows(max){
  const sig=S.mnq+'|'+S.mnf;if(S.mnSig!==sig){S.mnSig=sig;S.mnpg=1;}const pp=S.mnpp||8,P=Math.max(1,Math.ceil(l.length/pp));S.mnpg=Math.min(Math.max(1,S.mnpg||1),P);const c=S.mnpg,pg=l.slice((c-1)*pp,c*pp);
  return `<div class="trow mn thead"><span>Ministério</span><span>Líder</span><span>Membros</span><span>Times</span><span>Status</span><span></span></div>
  ${pg.map(m=>`<div class="trow mn ${m.active?'':'off'}" tabindex="0" data-a="mnOpen" data-v="${m.id}"><span class="tn">${mTile(m)}<span class="hn"><b>${esc(m.n)}</b><span>Ministério de ${esc(m.n)}</span></span></span>
-  <span class="hl"><span class="av" style="background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${initials(m.lead)}</span>${esc(m.lead)}</span>
+  <span class="hl"><span class="av" style="background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${m.lead?`${initials(m.lead)}</span>${esc(m.lead)}${mnLeaders(m).length>1?` <small class="soft">+${mnLeaders(m).length-1}</small>`:''}`:'</span><span class="soft">Sem líder</span>'}</span>
   <span class="mnm"><span class="tr"><i style="width:${Math.round(m.mem/max*100)}%"></i></span><b>${m.mem}</b></span>
   <span class="mnt"><b>${tCount(m)}</b> ${tCount(m)===1?'time':'times'}</span>
   <span class="ts">${m.active?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Ativo</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Inativo</span>'}</span>
@@ -61,41 +65,64 @@ function miniDetail(){
  const m=mnById(S.mini);if(!m){S.mini=null;return minisList();}
  return `<nav class="crumb rise"><span class="soft">Comunidade</span>${ic('chevR',13,2)}<button class="lnk back" data-a="mnBack">Ministérios</button>${ic('chevR',13,2)}<span>${esc(m.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
-  <div class="pid">${mTile(m,64)}<div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>Ministério de ${esc(m.n)}</h1>${m.active?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Ativo</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Inativo</span>'}</div><p>Líder: ${esc(m.lead)} · ${mnPpl(m).length} membros · ${tCount(m)} ${tCount(m)===1?'time':'times'}</p></div></div>
+  <div class="pid">${mTile(m,64)}<div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>Ministério de ${esc(m.n)}</h1>${m.active?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Ativo</span>':'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Inativo</span>'}</div><p>${mnLeadTxt(m)} · ${mnPpl(m).length} membros · ${tCount(m)} ${tCount(m)===1?'time':'times'}</p></div></div>
   <div class="pact"><div style="position:relative"><button class="ibtn" data-a="mnMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="mnPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="mnToggle">${ic(m.active?'pause':'check',17)}${m.active?'Inativar ministério':'Reativar ministério'}</button><hr><button class="pi danger" data-a="mnDel">${ic('x',17)}Excluir ministério</button></div></div></div>
-  <div class="ptabs" role="tablist">${[['det','Detalhes'],['mem','Membros',mnPpl(m).length],['times','Times',m.teams.length],['resp','Responsabilidades',m.resp.length],['cont','Conteúdo',m.content.length],['esc','Escalas',esCntMin(m)],['quad','Quadros',nxBdCount('min',m.id)],['cx','Caixas',cxCount('min',m.id)]].map(t=>`<button role="tab" class="${S.mtab===t[0]?'on':''}" data-a="mnTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
+  <div class="ptabs" role="tablist">${[['det','Detalhes'],['mem','Membros',mnPpl(m).length],['times','Times',m.teams.length],['resp','Responsabilidades',m.resp.length],['cont','Conteúdo',m.content.length],['esc','Escalas',esCntMin(m)],['enc','Encontros',mnEncCnt(m)],['quad','Quadros',nxBdCount('min',m.id)],['cx','Caixas',cxCount('min',m.id)]].map(t=>`<button role="tab" class="${S.mtab===t[0]?'on':''}" data-a="mnTab" data-v="${t[0]}">${t[1]}${t[2]?`<small>${t[2]}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
  <div id="mntb" class="rise" style="--d:2">${mnTabBody(m)}</div>`;
 }
-function mnTabBody(m){return ({det:mnDet,mem:mnMembers,times:mnTimes,resp:mnResp,cont:mnCont,esc:mnEsc,quad:m=>bdTab('min',m.id),cx:m=>cxTab('min',m.id)})[S.mtab](m);}
-function mnDet(m){const ed=S.mnedit;
- return `<div class="pgrid"><div class="col"><section class="card pc sec ${ed?'editing':''}"><div class="sh"><h2>Informações</h2>${ed?'':`<button class="btn sec sm" data-a="mnEdit">${ic('pen',14)}Editar</button>`}</div>
-  ${ed?`<form class="fgrid" id="mnF" novalidate style="grid-template-columns:1fr 1fr">
-   <label class="fld"><span class="fl">Líder</span><span class="selw"><select name="lead">${[...new Set([m.lead,...MEMBERS.filter(x=>x.tit).map(x=>x.n)])].map(n=>`<option ${n===m.lead?'selected':''}>${esc(n)}</option>`).join('')}</select>${ic('updown',14)}</span><span class="hint">Precisa ser um membro cadastrado.</span></label>
-   <label class="fld"><span class="fl">Telefone</span><input name="phone" type="tel" value="${esc(m.phone)}"></label>
+/* Encontros do ministério: o mesmo desenho do encontro do supervisor (agendar com o bloco "Quando", convocados, respostas, chamada) */
+const mnEncCnt=m=>mnMeets(m).filter(x=>!x.done&&!x.cancelled).length;
+function mnMeets(m){if(!m.meets){m.meets=[];const sd={Louvor:[[9,'19:30','Presencial','Ensaio geral','Repertório de outubro e passagem de som',false],[-12,'19:30','Presencial','Reunião do ministério','Alinhamos as escalas de setembro.',true]],Kids:[[6,'20:00','Remoto','Planejamento do mês','',false]],Recepção:[[13,'19:00','Presencial','Alinhamento da equipe','',false]]}[m.n]||[];
+  sd.forEach(([dd,st,md,tp,nt,dn])=>{const x=seM(dd,st,md,{topic:tp,where:md==='Presencial'?'Sala de ensaio':'',url:md==='Remoto'?'https://meet.google.com/':'',done:dn,notes:nt});m.meets.push(x);seInv('min',m,x).forEach((p,i)=>{if(dn)x.pres[p.n]=i%4!==3;});});}return m.meets;}
+function mnEnc(m){mnMeets(m).forEach(x=>seInv('min',m,x));return seEncounters('min',m);}
+function mnTabBody(m){return ({det:mnDet,mem:mnMembers,times:mnTimes,resp:mnResp,cont:mnCont,esc:mnEsc,enc:mnEnc,quad:m=>bdTab('min',m.id),cx:m=>cxTab('min',m.id)})[S.mtab](m);}
+function mnDet(m){
+ return `<div class="pgrid"><div class="col"><section class="card pc sec ${S.mnedit==='desc'?'editing':''}" id="mnsec-desc"><div class="sh"><h2>Descrição</h2>${S.mnedit==='desc'?'':`<button class="btn sec sm" data-a="mnEdit" data-v="desc">${ic('pen',14)}Editar</button>`}</div>
+  ${S.mnedit==='desc'?`<form class="fgrid" id="mnF" novalidate style="grid-template-columns:1fr">
    <label class="fld wide"><span class="fl">Descrição</span><textarea class="ta" name="desc" rows="3" placeholder="Para que serve este ministério">${esc(m.desc)}</textarea></label>
+   <label class="fld wide"><span class="fl">Quando serve <small>opcional</small></span><textarea class="ta" name="swhen" rows="2" maxlength="300" placeholder="Ex.: domingos de manhã e quartas à noite">${esc(m.serveWhen||'')}</textarea></label>
+   <label class="fld wide"><span class="fl">O que precisa para servir <small>opcional</small></span><textarea class="ta" name="sneed" rows="2" maxlength="300" placeholder="Ex.: gostar de crianças; fazer o treinamento de segurança">${esc(m.serveNeed||'')}</textarea></label>
    <label class="fld wide"><span class="fl">Foto <small>opcional</small></span><input name="photo" type="url" placeholder="https://…" value="${esc(m.photo)}"><span class="err"></span></label>
    <div class="dfoot"><button type="button" class="btn sec" data-a="mnCancel">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
-  :`<dl class="kv grid2"><div><dt>Líder</dt><dd class="cresp"><span class="av" style="background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${initials(m.lead)}</span>${esc(m.lead)}</dd></div><div><dt>Telefone</dt><dd class="mono">${esc(m.phone)}</dd></div><div style="grid-column:1/-1"><dt>Descrição</dt><dd>${m.desc?esc(m.desc):'<span class="soft">Sem descrição</span>'}</dd></div><div style="grid-column:1/-1"><dt>Foto</dt><dd>${m.photo?esc(m.photo):'<span class="soft">Sem foto · usa o ícone do ministério</span>'}</dd></div></dl>`}</section>
+  :`<dl class="kv"><div><dt>Descrição</dt><dd>${m.desc?esc(m.desc):'<span class="soft">Sem descrição</span>'}</dd></div><div><dt>Quando serve</dt><dd>${m.serveWhen?esc(m.serveWhen):'<span class="soft">Não informado</span>'}</dd></div><div><dt>O que precisa para servir</dt><dd>${m.serveNeed?esc(m.serveNeed):'<span class="soft">Não informado</span>'}</dd></div><div><dt>Foto</dt><dd>${m.photo?esc(m.photo):'<span class="soft">Sem foto · usa o ícone do ministério</span>'}</dd></div></dl>`}</section>
+  ${mnLidCard(m)}
+  <section class="card pc sec ${S.mnedit==='cont'?'editing':''}" id="mnsec-cont"><div class="sh"><h2>Contato</h2>${S.mnedit==='cont'?'':`<button class="btn sec sm" data-a="mnEdit" data-v="cont">${ic('pen',14)}Editar</button>`}</div>
+  ${S.mnedit==='cont'?`<form class="fgrid" id="mnCF" novalidate style="grid-template-columns:1fr">
+   <label class="fld"><span class="fl">Telefone</span><input name="phone" type="tel" value="${esc(m.phone)}"></label>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="mnCancel">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
+  :`<dl class="kv grid2"><div><dt>Telefone</dt><dd class="mono">${esc(m.phone)}</dd></div></dl>`}</section>
   <p class="who" style="margin:4px 4px 0;display:flex;gap:6px;align-items:center">${ic('lock',13)}O acesso ao painel deste ministério é concedido em Administração › Usuários e permissões.</p></div>
   <div class="col"><section class="card pc"><div class="sh"><h2>Resumo</h2></div><div class="mnsum">
    <button data-a="mnTab" data-v="times"><b>${tCount(m)}</b><span>Times</span></button><button data-a="mnTab" data-v="resp"><b>${m.resp.length}</b><span>Responsabilidades</span></button><button data-a="mnTab" data-v="cont"><b>${m.content.length}</b><span>Conteúdos</span></button><button data-a="mnTab" data-v="mem"><b>${mnPpl(m).length}</b><span>Membros</span></button></div></section>
    <section class="card pc"><div class="sh"><h2>Casas ligadas</h2></div>${(()=>{const cs=CASAS.filter(c=>c.min&&m.n.includes(c.min.split(' ')[0]));return cs.length?cs.map(c=>`<button class="dk" data-a="rGoCasa" data-v="${c.id}">${hTile(c,32)}<span class="dkt"><b>${esc(c.n)}</b><span>${c.ppl.length} pessoas</span></span>${ic('chevR',16)}</button>`).join(''):'<p class="who" style="margin:0">Nenhuma casa de apascentamento ligada a este ministério.</p>';})()}</section></div></div>`;}
+function mnLidCard(m){const ed=S.mnlid,l=mnLeaders(m),chip=(n,i)=>`<span class="cresp"><span class="av" style="background:var(--tone-${TONES[i%6]});color:var(--tone-${TONES[i%6]}-ink)">${initials(n)}</span>${esc(n)}</span>`;
+ return `<section class="card pc sec ${ed?'editing':''}" id="mnlid"><div class="sh"><h2>Liderança</h2>${ed?'':`<button class="btn sec sm" data-a="mnLid">${ic('pen',14)}Editar</button>`}</div>
+  ${ed?`<form class="fgrid" id="mnLF" novalidate style="grid-template-columns:1fr"><div class="fld wide"><span class="fl">Líderes</span><label class="sbox">${ic('search',15)}<input data-mnq placeholder="Buscar membro" autocomplete="off"></label><div class="cpick" data-mnpool>${mnPool(m).map((n,i)=>`<label><input type="checkbox" name="leaders" value="${esc(n)}" ${l.includes(n)?'checked':''}><span class="av" style="background:var(--tone-${TONES[i%6]});color:var(--tone-${TONES[i%6]}-ink)">${initials(n)}</span><span><b>${esc(n)}</b><small>${l.includes(n)?'Líder do ministério':'Membro'}</small></span><i class="cb">${ic('check',12,2.8)}</i></label>`).join('')}</div><span class="hint">O ministério pode ter mais de um líder, ou nenhum. Quem aparece aqui já tem Admin deste ministério em Usuários e permissões; o cargo só confere, não concede acesso.</span></div>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="mnLidCancel">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
+  :`<dl class="kv grid2"><div><dt>${l.length>1?'Líderes':'Líder'}</dt><dd class="ca-lds">${l.length?l.map(chip).join(''):'<span class="soft">Sem líder. Escolha quem já tem Admin neste ministério.</span>'}</dd></div></dl>`}</section>`;}
 function mnEmpty(t,s,btn,act){return `<div class="eempty"><span class="eei">${ic(btn,22)}</span><p>${t}</p><span class="who">${s}</span><button class="btn pri" data-a="${act}" style="margin-top:10px">${ic('plus',14,2.2)}${t.startsWith('Nenhum time')?'Criar primeiro time':t.startsWith('Nenhuma resp')?'Adicionar responsabilidade':'Vincular conteúdo'}</button></div>`;}
 function mnTimes(m){return `<section class="card pc"><div class="sh"><h2>Times</h2>${m.teams.length?`<button class="btn sec sm" data-a="mnAddTeam">${ic('plus',14,2.2)}Novo time</button>`:''}</div>
  ${m.teams.length?`<div class="mins">${m.teams.map((t,i)=>`<article class="minc2"><div class="mt"><button class="lnk record-title" data-a="mnInspect" data-v="team|${i}">${esc(t.n)}</button><button class="ibtn sm" data-a="mnDelTeam" data-v="${i}" aria-label="Excluir time">${ic('x',14)}</button></div><span class="who cresp" style="font-weight:400;color:var(--ink-muted)">${ic('user',13)}Líder: ${esc(t.lead)}</span><div class="segl" style="margin-top:12px"><span><b>${t.m}</b> ${t.m===1?'pessoa':'pessoas'}</span></div></article>`).join('')}</div>`:mnEmpty('Nenhum time ainda.','Divida o ministério em times para montar escalas por função.','users','mnAddTeam')}</section>`;}
 function mnResp(m){return `<section class="card pc"><div class="sh"><h2>Responsabilidades</h2>${m.resp.length?`<button class="btn sec sm" data-a="mnAddResp">${ic('plus',14,2.2)}Adicionar</button>`:''}</div>
  ${m.resp.length?`<ol class="resps">${m.resp.map((r,i)=>`<li><span class="rn">${i+1}</span><span><button class="lnk record-title" data-a="mnInspect" data-v="resp|${i}">${esc(r)}</button></span><button class="ibtn sm" data-a="mnDelResp" data-v="${i}" aria-label="Remover">${ic('x',14)}</button></li>`).join('')}</ol>`:mnEmpty('Nenhuma responsabilidade ainda.','Liste o que o ministério assume na igreja, como “Montagem do culto de domingo”.','clipboard','mnAddResp')}</section>`;}
-function mnCont(m){return `<section class="card pc"><div class="sh"><h2>Conteúdo vinculado</h2>${m.content.length?`<button class="btn sec sm" data-a="mnAddCont">${ic('plus',14,2.2)}Vincular</button>`:''}</div>
- <p class="who" style="margin:-4px 0 16px">Pregações, músicas, cursos e materiais são cadastrados em Conteúdo. Aqui você só vincula o que já existe.</p>
- ${m.content.length?`<div class="conts">${m.content.map((c,i)=>`<div class="ct1"><span class="cti">${ic(CTYPE_IC[c[0]],16)}</span><span class="ctt"><button class="lnk record-title" data-a="mnInspect" data-v="content|${i}">${esc(c[1])}</button><small>${c[0]}</small></span><button class="ibtn sm" data-a="mnDelCont" data-v="${i}" aria-label="Desvincular">${ic('x',14)}</button></div>`).join('')}</div>`:mnEmpty('Nenhum conteúdo vinculado.','Vincule um curso, pregação, música ou material.','book','mnAddCont')}</section>`;}
+const MC_PL={Curso:'Cursos',Jornada:'Jornadas',Série:'Séries',Pregação:'Pregações',Vídeo:'Vídeos',Música:'Músicas',Material:'Materiais'};
+/* item restrito a um ministério não pode ser vinculado a outro (só público ou interno) */
+const mcRestr=(type,name)=>{const o=type==='Pregação'?PREGS.find(p=>p.t===name):type==='Música'?SONGS.find(s=>s.n===name):type==='Material'?MATS.find(m=>m.t===name):type==='Curso'?(CSOLO.find(j=>j.courses[0].n===name)||{}):type==='Série'?NX_SERIES.find(s=>s.n===name):null;return !!(o&&o.min);};
+const mcOwned=m=>[...CSOLO.filter(j=>j.min===m.n).map(j=>['Curso',j.courses[0].n]),...NX_SERIES.filter(s=>s.min===m.n).map(s=>['Série',s.n]),...PREGS.filter(p=>p.min===m.n).map(p=>['Pregação',p.t]),...NX_VIDEOS.filter(v=>v.min===m.n).map(v=>['Vídeo',v.t]),...SONGS.filter(s=>s.min===m.n).map(s=>['Música',s.n]),...MATS.filter(x=>x.min===m.n).map(x=>['Material',x.t])];
+function mnCont(m){mnNorm(m);const own=mcOwned(m),lk=m.content,types=Object.keys(MC_PL).filter(t=>own.some(o=>o[0]===t)||lk.some(c=>c.type===t));
+ const row=(t,title,tag,act,v)=>`<div class="ct1" tabindex="0" data-a="${act}" data-v="${v}" style="cursor:pointer"><span class="cti">${ic(CTYPE_IC[t],16)}</span><span class="ctt"><b>${esc(title)}</b><small>${tag}</small></span>${ic('chevR',14,2)}</div>`;
+ return `<section class="card pc"><div class="sh"><div><h2>Conteúdo do ministério</h2><p class="who" style="margin:4px 0 0">O que é do ministério e o que está vinculado a ele. Tudo é cadastrado em Conteúdo; aqui você consulta e vincula o que for público ou interno.</p></div><button class="btn sec sm" data-a="mcNew">${ic('plus',14,2.2)}Vincular conteúdo</button></div>
+  ${types.length?types.map(t=>`<p class="fl" style="margin:18px 0 8px">${MC_PL[t]}</p><div class="conts">${own.filter(o=>o[0]===t).map(o=>row(t,o[1],'Do ministério','mcOpen',t)).join('')}${lk.map((c,i)=>c.type===t&&!own.some(o=>o[0]===t&&o[1]===c.t)?row(t,c.t,'Vinculado em '+c.at+(c.teams.length?' · para '+c.teams.map(esc).join(', '):'')+(c.req?' · obrigatório':''),'mcView',i):'').join('')}</div>`).join(''):mnEmpty('Nenhum conteúdo vinculado.','Vincule um curso, pregação, música ou material.','book','mcNew')}</section>`;}
 
 function rmAfter(){
  requestAnimationFrame(tabInd);
  const rq=$('#rq');if(rq)rq.addEventListener('input',e=>{S.rq=e.target.value;const p=e.target.selectionStart;render();const n=$('#rq');n.focus();n.setSelectionRange(p,p);});
  const q=$('#mnq');if(q)q.addEventListener('input',e=>{S.mnq=e.target.value;$('#mnrows').innerHTML=mnRows();});
+ const lf=$('#mnLF');if(lf)lf.addEventListener('submit',e=>{e.preventDefault();const m=mnById(S.mini),sel=new FormData(lf).getAll('leaders');m.leaders=sel;m.lead=sel[0]||'';S.mnlid=null;render();toast('Liderança atualizada');});
  const f=$('#mnF');if(f)f.addEventListener('submit',e=>{e.preventDefault();const m=mnById(S.mini),fd=new FormData(f),ph=fd.get('photo');if(ph&&!/^https?:\/\//.test(ph)){const i=f.querySelector('[name=photo]');i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent='Use um link começando com https://';return;}
-  const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{m.lead=fd.get('lead');m.phone=fd.get('phone');m.desc=fd.get('desc').trim();m.photo=ph;S.mnedit=null;render();toast('Informações atualizadas');},700);});
+  const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{m.desc=fd.get('desc').trim();m.serveWhen=fd.get('swhen').trim();m.serveNeed=fd.get('sneed').trim();m.photo=ph;S.mnedit=null;render();toast('Descrição atualizada');},700);});
+ const cf=$('#mnCF');if(cf)cf.addEventListener('submit',e=>{e.preventDefault();const m=mnById(S.mini),fd=new FormData(cf),b=cf.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{m.phone=fd.get('phone');S.mnedit=null;render();toast('Contato atualizado');},700);});
 }
 function reMn(){const m=mnById(S.mini);$('#mntb').innerHTML=mnTabBody(m);$$('.ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.mtab));tabInd();rmAfter();}
 function simpleDlg(title,label,ph,onOk){openDlg(`${dlgHead(title)}<form class="fgrid one" id="sF" novalidate><label class="fld"><span class="fl">${label}</span><input name="v" placeholder="${ph}" autocomplete="off"><span class="err"></span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit">Adicionar</button></div></form>`,'sm');
@@ -110,10 +137,12 @@ const RA={
  mnexpMenu:()=>{const p=$('#mnexpPop');closePops(p);p.classList.toggle('open');},
  mnMenu:()=>{const p=$('#mnPop');closePops(p);p.classList.toggle('open');},
  mnFilter:v=>{S.mnf=v;$$('.chipf[data-a=mnFilter]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#mnrows').innerHTML=mnRows();},
- mnOpen:v=>{S.mini=v;S.mtab='det';S.mnedit=null;render();window.scrollTo({top:0});},
+ mnOpen:v=>{S.mini=v;S.mtab='det';S.mnedit=null;S.mnlid=null;render();window.scrollTo({top:0});},
  mnBack:()=>{S.mini=null;render();},
- mnTab:v=>{S.mtab=v;S.mnedit=null;reMn();},
- mnEdit:()=>{S.mnedit=true;reMn();},
+ mnTab:v=>{S.mtab=v;S.mnedit=null;S.mnlid=null;reMn();},
+ mnEdit:v=>{S.mnedit=v;reMn();},
+ mnLid:()=>{S.mnlid=true;reMn();},
+ mnLidCancel:()=>{S.mnlid=null;reMn();},
  mnCancel:()=>{S.mnedit=null;reMn();},
  mnToggle:()=>{closePops();const m=mnById(S.mini);if(m.active){confirmDel({title:`Inativar o Ministério de ${m.n}?`,body:'Ele some do app e das escalas, mas times, membros e histórico são mantidos. Dá para reativar depois.',label:'Inativar',onConfirm:()=>{m.active=false;render();toast('Ministério inativado');}});}else{m.active=true;render();toast('Ministério reativado');}},
  mnDel:()=>{closePops();const m=mnById(S.mini);confirmDel({title:`Excluir o Ministério de ${m.n}?`,body:`Os ${m.mem} membros são desvinculados e os times, responsabilidades e escalas são apagados. Esta ação não pode ser desfeita. Se quiser só pausar, use “Inativar”.`,label:'Excluir ministério',typed:m.n,onConfirm:()=>{MINIS.splice(MINIS.indexOf(m),1);S.mini=null;render();toast(`Ministério de ${m.n} excluído`);}});},

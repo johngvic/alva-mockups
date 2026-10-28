@@ -134,9 +134,9 @@ function dEnc(d){
  if(!ms.length)return `<section class="card pc"><div class="eempty"><span class="eei">${ic('calendar',22)}</span><p>Nenhum encontro ainda.</p><span class="who">Agende o próximo ou registre um encontro que já aconteceu.</span><div class="row2" style="justify-content:center"><button class="btn sec" data-a="dReg">Registrar encontro</button><button class="btn pri" data-a="dSched">Agendar encontro</button></div></div></section>`;
  const item=m=>`<li class="${m.type}"><span class="ed"><b>${fmtD(m.d).split(' ')[0]}</b><span>${fmtD(m.d).split(' ')[1]}</span></span>
   <div class="eb2"><div class="et"><div><b>${m.type==='done'?`<button class="lnk record-title" data-a="dViewMeet" data-v="${m.id}">${esc(m.content||'Encontro realizado')}</button>`:m.type==='sched'?`${m.mode==='Remoto'?'Encontro remoto':'Encontro presencial'}`:esc(m.content||'Encontro')}</b><span class="who">${wd(m.d)} · ${m.time.replace(':00','h')}${m.type==='done'?` · ${m.mode}`:` · ${inDays(m.d)===0?'hoje':'em '+inDays(m.d)+' dias'}`}${m.mat?' · '+esc(m.mat):''}</span></div>
-   <div class="ea">${m.type==='sched'?`${m.link?`<button class="btn sec sm" data-a="copy" data-v="${esc(m.link)}">Copiar link</button>`:''}<button class="btn pri sm" data-a="dConclude" data-v="${m.id}">Concluir</button>`:''}<button class="ibtn sm" data-a="dDelMeet" data-v="${m.id}" aria-label="Excluir encontro" title="Excluir encontro">${ic('x',14)}</button></div></div>
+   <div class="ea">${m.type==='sched'?`${m.link?`<button class="btn sec sm" data-a="copy" data-v="${esc(m.link)}">Copiar link</button>`:''}<button class="ibtn sm" data-a="dEdit" data-v="${m.id}" aria-label="Editar encontro" title="Editar encontro">${ic('pen',14)}</button><button class="btn pri sm" data-a="dConclude" data-v="${m.id}">Concluir</button>`:''}<button class="ibtn sm" data-a="dDelMeet" data-v="${m.id}" aria-label="Excluir encontro" title="Excluir encontro">${ic('x',14)}</button></div></div>
    ${m.note?`<p class="who" style="margin:6px 0 0">${esc(m.note)}</p>`:''}</div></li>`;
- return `<section class="card pc"><div class="sh"><h2>Encontros</h2><div class="row2"><button class="btn sec sm" data-a="dReg">Registrar</button><button class="btn pri sm" data-a="dSched">Agendar</button></div></div>
+ return qdRenewFor(d.meets,{act:'dRenew',title:()=>'Encontro de discipulado'})+`<section class="card pc"><div class="sh"><h2>Encontros</h2><div class="row2"><button class="btn sec sm" data-a="dReg">Registrar</button><button class="btn pri sm" data-a="dSched">Agendar</button></div></div>
   ${sched.length?`<p class="eh">Agendados</p><ol class="elist">${sched.map(item).join('')}</ol>`:''}
   ${done.length?`<p class="eh">Realizados</p><ol class="elist">${done.map(item).join('')}</ol>`:''}</section>`;
 }
@@ -156,7 +156,7 @@ function dTrailRow(j,i){const jor=j.k==='Jornada',pr=Math.round(j.done/Math.max(
  return `<li><span class="ct-node">${fin?ic('check',16,2.6):i+1}</span>`+(jor
   ?`<div class="ct-cc" tabindex="0" data-a="dJGo" data-v="${i}" style="grid-template-columns:minmax(0,1fr) auto auto auto auto auto"><div class="ct-ccb"><b>${tpIcon('Jornada',14)}${esc(j.n)}</b><span style="white-space:normal">${j.courses.map((c,k)=>`${k<j.done?'✓':'○'} ${esc(c)}`).join('  ·  ')}</span>${nt}</div><span class="ct-ccm"><b>${j.c}</b> etapas</span><span class="ct-ccp"><span class="tr"><i style="width:${pr}%"></i></span><small>${j.done} de ${j.c} · ${pr}%</small></span>${acts}</div></li>`
   :`<div class="ct-cc" tabindex="0" data-a="dJGo" data-v="${i}" style="grid-template-columns:minmax(0,1fr) auto auto auto auto auto"><div class="ct-ccb"><b>${tpIcon(j.k,14)}${esc(j.n)}</b><span>${j.k}</span>${nt}</div><span class="ct-ccm"><b>${j.c}</b> ${j.c===1?'etapa':'etapas'}</span><span class="ct-ccp"><span class="tr"><i style="width:${pr}%"></i></span><small>${j.done} de ${j.c} · ${pr}%</small></span>${acts}</div></li>`);}
-const TP_TYPES=['Jornada','Curso','Pregação','Música','Material'],TP_CLR={Jornada:'#0e7c66'},tpIc=k=>k==='Jornada'?'route':CTYPE_IC[k];
+const TP_TYPES=['Jornada','Curso','Pregação','Música','Material','Série'],TP_CLR={Jornada:'#0e7c66'},tpIc=k=>k==='Jornada'?'route':CTYPE_IC[k];
 const tpKey=t=>t.k==='Jornada'||!t.k?'Jornada|'+t.id:t.k+'|'+t.t;
 const tpIcon=(k,sz=15)=>`<span class="mc-i t-${k==='Jornada'?'cursos':MC_PAGE[k]}" ${TP_CLR[k]?`style="--k:${TP_CLR[k]}"`:''}>${ic(tpIc(k),sz,1.8)}</span>`;
 /* mesmo diálogo "Vincular conteúdo" do ministério, sem "Para quem" e "Obrigatório"; replace = índice do item que está sendo trocado */
@@ -209,20 +209,26 @@ const DA={
  dMenu:()=>{const p=$('#dPop');closePops(p);p.classList.toggle('open');},
  dReg:()=>regDlg(dById(S.disc)),
  dConclude:v=>{const d=dById(S.disc);regDlg(d,d.meets.find(m=>m.id===v));},
- dSched:()=>{const d=dById(S.disc);openDlg(`${dlgHead('Agendar encontro','O conteúdo tratado é preenchido quando você concluir o encontro.')}
+ dRenew:v=>A.dSched('renew:'+v),
+ dEdit:v=>{const d=dById(S.disc),m=d.meets.find(x=>x.id===v);if(!m)return;const fl=m.ser?d.meets.filter(x=>x.ser===m.ser&&x.type==='sched'&&x.d>m.d):[];
+  qdEditDlg({title:'Editar encontro',sub:wd(m.d)+', '+fmtD(m.d),vals:{d:m.d,t:m.time,mode:m.mode,where:m.where||'',url:m.link||''},n:fl.length,
+   check:q=>d.meets.some(x=>x!==m&&x.type==='sched'&&x.d===q.d&&x.time===q.t)?['d','Já existe um encontro nesse horário']:null,
+   run:(q,nx)=>{const tg=nx?[m,...fl]:[m];tg.forEach(x=>{x.time=q.t;x.mode=q.mode;x.where=q.where;x.link=q.url;if(x===m)x.d=q.d;});reDisc();toast((tg.length>1?tg.length+' encontros atualizados':'Encontro atualizado')+' · participantes avisados');}});},
+ dSched:rn0=>{const rn=String(rn0||'').startsWith('renew:')?String(rn0).slice(6):null,d=dById(S.disc),t=TODAY.toISOString().slice(0,10),Q=qdInit({start:addDays(7)}),qo={min:t,time:qdTime},rp=rn&&qdRenewPreset(d.meets,rn);if(rp){Object.assign(Q,rp.q,{f:rp.m0.time||'19:30'});qdFix(Q);}openDlg(`${dlgHead(rp?'Renovar para '+rp.q.start.slice(0,4):'Agendar encontro','O conteúdo tratado é preenchido quando você concluir o encontro.')}
   <form class="fgrid" id="schF" novalidate style="grid-template-columns:1fr 1fr">
-   <label class="fld"><span class="fl">Data</span><input type="date" name="d" min="${TODAY.toISOString().slice(0,10)}" value="${addDays(7)}"><span class="err"></span></label>
-   <label class="fld"><span class="fl">Horário</span><input type="time" name="t" value="19:30"></label>
+   <div class="wide" id="qdW">${qdBlock(Q,qo)}</div>
    <div class="wide">${partsField(d)}</div>
    <div class="fld wide"><span class="fl">Modalidade</span><div class="yn" role="radiogroup" id="modeG"><label><input type="radio" name="mode" value="Presencial" checked><span>${ic('pin',15)}&nbsp;Presencial</span></label><label><input type="radio" name="mode" value="Remoto"><span>${ic('monitor',15)}&nbsp;Remoto</span></label></div></div>
    <label class="fld wide" id="whereF"><span class="fl">Local <small>opcional</small></span><input name="where" placeholder="Ex.: Café da igreja, sala 2"></label>
    <label class="fld wide" id="linkF" hidden><span class="fl">Link da reunião <small>opcional</small></span><input name="link" type="url" placeholder="Meet, Teams, Zoom… pode preencher depois"><span class="err"></span></label>
-   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Agendar</button></div></form>`);
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Agendar</button></div></form>`,'lg evs');
   bindParts();$('#modeG').addEventListener('change',e=>{const r=e.target.value==='Remoto';$('#linkF').hidden=!r;$('#whereF').hidden=r;});
-  const f=$('#schF');f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);if(!fd.get('d')){const i=f.querySelector('[name=d]');i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent='Escolha a data';return;}
+  const f=$('#schF');qdBind(f,Q,()=>{qdFix(Q);$('#qdBox').outerHTML=qdBlock(Q,qo);},t);
+  f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f),r=qdCheck(Q);if(r)return qdShowErr(f,r);
    const lk=fd.get('link');if(lk&&!/^https?:\/\//.test(lk)){const i=f.querySelector('[name=link]');i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent='Link inválido';return;}
-   const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{d.meets.push(MT(fd.get('d'),'sched',{t:fd.get('t'),mode:fd.get('mode'),link:lk}));closeDlg();S.dpt='enc';render();toast(`Encontro agendado para ${wd(fd.get('d'))}, ${fmtD(fd.get('d'))} · convite enviado`);},800);});},
+   const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{const dates=evOccs(Q),sid=Q.freq==='none'?'':'sr'+Date.now();dates.forEach(x=>{const m=MT(x,'sched',{t:Q.f,mode:fd.get('mode'),link:lk});if(sid){m.ser=sid;m.rep=Q.freq;m.rdays=Q.days.slice();}d.meets.push(m);});if(rn)d.meets.forEach(m=>{if(m.ser===rn)m.renewed=true;});closeDlg();S.dpt='enc';render();toast(dates.length>1?`${dates.length} encontros agendados a partir de ${wd(dates[0])}, ${fmtD(dates[0])} · convites enviados`:`Encontro agendado para ${wd(dates[0])}, ${fmtD(dates[0])} · convite enviado`);},800);});},
  dDelMeet:v=>{const d=dById(S.disc),i=d.meets.findIndex(m=>m.id===v),m=d.meets[i];
+  if(m.type==='sched'&&m.ser){const fl=d.meets.filter(x=>x.ser===m.ser&&x.type==='sched'&&x.d>m.d);if(fl.length)return qdScope({title:'Cancelar encontro?',sub:wd(m.d)+', '+fmtD(m.d),body:'Os participantes são avisados do cancelamento.',label:'Cancelar encontro',danger:1,n:fl.length,run:nx=>{const gone=nx?[m,...fl]:[m];d.meets=d.meets.filter(x=>!gone.includes(x));reDisc();toast(gone.length>1?gone.length+' encontros cancelados':'Encontro cancelado');}});}
   confirmDel({title:m.type==='sched'?'Cancelar este encontro?':'Excluir este registro?',body:m.type==='sched'?`Os participantes serão avisados do cancelamento de ${wd(m.d)}, ${fmtD(m.d)}.`:`O registro de ${fmtD(m.d)} sai do histórico de ${first(d)}. A cadência de contato é recalculada.`,label:m.type==='sched'?'Cancelar encontro':'Excluir registro',onConfirm:()=>{d.meets.splice(i,1);reDisc();toast(m.type==='sched'?'Encontro cancelado':'Registro excluído',()=>{d.meets.splice(i,0,m);reDisc();});}});},
  dAddJ:()=>{closePops();dTrailPick(dById(S.disc));},
  dJSwap:v=>dTrailPick(dById(S.disc),+v),

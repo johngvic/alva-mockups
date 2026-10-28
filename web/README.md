@@ -8,6 +8,7 @@
 - Edite o arquivo da tela. O `npm run dev` recarrega a página ao salvar qualquer arquivo incluído.
 - Tela nova: crie `screens-<nome>.js` e inclua a linha em `main.js` (antes dos `screens-ext-*` se não for um patch).
 - Dois arquivos só se tocam em: `NAV` e o roteamento do `render()` (ambos em `core.js`).
+- **Cada página tem o seu arquivo e é independente.** Mexer no layout de Doações não muda o Financeiro; mexer na Cafeteria não muda o Restaurante nem a Loja. Peças comuns (formatadores, cabeçalho, indicadores, dados de exemplo) ficam em `core*.js` e `screens-food.js`; tabela, botão, janela e ação de uma página ficam no arquivo dela, com o nome da página no prefixo (`cafeItemEdit`, `restSaleNew`, `shopItemNew`).
 
 ## Mapa (linhas do `main.js` anterior à divisão)
 
@@ -35,7 +36,11 @@
 | `screens-almox.js` | 4715–4970 | Almoxarifado |
 | `screens-perfil.js` | 4971–5042 | Meu perfil |
 | `core-ui.js` | 5043–5130 | botões assíncronos, padrão de lista, toast, paleta de comandos |
-| `screens-food.js` | 5131–5365 | Cafeteria, Restaurante e Loja (dados e ações) |
+| `screens-food.js` | 5131–5365 | **Base compartilhada das vendas**: dados de exemplo, formatadores, peças de tela comuns (cabeçalho, indicadores, filtros, período) e o roteador das páginas da Cafeteria, do Restaurante e da Loja |
+| `screens-doacoes.js` | (nova) | Financeiro › Doações: campanhas, doadores, Recibo, Estornar e Caixa da campanha |
+| `screens-cafeteria.js` | (nova) | Cafeteria: Visão geral, Vendas (com Venda rápida), Caixa diário, Itens, Categorias, Movimentações e Divergências |
+| `screens-restaurante.js` | (nova) | Restaurante: as mesmas telas, em arquivo próprio |
+| `screens-loja.js` | (nova) | Loja: as mesmas telas, a venda rápida do balcão, Pedidos do app e Configurar |
 | `core-actions.js` | 5366–5404 | dispatcher `A` e eventos da paleta |
 | `screens-ext-1.js` … `-4.js` | 5405–6860 | camadas de ajustes sobre telas anteriores (a redistribuir) |
 | `screens-evento-ingressos.js` | 6861–7077 | Eventos: ingressos e compras |
@@ -45,5 +50,7 @@
 | `screens-relatorios.js` | 7808–8141 | Relatórios |
 | `screens-ajuda.js` | 8142–8473 | Central de ajuda |
 | `screens-ext-5.js`, `-6.js` | 8474–9189 | camadas de ajustes (tabelas, paginação, Lojas) |
+
+Não existem mais arquivos `*-ajustes.js`: os ajustes de Casas (e do endereço do membro), Notificações e Conteúdo (comentários, série mista, aba Conteúdo do ministério, trilha do Acompanhamento) foram fundidos na tela dona. Ajuste novo vai direto no arquivo da tela, não em arquivo à parte.
 
 Os `screens-ext-*` são trechos que sobrescrevem ou estendem telas definidas antes; ficaram onde estavam para não mudar a ordem de execução. A ideia é movê-los, aos poucos, para o arquivo da tela dona.

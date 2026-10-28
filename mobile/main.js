@@ -383,7 +383,7 @@ V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tab
   </nav>
   <section class="pad stack g3">
    <div class="row g3" style="align-items:stretch">
-    ${S.role==='visitante'?`<div class="cta gr-lima grow" style="color:#010f12">${S.igFila?`<div><h3>Você está na fila</h3><p>${S.igFila}º para a próxima integração</p></div><button class="btn dark md" data-a="igLeave">Sair da fila</button>`:`<div><h3>Quero fazer parte</h3><p>Conheça o caminho para ser membro</p></div><button class="btn dark md" data-a="wantMember">Começar</button>`}</div>`:`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Contribuir</h3><p>Dízimos, ofertas e missões</p></div><button class="btn dark md" data-a="give">Contribuir</button></div>`}
+    ${S.role==='visitante'?`<div class="cta gr-lima grow" style="color:#010f12">${S.igFila?`<div><h3>Você está na fila</h3><p>${S.igFila}º para a próxima integração</p></div><button class="btn dark md" data-a="igLeave">Sair da fila</button>`:`<div><h3>Quero fazer parte</h3><p>Conheça o caminho para ser membro</p></div><button class="btn dark md" data-a="wantMember">Começar</button>`}</div>`:`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Contribuir</h3><p>Dízimos, ofertas e missões</p></div><button class="btn dark md" data-a="sub" data-v="contribuir">Contribuir</button></div>`}
     <div class="cta gr-vinho grow" style="color:#fff"><div><h3>Pedido de oração</h3><p>Nossa equipe ora por você</p></div><button class="btn onmedia md" data-a="prayer">Pedir oração</button></div>
    </div>
    <div class="card row g3" style="padding:16px;border-radius:var(--r-md)"><span class="iconbox" style="${tone('salvia')}">${ic('message',22)}</span><div class="grow stack" style="gap:2px"><span class="it-title">Assistente no WhatsApp</span><span class="it-sub">Tire dúvidas a qualquer hora</span></div><button class="btn secondary sm" data-a="whats">Conversar</button></div>
@@ -439,7 +439,7 @@ function escCard(x,i){const k=K(x.y,x.m,x.d),bl=blockedAt(k),o=KD(k),tn=MINTONE[
   ${x.id==='s0'?svcBox():''}
   ${x.over&&!off?`<div class="lim-note">${ic('alert',16,2.2)}<div><b>Acima do seu limite do mês</b><span>${x.st==='confirmado'?'Você topou servir além do limite. Obrigado!':`O líder pediu mesmo assim${x.why?': “'+esc(x.why)+'”':''}. Tudo bem recusar.`}</span></div></div>`:''}
   ${bl&&!off?`<div class="es2-warn">${ic('alert',14,2)}Conflita com seu bloqueio de ${fmtK(bl.a)}${bl.a!==bl.b?' a '+fmtK(bl.b):''}</div>`:''}
-  ${x.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="escalaOk" data-v="${x.id}">Aceitar</button><button class="btn ghost2 sm" data-a="escalaNo" data-v="${x.id}">Recusar</button></div>`:x.st==='confirmado'?`<div class="es2-a"><button class="tlink sm2" data-a="escalaNo" data-v="${x.id}">Não vou conseguir ir</button></div>`:''}
+  ${x.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="escalaOk" data-v="${x.id}">Aceitar</button><button class="btn ghost2 sm" data-a="escalaNo" data-v="${x.id}">Recusar</button></div>`:x.st==='confirmado'?`<div class="es2-a"><button class="tlink sm2" data-a="escalaNo" data-v="${x.id}">Pedir troca</button></div>`:''}
  </article>`;}
 function discCard(x,i){const k=K(x.y,x.m,x.d),o=KD(k),off=x.st==='recusado';
  return `<article class="ev-c es2 ${off?'off':''}" style="--t:var(--tone-${x.tone||'ceu'});--i:${i}">
@@ -539,8 +539,8 @@ V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).leng
  <div class="pad stack g8" style="padding-top:16px">
   ${S.role==='visitante'?'':ccMini()}
   ${grp('Você',row('Meus dados','meusDados',miss?miss+' dados faltando':'')+row('Notificações','notifs',nN?nN+(nN>1?' novas':' nova'):'',nN>0)+row('Privacidade e dados','privacidade',''))}
-  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')+row('Batismo','batismo',S.bat.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
-  ${grp('Conteúdo',row('Pregações','nxPregs','')+row('Músicas','nxSongs',''))}
+  ${grp('Sua caminhada',(S.role==='visitante'?row('Quero ser membro','secretaria',S.igFila?'Na fila · '+S.igFila+'º':'Primeiros passos'):row('Meus documentos','documentos',MYDOCS.length+(MYDOCS.length>1?' documentos':' documento'))+row('Meus ministérios','meusMin',MYMIN.length+' ministérios')+row('Minhas tarefas','tarefas',(()=>{const o=tkOpen(),l=o.filter(x=>(tkDue(x)||[])[0]==='danger').length;return o.length?o.length+(o.length>1?' em aberto':' em aberto'):'';})(),tkOpen().some(x=>(tkDue(x)||[])[0]==='danger')))+row('Meus empréstimos','meusEmp',MYLOANS.length+(MYLOANS.length>1?' itens':' item'),MYLOANS.some(lnLate))+row('Inscrições','inscricoes',ins?ins+(ins>1?' ativas':' ativa'):'')+row('Pedidos de oração','oracao',prW?prW+' aguardando':'')+(S.role==='visitante'?'':row('Apresentações','bebes',S.apb.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')+row('Batismo','batismo',S.bat.pedidos.some(p=>p.st==='aguardando')?'Aguardando':'')))}
+  ${grp('Conteúdo',row('Pregações','nxPregs','')+row('Músicas','nxSongs','')+row('Material de apoio','nxMats',''))}
   ${['lider','admin'].includes(S.role)?grp('Liderança',row('Acompanhamentos','urgentes',URG.length+' urgentes',true)):''}
   ${grp('A igreja',row('Quem somos','quemSomos','')+row('Fale com a secretaria','secretaria','Seg a sex')+row('Assistente no WhatsApp','assistente',''))}
   <section class="stack g3">
@@ -569,7 +569,7 @@ function dawnSky(on){
 function render(dir){
  clearInterval(playTimer);S.cu.playing=S.screen==='curso'?S.cu.playing:false;
  const out=V[S.screen]();const view=$('#view');
- const AMB={home:'home',agenda:'agenda',grupos:'grupos',cursos:'cursos',curso:'cursos',mais:'mais',church:'church',contribuir:'grupos',aoVivo:'home',quemSomos:'home',meusMin:'cursos',tarefas:'cursos',inscricoes:'home',assistente:'grupos',secretaria:'agenda',privacidade:'agenda',carteirinha:'mais',documentos:'mais'};
+ const AMB={home:'home',agenda:'agenda',grupos:'grupos',cursos:'cursos',curso:'cursos',mais:'mais',church:'church',contribuir:'grupos',aoVivo:'home',quemSomos:'home',meusMin:'cursos',meusEmp:'mais',tarefas:'cursos',inscricoes:'home',assistente:'grupos',secretaria:'agenda',privacidade:'agenda',carteirinha:'mais',documentos:'mais'};
  view.innerHTML=`<div data-amb="${out.amb||AMB[S.screen]||(out.tabs==='mais'?'mais':'auth')}" class="screen ${out.tabs?'has-tabs':''} ${dir==='back'?'enter-back':dir==='none'?'':dir==='tab'?'enter-tab':'enter'}" id="scr">${out.html}</div>`;
  const sbar=$('.statusbar');sbar.style.setProperty('--sb',out.sb||'var(--ink)');sbar.style.setProperty('--sbbg','transparent');const scr=$('#scr');if(out.tabs)scr.addEventListener('scroll',()=>{sbar.style.setProperty('--sbbg',scr.scrollTop>40?'var(--glass)':'transparent');sbar.style.backdropFilter=scr.scrollTop>40?'blur(20px)':'none';},{passive:true});else sbar.style.backdropFilter='none';
  $('#tabbarSlot').innerHTML=out.tabs?`<nav class="tabbar" aria-label="Navegação principal">${tabsFor().map(t=>`<button class="tab" data-a="tab" data-v="${t[0]}" ${out.tabs===t[0]?'aria-current="page"':''}>${ic(t[1],24,out.tabs===t[0]?2.25:1.75)}${t[2]}</button>`).join('')}</nav>`:'';
@@ -636,9 +636,9 @@ function eventSheet(id){
  const e=EVENTS.find(x=>x.id===id);const on=S.rsvp[e.id];
  sheet(`<div class="sheet-hero gr-${e.g}" style="margin-top:-10px;border-radius:var(--r-xl) var(--r-xl) 0 0">${tag(e.tone,e.cat,true)}<h3>${esc(e.t)}</h3><div class="row g4" style="font:400 15px/20px var(--font-text);flex-wrap:wrap"><span class="row" style="gap:4px">${ic('calendar',16)}${e.range||WD[dow(e.y,e.m,e.d)]+', '+e.d+' de '+MONTHS[e.m-1]}</span><span class="row" style="gap:4px">${ic('clock',16)}${e.h}</span><span class="row" style="gap:4px">${ic('pin',16)}${esc(e.p)}</span></div></div>
  <div class="stack g5"><p class="body">${DESC[e.cat]||''}</p>
-  <div class="row between"><span class="callout">${(e.n+(on?1:0))} ${e.sign?'inscritos':'confirmados'}</span>${on?status('success',e.sign?'Inscrito':'Confirmado'):''}</div>
+  ${e.sign?`<div class="row between"><span class="callout">${(e.n+(on?1:0))} inscritos</span>${on?status('success','Inscrito'):''}</div>`:''}
   ${apbEvBlock(e)}
-  <div class="stack g3">${on?(e.sign&&e.id==='e11'?`<button class="btn outline block" data-a="rgFromEv" data-v="i1">Ver minha inscrição</button>`:`<button class="btn outline block" data-a="rsvp" data-v="${e.id}">${e.sign?'Cancelar inscrição':'Cancelar presença'}</button>`):`<button class="btn primary block split" data-a="rsvp" data-v="${e.id}"><span>${e.sign?'Inscrever-se':'Confirmar presença'}</span><span class="meta">${e.sign?'Gratuito':WD[dow(e.y,e.m,e.d)]+' '+e.d+'/'+String(e.m).padStart(2,'0')}</span></button>`}
+  <div class="stack g3">${!e.sign?'':on?(e.id==='e11'?`<button class="btn outline block" data-a="rgFromEv" data-v="i1">Ver minha inscrição</button>`:`<button class="btn outline block" data-a="rsvp" data-v="${e.id}">Cancelar inscrição</button>`)+`<button class="btn secondary block" disabled>Fazer check-in · abre no dia do evento</button>`:`<button class="btn primary block split" data-a="rsvp" data-v="${e.id}"><span>Inscrever-se</span><span class="meta">Gratuito</span></button>`}
   <div class="row g3"><button class="btn secondary md grow" data-a="addCal">Salvar na agenda</button><button class="btn secondary md grow" data-a="shareEv">Compartilhar</button></div></div></div>`);
 }
 function groupSheet(id){
@@ -662,24 +662,6 @@ function miniSheet(id){const m=MINIS.find(x=>x.id===id);const on=S.serving[id];
   <div class="gfacts"><div style="grid-column:span 2"><span class="eb2">Quando</span><b style="font-size:17px;line-height:22px;letter-spacing:-.02em">${m.when}</b></div><div><span class="eb2">Equipe</span><b>${m.n}</b><small>voluntários</small></div></div>
   <div class="chlist"><div class="prow"><span class="grow stack" style="gap:2px"><span class="eb2">Liderança</span><span class="pt" style="font-size:16px">${m.lead}</span></span></div><div class="prow" style="align-items:flex-start"><span class="grow stack" style="gap:6px"><span class="eb2">Para servir aqui</span>${m.need.map(n=>`<span class="row g2" style="align-items:flex-start;font:400 15px/20px var(--font-text)"><span class="mico" style="width:auto;color:var(--brand-text);margin-top:2px">${ic('check',14,2.5)}</span>${n}</span>`).join('')}</span></div></div>
   <div class="servebox" id="serveBox">${S.role==='visitante'?`<div class="svc-note" style="margin:0">${ic('info',16,2)}<div><b>Servir é para membros</b><span>Depois da integração você pode servir em qualquer ministério. Enquanto isso, converse com o líder para conhecer.</span></div></div>`:serveBox(m,on)}</div><button class="btn secondary block talkbtn" data-a="talkLeader" data-v="m|${m.id}">${ic('message',18)}Falar com o líder</button></div>`);}
-function giveSheet(){
- const st={type:'Dízimo',amt:50,method:'Pix'};
- sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Contribuir</h3><p class="callout">Sua generosidade sustenta a obra da ${esc(S.church?S.church.name:'igreja')}.</p></div>
-  <div class="seg" id="gType">${['Dízimo','Oferta','Missões'].map(t=>`<button type="button" aria-selected="${t==='Dízimo'}" data-v="${t}">${t}</button>`).join('')}</div>
-  <div class="stack g2"><span class="foot" style="font-weight:600">Valor</span><div class="amounts" id="gAmt">${[20,50,100].map(v=>`<button type="button" class="chip" aria-pressed="${v===50}" data-v="${v}">R$ ${v}</button>`).join('')}<button type="button" class="chip" aria-pressed="false" data-v="outro">Outro</button></div></div>
-  <div id="gOther" hidden>${field({id:'gVal',label:'Outro valor',type:'text',ph:'R$ 0,00',im:'decimal'})}</div>
-  <div class="stack g2"><span class="foot" style="font-weight:600">Forma de pagamento</span><div class="row g2" id="gMet">${['Pix','Cartão','Boleto'].map(m=>`<button type="button" class="chip" aria-pressed="${m==='Pix'}" data-v="${m}">${m}</button>`).join('')}</div></div>
-  <button class="btn accent block split" id="gGo"><span>Contribuir</span><span class="meta" id="gGoV">R$ 50,00</span></button></div>`,sh=>{
-  const fmt=v=>'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  const upd=()=>{$('#gGoV').textContent=st.amt?fmt(st.amt):'—';};
-  const group=(sel,fn)=>$(sel,sh).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('button',$(sel,sh)).forEach(x=>x.setAttribute(sel==='#gType'?'aria-selected':'aria-pressed',x===b));fn(b.dataset.v);upd();});
-  group('#gType',v=>st.type=v);group('#gMet',v=>st.method=v);
-  group('#gAmt',v=>{const o=$('#gOther',sh);if(v==='outro'){o.hidden=false;st.amt=0;$('#gVal').focus();}else{o.hidden=true;st.amt=+v;clearErr('gVal');}});
-  $('#gVal',sh).addEventListener('input',e=>{let d=e.target.value.replace(/\D/g,'');const n=(+d||0)/100;e.target.value=d?fmt(n):'';st.amt=n;clearErr('gVal');upd();});
-  $('#gGo',sh).addEventListener('click',async e=>{if(!$('#gOther',sh).hidden&&st.amt<1){setErr('gVal','Informe um valor a partir de R$ 1,00.');return;}if(st.amt>5000){setErr('gVal','Para valores acima de R$ 5.000, fale com a tesouraria.');return;}
-   await busy(e.currentTarget,1200,null,'Registrado');await closeSheet();toast('success',st.type+' registrado',fmt(st.amt)+' via '+st.method+'. O comprovante fica em Minhas contribuições.');});
- });
-}
 function prayerSheet(){
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Pedido de oração</h3><p class="callout">A equipe de intercessão ora por cada pedido durante a semana.</p></div>
   ${field({id:'pText',label:'Seu pedido',area:true,ph:'Pelo que podemos orar?',hint:'0/500',max:500})}
@@ -737,18 +719,23 @@ function blockSheet(){
   draw();
  });
 }
-function refuseSheet(kind,id){
- const x=kind==='escala'?S.escalas.find(e=>e.id===id):S.discs.find(e=>e.id===id);const who=kind==='escala'?'a liderança de '+x.min:x.who.split(' ')[0];
- sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${kind==='escala'?'Recusar escala':'Recusar encontro'}</h3><p class="callout">${kind==='escala'?x.min+' · '+x.fn+' · '+fmtK(K(x.y,x.m,x.d)):x.theme+' · '+fmtK(K(x.y,x.m,x.d))+' · '+x.h}</p></div>
-  <div class="stack g2"><span class="eb2">Por quê?</span><div class="row g2" style="flex-wrap:wrap" id="rfWhy">${(kind==='escala'?(x.over?['Já sirvo bastante este mês','Viagem','Trabalho','Outro']:['Viagem','Trabalho','Compromisso familiar','Outro']):['Horário não dá','Prefiro remoto','Outro']).map(w=>`<button type="button" class="chip" aria-pressed="false" data-v="${w}">${w}</button>`).join('')}</div></div>
-  ${field({id:'rfMsg',label:'Mensagem para '+who+' (opcional)',area:true,ph:kind==='escala'?'Posso trocar com alguém do time?':'Que tal na semana seguinte?',max:200})}
-  <div class="otpmsg" id="rfErr" role="alert" style="min-height:0"></div>
-  <div class="stack g3"><button type="button" class="btn primary block" id="rfGo">Recusar</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
-  let why=null;$('#rfWhy',sh).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('#rfWhy button',sh).forEach(z=>z.setAttribute('aria-pressed',z===b));why=b.dataset.v;$('#rfErr',sh).textContent='';});
-  $('#rfGo',sh).addEventListener('click',async e=>{if(!why){$('#rfErr',sh).textContent='Escolha um motivo para '+who+' entender.';return;}
-   await busy(e.currentTarget,700,null,'Recusado');x.st='recusado';await closeSheet();$('#agBody').innerHTML=agendaTab();
-   toast('info',kind==='escala'?'Escala recusada':'Encontro recusado',kind==='escala'?(()=>{const u=limUse(x.y,x.m);return 'A liderança de '+x.min+' vai procurar outra pessoa.'+(x.over?' Seu mês segue em '+u.reg+' de '+u.lim+'.':' Uma vaga do seu mês ficou livre ('+u.reg+' de '+u.lim+').');})():x.who.split(' ')[0]+' vai sugerir outro horário.');});
+/* Recusa: o motivo é só um texto livre, escrito pela pessoa (obrigatório, até 200 caracteres); sem lista de motivos */
+function reasonSheet(o){
+ sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${o.title}</h3><p class="callout">${o.callout}</p></div>
+  ${field({id:'rsMsg',label:'Motivo',area:true,ph:o.ph,max:200})}
+  <div class="otpmsg" id="rsErr" role="alert" style="min-height:0"></div>
+  <div class="stack g3"><button type="button" class="btn primary block" id="rsGo">${o.btn}</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
+  $('#rsMsg',sh).addEventListener('input',()=>{$('#rsErr',sh).textContent='';});
+  $('#rsGo',sh).addEventListener('click',async e=>{const why=(($('#rsMsg',sh)||{}).value||'').trim();if(!why){$('#rsErr',sh).textContent='Escreva o motivo para '+o.who+' entender.';return;}
+   await busy(e.currentTarget,o.ms||700,null,o.done);await o.run(why);});
  });
+}
+function refuseSheet(kind,id){
+ const x=kind==='escala'?S.escalas.find(e=>e.id===id):S.discs.find(e=>e.id===id);const swap=kind==='escala'&&x.st==='confirmado',who=kind==='escala'?'a liderança de '+x.min:x.who.split(' ')[0];
+ reasonSheet({title:kind==='escala'?(swap?'Pedir troca':'Recusar escala'):'Recusar encontro',callout:kind==='escala'?x.min+' · '+x.fn+' · '+fmtK(K(x.y,x.m,x.d)):x.theme+' · '+fmtK(K(x.y,x.m,x.d))+' · '+x.h,
+  ph:kind==='escala'?'Ex.: viajo nesse fim de semana; posso trocar com alguém do time?':'Ex.: o horário não funciona para mim; que tal na semana seguinte?',btn:swap?'Pedir troca':'Recusar',who,done:swap?'Troca pedida':'Recusado',
+  run:async why=>{x.st='recusado';x.why=why;await closeSheet();$('#agBody').innerHTML=agendaTab();
+   toast('info',kind==='escala'?(swap?'Troca pedida':'Escala recusada'):'Encontro recusado',kind==='escala'?(()=>{const u=limUse(x.y,x.m);return 'A liderança de '+x.min+' vai procurar outra pessoa.'+(x.over?' Seu mês segue em '+u.reg+' de '+u.lim+'.':' Uma vaga do seu mês ficou livre ('+u.reg+' de '+u.lim+').');})():x.who.split(' ')[0]+' vai sugerir outro horário.');}});
 }
 
 /* ---------- agenda: month swap + swipe ---------- */
@@ -805,7 +792,7 @@ const A={
  live:()=>toast('info','Lembrete ativado','Avisamos quando o culto de domingo, 18h30, entrar ao vivo.'),
  mood:(v,el)=>{S.mood=v;$$('#moods .chip').forEach(c=>c.setAttribute('aria-pressed',c===el));if(v==='Preciso de oração'){prayerSheet();}else toast('success','Obrigado por partilhar','A equipe pastoral acompanha como você está.');},
  ministerios:()=>{S.gr.tab='Ministérios';A.tab('grupos');},
- prayer:()=>prayerSheet(),give:()=>giveSheet(),
+ prayer:()=>prayerSheet(),
  whats:()=>toast('info','Abrindo o WhatsApp','No app real, a conversa com o assistente abre aqui.'),
  rsvp:async(v,el)=>{const e=EVENTS.find(x=>x.id===v);await busy(el,700,null,S.rsvp[v]?'Cancelado':(EVENTS.find(x=>x.id===v).sign?'Inscrito':'Confirmado'));S.rsvp[v]=!S.rsvp[v];await closeSheet();
   if(S.rsvp[v])toast('success',e.sign?'Inscrição confirmada':'Presença confirmada',e.sign?'Seu QR Code está em Mais › Inscrições.':e.t+', '+e.d+' de '+MONTHS[e.m-1]+' às '+e.h+'.');else toast('info',e.sign?'Inscrição cancelada':'Presença cancelada','Você pode confirmar de novo quando quiser.');softRender();},
@@ -942,7 +929,7 @@ try{const t=localStorage.getItem('alva-theme');if(t==='dia'){S.theme='dia';phone
 /* =========================================================
    MAIS › sub-telas
    ========================================================= */
-const SUBS=['carteirinha','documentos','tarefas','meusDados','notifs','quemSomos','cuidado','contribuir','inscricoes','aoVivo','meusMin','oracao','secretaria','assistente','privacidade'];
+const SUBS=['carteirinha','documentos','tarefas','meusDados','notifs','quemSomos','cuidado','contribuir','inscricoes','aoVivo','meusMin','meusEmp','oracao','secretaria','assistente','privacidade'];
 APP.push(...SUBS);
 const brl=n=>'R$ '+Number(n).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 Object.assign(S,{
@@ -958,8 +945,8 @@ Object.assign(S,{
   {id:'n4',t:'Seu pedido de oração foi respondido',s:'Pr. Marcos Lima está orando por você',when:'Qua, 23 set · 08h16',grp:'Esta semana',tone:'vinho',i:'hands',go:'oracao',unread:false},
   {id:'n5',t:'Feliz aniversário! A Alva ora por você hoje.',s:'Que seu novo ano seja cheio da graça de Deus.',when:'12 set',grp:'Anteriores',tone:'damasco',i:'sparkle',go:null,unread:true}],
  care:{urg:'Normal',next:{who:'Pr. Marcos Lima',when:'Qui, 8 out · 19h',remote:true,st:'pendente'},list:[{t:'Conversa sobre pressão no trabalho',d:'10/09/2026',who:'Pr. Marcos Lima',st:'urgente'},{t:'Aconselhamento familiar',d:'02/08/2026',who:'Diac. Ana Costa',st:'andamento'}]},
- give:{dest:'livre',amt:null,method:'Pix',hist:[]},
- camps:[{id:'livre',t:'Contribuição livre',s:'Dízimos e ofertas para a obra'},{id:'retiro',t:'Retiro de Jovens 2026',s:'Ajude a levar 60 jovens ao retiro',got:8420,goal:15000},{id:'reforma',t:'Reforma do Templo',s:'Nova acústica e acessibilidade',got:34200,goal:80000}],
+ give:{dest:'livre',amt:null,hist:[]},
+ camps:[{id:'livre',t:'Contribuição livre',s:'Dízimos e ofertas para a obra'},{id:'retiro',t:'Retiro de Jovens 2026',s:'Ajude a levar 60 jovens ao retiro',got:8420,goal:15000},{id:'reforma',t:'Reforma do Templo',s:'Nova acústica e acessibilidade',got:34200,goal:80000},{id:'natal',t:'Natal Solidário',s:'Cestas para 80 famílias',got:12600,goal:20000,fixed:true,link:'pay.alva.app/f/natal-solidario'}],
  insc:{open:[{id:'i1',t:'Conferência Anual 2026',when:'18 a 20 out',price:0,left:180,g:'brasa'},{id:'i2',t:'Conferência de Missões',when:'Sáb, 7 nov',price:60,left:42,g:'mar'},{id:'i3',t:'Retiro de Jovens 2026',when:'14 a 16 nov',price:120,left:12,g:'lima'}],mine:[]},
  prayers:[{id:'p1',t:'Pela recuperação da minha mãe depois da cirurgia.',d:'15/09/2026',st:'orado',by:'Pr. Marcos Lima',at:'16/09 às 08h15'},{id:'p2',t:'Por sabedoria numa decisão importante no trabalho.',d:'10/09/2026',st:'aguardando'}],
  minOpen:'louvor',chat:[],priv:{aniv:true,lista:true,fotos:false}
@@ -979,18 +966,19 @@ const sub=(title,lede,body,right)=>({sb:'var(--ink)',tabs:'mais',html:`${subHead
 /* 1. Meus dados */
 const ME_ADDR=m=>[m.rua&&(m.rua+(m.num?', '+m.num:'')),m.comp,m.bairro,m.cid&&(m.cid+(m.uf?' - '+m.uf:''))].filter(Boolean).join(' · ');
 const ME_DIV={Brasil:'Estado (sigla)',Argentina:'Província',Chile:'Região'};
+const meAge=s=>{const m=String(s||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return null;let a=TODAY.y-+m[3];if(TODAY.m<+m[2]||(TODAY.m===+m[2]&&TODAY.d<+m[1]))a--;return a>=0?a:null;};
 const ME_MISS=m=>[['nasc','Data de nascimento'],['rua','Endereço'],['cep','Código postal']].filter(x=>!m[x[0]]);
 const FAMG=[['par','Pais'],['me','Você'],['kid','Filhos'],['oth','Outros familiares']];
 /* valor longo ou com detalhe vai para baixo do rótulo, alinhado à esquerda */
 function meRow(l,v,ph,sub){const st=sub||String(v||'').length>24;return `<div class="kr${st?' kr-st':''}"><span>${l}</span><span${v?'':' class="kr-none"'}>${v?esc(v):(ph||'Não informado')}${v&&sub?`<small>${esc(sub)}</small>`:''}</span></div>`;}
 function meDados(m,member){const miss=ME_MISS(m);
  return `${miss.length?`<div class="panel" style="animation:none"><div class="ph"><span class="bang">!</span><div><b>Faltam ${miss.length} ${miss.length>1?'dados':'dado'}</b><p>${miss.map(x=>x[1].toLowerCase()).join(', ').replace(/, ([^,]*)$/,' e $1').replace(/^./,c=>c.toUpperCase())}. Com aniversário e endereço, sua Casa consegue te visitar e celebrar com você.</p></div></div><button class="btn primary md block" data-a="meEdit">Completar agora</button></div>`:''}
-  <div class="kv"><div class="kh"><span>Pessoais</span><span>você edita</span></div>${meRow('Nome completo',m.nome)}${meRow('E-mail',m.email)}${meRow('Telefone',m.tel)}${meRow('Nascimento',m.nasc)}${meRow('Gênero',m.gen)}${meRow('Estado civil',m.civil)}</div>
+  <div class="kv"><div class="kh"><span>Pessoais</span><span>você edita</span></div>${meRow('Nome completo',m.nome)}${meRow('E-mail',m.email)}${meRow('Telefone',m.tel)}${meRow('Nascimento',m.nasc)}${meAge(m.nasc)!=null?meRow('Idade','Você tem '+meAge(m.nasc)+' anos'):''}${meRow('Gênero',m.gen)}${meRow('Estado civil',m.civil)}</div>
   <div class="kv"><div class="kh"><span>Endereço</span><span>você edita</span></div>${meRow('País',m.pais||'Brasil')}${meRow('Rua e número',m.rua&&(m.rua+(m.num?', '+m.num:'')))}${meRow('Complemento',m.comp,'—')}${meRow('Bairro ou distrito',m.bairro)}${meRow('Cidade',m.cid)}${meRow((ME_DIV[m.pais||'Brasil']||'Estado').replace(' (sigla)',''),m.uf)}${meRow('Código postal',m.cep)}</div>
   <div class="kv"><div class="kh"><span>Na igreja</span><span>definido pela secretaria</span></div>${meRow('Igreja',S.church.name)}${meRow('Perfil',ROLES[S.role][0])}${member?meRow('Membro desde',m.since)+meRow('Integração',m.integ)+meRow('Batismo',m.bap)+meRow('Tempo de conversão',m.conv)+meRow('Casa de Apascentamento',m.casa,'',m.casaLead?'Liderada por '+m.casaLead:'')+meRow('Discipulado',m.disc,'',m.disc?'Seu discipulador':'')+meRow('Ministérios',MYMIN.length?MYMIN.length+(MYMIN.length>1?' ministérios':' ministério'):'','',MYMIN.map(x=>x.t).join(' · ')):''}</div>
   <button class="btn primary block" data-a="meEdit">Editar meus dados</button>
   ${member?`<button class="tlink" data-a="go" data-v="secretaria">Algo errado em “Na igreja”? Fale com a secretaria</button>`:''}`;}
-function famNode(p,me){const app=me?'':p.kids?'<span class="fn-tag kid">Kids</span>':p.pend?'<span class="fn-tag wait">Aguardando secretaria</span>':p.app?'<span class="fn-tag on">No app</span>':'<span class="fn-tag">Sem o app</span>';
+function famNode(p,me){const app=me?'':p.kids?'<span class="fn-tag kid">Kids</span>':p.rem?'<span class="fn-tag wait">Remoção em análise</span>':p.pend?'<span class="fn-tag wait">Em análise</span>':p.app?'<span class="fn-tag on">No app</span>':'<span class="fn-tag">Sem o app</span>';
  return `<button class="fnode ${me?'me':''}" ${me?'disabled':`data-a="famOpen" data-v="${p.id}"`}><span class="avatar" style="${tone(p.tone||'ceu')}">${initials(me?p.nome:p.n)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="fn-n">${esc(me?p.nome:p.n)}</span><span class="fn-r">${me?'Você':esc(p.rel)+(p.age?' · '+esc(p.age):'')}</span></span>${app}${me?'':`<span class="chev">${ic('chevR',18,2)}</span>`}</button>`;}
 function meFamilia(m){const by=g=>m.fam.filter(p=>p.g===g),sp=by('sp');
  const grp=(lbl,inner)=>`<section class="fgen"><p class="eb2">${lbl}</p><div class="fgen-l">${inner}</div></section>`;
@@ -998,8 +986,8 @@ function meFamilia(m){const by=g=>m.fam.filter(p=>p.g===g),sp=by('sp');
  const n=m.fam.length+1,gens=(by('par').length?1:0)+1+(by('kid').length?1:0),inApp=1+m.fam.filter(p=>p.app).length;
  return `<div class="fstats"><div><b>${n}</b><span>pessoas</span></div><div><b>${gens}</b><span>${gens>1?'gerações':'geração'}</span></div><div><b>${inApp}</b><span>no app</span></div></div>
   <div class="ftree">${blocks.join('<i class="fline" aria-hidden="true"></i>')}</div>
-  <button class="btn outline block" data-a="famAdd">${ic('userplus',18,2)}Vincular familiar</button>
-  <p class="foot" style="margin:0;text-align:center">A secretaria confere cada vínculo antes de ele aparecer para a liderança.</p>`;}
+  <button class="btn outline block" data-a="famAdd">${ic('userplus',18,2)}Pedir vínculo</button>
+  <p class="foot" style="margin:0;text-align:center">Cada vínculo é analisado antes de aparecer para a liderança.</p>`;}
 function meCaminhada(m){const steps=[['Cadastro',1,'2019'],['Integração aceita',1,'abr 2019'],['Batismo',1,'mai 2019'],['Integrado(a)',1,'mai 2019'],['Casa de Apascentamento',!!m.casa,'set 2019'],['Serve em um ministério',MYMIN.length>0,'2021']];
  return `<section class="stack g3"><p class="eb2">Sua caminhada</p><ol class="walk2">${steps.map(x=>`<li class="${x[1]?'done':''}"><span class="w-d">${x[1]?ic('check',14,2.6):''}</span><span class="grow">${x[0]}</span><span class="w-t">${x[1]?x[2]:'próximo passo'}</span></li>`).join('')}</ol></section>
   <section class="stack g3"><div class="row between"><p class="eb2">Onde você serve</p><button class="link" data-a="go" data-v="meusMin">Ver tudo</button></div><div class="list">${MYMIN.map(x=>`<button class="item" data-a="go" data-v="meusMin"><span class="iconbox" style="${tone(x.tone)}">${ic(x.i,20)}</span><span class="grow stack" style="gap:2px"><span class="it-title">${x.t}</span><span class="it-sub">${x.role} · desde ${x.since}</span></span><span class="chev">${ic('chevR',18,2)}</span></button>`).join('')}</div></section>
@@ -1067,14 +1055,19 @@ function careBody(inTab){const c=S.care,nx=c.next;return `${inTab===false?'':'<p
 V.cuidado=()=>sub('Acompanhamento','Passando por um momento difícil ou precisa conversar com um pastor? Conte um pouco aqui e alguém da equipe pastoral entra em contato.',careBody(false));
 
 /* 5. Contribuir */
-V.contribuir=()=>{const g=S.give;const amt=g.amt;return sub('Contribuir','',`
-  <section class="stack g3"><p class="eb2">Para onde vai sua contribuição?</p><div class="stack g3" role="radiogroup">${S.camps.map(c=>`<button class="rec" role="radio" aria-checked="${g.dest===c.id}" data-a="giveDest" data-v="${c.id}"><span class="grow stack" style="gap:4px"><span class="it-title">${c.t}</span><span class="it-sub">${c.s}</span>${c.goal?`<span class="bar" style="margin-top:6px"><i style="width:${Math.round(c.got/c.goal*100)}%"></i></span><span class="foot" style="font-variant-numeric:tabular-nums">${brl(c.got)} de ${brl(c.goal)}</span>`:''}</span><span class="radio">${g.dest===c.id?ic('check',14,3):''}</span></button>`).join('')}</div></section>
-  <section class="stack g3"><p class="eb2">Valor</p><div class="amt2">${[50,100,200].map(v=>`<button class="chip" aria-pressed="${amt===v&&!g.other}" data-a="giveAmt" data-v="${v}">R$ ${v}</button>`).join('')}<button class="chip" aria-pressed="${!!g.other}" data-a="giveAmt" data-v="outro">Outro valor</button></div>
+const giveQrCells=()=>Array.from({length:441},(_,i)=>{const x=i%21,y=Math.floor(i/21),f=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);const edge=f&&(x%14===0||x%14===6||y%14===0||y%14===6||(x%14>=2&&x%14<=4&&y%14>=2&&y%14<=4));return f?(edge?1:0):((x*5+y*11+x*y)%5<2?1:0);});
+V.contribuir=()=>{const g=S.give,amt=g.amt,dst=S.camps.find(c=>c.id===g.dest),fx=!!dst.fixed;return sub('Contribuir','',`
+  <section class="stack g3"><p class="eb2">Para onde vai sua contribuição?</p><div class="stack g3" role="radiogroup">${S.camps.map(c=>`<button class="rec" role="radio" aria-checked="${g.dest===c.id}" data-a="giveDest" data-v="${c.id}"><span class="grow stack" style="gap:4px"><span class="it-title">${c.t}</span><span class="it-sub">${c.s}${c.fixed?' · link fixo, anônimo':''}</span>${c.goal?`<span class="bar" style="margin-top:6px"><i style="width:${Math.round(c.got/c.goal*100)}%"></i></span><span class="foot" style="font-variant-numeric:tabular-nums">${brl(c.got)} de ${brl(c.goal)}</span>`:''}</span><span class="radio">${g.dest===c.id?ic('check',14,3):''}</span></button>`).join('')}</div></section>
+  ${fx?`<section class="stack g3"><div class="card stack g3" style="padding:16px;border-radius:var(--r-md)"><div class="lj-qr" aria-label="QR code do link da campanha (demonstração)">${giveQrCells().map(c=>`<i${c?' class="on"':''}></i>`).join('')}</div><div class="copybox"><span class="mask" style="font-size:13px;word-break:break-all">https://${dst.link}</span></div><button class="btn secondary block" data-a="copy" data-v="https://${dst.link}">Copiar link</button></div>
+   <div class="svc-note" style="margin:0">${ic('info',16,2)}<div><b>Doação anônima</b><span>Neste link a igreja não recebe o seu nome e você não recebe recibo nem informe. Escolha o valor na página de pagamento.</span></div></div>
+   <button class="btn accent block" data-a="giveOpenFixed">Abrir o pagamento</button></section>`
+  :`<section class="stack g3"><p class="eb2">Valor</p><div class="amt2">${[50,100,200].map(v=>`<button class="chip" aria-pressed="${amt===v&&!g.other}" data-a="giveAmt" data-v="${v}">R$ ${v}</button>`).join('')}<button class="chip" aria-pressed="${!!g.other}" data-a="giveAmt" data-v="outro">Outro valor</button></div>
    <div ${g.other?'':'hidden'} id="giveOther">${field({id:'gOther',label:'Quanto?',ph:'R$ 0,00',im:'decimal',val:g.other&&amt?brl(amt):''})}</div></section>
-  <section class="stack g3"><p class="eb2">Como</p><div class="seg" id="payM">${['Pix','Cartão','Boleto'].map(m=>`<button type="button" aria-selected="${g.method===m}" data-a="giveMethod" data-v="${m}">${m}</button>`).join('')}</div></section>
+  <section class="stack g3"><p class="eb2">CPF <span class="foot" style="font-weight:400">opcional</span></p>${field({id:'gCpf',label:'CPF',ph:'000.000.000-00',im:'numeric'})}<p class="foot" style="margin:0">Só para o informe anual de contribuições. Pode deixar em branco.</p></section>
   <button class="btn accent block ${amt?'split':''}" id="giveGo" data-a="giveGo" ${amt?'':'disabled'}>${amt?`<span>Contribuir</span><span class="meta">${brl(amt)}</span>`:'Escolha um valor acima'}</button>
+  <p class="foot" style="margin:0">O pagamento abre no navegador do celular, em Pix ou cartão, e volta para cá quando terminar.</p>`}
   <section class="stack g3"><div class="row between"><p class="eb2">Minhas contribuições</p>${g.hist.length?`<button class="link" data-a="informe">Informe 2025</button>`:''}</div>
-   ${g.hist.length?`<div class="list">${g.hist.map(h=>`<div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title" style="font-variant-numeric:tabular-nums">${brl(h.v)}</span><span class="it-sub">${h.dest} · ${h.m} · ${h.d}</span></span>${h.st==='ok'?status('success','Confirmada'):status('warning','Aguardando')}</div>`).join('')}</div>`:`<p class="callout" style="margin:0">Você ainda não fez nenhuma contribuição pelo app.</p>`}</section>`);};
+   ${g.hist.length?`<div class="list">${g.hist.map((h,i)=>`<div class="item" style="cursor:default"><span class="grow stack" style="gap:3px"><span class="it-title" style="font-variant-numeric:tabular-nums">${brl(h.v)}</span><span class="it-sub">${h.dest} · ${h.d}</span>${h.st==='ok'&&h.n?`<button class="link" data-a="giveRecibo" data-v="${i}" style="align-self:flex-start">Recibo nº ${h.n}</button>`:''}${h.st==='wait'||(h.st==='ok'&&h.cancel)?`<button class="link" data-a="giveCancel" data-v="${i}" style="align-self:flex-start">Cancelar contribuição</button>`:''}</span>${h.st==='ok'?status('success','Confirmada'):h.st==='wait'?status('warning','Aguardando pagamento'):status('danger','Estornada')}</div>`).join('')}</div>`:`<p class="callout" style="margin:0">Você ainda não fez nenhuma contribuição pelo app.</p>`}</section>`);};
 
 /* 6. Inscrições */
 V.inscricoes=()=>{const I_=S.insc;const mineIds=I_.mine.map(m=>m.id);return sub('Inscrições','',`
@@ -1092,6 +1085,13 @@ V.meusMin=()=>sub('Meus ministérios','',`
   <div class="stack g3">${MYMIN.map(m=>{const o=S.minOpen===m.id;return `<article class="card acc ${o?'open':''}"><button class="acc-h" data-a="minToggle" data-v="${m.id}" aria-expanded="${o}"><span class="iconbox" style="${tone(m.tone)}">${ic(m.i,22)}</span><span class="grow stack" style="gap:2px"><span class="it-title">${m.t}</span><span class="it-sub">${m.role} · próxima escala ${m.next.split(' · ')[0]}</span></span><span class="chev acc-c">${ic('chevR',18,2)}</span></button>
    ${o?`<div class="acc-b"><div class="kv" style="box-shadow:none;background:transparent"><div class="kr"><span>Meu papel</span><span>${m.role}</span></div><div class="kr"><span>Próxima escala</span><span>${m.next}</span></div><div class="kr"><span>Líder</span><span>${m.leader}</span></div><div class="kr"><span>Servindo desde</span><span>${m.since}</span></div></div><button class="btn primary md block" data-a="minAgenda">Ver na agenda</button></div>`:''}</article>`;}).join('')}</div>
   <button class="tlink" data-a="ministerios">Quero servir em outro ministério</button>`);
+
+/* Meus empréstimos (somente leitura) */
+const MYLOANS=[{t:'Violão Yamaha F310',qty:1,due:[2026,9,28],sub:'Almoxarifado'},{t:'Microfone Shure SM58',qty:2,due:[2026,10,6],sub:'Almoxarifado'}];
+const lnLate=x=>new Date(x.due[0],x.due[1]-1,x.due[2])<new Date(TODAY.y,TODAY.m-1,TODAY.d);
+V.meusEmp=()=>sub('Meus empréstimos','O que do almoxarifado está com você.',`
+  <p class="tk-note">${ic('info',16,2)}<span>Só para consulta. Para devolver, fale com quem cuida do almoxarifado.</span></p>
+  ${MYLOANS.length?`<div class="stack g3">${MYLOANS.map(x=>`<article class="card row g3" style="padding:14px 16px;border-radius:var(--r-md)"><span class="iconbox" style="${tone('ceu')}">${ic('clipboard',22)}</span><span class="grow stack" style="gap:4px;min-width:0"><span class="it-title">${esc(x.t)}</span><span class="it-sub">${x.qty} ${x.qty>1?'unidades':'unidade'} · devolver até ${x.due[2]} ${MTH[x.due[1]-1]}</span><span>${lnLate(x)?status('danger','Em atraso'):status('info','No prazo')}</span></span></article>`).join('')}</div>`:`<div class="card" style="padding:28px 18px;border-radius:var(--r-lg);text-align:center"><p class="callout" style="margin:0">Você não tem empréstimos.</p></div>`}`);
 
 /* Minhas tarefas (somente leitura) */
 const MYTASKS=[
@@ -1125,7 +1125,7 @@ V.secretaria=()=>sub('Fale com a secretaria','Atendimento de segunda a sexta, da
   <button class="btn primary block" data-a="whatsSec">Chamar no WhatsApp</button>
   <div class="kv">${[['Telefone','(11) 99123-4455'],['E-mail','secretaria@alvaigreja.com.br']].map(r=>`<div class="kr" style="align-items:center"><span class="stack" style="gap:2px"><span class="foot">${r[0]}</span><span style="color:var(--ink);font-weight:600">${r[1]}</span></span><button class="btn outline sm" data-a="copy" data-v="${r[1]}">Copiar</button></div>`).join('')}
    <div class="kr stack2"><span>Endereço</span><span>Rua das Acácias, 500 · Jardins<br><span style="font-weight:400;color:var(--ink-muted)">São Paulo, SP</span></span></div></div>
-  <section class="stack g3"><p class="eb2">Pedidos mais comuns</p><div class="list">${['Declaração de membro','Agendar batismo ou casamento','Atualizar cadastro da família','Segunda via de recibo'].map(t=>`<button class="item" data-a="secReq" data-v="${t}"><span class="grow it-title" style="font-weight:500">${t}</span><span class="chev">${ic('chevR',18,2)}</span></button>`).join('')}</div></section>`);
+  <section class="stack g3"><p class="eb2">Resolver agora</p><div class="list">${S.role==='visitante'?'':S.decReq?`<div class="item" style="align-items:center"><span class="grow stack" style="gap:2px"><span class="it-title" style="font-weight:500">Declaração de membro</span><span class="foot" style="margin:0">Pedido enviado em ${S.decReq.d} · aguardando a secretaria. Quando ficar pronta, aparece em Meus documentos.</span></span><button class="btn outline sm" data-a="decCancel">Cancelar pedido</button></div>`:`<button class="item" data-a="decReq"><span class="grow stack" style="gap:2px"><span class="it-title" style="font-weight:500">Pedir declaração de membro</span><span class="foot" style="margin:0">A secretaria emite e avisa você.</span></span><span class="chev">${ic('chevR',18,2)}</span></button>`}<button class="item" data-a="sub" data-v="contribuir"><span class="grow it-title" style="font-weight:500">Segunda via de recibo</span><span class="chev">${ic('chevR',18,2)}</span></button></div><p class="foot" style="margin:0">Para outros assuntos, como casamento, fale com a secretaria pelos canais acima.</p></section>`);
 
 /* 11. Assistente */
 V.assistente=()=>sub('Assistente no WhatsApp','Um jeito rápido de resolver algumas coisas sem abrir o app. Funciona para um conjunto pequeno de perguntas, não para tudo.',`
@@ -1176,7 +1176,7 @@ function qrSVG(seed){let h=0;for(const c of seed)h=(h*31+c.charCodeAt(0))>>>0;co
  return `<svg viewBox="-2 -2 29 29" width="220" height="220" shape-rendering="crispEdges" role="img" aria-label="QR Code da inscrição"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/>${r}${fin(0,0)}${fin(18,0)}${fin(0,18)}</svg>`;}
 async function copyText(t){try{await navigator.clipboard.writeText(t);toast('success','Copiado',t);}catch(_){toast('info','Não deu para copiar',t);}}
 function playerSheet(v){sheet(`<div class="stack g4"><div class="player gr-${v.g}" id="player"><span class="ttl">${v.t}</span>${v.live?'<span class="livebadge" style="position:absolute;right:14px;top:14px"><i></i>Ao vivo</span>':''}<button class="pbtn" data-a="play" aria-label="Assistir">${ic('play',28,2.5)}</button><div class="pbar"><span id="pt">0:00</span><div class="bar"><i id="pp" style="width:0"></i></div><span>${v.live?'ao vivo':v.dur}</span></div></div>
- <div class="stack g2"><h3 class="t2">${v.t}</h3><p class="callout" style="margin:0">${v.live?v.n:v.s}</p></div><div class="row g2"><button class="btn secondary md grow" data-a="shareEv">Compartilhar</button><button class="btn secondary md grow" data-a="notesSoon">Anotações</button></div>${v.cm?cmtHtml(v.cm):''}</div>`);}
+ <div class="stack g2"><h3 class="t2">${v.t}</h3><p class="callout" style="margin:0">${v.live?v.n:v.s}</p></div><div class="row g2"><button class="btn secondary md grow" data-a="shareEv">Compartilhar</button><button class="btn secondary md grow" data-a="notesSoon">Anotações</button></div>${v.cid?`<button class="btn ${S.nxDone[v.cid]?'outline':'primary'} md block" id="doneBtn" data-a="nxDone" data-v="${v.cid}">${S.nxDone[v.cid]?'Concluído · desmarcar':'Marcar como concluído'}</button>`:''}${v.cm?cmtHtml(v.cm):''}</div>`);}
 
 /* ---------- actions ---------- */
 Object.assign(A,{
@@ -1194,36 +1194,33 @@ Object.assign(A,{
   meOpt:(v,el)=>{const [id,o]=v.split('|');$('#'+id).value=o;$$('button',el.parentElement).forEach(b=>{const on=b===el;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on);});
   if(id==='mPais'){const lb=$('#f-mUf label'),ip=$('#mUf');if(lb)lb.textContent=ME_DIV[o]||'Estado';if(ip){ip.maxLength=o==='Brasil'?2:40;ip.value='';}}},
   famOpen:v=>{const p=S.me.fam.find(x=>x.id===v);if(!p)return;sheet(`<div class="stack g5"><div class="row g4"><span class="avatar lg" style="${tone(p.tone||'ceu')}">${initials(p.n)}</span><div class="stack" style="gap:4px"><h3 class="t2">${esc(p.n)}</h3><span class="foot">${esc(p.rel)}${p.age?' · '+esc(p.age):''}</span></div></div>
-   <div class="kv">${meRow('Parentesco',p.rel)}${meRow('No app',p.kids?'Pelo seu cadastro (Kids)':p.pend?'Aguardando a secretaria':p.app?'Sim, tem conta própria':'Ainda não')}${p.kids?meRow('Check-in Kids','Você é responsável'):''}</div>
+   <div class="kv">${meRow('Parentesco',p.rel)}${meRow('No app',p.kids?'Pelo seu cadastro (Kids)':p.rem?'Remoção em análise':p.pend?'Em análise':p.app?'Sim, tem conta própria':'Ainda não')}${p.kids?meRow('Check-in Kids','Você é responsável'):''}</div>
    ${!p.app&&!p.kids&&!p.pend?`<button class="btn primary block" data-a="famInvite" data-v="${p.id}">Convidar para o app</button>`:''}
-   <button class="btn outline block" data-a="famDel" data-v="${p.id}">Pedir remoção do vínculo</button></div>`);},
+   ${p.rem?'':`<button class="btn outline block" data-a="famDel" data-v="${p.id}">Pedir remoção do vínculo</button>`}</div>`);},
   famInvite:async(v,el)=>{await busy(el,800,null,'Convite enviado');closeSheet();toast('success','Convite enviado',S.me.fam.find(x=>x.id===v).n.split(' ')[0]+' recebe um link para baixar o app.');},
-  famDel:v=>{const p=S.me.fam.find(x=>x.id===v);sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Remover ${esc(p.n.split(' ')[0])} da sua família?</h3><p class="body">O pedido vai para a secretaria. Até ela confirmar, o vínculo continua aparecendo para a liderança.</p></div><div class="stack g3"><button class="btn dangerfill block" data-a="famDelOk" data-v="${p.id}">Pedir remoção</button><button class="btn outline block" data-a="closeSheet">Manter vínculo</button></div></div>`);},
-  famDelOk:async(v,el)=>{await busy(el,700,null,'Pedido enviado');const p=S.me.fam.find(x=>x.id===v);S.me.fam=S.me.fam.filter(x=>x.id!==v);closeSheet();softRender();toast('success','Pedido enviado','A secretaria vai confirmar a remoção de '+p.n.split(' ')[0]+'.');},
-  famAdd:()=>{sheet(`<form class="stack g5" data-submit="famReq" novalidate><div class="stack g2"><h3 class="t2">Vincular familiar</h3><p class="body">A secretaria confere e confirma o vínculo. Se a pessoa já tem cadastro na igreja, a gente encontra pelo nome.</p></div>
+  famDel:v=>{const p=S.me.fam.find(x=>x.id===v);sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Pedir remoção do vínculo com ${esc(p.n.split(' ')[0])}?</h3><p class="body">O vínculo continua até o pedido ser analisado.</p></div><div class="stack g3"><button class="btn dangerfill block" data-a="famDelOk" data-v="${p.id}">Pedir remoção do vínculo</button><button class="btn outline block" data-a="closeSheet">Manter vínculo</button></div></div>`);},
+  famDelOk:async(v,el)=>{await busy(el,700,null,'Pedido enviado');const p=S.me.fam.find(x=>x.id===v);p.rem=true;closeSheet();softRender();toast('success','Pedido enviado','Avisamos quando o pedido for analisado.');},
+  famAdd:()=>{sheet(`<form class="stack g5" data-submit="famReq" novalidate><div class="stack g2"><h3 class="t2">Pedir vínculo de familiar</h3><p class="body">Informe os dados do familiar. Seu pedido será analisado e o vínculo aparece aqui quando for aprovado.</p></div>
    ${field({id:'fNome',label:'Nome completo',ac:'off'})}
    <div class="stack g2" id="f-fRel"><span class="eb2">Parentesco</span><div class="chips2" role="radiogroup" aria-label="Parentesco">${['Cônjuge','Filho(a)','Pai','Mãe','Irmão(ã)','Outro'].map((o,i)=>`<button type="button" class="chip" role="radio" aria-pressed="${!i}" aria-checked="${!i}" data-a="meOpt" data-v="fRel|${o}">${o}</button>`).join('')}</div><input type="hidden" id="fRel" value="Cônjuge"></div>
    ${field({id:'fNasc',label:'Data de nascimento',ph:'dd/mm/aaaa',im:'numeric',max:10,hint:'Para filhos, libera o check-in no Kids.'})}
-   <div class="stack g3"><button class="btn primary block" type="submit">Enviar para a secretaria</button><button type="button" class="tlink" data-a="closeSheet">Cancelar</button></div></form>`);},
+   <div class="stack g3"><button class="btn primary block" type="submit">Enviar pedido</button><button type="button" class="tlink" data-a="closeSheet">Cancelar</button></div></form>`);},
 
  readAll:()=>{S.notifs.forEach(n=>n.unread=false);softRender();toast('success','Tudo lido','');},
  delRead:()=>{S.notifs=S.notifs.filter(n=>n.unread);softRender();toast('success','Notificações lidas apagadas','');},
  openNotif:v=>{const n=S.notifs.find(x=>x.id===v);n.unread=false;if(n.go==='escalas'){S.ag.tab='Escalas';A.tab('agenda');}else if(n.go){go(n.go);}else softRender();},
  urg:v=>{S.care.urg=v;const t=$('#cText');const keep=t?t.value:'';softRender();$('#cText').value=keep;},
  careOk:async(v,el)=>{await busy(el,600,null,'Confirmado');S.care.next.st='aceito';softRender();toast('success','Encontro confirmado',S.care.next.who+' recebeu sua confirmação.');},
- careNo:()=>{S.care.next.st='recusado';softRender();toast('info','Encontro recusado','O pastor vai propor outro horário.');},
+ careNo:()=>{const nx=S.care.next;reasonSheet({title:'Recusar encontro',callout:esc(nx.who)+' · '+nx.when,ph:'Ex.: nesse horário não consigo; posso na próxima semana',btn:'Recusar',who:nx.who.replace(/^\w+\.\s/,'').split(' ')[0],done:'Recusado',ms:600,run:async why=>{nx.st='recusado';nx.why=why;await closeSheet();softRender();toast('info','Encontro recusado','O pastor vai propor outro horário.');}});},
  giveDest:v=>{S.give.dest=v;softRender();},
  giveAmt:v=>{if(v==='outro'){S.give.other=true;S.give.amt=null;softRender();setTimeout(()=>$('#gOther').focus(),50);}else{S.give.other=false;S.give.amt=+v;softRender();}},
- giveMethod:v=>{S.give.method=v;$$('#payM button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));},
  giveGo:async(v,el)=>{const g=S.give;if(g.other&&(!g.amt||g.amt<1)){setErr('gOther','Informe um valor a partir de R$ 1,00.');return;}if(g.amt>5000){setErr('gOther','Acima de R$ 5.000, fale com a tesouraria.');return;}
-  await busy(el,900,null,S.give.method==='Cartão'?'Confirmado':'Gerado');const dest=S.camps.find(c=>c.id===g.dest).t;const rec={v:g.amt,dest,m:g.method,d:'29/09/2026',st:g.method==='Cartão'?'ok':'wait'};
-  if(g.method==='Cartão'){g.hist.unshift(rec);const c=S.camps.find(c=>c.id===g.dest);if(c.goal)c.got+=g.amt;g.amt=null;g.other=false;softRender();toast('success','Contribuição confirmada',brl(rec.v)+' para '+dest+'. Obrigado!');return;}
-  const code='00020126580014BR.GOV.BCB.PIX0136alva-'+Math.round(g.amt*100)+'-sede5204000053039865802BR';
-  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${g.method==='Pix'?'Pix gerado':'Boleto gerado'}</h3><p class="callout">${brl(rec.v)} para ${dest}. ${g.method==='Pix'?'Válido por 30 minutos.':'Vence em 3 dias úteis.'}</p></div>
-   <div class="copybox"><span class="mask" style="font-size:12px;word-break:break-all">${g.method==='Pix'?code:'23793.38128 60000.000003 00000.000400 1 99990000'+Math.round(g.amt*100)}</span></div>
-   <button class="btn secondary block" data-a="copy" data-v="${g.method==='Pix'?code:'boleto'}">Copiar código</button><button class="btn primary block" data-a="paid">Já paguei</button></div>`);
-  S._pending=rec;},
- paid:async(v,el)=>{await busy(el,1200,null,'Recebido');const g=S.give,rec=S._pending;rec.st='ok';g.hist.unshift(rec);const c=S.camps.find(c=>c.t===rec.dest);if(c&&c.goal)c.got+=rec.v;g.amt=null;g.other=false;await closeSheet();softRender();toast('success','Pagamento recebido',brl(rec.v)+' para '+rec.dest+'. Obrigado!');},
+  await busy(el,900,null,'Abrindo');const dest=S.camps.find(c=>c.id===g.dest).t,rec={v:g.amt,dest,d:'29/09/2026',st:'wait',n:null,cancel:true};
+  g.hist.unshift(rec);g.amt=null;g.other=false;softRender();toast('info','Aguardando pagamento','O pagamento abriu no navegador. Assim que cair, sua contribuição confirma.');
+  setTimeout(()=>{if(rec.st!=='wait')return;rec.st='ok';rec.n=String(412+g.hist.length).padStart(4,'0');const c=S.camps.find(c=>c.t===dest);if(c&&c.goal)c.got+=rec.v;if(S.screen==='contribuir')softRender();toast('success','Contribuição confirmada',brl(rec.v)+' para '+dest+'. O recibo foi enviado por e-mail.');},3500);},
+ giveCancel:v=>{const h=S.give.hist[+v];sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Cancelar esta contribuição?</h3><p class="callout">${brl(h.v)} para ${h.dest}. ${h.st==='wait'?'O pagamento ainda não foi feito, então nada é cobrado.':'O valor volta pelo mesmo meio de pagamento. A taxa do provedor não volta.'}</p></div><div class="stack g3"><button class="btn primary block" id="giveYes">Cancelar contribuição</button><button class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{$('#giveYes',sh).addEventListener('click',async e=>{await busy(e.currentTarget,900,null,'Cancelada');await closeSheet();const wasOk=h.st==='ok';h.st='refunded';if(wasOk){const c=S.camps.find(c=>c.t===h.dest);if(c&&c.goal)c.got-=h.v;}softRender();toast('info','Contribuição cancelada',wasOk?'O valor volta pelo mesmo meio de pagamento.':'Nada foi cobrado.');});});},
+ giveRecibo:v=>{const h=S.give.hist[+v];toast('success','Recibo nº '+h.n,'Enviamos o recibo para '+S.me.email+'.');},
+ giveOpenFixed:()=>toast('info','Abrindo o pagamento','O link abre no navegador do celular. Como a doação é anônima, não há recibo.'),
  informe:()=>toast('success','Informe de contribuições 2025','Enviamos o PDF para '+S.me.email+'.'),
  copy:v=>copyText(v),
  inscrever:async(v,el)=>{const e=S.insc.open.find(x=>x.id===v);if(!e.price){await busy(el,700,null,'Inscrito');S.insc.mine.push({id:v,st:'ok',method:'-'});softRender();toast('success','Inscrição confirmada','Seu QR Code está em Minhas inscrições.');return;}
@@ -1240,7 +1237,8 @@ Object.assign(A,{
  answered:(v)=>{const p=S.prayers.find(x=>x.id===v);p.st='respondido';softRender();toast('success','Que alegria!','Vamos agradecer junto com você no próximo culto.');},
  social:v=>toast('info','Abrindo '+v,'No app real, abre o perfil da igreja no '+v+'.'),
  whatsSec:()=>toast('info','Abrindo o WhatsApp','Conversa com a secretaria da '+S.church.name+'.'),
- secReq:v=>toast('success','Pedido enviado',v+'. A secretaria responde em até 2 dias úteis.'),
+ decReq:()=>{S.decReq={d:'29/09'};softRender();toast('success','Pedido enviado','A secretaria vai emitir e avisar você. A declaração aparece em Meus documentos.');},
+ decCancel:()=>{S.decReq=null;softRender();toast('info','Pedido cancelado','Você pode pedir de novo quando quiser.');},
  ask:async v=>{const box=$('#chat');if(!S.chat.length)S.chat=[['me','Qual a agenda da igreja?'],['bot',BOT['Qual a agenda da igreja?']]];S.chat.push(['me',v]);box.insertAdjacentHTML('beforeend',`<div class="bub me">${esc(v)}</div><div class="bub bot typing"><i></i><i></i><i></i></div>`);box.scrollTop=box.scrollHeight;
   await wait(1100);S.chat.push(['bot',BOT[v]]);const t=$('.typing',box);if(t){t.classList.remove('typing');t.innerHTML=esc(BOT[v]).replace(/\n/g,'<br>');}box.scrollTop=box.scrollHeight;},
  whats2:()=>toast('info','Abrindo o WhatsApp','No app real, a conversa com o assistente abre aqui.'),
@@ -1265,7 +1263,7 @@ Object.assign(F,{
   if(n.split(' ').filter(Boolean).length<2){setErr('fNome','Informe nome e sobrenome.');ok=false;}
   if(d){const m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);const dt=m&&new Date(+m[3],+m[2]-1,+m[1]);if(!m||dt.getDate()!==+m[1]||dt>new Date(2026,8,29)){setErr('fNasc','Data inválida. Use dd/mm/aaaa.');ok=false;}}
   if(!ok)return;await busy($('button[type=submit]',f),900,null,'Enviado');const g=r==='Cônjuge'?'sp':r==='Filho(a)'?'kid':r==='Pai'||r==='Mãe'?'par':'oth';
-  S.me.fam.push({id:'f'+Date.now(),n,rel:r,g,pend:true,tone:['ceu','menta','damasco','lima','salvia'][S.me.fam.length%5]});closeSheet();S.meTab='familia';softRender();toast('success','Pedido enviado','A secretaria confirma o vínculo com '+n.split(' ')[0]+'.');},
+  S.me.fam.push({id:'f'+Date.now(),n,rel:r,g,pend:true,tone:['ceu','menta','damasco','lima','salvia'][S.me.fam.length%5]});closeSheet();S.meTab='familia';softRender();toast('success','Pedido enviado','Avisamos quando o pedido for analisado.');},
  async sendCare(f){const t=val('cText');if(t.length<10){setErr('cText',t?'Conte um pouco mais para o pastor entender.':'Escreva como podemos te ajudar.');return;}
   await busy($('button[type=submit]',f),1000,null,'Enviado');S.care.list.unshift({t:t.length>48?t.slice(0,46)+'…':t,d:'29/09/2026',who:'Equipe pastoral',st:S.care.urg==='Urgente'?'urgente':'novo'});S.care.urg='Normal';softRender();toast('success','Pedido enviado',S.care.list[0].st==='urgente'?'Um pastor fala com você ainda hoje.':'Um pastor entra em contato em até 3 dias.');},
  async sendPrayer(f){const t=val('prText');if(!t){setErr('prText','Escreva seu pedido para enviarmos à equipe.');return;}if(t.length<10){setErr('prText','Conte um pouco mais para a equipe saber como orar.');return;}
@@ -1281,14 +1279,14 @@ phone.addEventListener('input',e=>{const t=e.target;
 /* demo users preload */
 const _login=F.login;F.login=async function(f){await _login(f);const e=(S.email||'').toLowerCase();
  if(e==='renan.ferreira@email.com'&&!S.insc.mine.length)S.insc.mine.push({id:'i1',st:'ok',method:'-'});
- if(e==='giovanna.martins@email.com'&&!S.give.hist.length)S.give.hist.push({v:350,dest:'Contribuição livre',m:'Pix',d:'05/09/2026',st:'ok'},{v:350,dest:'Contribuição livre',m:'Pix',d:'05/08/2026',st:'ok'},{v:120,dest:'Retiro de Jovens 2026',m:'Cartão',d:'20/07/2026',st:'ok'});
+ if(e==='giovanna.martins@email.com'&&!S.give.hist.length)S.give.hist.push({v:350,dest:'Contribuição livre',m:'Pix',d:'05/09/2026',st:'ok',n:'0398'},{v:350,dest:'Contribuição livre',m:'Pix',d:'05/08/2026',st:'ok',n:'0371'},{v:120,dest:'Retiro de Jovens 2026',m:'Cartão',d:'20/07/2026',st:'ok',n:'0342'});
  if(S.user&&S.user.name)S.me.nome=S.user.name;};
-RAIL.push(...[['carteirinha','Mais › Você › Carteirinha de membro'],['documentos','Mais › Meus documentos'],['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
+RAIL.push(...[['carteirinha','Mais › Você › Carteirinha de membro'],['documentos','Mais › Meus documentos'],['meusDados','Mais › Meus dados'],['notifs','Mais › Notificações'],['quemSomos','Mais › Quem somos'],['cuidado','Agenda › Acompanhamento'],['contribuir','Mais › Contribuir'],['inscricoes','Mais › Inscrições'],['aoVivo','Mais › Ao vivo'],['meusMin','Mais › Meus ministérios'],['meusEmp','Mais › Meus empréstimos'],['tarefas','Mais › Minhas tarefas'],['oracao','Mais › Pedidos de oração'],['secretaria','Mais › Secretaria'],['assistente','Mais › Assistente'],['privacidade','Mais › Privacidade']]);
 $('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
 /* ---------- cenários por tipo de usuário ---------- */
 function visitorCard(){return `<div class="pad" style="margin:-4px 0 22px"><div class="vcard gr-aurora"><p class="eb2" style="color:#fff;opacity:.85">Primeira vez por aqui?</p><p class="vtitle">Que bom ter você com a gente.</p><p style="margin:0;font:400 15px/20px var(--font-text);color:rgba(255,255,255,.88)">O melhor jeito de conhecer a Alva é numa Casa de Apascentamento perto de você.</p><div class="row g2" style="margin-top:6px"><button class="btn dark md" data-a="tab" data-v="grupos">Encontrar uma Casa</button><button class="btn onmedia md" data-a="sub" data-v="quemSomos">Quem somos</button></div></div></div>`;}
-function roleApply(){if(S.role==='visitante'){S.ag.tab='Eventos';if(['cursos','curso','bebes','bebeNovo','meusMin','tarefas','svcTeam','urgentes','contribuir'].includes(S.screen)){S.hist=[];S.screen='home';render('tab');return;}}if(APP.includes(S.screen))softRender();}
+function roleApply(){if(S.role==='visitante'){S.ag.tab='Eventos';if(['cursos','curso','bebes','bebeNovo','meusMin','meusEmp','tarefas','svcTeam','urgentes','contribuir'].includes(S.screen)){S.hist=[];S.screen='home';render('tab');return;}}if(APP.includes(S.screen))softRender();}
 const SCN={
  visitante:()=>{S.user={first:'Lucas',name:'Lucas Almeida'};S.role='visitante';S.me.nome='Lucas Almeida';S.ag.tab='Eventos';return 'home';},
  membro:()=>{S.user={first:'Rafael',name:'Rafael Pereira'};S.role='membro';S.me.nome='Rafael Pereira';return 'home';}
@@ -1590,7 +1588,7 @@ Object.assign(A,{
  cmtSheet:v=>sheet(`<div class="stack g5"><h3 class="t2">${esc(v.slice(v.indexOf(':')+1))}</h3>${cmtHtml(v)}</div>`),
  cmtAddM:v=>{const el=document.getElementById(cmtId(v)),x=el?el.value.trim():'';if(!x){toast('error','Escreva o comentário','');return;}(S.cmts[v]||(S.cmts[v]=[])).push({n:S.user.name,t:x,at:'agora',me:true});cmtPaintM(v);toast('success','Comentário publicado','');},
  cmtDelM:v=>{const i=v.lastIndexOf('|'),k=v.slice(0,i);S.cmts[k].splice(+v.slice(i+1),1);cmtPaintM(k);toast('info','Comentário apagado','');},
- nxPlay:v=>{const x=NX_MVIDEOS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.cat+' · '+x.when,cm:'video:'+v});},
+ nxPlay:v=>{const x=NX_MVIDEOS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.cat+' · '+x.when,cm:'video:'+v,cid:v});},
  nxItem:v=>{const s=NX_MSERIES.find(x=>x.id===S.nxSeries),it=s.items[+v];playerSheet({t:it.t,g:s.g,dur:it.dur,s:s.t+' · '+(+v+1)+' de '+s.items.length});},
  nxVf:v=>{S.nxVf=v;softRender();},nxSf:v=>{S.nxSf=v;softRender();},
  nxSeriesOpen:id=>{S.nxSeries=id;go('nxSeriesDetail');},
@@ -1606,12 +1604,21 @@ Object.assign(A,{
  const k=r.html.lastIndexOf('</div>');r.html=r.html.slice(0,k)+add+r.html.slice(k);return r;};}
 const NX_MPREGS=[{id:'pg1',t:'Uma nova vida',who:'Pr. Rafael Pereira',when:'há 3 dias',dur:'41:10',g:'vinho',public:true},{id:'pg2',t:'Fé no cotidiano',who:'Pr. Rafael Pereira',when:'há 1 semana',dur:'36:45',g:'aurora',public:true},{id:'pg3',t:'Oração que transforma',who:'Pr. Marcos Lima',when:'há 2 semanas',dur:'39:02',g:'mar',public:false},{id:'pg4',t:'O lar como altar',who:'Pr. Rafael Pereira',when:'há 3 semanas',dur:'37:30',g:'brasa',public:true}];
 const NX_MSONGS=[{id:'mu1',t:'Majestade',art:'Fernandinho',dur:'5:21',g:'brasa',public:true},{id:'mu2',t:'Oceanos',art:'Hillsong',dur:'8:56',g:'mar',public:true},{id:'mu3',t:'Grande é o Senhor',art:'Aline Barros',dur:'4:40',g:'aurora',public:false},{id:'mu4',t:'Deus Cuida de Mim',art:'Ministério Zoe',dur:'3:48',g:'lima',public:true}];
-S.nxSeen={};
-const nxMRow=(x,act,sub)=>`<button class="item vrow" data-a="${act}" data-v="${x.id}">${nxThumb(x,'sm')}<span class="grow stack" style="gap:3px;min-width:0"><span class="it-title vrt">${esc(x.t)}</span><span class="it-sub">${sub}</span></span>${S.nxSeen[x.id]?status('success','Visto'):''}</button>`;
+S.nxSeen={};S.nxDone={};
+const nxMRow=(x,act,sub)=>`<button class="item vrow" data-a="${act}" data-v="${x.id}">${nxThumb(x,'sm')}<span class="grow stack" style="gap:3px;min-width:0"><span class="it-title vrt">${esc(x.t)}</span><span class="it-sub">${sub}</span></span>${S.nxDone[x.id]?status('success','Concluído'):S.nxSeen[x.id]?status('success','Visto'):''}</button>`;
 V.nxPregs=()=>nxScreen('Pregações','Mensagens da sua igreja.',`<div class="list">${nxPub(NX_MPREGS).map(p=>nxMRow(p,'nxOpenP',p.who+' · '+p.when)).join('')}</div>`);
 V.nxSongs=()=>nxScreen('Músicas','Para ouvir e cantar.',`<div class="list">${nxPub(NX_MSONGS).map(m=>nxMRow(m,'nxOpenS',esc(m.art))).join('')}</div>`);
-Object.assign(A,{nxOpenP:v=>{S.nxSeen[v]=true;softRender();const x=NX_MPREGS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.who+' · '+x.when,cm:'sermon:'+v});},nxOpenS:v=>{S.nxSeen[v]=true;softRender();const x=NX_MSONGS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.art,cm:'song:'+v});}});
-SUBS.push('nxVideos','nxSeries','nxSeriesDetail','nxPregs','nxSongs');RAIL.push(['nxVideos','Início › Vídeos'],['nxSeries','Início › Séries'],['nxPregs','Mais › Pregações'],['nxSongs','Mais › Músicas']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
+Object.assign(A,{nxOpenP:v=>{S.nxSeen[v]=true;softRender();const x=NX_MPREGS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.who+' · '+x.when,cm:'sermon:'+v,cid:v});},nxOpenS:v=>{S.nxSeen[v]=true;softRender();const x=NX_MSONGS.find(y=>y.id===v);playerSheet({t:x.t,g:x.g,dur:x.dur,s:x.art,cm:'song:'+v,cid:v});}});
+/* Material de apoio no app: aparece o que a visibilidade libera (aqui, o PDF do kit dos pais para todos os membros); abrir marca visto e o botão conclui */
+const NX_MMATS=[{id:'mt1',t:'Kit dos pais — Kids',desc:'O PDF do kit do mês, com as atividades para fazer em casa.',files:[{n:'Kit-Kids-Outubro.pdf',kb:1240}],public:false},{id:'mt2',t:'Guia do líder de casa',desc:'Boas práticas para conduzir os encontros da casa.',files:[{n:'Casas-de-Apascentamento.pdf',kb:2310},{n:'Dinamicas-quebra-gelo.docx',kb:640}],public:false},{id:'mt3',t:'Horários e como chegar',desc:'Os horários dos cultos e o mapa para chegar à igreja.',files:[{n:'Horarios-e-mapa.pdf',kb:380}],public:true}];
+const nxSz=kb=>kb>=1000?(kb/1000).toFixed(1).replace('.',',')+' MB':kb+' KB';
+V.nxMats=()=>nxScreen('Material de apoio','Arquivos que a igreja liberou para você.',`<div class="list">${nxPub(NX_MMATS).map(m=>`<button class="item" data-a="nxOpenM" data-v="${m.id}"><span class="iconbox" style="${tone('oceano')}">${ic('book',18,2)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="it-title">${esc(m.t)}</span><span class="it-sub">${m.files.length} arquivo${m.files.length===1?'':'s'}</span></span>${S.nxDone[m.id]?status('success','Concluído'):S.nxSeen[m.id]?status('success','Visto'):''}</button>`).join('')}</div>`);
+Object.assign(A,{
+ nxOpenM:v=>{S.nxSeen[v]=true;softRender();const m=NX_MMATS.find(y=>y.id===v);sheet(`<div class="stack g4"><div class="stack g2"><h3 class="t2">${esc(m.t)}</h3><p class="callout" style="margin:0">${esc(m.desc)}</p></div><div class="list">${m.files.map(f=>`<button class="item" data-a="nxDown" data-v="${esc(f.n)}"><span class="iconbox" style="${tone('oceano')}">${ic('book',18,2)}</span><span class="grow stack" style="gap:2px"><span class="it-title">${esc(f.n)}</span><span class="it-sub">${nxSz(f.kb)}</span></span><span class="chev">${ic('arrowR',18,2)}</span></button>`).join('')}</div><button class="btn ${S.nxDone[v]?'outline':'primary'} md block" id="doneBtn" data-a="nxDone" data-v="${v}">${S.nxDone[v]?'Concluído · desmarcar':'Marcar como concluído'}</button>${cmtHtml('material:'+v)}</div>`);},
+ nxDown:v=>toast('info','Baixando',v),
+ nxDone:v=>{S.nxDone[v]=!S.nxDone[v];S.nxSeen[v]=true;const b=$('#doneBtn');if(b){b.textContent=S.nxDone[v]?'Concluído · desmarcar':'Marcar como concluído';b.classList.toggle('primary',!S.nxDone[v]);b.classList.toggle('outline',!!S.nxDone[v]);}softRender();toast(S.nxDone[v]?'success':'info',S.nxDone[v]?'Marcado como concluído':'Conclusão desfeita',S.nxDone[v]?'Você pode desmarcar quando quiser.':'Fica só como visto.');}
+});
+SUBS.push('nxVideos','nxSeries','nxSeriesDetail','nxPregs','nxSongs','nxMats');RAIL.push(['nxVideos','Início › Vídeos'],['nxSeries','Início › Séries'],['nxPregs','Mais › Pregações'],['nxSongs','Mais › Músicas'],['nxMats','Mais › Material de apoio']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
 /* ---------- Convites de encontros: Casa e supervisor ---------- */
 S.minv=[
@@ -1636,12 +1643,8 @@ function invBody(){const l=invMine(),p=l.filter(x=>x.st==='pendente'),r=l.filter
   ${l.length?'':'<div class="ev-none"><span>'+ic('calendar',20)+'</span><div class="stack" style="gap:2px"><b>Nenhum convite</b><span>Quando sua Casa marcar um encontro, ele aparece aqui.</span></div></div>'}`;}
 {const base=agendaTab;agendaTab=function(){return S.ag.tab==='Encontros'?invBody():base();};}
 function invNoSheet(id){const x=S.minv.find(e=>e.id===id);
- sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Recusar encontro</h3><p class="callout">${esc(x.t)} · ${fmtK(K(x.y,x.m,x.d))} · ${x.h}</p></div>
-  <div class="stack g2"><span class="eb2">Motivo <span style="text-transform:none;letter-spacing:0;font-weight:400">(opcional)</span></span><div class="row g2" style="flex-wrap:wrap" id="ivWhy">${['Viagem','Trabalho','Compromisso familiar','Saúde'].map(w=>`<button type="button" class="chip" aria-pressed="false" data-v="${w}">${w}</button>`).join('')}</div></div>
-  ${field({id:'ivMsg',label:'Mensagem para '+x.lead.split(' ')[0]+' (opcional)',area:true,ph:'Ex.: Chego na próxima semana',max:200})}
-  <div class="stack g3"><button type="button" class="btn primary block" id="ivGo">Recusar</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{
-  let why='';$('#ivWhy',sh).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const on=b.getAttribute('aria-pressed')!=='true';$$('#ivWhy button',sh).forEach(z=>z.setAttribute('aria-pressed',on&&z===b));why=on?b.dataset.v:'';});
-  $('#ivGo',sh).addEventListener('click',async e=>{const msg=($('#ivMsg',sh)||{}).value||'';await busy(e.currentTarget,600,null,'Recusado');x.st='recusado';x.why=[why,msg.trim()].filter(Boolean).join(' · ');await closeSheet();softRender();toast('info','Encontro recusado',x.lead.split(' ')[0]+' vê sua resposta'+(x.why?' e o motivo':'')+'.');});});}
+ reasonSheet({title:'Recusar encontro',callout:esc(x.t)+' · '+fmtK(K(x.y,x.m,x.d))+' · '+x.h,ph:'Ex.: chego só na próxima semana',btn:'Recusar',who:x.lead.split(' ')[0],done:'Recusado',ms:600,
+  run:async why=>{x.st='recusado';x.why=why;await closeSheet();softRender();toast('info','Encontro recusado',x.lead.split(' ')[0]+' vê sua resposta e o motivo.');}});}
 Object.assign(A,{
  invOk:async(v,el)=>{const x=S.minv.find(e=>e.id===v);await busy(el,600,null,'Aceito');x.st='aceito';x.why='';softRender();toast('success','Presença confirmada','Você recebe um lembrete 1 dia antes.');},
  invNo:v=>invNoSheet(v),
@@ -1693,10 +1696,10 @@ const ljCover=(it,cls='')=>`<span class="lj-cv gr-${it.g} ${cls}">${ic(ljCat(it.
 const ljCartBtn=()=>`<button class="iconbtn lj-cb" data-a="go" data-v="lojaCart" aria-label="Sacola${ljCount()?', '+ljCount()+' itens':''}">${ic('bag',19,1.9)}${ljCount()?`<small>${ljCount()}</small>`:''}</button>`;
 const ljScreen=(title,lede,body,right)=>({sb:'var(--ink)',tabs:null,amb:'home',html:`${subHead(title,lede,right)}<div class="pad stack g6 lj-body" style="padding-top:8px">${body}</div>`});
 const ljBar=()=>ljCount()?`<button class="lj-bar" data-a="go" data-v="lojaCart"><span class="lj-bn">${ljCount()}</span><span class="grow">Ver sacola</span><b>${ljR(ljTotal())}</b>${ic('chevR',16,2.25)}</button>`:'';
-const ljSt=o=>o.st==='retirado'?ST2('mute','Retirado'):o.st==='pronto'?ST2('ok','Pronto para retirar'):ST2('warn','Separando');
-V.loja=()=>{const q=ljNorm(S.lj.q),l=LJ_ITEMS.filter(x=>(S.lj.cat==='Todos'||ljCat(x.cat)[1]===S.lj.cat)&&(!q||ljNorm(x.n+' '+x.desc).includes(q))),open=S.orders.filter(o=>o.st!=='retirado');
+const ljSt=o=>o.st==='cancelado'?ST2('mute','Cancelado'):o.st==='aguardando'?ST2('info','Aguardando pagamento'):o.st==='retirado'?ST2('mute','Retirado'):o.st==='pronto'?ST2('ok','Pronto para retirar'):ST2('warn','Separando');
+V.loja=()=>{const q=ljNorm(S.lj.q),l=LJ_ITEMS.filter(x=>(S.lj.cat==='Todos'||ljCat(x.cat)[1]===S.lj.cat)&&(!q||ljNorm(x.n+' '+x.desc).includes(q))),open=S.orders.filter(o=>o.st!=='retirado'&&o.st!=='cancelado');
  return ljScreen('Loja','Livros, camisetas e acessórios da igreja. Pague pelo app e retire no domingo.',`
-  ${open.length?`<button class="lj-ord" data-a="ljOrder" data-v="${open[0].id}"><span class="iconbox" style="${tone('lima')}">${ic('bag',20)}</span><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">Pedido #${open[0].id}</span><span class="it-sub">Código de retirada ${open[0].code}</span></span>${ljSt(open[0])}</button>`:''}
+  ${open.length?`<button class="lj-ord" data-a="ljOrder" data-v="${open[0].id}"><span class="iconbox" style="${tone('lima')}">${ic('bag',20)}</span><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">Pedido #${open[0].id}</span><span class="it-sub">${open[0].st==='aguardando'?'Aguardando o pagamento do Pix':'Código de retirada '+open[0].code}</span></span>${ljSt(open[0])}</button>`:''}
   <label class="lj-search">${ic('search',18,2)}<input id="ljQ" type="search" placeholder="Buscar na loja" value="${esc(S.lj.q)}" autocomplete="off"></label>
   ${nxChips(['Todos',...LJ_CATS.map(c=>c[1])],S.lj.cat,'ljCat')}
   ${l.length?`<div class="lj-grid">${l.map(it=>{const n=ljInCart(it.id);return `<button class="lj-card ${it.stock===0?'off':''}" data-a="ljItem" data-v="${it.id}">${ljCover(it)}<span class="lj-cb2"><span class="lj-n">${esc(it.n)}</span><span class="lj-p">${ljR(it.price)}</span>${n?`<span class="lj-in">${ic('check',12,2.75)}${n} na sacola</span>`:''}</span></button>`;}).join('')}</div>`:'<p class="foot" style="text-align:center">Nada encontrado com esse filtro.</p>'}
@@ -1728,11 +1731,15 @@ V.lojaOk=()=>{const o=S.orders.find(x=>x.id===S.ljLast);
   <div class="list">${o.items.map(x=>{const it=ljIt(x.id);return `<div class="item" style="cursor:default"><span class="grow it-title" style="font-size:15.5px">${x.q}× ${esc(it.n)}${x.size?' · '+x.size:''}</span><span class="it-sub">${ljR(it.price*x.q)}</span></div>`;}).join('')}<div class="item" style="cursor:default"><span class="grow it-title" style="font-size:15.5px">Total</span><b>${ljR(o.total)}</b></div></div>
   <div class="stack g3"><button class="btn primary block" data-a="ljDone">Voltar para a loja</button><button class="tlink" data-a="ljGoOrders">Ver meus pedidos</button></div></div>`};};
 V.lojaOrders=()=>ljScreen('Meus pedidos','Compras feitas pelo app.',`<div class="list">${S.orders.map(o=>`<button class="item" data-a="ljOrder" data-v="${o.id}"><span class="grow stack" style="gap:3px"><span class="it-title" style="font-size:16px">Pedido #${o.id}</span><span class="it-sub">${o.d} · ${o.items.reduce((a,x)=>a+x.q,0)} ${o.items.reduce((a,x)=>a+x.q,0)>1?'itens':'item'} · ${ljR(o.total)}</span></span>${ljSt(o)}</button>`).join('')||'<p class="foot" style="padding:16px">Nenhum pedido ainda.</p>'}</div>`);
-function ljPixSheet(){const t=ljTotal(),cells=Array.from({length:441},(_,i)=>{const x=i%21,y=Math.floor(i/21),f=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);const edge=f&&(x%14===0||x%14===6||y%14===0||y%14===6||(x%14>=2&&x%14<=4&&y%14>=2&&y%14<=4));return f?(edge?1:0):((x*7+y*13+x*y)%5<2?1:0);});
- sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Pagar com Pix</h3><p class="callout">${ljR(t)} · o pedido é confirmado assim que o pagamento cair.</p></div>
+function ljPixOrder(){const code=Math.random().toString(36).slice(2,6).toUpperCase(),id='A'+(1030+S.orders.length);
+ S.orders.unshift({id,code,d:'Hoje',items:S.cart.map(x=>({...x})),total:ljTotal(),pay:'Pix',st:'aguardando'});S.cart=[];S.ljLast=id;softRender();ljPixSheet(id);}
+function ljConfirmPix(id){const o=S.orders.find(x=>x.id===id);if(!o||o.st!=='aguardando')return;o.st='separando';o.items.forEach(x=>{const it=ljIt(x.id);it.stock=Math.max(0,it.stock-x.q);});S.ljLast=id;go('lojaOk',{replace:false});}
+function ljCancelOrder(id){const o=S.orders.find(x=>x.id===id);if(!o||o.st!=='aguardando')return;o.st='cancelado';softRender();toast('info','Pedido cancelado','Nada foi cobrado. Você pode fazer um novo pedido quando quiser.');}
+function ljPixSheet(id){const o=S.orders.find(x=>x.id===id),cells=Array.from({length:441},(_,i)=>{const x=i%21,y=Math.floor(i/21),f=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);const edge=f&&(x%14===0||x%14===6||y%14===0||y%14===6||(x%14>=2&&x%14<=4&&y%14>=2&&y%14<=4));return f?(edge?1:0):((x*7+y*13+x*y)%5<2?1:0);});
+ sheet(`<div class="stack g5"><div class="row between" style="align-items:center"><h3 class="t2">Pagar com Pix</h3>${ljSt(o)}</div><p class="callout">${ljR(o.total)} · o pedido #${o.id} é confirmado assim que o pagamento cair.</p>
   <div class="lj-qr" aria-label="QR code do Pix (demonstração)">${cells.map(c=>`<i${c?' class="on"':''}></i>`).join('')}</div>
   <button type="button" class="btn secondary block" data-a="copy" data-v="00020126alva-pix-demo">Copiar código Pix</button>
-  <div class="stack g3"><button type="button" class="btn primary block" id="ljPaid">Já paguei</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{$('#ljPaid',sh).addEventListener('click',async e=>{await busy(e.currentTarget,900,null,'Pagamento recebido');await closeSheet();ljPlace();});});}
+  <div class="stack g3"><button type="button" class="btn primary block" id="ljPaid">Já paguei</button><button type="button" class="btn secondary block" id="ljCancel">Cancelar pedido</button><button type="button" class="tlink" data-a="closeSheet">Pagar depois</button></div></div>`,sh=>{$('#ljPaid',sh).addEventListener('click',async e=>{await busy(e.currentTarget,900,null,'Pagamento recebido');await closeSheet();ljConfirmPix(id);});$('#ljCancel',sh).addEventListener('click',async()=>{await closeSheet();ljCancelOrder(id);});});}
 function ljCardSheet(){const t=ljTotal();
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Pagar com cartão</h3><p class="callout">${ljR(t)} à vista.</p></div>
   <div class="lj-cardv">${ic('card',22,1.9)}<span class="grow stack" style="gap:1px"><b>Visa final 4242</b><small>Cartão salvo na sua conta</small></span>${ST2('ok','Padrão')}</div>
@@ -1743,16 +1750,31 @@ Object.assign(A,{
  ljItem:v=>ljItemSheet(v),
  ljQty:v=>{const [i,d]=v.split('|').map(Number),x=S.cart[i];if(!x)return;x.q+=d;if(x.q<=0)S.cart.splice(i,1);softRender();},
  ljPay:v=>{S.lj.pay=v;softRender();},
- ljCheckout:()=>{if(!S.cart.length)return;S.lj.pay==='pix'?ljPixSheet():ljCardSheet();},
+ ljCheckout:()=>{if(!S.cart.length)return;S.lj.pay==='pix'?ljPixOrder():ljCardSheet();},
  ljDone:()=>{S.hist=S.hist.filter(h=>!['lojaCart','lojaOk'].includes(h));S.screen='loja';render('back');},
  ljGoOrders:()=>{S.hist=S.hist.filter(h=>!['lojaCart','lojaOk'].includes(h));go('lojaOrders');},
- ljOrder:v=>{const o=S.orders.find(x=>x.id===v);sheet(`<div class="stack g5"><div class="row between" style="align-items:center"><h3 class="t2">Pedido #${o.id}</h3>${ljSt(o)}</div>${o.code&&o.st!=='retirado'?`<div class="lj-code"><span class="eb2">Código de retirada</span><b>${o.code}</b></div>`:''}<div class="kv">${o.items.map(x=>{const it=ljIt(x.id);return `<div class="kr"><span>${x.q}× ${esc(it.n)}${x.size?' · '+x.size:''}</span><span>${ljR(it.price*x.q)}</span></div>`;}).join('')}<div class="kr"><span>Pagamento</span><span>${o.pay}</span></div><div class="kr"><span style="color:var(--ink);font-weight:600">Total</span><span>${ljR(o.total)}</span></div></div><p class="foot" style="margin:0">Retirada na loja da igreja, domingos das 9h às 13h.</p><button class="btn secondary block" data-a="closeSheet">Fechar</button></div>`);}});
+ ljOrder:v=>{const o=S.orders.find(x=>x.id===v);sheet(`<div class="stack g5"><div class="row between" style="align-items:center"><h3 class="t2">Pedido #${o.id}</h3>${ljSt(o)}</div>${o.st==='aguardando'?`<p class="callout" style="margin:0">Falta pagar o Pix. O código de retirada aparece quando o pagamento cair.</p>`:o.code&&o.st!=='retirado'&&o.st!=='cancelado'?`<div class="lj-code"><span class="eb2">Código de retirada</span><b>${o.code}</b></div>`:''}<div class="kv">${o.items.map(x=>{const it=ljIt(x.id);return `<div class="kr"><span>${x.q}× ${esc(it.n)}${x.size?' · '+x.size:''}</span><span>${ljR(it.price*x.q)}</span></div>`;}).join('')}<div class="kr"><span>Pagamento</span><span>${o.pay}</span></div><div class="kr"><span style="color:var(--ink);font-weight:600">Total</span><span>${ljR(o.total)}</span></div></div><p class="foot" style="margin:0">Retirada na loja da igreja, domingos das 9h às 13h.</p>${o.st==='aguardando'?`<button class="btn primary block" data-a="ljPixAgain" data-v="${o.id}">Pagar com Pix</button><button class="btn secondary block" data-a="ljCancelOrder" data-v="${o.id}">Cancelar pedido</button>`:''}<button class="btn secondary block" data-a="closeSheet">Fechar</button></div>`);},
+ ljPixAgain:async v=>{await closeSheet();ljPixSheet(v);},
+ ljCancelOrder:async v=>{await closeSheet();ljCancelOrder(v);}});
 document.addEventListener('input',e=>{if(e.target.id!=='ljQ')return;S.lj.q=e.target.value;const pos=e.target.selectionStart;softRender();const i=document.getElementById('ljQ');if(i){i.focus();i.setSelectionRange(pos,pos);}});
 {const oh=V.home;V.home=()=>{const r=oh();const card=`<button class="cta lj-home gr-mar" data-a="loja"><span class="lj-hi">${ic('bag',22,1.9)}</span><div><h3>Loja da igreja</h3><p>Livros, camisetas e acessórios. Pague pelo app e retire no domingo.</p></div><span class="btn onmedia md">Ver loja${ljCount()?' · '+ljCount():''}</span></button>`;
  const k=r.html.indexOf('<div class="card row g3" style="padding:16px;border-radius:var(--r-md)"><span class="iconbox" style="'+tone('salvia')+'">');
  if(k>0)r.html=r.html.slice(0,k)+card+r.html.slice(k);return r;};}
 SUBS.push('loja','lojaCart','lojaOk','lojaOrders');RAIL.push(['loja','Início › Loja'],['lojaCart','Início › Loja › Sacola']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
+
+/* ================= Aniversariantes dos meus contextos (ministério, time, casa e equipe do Kids): só dia e mês, sem ano; nunca discipulado, acompanhamento nem criança ================= */
+const BD_PPL=[['Camila Souza','Louvor · Vocal',-1],['João Teixeira','Louvor · Teclado',0],['Marina Alves','Casa Vila Nova',2],['Rafael Costa','Recepção · Equipe de domingo',4],['Beatriz Lima','Kids · Equipe de segunda',6]];
+const bdDate=n=>{const d=new Date(TODAY.y,TODAY.m-1,TODAY.d+n,12);return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');};
+const bdWhen=n=>n===-1?'Ontem':n===0?'Hoje':n===1?'Amanhã':'Em '+n+' dias · '+bdDate(n);
+const bdIni=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('');
+const bdRow=p=>{const sent=S.bdSent&&S.bdSent[p[0]];return `<div class="card row g3" style="padding:14px 16px;border-radius:var(--r-md);align-items:center"><span class="iconbox" style="${tone('ceu')}">${bdIni(p[0])}</span><span class="grow stack" style="gap:3px;min-width:0"><b>${esc(p[0])}</b><span class="foot" style="margin:0">${esc(p[1])} · ${bdWhen(p[2])}</span></span>${p[2]>0?'':`<button class="btn ${sent?'ghost':'primary'} sm" data-a="bdGreet" data-v="${esc(p[0])}" ${sent?'disabled':''}>${sent?'Felicitado':'Felicitar'}</button>`}</div>`;};
+V.aniversarios=()=>sub('Aniversariantes','De quem serve com você: ministérios, times, casa e equipes do Kids. Só aparece o dia e o mês.',`<section class="stack g3">${BD_PPL.map(bdRow).join('')}</section><p class="foot" style="margin:0">Felicitar vale no dia do aniversário e no dia seguinte, e manda uma notificação à pessoa, uma vez por ano. Discipulado e acompanhamento não entram aqui.</p>`);
+Object.assign(A,{bdGreet:v=>{S.bdSent=S.bdSent||{};if(S.bdSent[v])return;S.bdSent[v]=1;softRender();toast('success','Felicitação enviada',v.split(' ')[0]+' recebe uma notificação.');}});
+{const oh=V.home;V.home=()=>{const r=oh();if(S.role==='visitante')return r;const hoje=BD_PPL.filter(p=>p[2]===0)[0],n7=BD_PPL.filter(p=>p[2]>=0).length,card=`<button class="card row g3" data-a="sub" data-v="aniversarios" style="padding:16px;border-radius:var(--r-md);text-align:left;width:100%;align-items:center"><span class="iconbox" style="${tone('menta')}">${ic('heart',20,2)}</span><span class="grow stack" style="gap:3px"><b>Aniversariantes</b><span class="foot" style="margin:0">${n7} nos seus times esta semana${hoje?' · '+esc(hoje[0].split(' ')[0])+' é hoje':''}</span></span><span aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
+ const k=r.html.indexOf('<div class="card row g3" style="padding:16px;border-radius:var(--r-md)"><span class="iconbox" style="'+tone('salvia')+'">');
+ if(k>0)r.html=r.html.slice(0,k)+card+r.html.slice(k);return r;};}
+SUBS.push('aniversarios');RAIL.push(['aniversarios','Início › Aniversariantes']);$('#railNav').innerHTML=RAIL.map(r=>`<button type="button" data-s="${r[0]}">${r[1]}</button>`).join('');
 
 /* ================= Inscrições: ingresso, compras adicionais e um QR por código ================= */
 {const O=S.insc.open,byId=id=>O.find(e=>e.id===id);
@@ -1778,7 +1800,7 @@ function rgCodes(m){
  const ps=tk.per&&tk.per.length?e.periods.filter(p=>tk.per.includes(p)):e.periods;
  const acc=e.checkin==='inteiro'?[{k:'geral',n:'Entrada geral',tag:'Acesso',code:`ALVA-${num}-ACESSO-GERAL`}]:e.checkin==='periodo'?ps.map(p=>({k:'p:'+p,n:'Entrada · '+p,tag:'Acesso',code:`ALVA-${num}-${rgSlug(p)}`})):[];
  const inc=tk.incl.map(id=>rgItOf(e,id)).filter(Boolean).map(i=>({k:'inc:'+i.id,n:rgLbl(i),tag:'Incluso',code:`ALVA-${num}-${rgSlug(rgLbl(i))}-INC`}));
- const buy=m.buy.map(id=>rgItOf(e,id)).filter(Boolean).map(i=>({k:'i:'+i.id,n:rgLbl(i),tag:'Compra',code:`ALVA-${num}-${rgSlug(rgLbl(i))}`}));
+ const seen={},buy=m.buy.map(id=>rgItOf(e,id)).filter(Boolean).map(i=>{const n=seen[i.id]=(seen[i.id]||0)+1;return {k:'i:'+i.id+(n>1?'#'+n:''),n:rgLbl(i),tag:'Compra',code:`ALVA-${num}-${rgSlug(rgLbl(i))}${n>1?'-'+n:''}`};});
  return e.checkin==='off'?[]:[...acc,...inc,...buy];
 }
 const rgSt=m=>m.st==='cancelada'?ST2('mute','Cancelada'):m.st==='ok'?ST2('ok','Confirmada'):ST2('warn','Aguardando pagamento');
@@ -1789,10 +1811,14 @@ const rgPayTxt=m=>m.st==='cancelada'?(m.refund==='solicitado'?'Reembolso solicit
 /* cálculo da inscrição em andamento */
 function vDiscM(v,price){return v.type==='pct'?Math.min(price,Math.round(price*v.disc)/100):Math.min(price,v.disc);}
 function rgCalc(){
- const g=S.rg,e=rgEv(g.ev),t=rgTkOf(e,g.tk),vc=g.vc?(e.vouchers||[]).find(v=>v.code===g.vc):null,disc=vc?vDiscM(vc,t.price):0;
- const adds=g.buy.map(id=>rgItOf(e,id)).filter(i=>i&&!t.incl.includes(i.id)),add=adds.reduce((a,i)=>a+i.price,0);
- return {e,t,vc,disc,adds,add,total:t.price-disc+add};
+ const g=S.rg,e=rgEv(g.ev),units=[];e.tickets.forEach(t=>{for(let k=0;k<(g.q[t.id]||0);k++)units.push(t);});
+ const t=units[0]||rgTkOf(e,g.tk),vc=g.vc?(e.vouchers||[]).find(v=>v.code===g.vc):null,tkTot=units.reduce((a,x)=>a+x.price,0),disc=vc?vDiscM(vc,tkTot):0;
+ const adds=[];e.items.forEach(i=>{for(let k=0;k<(g.bq[i.id]||0);k++)adds.push(i);});
+ const add=adds.reduce((a,i)=>a+i.price,0);
+ return {e,t,units,nT:units.length,tkTot,vc,disc,adds,add,total:tkTot-disc+add};
 }
+/* quantidade de ingresso e de compra adicional, como num carrinho comum */
+const rgStep=(k,id,q,mx,dis)=>`<div class="lj-step sm"><button type="button" data-a="rgQ" data-v="${k}|${id}|-1" ${q<=0||dis?'disabled':''} aria-label="Menos">${ic('minus',14,2.25)}</button><b>${q}</b><button type="button" data-a="rgQ" data-v="${k}|${id}|1" ${q>=mx||dis?'disabled':''} aria-label="Mais">${ic('plus',14,2.25)}</button></div>`;
 const rgFull=t=>t.left===0;
 
 V.inscricoes=()=>{const I_=S.insc;I_.mine.forEach(rgNorm);const mineIds=I_.mine.filter(rgActive).map(m=>m.id);
@@ -1803,14 +1829,14 @@ V.inscricoes=()=>{const I_=S.insc;I_.mine.forEach(rgNorm);const mineIds=I_.mine.
   <section class="stack g3"><p class="eb2">Minhas inscrições</p>${I_.mine.length?`<div class="list">${I_.mine.map(m=>{const e=rgEv(m.id),n=rgTks(m).length;return `<button class="item" data-a="rgOpen" data-v="${m.rid}"><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${e.t}</span><span class="it-sub">${e.when}</span><span class="it-sub">${n} ${n===1?'ingresso':'ingressos'}${m.buy.length?' · +'+m.buy.length+(m.buy.length===1?' compra':' compras'):''}${m.total?' · '+brl(m.total):''}</span></span>${rgSt(m)}${ic('chevR',16,2.25)}</button>`;}).join('')}</div>`:`<p class="callout" style="margin:0">Você ainda não tem inscrição em nenhum evento.</p>`}</section>`);};
 
 /* escolha de ingresso, compras e pagamento */
-V.inscCheckout=()=>{const c=rgCalc(),g=S.rg,{e,t}=c,tks=e.tickets;
+V.inscCheckout=()=>{const c=rgCalc(),g=S.rg,{e}=c,tks=e.tickets;
  return {sb:'var(--ink)',tabs:null,amb:'home',html:`${subHead(e.t,e.when)}<div class="pad stack g6" style="padding-top:8px">
-  ${tks.length>1?`<section class="stack g3"><p class="eb2">Ingresso</p><div class="lj-pay rg-pay" role="radiogroup">${tks.map(x=>`<button type="button" role="radio" aria-checked="${x.id===g.tk}" data-a="rgTk" data-v="${x.id}" ${rgFull(x)?'disabled':''}><span class="grow stack" style="gap:2px;align-items:flex-start"><b>${esc(x.n)}</b><small>${rgFull(x)?'Esgotado':esc(x.desc)}</small>${x.incl.length?`<small class="rg-inc">Inclui ${x.incl.map(id=>esc(rgLbl(rgItOf(e,id)))).join(', ')}</small>`:''}${x.left&&x.left<=40?`<small class="rg-inc">Restam ${x.left}</small>`:''}</span><b class="rg-pr">${x.price?brl(x.price):'Grátis'}</b><i class="lj-rd"></i></button>`).join('')}</div></section>`:''}
-  ${e.items.length?`<section class="stack g3"><p class="eb2">Compras adicionais <span class="rg-opt">opcional</span></p><div class="lj-pay rg-pay">${e.items.map(i=>{const inc=t.incl.includes(i.id),on=inc||g.buy.includes(i.id);return `<button type="button" role="checkbox" aria-checked="${on}" data-a="rgAdd" data-v="${i.id}" ${inc?'disabled':''}><span class="grow stack" style="gap:1px;align-items:flex-start"><b>${esc(i.n)}</b><small>${inc?'Já incluso no seu ingresso':esc(i.p||'Evento inteiro')}</small></span><b class="rg-pr">${inc?'Incluso':brl(i.price)}</b><i class="rg-ck">${ic('check',13,3)}</i></button>`;}).join('')}</div></section>`:''}
-  ${t.price&&(e.vouchers||[]).length?`<section class="stack g3"><p class="eb2">Voucher <span class="rg-opt">opcional</span></p>${c.vc?`<div class="card row g3 rg-vcok" style="padding:12px 16px;border-radius:var(--r-md);align-items:center"><span class="iconbox" style="${tone('menta')}">${ic('ticket',18)}</span><span class="grow stack" style="gap:1px"><b class="mask">${esc(c.vc.code)}</b><span class="it-sub">− ${brl(c.disc)} no ingresso</span></span><button type="button" class="tlink" data-a="rgVcClear">Remover</button></div>`:`<div class="rg-vcf"><input id="rgVc" placeholder="Código do voucher" value="${esc(g.vcTxt||'')}" autocomplete="off" autocapitalize="characters"><button type="button" class="btn secondary md" data-a="rgVcApply">Aplicar</button></div>`}</section>`:''}
+  <section class="stack g3"><p class="eb2">Ingressos</p><div class="rg-qs">${tks.map(x=>{const q=g.q[x.id]||0,mx=x.left?Math.min(x.left,10):10;return `<div class="rg-q ${q?'on':''} ${rgFull(x)?'off':''}"><span class="grow stack" style="gap:2px;align-items:flex-start"><b>${esc(x.n)}</b><small>${rgFull(x)?'Esgotado':esc(x.desc)}</small>${x.incl.length?`<small class="rg-inc">Inclui ${x.incl.map(id=>esc(rgLbl(rgItOf(e,id)))).join(', ')}</small>`:''}${x.left&&x.left<=40?`<small class="rg-inc">Restam ${x.left}</small>`:''}</span><b class="rg-pr">${x.price?brl(x.price):'Grátis'}</b>${rgStep('t',x.id,q,mx,rgFull(x))}</div>`;}).join('')}</div></section>
+  ${e.items.length?`<section class="stack g3"><p class="eb2">Compras adicionais <span class="rg-opt">opcional</span></p><div class="rg-qs">${e.items.map(i=>{const q=g.bq[i.id]||0,inc=c.units.some(u=>u.incl.includes(i.id));return `<div class="rg-q ${q?'on':''}"><span class="grow stack" style="gap:1px;align-items:flex-start"><b>${esc(i.n)}</b><small>${esc(i.p||'Evento inteiro')}</small>${inc?`<small class="rg-inc">Já vem em um dos seus ingressos; compre mais se quiser</small>`:''}</span><b class="rg-pr">${brl(i.price)}</b>${rgStep('i',i.id,q,10,false)}</div>`;}).join('')}</div></section>`:''}
+  ${c.tkTot&&(e.vouchers||[]).length?`<section class="stack g3"><p class="eb2">Voucher <span class="rg-opt">opcional</span></p>${c.vc?`<div class="card row g3 rg-vcok" style="padding:12px 16px;border-radius:var(--r-md);align-items:center"><span class="iconbox" style="${tone('menta')}">${ic('ticket',18)}</span><span class="grow stack" style="gap:1px"><b class="mask">${esc(c.vc.code)}</b><span class="it-sub">− ${brl(c.disc)} na compra</span></span><button type="button" class="tlink" data-a="rgVcClear">Remover</button></div>`:`<div class="rg-vcf"><input id="rgVc" placeholder="Código do voucher" value="${esc(g.vcTxt||'')}" autocomplete="off" autocapitalize="characters"><button type="button" class="btn secondary md" data-a="rgVcApply">Aplicar</button></div>`}</section>`:''}
   ${c.total?`<section class="stack g3"><p class="eb2">Pagamento</p><div class="lj-pay" role="radiogroup">${[['pix','Pix','qr','Aprovação na hora'],['card','Cartão de crédito','card','Visa final 4242']].map(([k,l,i,sub])=>`<button type="button" role="radio" aria-checked="${g.pay===k}" data-a="rgPayM" data-v="${k}">${ic(i,20,1.9)}<span class="grow stack" style="gap:1px;align-items:flex-start"><b>${l}</b><small>${sub}</small></span><i class="lj-rd"></i></button>`).join('')}</div></section>`:''}
-  <div class="kv"><div class="kr"><span>${esc(t.n)}</span><span>${t.price?brl(t.price):'Grátis'}</span></div>${c.disc?`<div class="kr"><span>Voucher ${esc(c.vc.code)}</span><span>− ${brl(c.disc)}</span></div>`:''}${c.add?`<div class="kr"><span>${c.adds.length} ${c.adds.length===1?'compra adicional':'compras adicionais'}</span><span>${brl(c.add)}</span></div>`:''}<div class="kr"><span style="color:var(--ink);font-weight:600">Total</span><span>${c.total?brl(c.total):'Grátis'}</span></div></div>
-  <button class="btn primary block" data-a="rgGo">${c.total?(g.pay==='pix'?'Pagar com Pix':'Pagar com cartão')+' · '+brl(c.total):'Confirmar inscrição'}</button>
+  <div class="kv">${tks.filter(x=>g.q[x.id]).map(x=>`<div class="kr"><span>${g.q[x.id]} × ${esc(x.n)}</span><span>${x.price?brl(x.price*g.q[x.id]):'Grátis'}</span></div>`).join('')}${c.disc?`<div class="kr"><span>Voucher ${esc(c.vc.code)}</span><span>− ${brl(c.disc)}</span></div>`:''}${c.add?`<div class="kr"><span>${c.adds.length} ${c.adds.length===1?'compra adicional':'compras adicionais'}</span><span>${brl(c.add)}</span></div>`:''}<div class="kr"><span style="color:var(--ink);font-weight:600">Total</span><span>${c.total?brl(c.total):'Grátis'}</span></div></div>
+  <button class="btn primary block" data-a="rgGo" ${c.nT?'':'disabled'}>${!c.nT?'Escolha um ingresso':c.total?(g.pay==='pix'?'Pagar com Pix':'Pagar com cartão')+' · '+brl(c.total):'Confirmar inscrição'}</button>
   <p class="foot" style="margin:0">${c.total?'Sua vaga fica reservada por 30 minutos. Os códigos são liberados quando o pagamento confirmar.':'Seus códigos aparecem em Meus ingressos.'}</p></div>`};};
 
 /* um ingresso: os códigos (QR) dele; a compra inteira fica na tela da inscrição */
@@ -1842,17 +1868,16 @@ function rgPaySheet(total,kind,onPaid){
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Pagar com Pix</h3><p class="callout">${brl(total)} · a inscrição confirma assim que o pagamento cair.</p></div><div class="lj-qr" aria-label="QR code do Pix (demonstração)">${cells.map(c=>`<i${c?' class="on"':''}></i>`).join('')}</div><button type="button" class="btn secondary block" data-a="copy" data-v="00020126alva-pix-demo">Copiar código Pix</button><div class="stack g3"><button type="button" class="btn primary block" id="rgPaid">Já paguei</button><button type="button" class="tlink" data-a="closeSheet">Voltar</button></div></div>`,sh=>{$('#rgPaid',sh).addEventListener('click',async e=>{await busy(e.currentTarget,900,null,'Reservado');await closeSheet();onPaid();});});
 }
 function rgPlace(){
- const c=rgCalc(),g=S.rg,e=c.e,rec={id:e.id,rid:'r'+Date.now(),st:c.total?'wait':'ok',method:c.total?(g.pay==='pix'?'Pix':'Cartão'):'-',tk:g.tk,buy:c.adds.map(i=>i.id),vch:c.vc?c.vc.code:'',total:c.total,ck:{}};
- S.insc.mine.push(rec);e.left=Math.max(0,e.left-1);if(c.t.left)c.t.left--;S.tkReg=rec.rid;S.screen='compra';$('#overlay').innerHTML='';render();
+ const c=rgCalc(),g=S.rg,e=c.e,u=c.units,rec={id:e.id,rid:'r'+Date.now(),st:c.total?'wait':'ok',method:c.total?(g.pay==='pix'?'Pix':'Cartão'):'-',tk:u[0].id,buy:c.adds.map(i=>i.id),vch:c.vc?c.vc.code:'',total:c.total,ck:{},more:u.slice(1).map(t=>({tk:t.id,who:'A definir',ck:{}}))};
+ S.insc.mine.push(rec);e.left=Math.max(0,e.left-u.length);u.forEach(t=>{if(t.left)t.left=Math.max(0,t.left-1);});S.tkReg=rec.rid;S.screen='compra';$('#overlay').innerHTML='';render();
  if(c.total){toast('info','Aguardando pagamento','Assim que o '+rec.method+' cair, seus códigos são liberados.');setTimeout(()=>{rec.st='ok';if(['ingresso','compra','inscricoes'].includes(S.screen))softRender();toast('success','Pagamento confirmado','Inscrição em '+e.t+' garantida.');},3500);}
  else toast('success','Inscrição confirmada','Seus ingressos estão em Mais › Inscrições.');
 }
 Object.assign(A,{
  inscrever:async(v,el)=>{const e=rgEv(v),t=e.tickets[0];
   if(e.tickets.length===1&&!t.price&&!e.items.length){await busy(el,700,null,'Inscrito');const rec={id:v,rid:'r'+v,st:'ok',method:'-',tk:t.id,buy:[],vch:'',total:0,ck:{}};S.insc.mine.push(rec);e.left=Math.max(0,e.left-1);S.tkReg=rec.rid;softRender();toast('success','Inscrição confirmada','Seus ingressos estão em Mais › Inscrições.');return;}
-  S.rg={ev:v,tk:(e.tickets.find(x=>!rgFull(x))||t).id,buy:[],vc:'',vcTxt:'',pay:'pix'};go('inscCheckout');},
- rgTk:v=>{const g=S.rg,t=rgTkOf(rgEv(g.ev),v);g.tk=v;g.buy=g.buy.filter(id=>!t.incl.includes(id));softRender();},
- rgAdd:v=>{const g=S.rg;g.buy=g.buy.includes(v)?g.buy.filter(x=>x!==v):[...g.buy,v];softRender();},
+  const t0=(e.tickets.find(x=>!rgFull(x))||t).id;S.rg={ev:v,tk:t0,q:{[t0]:1},bq:{},vc:'',vcTxt:'',pay:'pix'};go('inscCheckout');},
+ rgQ:v=>{const [k,id,d]=v.split('|'),g=S.rg,m=k==='t'?g.q:g.bq;m[id]=Math.max(0,(m[id]||0)+(+d));if(!m[id])delete m[id];softRender();},
  rgVcApply:()=>{const g=S.rg,e=rgEv(g.ev),code=(($('#rgVc')||{}).value||'').trim().toUpperCase();if(!code){toast('error','Digite o código','Informe o voucher que você recebeu.');return;}
   if(!(e.vouchers||[]).some(v=>v.code===code)){g.vcTxt=code;toast('error','Voucher não encontrado','Confira o código e tente de novo.');return;}
   g.vc=code;g.vcTxt='';softRender();toast('success','Voucher aplicado','O desconto já está no total.');},

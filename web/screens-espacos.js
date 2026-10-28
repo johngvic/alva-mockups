@@ -12,14 +12,19 @@ const ESPS=[
  {id:'s1',n:'Auditório Principal',cap:300,loc:'Térreo',desc:'',act:true,rec:['som','proj','ar','wifi'],tone:'ceu',icon:'church',fixed:[[0,'09:00','12:30','Culto de Celebração'],[0,'18:00','20:30','Culto da noite'],[3,'19:30','21:30','Culto de quarta']]},
  {id:'s2',n:'Sala de Reuniões A',cap:12,loc:'1º andar',desc:'',act:true,rec:['tv','ar','wifi'],tone:'menta',icon:'users',fixed:[]},
  {id:'s3',n:'Sala de Reuniões B',cap:8,loc:'1º andar',desc:'Ideal para aconselhamento.',act:true,rec:['ar'],tone:'salvia',icon:'message',fixed:[]},
- {id:'s4',n:'Sala Kids',cap:25,loc:'Anexo',desc:'Já usada pelo Zelo Kids nos cultos — fora do horário de culto fica livre pra reserva.',act:true,rec:['tv','ar'],tone:'damasco',icon:'baby',fixed:[[0,'09:00','12:30','Zelo Kids'],[0,'18:00','20:30','Zelo Kids']]},
+ {id:'s4',n:'Sala Kids',cap:25,loc:'Anexo',desc:'Sala do Kids A. Reservada pelo Culto Kids; fora desse horário fica livre pra reserva.',act:true,rec:['tv','ar'],tone:'damasco',icon:'baby',fixed:[]},
  {id:'s5',n:'Espaço Multiuso',cap:60,loc:'2º andar',desc:'',act:true,rec:['som'],tone:'rosado',icon:'layers',fixed:[]},
+ {id:'s7',n:'Sala Berçário',cap:15,loc:'Anexo',desc:'',act:true,rec:['ar'],tone:'damasco',icon:'baby',fixed:[]},
+ {id:'s8',n:'Sala Maternal',cap:20,loc:'Anexo',desc:'',act:true,rec:['ar'],tone:'damasco',icon:'baby',fixed:[]},
+ {id:'s9',n:'Sala Jardim',cap:22,loc:'Anexo',desc:'',act:true,rec:['ar'],tone:'damasco',icon:'baby',fixed:[]},
  {id:'s6',n:'Sala de Oração',cap:15,loc:'Térreo',desc:'Em reforma até novembro.',act:false,rec:[],tone:'lima',icon:'hands',fixed:[]},
 ];
 /* uso fixo: regras com vigência e recorrência (dia fixo, semanal, quinzenal, mensal, anual) */
 let _uid2=0;const UF=(l,f,t,rec,o={})=>({id:'u'+(++_uid2),l,f,t,rec,days:o.days||[],mode:o.mode||'semana',date:o.date||'',from:o.from||'2026-01-01',to:o.to||''});
 ESPS.forEach(s=>{s.uso=s.fixed.map(x=>UF(x[3],x[1],x[2],'semanal',{days:[x[0]]}));delete s.fixed;s.custom=[];s.hist=[{t:'Sala criada',d:'2026-01-10',by:'Administração'}];});
 ESPS[0].custom=[{k:'c1',n:'Teclado fixo'}];ESPS[0].rec.push('c1');
+/* o Culto Kids (evento do ministério Kids) reserva as salas do Kids, todo domingo */
+['s7','s8','s9','s4'].forEach(id=>{const sp=ESPS.find(x=>x.id===id);[['srK1','10:00','12:00','Culto Kids · manhã'],['srK2','19:00','21:00','Culto Kids · noite']].forEach(([ser,f,t,l])=>{const e=EVTS.find(x=>x.ser===ser);sp.uso.push(Object.assign(UF(l,f,t,'semanal',{days:[0],from:'2026-10-04'}),{ev:e.id}));});});
 ESPS[1].uso.push(UF('Conselho pastoral','08:00','09:30','quinzenal',{days:[1],from:'2026-09-07'}));
 ESPS[4].uso.push(UF('Reunião de diáconos','19:30','21:00','mensal',{mode:'semana',date:'2026-10-06',from:'2026-01-06'}));
 ESPS[4].custom=[{k:'c2',n:'Bebedouro'},{k:'c3',n:'Cadeiras extras'},{k:'c4',n:'Instrumentos'}];ESPS[4].rec.push('c2','c3','c4');
@@ -48,13 +53,14 @@ const slById=id=>ESPS.find(s=>s.id===id);
 const DOWN=['domingo','segunda','terça','quarta','quinta','sexta','sábado'],DOWS=['dom','seg','ter','qua','qui','sex','sáb'];
 const REC_L=[['semanal','Semanal'],['quinzenal','Quinzenal'],['mensal','Mensal'],['anual','Anual']];
 const nthOf=d=>Math.ceil(+d.slice(8)/7),ORD=n=>n>=5?'última':n+'ª';
+const dim=d=>new Date(+d.slice(0,4),+d.slice(5,7),0).getDate(),dayOn=(d,a)=>+d.slice(8)===Math.min(+a.slice(8),dim(d)),nthOn=(d,a)=>{if(dow(d)!==dow(a))return false;const n=nthOf(a);return n>=5?+d.slice(8)+7>dim(d):nthOf(d)===n;};
 const dDiff=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5);
 function ruleOn(u,d){if(u.from&&d<u.from)return false;if(u.to&&d>u.to)return false;const a=u.date||u.from,w=dow(d);
  if(u.rec==='unico')return d===u.date;
  if(u.rec==='semanal')return u.days.includes(w);
  if(u.rec==='quinzenal'){if(!u.days.includes(w))return false;const s0=addD(u.from,-dow(u.from));return Math.floor(dDiff(s0,d)/7)%2===0;}
- if(u.rec==='mensal')return u.mode==='dia'?+d.slice(8)===+a.slice(8):w===dow(a)&&nthOf(d)===nthOf(a);
- if(u.rec==='anual'){if(d.slice(5,7)!==a.slice(5,7))return false;return u.mode==='dia'?d.slice(8)===a.slice(8):w===dow(a)&&nthOf(d)===nthOf(a);}
+ if(u.rec==='mensal')return u.mode==='dia'?dayOn(d,a):nthOn(d,a);
+ if(u.rec==='anual'){if(d.slice(5,7)!==a.slice(5,7))return false;return u.mode==='dia'?dayOn(d,a):nthOn(d,a);}
  return false;}
 const dayNm=w=>(w===0||w===6?'todo ':'toda ')+DOWN[w];
 const plural=w=>DOWN[w].replace(/(a|o)$/,'$1s').replace('terça','terças').replace('sábado','sábados');

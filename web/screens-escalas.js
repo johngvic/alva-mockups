@@ -2,6 +2,7 @@
 const EST={criacao:['Em criação','var(--ink-muted)','var(--surface-2)'],aguardando:['Aguardando aceite','var(--st-sol)','var(--st-sol-bg)'],aprovada:['Aprovada','var(--st-int)','var(--st-int-bg)']};
 const MST={rascunho:['Não enviado','var(--ink-muted)','var(--surface)'],aguardando:['Pendente','var(--st-sol)','var(--st-sol-bg)'],confirmado:['Aceitou','var(--st-int)','var(--st-int-bg)'],recusado:['Recusou','var(--st-rec)','var(--st-rec-bg)']};
 let _bid=0;
+const evK=(d,time)=>(EVTS.find(e=>e.kind==='culto'&&e.min==='Kids'&&e.d===d&&e.time===time)||{}).id;
 const BK=(label,members=[],content=[],team='')=>({id:'bk'+(++_bid),label,team,members:members.map(m=>({n:m[0],role:m[1],st:m[2]||'confirmado',over:m[3]||undefined})),content:content.map(c=>({t:c[0],d:c[1]||'',k:c[2]||(/^Tom /.test(c[1]||'')?'musica':'material')}))});
 const DT=(ev,blocks)=>({id:'dt'+(++_bid),ev,blocks});
 /* ---------- presença no dia (o check-in da pessoa já é Presente) ---------- */
@@ -13,13 +14,17 @@ function ckState(e){if(!e||e.d!==CKDAY)return null;const w=ckWin(e);return CKNOW
 const CKPR={pend:['Sem check-in','var(--ink-muted)','var(--surface)'],ok:['Presente','var(--st-int)','var(--st-int-bg)'],falta:['Ausente','var(--st-rec)','var(--st-rec-bg)']};
 const ckOf=m=>m.pr==='ok'?'ok':m.pr==='falta'?'falta':'pend';
 const ESCALAS=[
- {id:'es0',n:'Escala Louvor — Ensaios de setembro',min:'Louvor',desc:'Ensaio geral antes dos cultos de outubro.',st:'aprovada',dates:[
-  DT('ev11',[BK('Ensaio',[['Daniela Rocha','Vocal'],['Elisa Moura','Vocal'],['Diego Faria','Bateria'],['Igor Santana','Baixo'],['Clara Nunes','Teclado'],['Gustavo Mendes','Guitarra','recusado']],[['Grande é o Senhor','Tom G']],'Domingo manhã')])]},
  {id:'es1',n:'Escala Louvor — Outubro',min:'Louvor',desc:'Cultos de celebração de outubro.',st:'aprovada',dates:[
   DT('ev2',[BK('Culto inteiro',[['Ana Clara Lima','Vocal'],['Daniela Rocha','Vocal'],['Bruno Reis','Violão'],['Helena Duarte','Teclado']],[['Grande é o Senhor','Tom G'],['Te louvarei','Tom D']],'Domingo manhã')]),
   DT('ev3',[BK('Culto inteiro',[['Ana Clara Lima','Vocal'],['Elisa Moura','Vocal'],['Bruno Reis','Violão']],[['Aclame ao Senhor','Tom A']],'Domingo manhã')])]},
  {id:'es2',n:'Escala Kids — Outubro',min:'Kids',desc:'',st:'aguardando',dates:[
-  DT('ev10',[BK('Manhã — Berçário',[['Mônica Souza','Monitora']],[['Apostila — Deus cuida de mim','Cap. 3']]),BK('Manhã — Maternal',[['Cláudia Ferraz','Monitora']],[['Apostila — Deus cuida de mim','Cap. 3']]),BK('Tarde — Berçário',[['Renan Ferreira','Monitor','aguardando']],[['Apostila — Deus cuida de mim','Cap. 3']]),BK('Tarde — Maternal',[],[['Apostila — Deus cuida de mim','Cap. 3']])])]},
+  DT(evK('2026-10-04','10h'),[BK('Berçário',[['Mônica Souza','Monitora'],['Patrícia Lima','Auxiliar','aguardando']],[['Apostila — Deus cuida de mim','Cap. 3']],'Berçário — Domingo manhã'),BK('Maternal',[['Cláudia Ferraz','Monitora']],[],'Maternal — Domingo manhã'),BK('Kids A',[['Henrique Costa','Monitor'],['Giovanna Martins','Auxiliar']],[],'Kids A — Domingo manhã')]),
+  DT(evK('2026-10-04','19h'),[BK('Berçário',[['Renan Ferreira','Monitor','aguardando']],[],'Berçário — Domingo manhã'),BK('Maternal',[],[],'Maternal — Domingo manhã')]),
+  DT(evK('2026-10-11','10h'),[BK('Berçário',[['Mônica Souza','Monitora','aguardando']],[['Vídeo — Jesus ama as crianças','']],'Berçário — Domingo manhã'),BK('Maternal',[['Cláudia Ferraz','Monitora','aguardando']],[],'Maternal — Domingo manhã')])]},
+ {id:'es2b',n:'Escala Kids — Outubro (2ª quinzena)',min:'Kids',desc:'',st:'criacao',dates:[
+  DT(evK('2026-10-18','10h'),[BK('Berçário',[['Mônica Souza','Monitora','rascunho']],[],'Berçário — Domingo manhã'),BK('Maternal',[['Cláudia Ferraz','Monitora','rascunho']],[],'Maternal — Domingo manhã'),BK('Kids A',[['Henrique Costa','Monitor','rascunho']],[],'Kids A — Domingo manhã')]),
+  DT(evK('2026-10-18','19h'),[BK('Berçário',[['Renan Ferreira','Monitor','rascunho']],[],'Berçário — Domingo manhã')]),
+  DT(evK('2026-10-25','10h'),[BK('Berçário',[['Mônica Souza','Monitora','rascunho']],[],'Berçário — Domingo manhã'),BK('Maternal',[['Cláudia Ferraz','Monitora','rascunho']],[],'Maternal — Domingo manhã')])]},
  {id:'es3',n:'Escala Diaconia — Outubro',min:'Diaconia',desc:'',st:'criacao',dates:[DT('ev6',[BK('Evento inteiro',[['Larissa Pires','Ceia','rascunho',true],['Ana Clara Lima','Recepção','rascunho']])])]},
  {id:'es4',n:'Escala Retiro de Jovens',min:'Jovens e Adolescentes',desc:'Equipe de apoio do retiro.',st:'criacao',dates:[DT('ev5',[BK('Sábado',[['Thiago Barros','Coordenação','rascunho']]),BK('Domingo')])]},
  {id:'es5',n:'Escala Louvor — Novembro',min:'Louvor',desc:'',st:'criacao',dates:[]},
@@ -45,11 +50,11 @@ const esIsPast=d=>{const e=eById(d.ev);return !!(e&&past(e));};
 const esPillDone='<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Realizada</span>';
 const attPill=m=>{if(m.st==='recusado')return msPill(m);const k=ckOf(m);return `<span class="stp" style="--c:${CKPR[k][1]};--b:${CKPR[k][2]}"><i></i>${k==='pend'?'Sem registro':CKPR[k][0]}</span>`;};
 const esPill=s=>`<span class="stp" style="--c:${EST[s][1]};--b:${EST[s][2]}"><i></i>${EST[s][0]}</span>`;
-let msPill=(m,clickable,ref)=>`<${clickable?`button data-a="esMst" data-v="${ref}" title="Marcar como aceito"`:'span'} class="stp ${clickable?'clk':''}" style="--c:${MST[m.st][1]};--b:${MST[m.st][2]}"><i></i>${MST[m.st][0]}</${clickable?'button':'span'}>`;
+const msPill=(m,clickable,ref)=>`<${clickable?`button data-a="esMst" data-v="${ref}" title="Marcar como aceito"`:'span'} class="stp ${clickable?'clk':''}" style="--c:${MST[m.st][1]};--b:${MST[m.st][2]}"><i></i>${MST[m.st][0]}</${clickable?'button':'span'}>`;
 const esMembers=x=>x.dates.flatMap(d=>d.blocks.flatMap(b=>b.members));
 const esSorted=x=>x.dates.slice().sort((a,b)=>(eById(a.ev)?.d||'')<(eById(b.ev)?.d||'')?-1:1);
 const dateState=d=>{const e=eById(d.ev);if(e&&past(e))return 'past';const ms=d.blocks.flatMap(b=>b.members);if(!ms.length)return 'empty';if(ms.some(m=>m.st==='recusado')||d.blocks.some(b=>!b.members.length))return 'acao';if(ms.some(m=>m.st!=='confirmado'))return 'wait';return 'ok';};
-function teamsFor(min){if(min==='Kids')return KTEAMS.map(t=>({n:t.n,m:t.m}));const mn=MINIS.find(m=>m.n===min);return (mn?mn.teams:[]).map((t,i)=>t.ppl?{n:t.n,m:t.ppl.slice()}:({n:t.n,m:MEMBERS.filter(x=>x.tit).slice(i*2,i*2+Math.min(3,t.m)).map(x=>x.n)}));}
+function teamsFor(min){const mn=MINIS.find(m=>m.n===min);return (mn?mn.teams:[]).map((t,i)=>t.ppl?{n:t.n,m:t.ppl.slice()}:({n:t.n,m:MEMBERS.filter(x=>x.tit).slice(i*2,i*2+Math.min(3,t.m)).map(x=>x.n)}));}
 
 /* ---------- list ---------- */
 function escList(){
@@ -146,6 +151,7 @@ function esBlock(x,d,b){
    ${b.members.length?`<div class="esms">${b.members.map((m,i)=>`<div class="esm"><span class="av" style="background:var(--tone-${TONES[m.n.length%6]});color:var(--tone-${TONES[m.n.length%6]}-ink)">${initials(m.n)}</span><span class="dkt"><b>${esc(m.n)}</b><span>${esc(m.role)}${m.over&&m.st!=='recusado'?` <em class="lm-x" title="Escalado(a) acima do limite mensal">${ic('alert',10,2.6)}Exceção ao limite</em>`:''}${m.sub?` <em class="es-sub" title="${esc(m.sub.why)}">${ic('swap',10,2.4)}no lugar de ${esc(m.sub.from.split(' ')[0])}</em>`:''}</span></span>${!pd&&m.st!=='recusado'&&['over','full','pause'].includes(lmUse(m.n,ym).st)?lmPill(m.n,ym):''}${pd?attPill(m):msPill(m,x.st==='aguardando'&&m.st==='aguardando',r+'|'+i)}${pd?'':`<button class="ibtn sm" data-a="esSwap" data-v="${r}|${i}" aria-label="Substituir ${esc(m.n)}" title="Substituir">${ic('swap',13)}</button><button class="ibtn sm" data-a="esDelM" data-v="${r}|${i}" aria-label="Remover ${esc(m.n)}" title="Remover">${ic('x',13)}</button>`}</div>`).join('')}</div>`:`<p class="esempty">${ic('alert',13,2)}Ninguém escalado neste bloco.</p>`}
    ${pd?'':`<div class="row2" style="margin-top:8px">`}${pd?'':`${b.team?'':`<button class="btn sec sm" data-a="esTeam" data-v="${r}">${ic('users',13)}Selecionar time</button>`}<button class="btn sec sm" data-a="esAddM" data-v="${r}">${ic('plus',13,2.2)}Pessoa</button>${x.st!=='criacao'?`<button class="btn sec sm" data-a="esNotify" data-v="${r}" ${pend?'':'disabled'}>${ic('bell',13)}Notificar</button>`:''}`}${pd?'':`</div>`}</div>
   <div><p class="fl">Conteúdo <small>repertório, material de apoio…</small></p>
+   ${x.min==='Kids'?kAulaPrevista(d,b):''}
    ${b.content.length?`<div class="escs">${b.content.map((c,i)=>`<div class="escc"><span class="cti ec-k ${c.k||'outro'}" style="width:28px;height:28px;border-radius:8px">${ic(ECT[c.k||'outro'][2],13)}</span><span class="dkt"><b>${esc(c.t)}</b><span>${ECT[c.k||'outro'][0]}${c.d?' · '+esc(c.d):''}</span></span>${pd?'':`<button class="ibtn sm" data-a="esDelC" data-v="${r}|${i}" aria-label="Remover">${ic('x',13)}</button>`}</div>`).join('')}</div>`:'<p class="who" style="margin:0 0 4px">Nada ainda.</p>'}
    ${pd?'':`<div class="row2" style="margin-top:8px"><button class="btn sec sm" data-a="esAddC" data-v="${r}">${ic('plus',13,2.2)}Conteúdo</button><button class="btn sec sm" data-a="esReuse" data-v="${r}">${ic('layers',13)}Reaproveitar de outro bloco</button></div>`}</div></div></div>`;
 }
@@ -391,7 +397,7 @@ function lmMount(){
  const lw=$('#lxw');if(lw)lw.addEventListener('input',()=>{S.lmF.why=lw.value;$('#lxc').textContent=lw.value.length;lw.closest('.fld').classList.remove('bad');});
 }
 const lmErr=(id,msg)=>{const e=$('#'+id);if(!e)return;e.textContent=msg;e.closest('.fld').classList.add('bad');};
-function myLimit(){const c=MYESC.filter(x=>x.d.startsWith(LMYM)).length,lim=lmLim('Rafael Pereira',LMYM);if(lim===Infinity)return '';const st=c>lim?'over':c===lim?'full':c===lim-1?'near':'free';
+function myLimit(){const c=MYESC.filter(x=>!x.off&&x.d.startsWith(LMYM)).length,lim=lmLim('Rafael Pereira',LMYM);if(lim===Infinity)return '';const st=c>lim?'over':c===lim?'full':c===lim-1?'near':'free';
  return `<div class="lm-me ${st}">${lmDots(c,lim)}<span class="dkt"><b>${c} de ${lim} escalas em ${lmMon(LMYM)}</b><span>${st==='full'||st==='over'?'Você chegou no limite do mês. Novos convites só chegam como exceção.':st==='near'?'Falta 1 para o seu limite do mês.':'Limite da igreja para ninguém ficar sobrecarregado.'}</span></span></div>`;}
 
 const LMA={

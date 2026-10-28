@@ -14,12 +14,14 @@ const POOL=['Aline Rocha','Bruna Tavares','Caio Almeida','Davi Monteiro','Érica
 const STEPS_DEF=[['Boas-vindas','Culto de domingo','calendar'],['Café com a liderança','Salão social','coffee'],['Fundamentos da fé','3 encontros','book'],['Batismo','Chácara Alva','sprout'],['Integração','Culto de celebração','check']];
 const IST={pendente:['Pendente','var(--st-sol)','var(--st-sol-bg)'],aceito:['Aceito','var(--st-ace)','var(--st-ace-bg)'],andamento:['Em etapas','var(--ink-muted)','var(--surface-2)'],integrado:['Integrado','var(--st-int)','var(--st-int-bg)']};
 let _iid=0;
+/* a integração é o período de admissão: os pedidos abrem em `date` e fecham em `close` (15 dias por padrão); o dia da integração é um evento da Agenda (g.ev) */
+function igAdd(d,n){const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10);}
 function mkInteg(n,date,time,total,integ,o={}){
  const id='i'+(++_iid),ppl=[];
  const nA=o.aceitos??(total>integ?Math.min(1,total-integ):0),nP=o.pend??(total-integ-nA>0?1:0);
  for(let i=0;i<total;i++){const nm=POOL[(i+_iid*7)%POOL.length];const st=i<integ?'integrado':i<integ+nA?'aceito':i<integ+nA+nP?'pendente':'andamento';
   ppl.push({id:id+'p'+i,n:nm,tone:TONES[(i+_iid)%6],st,step:st==='integrado'?5:st==='andamento'?1+(i%3):st==='aceito'?1:0,ph:`(11) 9${String(8000+i*37).slice(0,4)}-${String(1000+i*91).slice(-4)}`});}
- return {id,n,date,time,limit:o.limit||'',link:o.link||'',resp:o.resp||'',contact:o.contact||'',current:!!o.current,active:!!o.active,ppl,steps:STEPS_DEF.map((s,i)=>({id:id+'s'+i,t:s[0],w:s[1],icon:s[2],date:o.stepDates?o.stepDates[i]:''}))};
+ return {id,n,date,close:o.close||igAdd(date,15),ev:null,time,limit:o.limit||'',link:o.link||'',resp:o.resp||'',contact:o.contact||'',current:!!o.current,active:!!o.active,ppl,steps:STEPS_DEF.map((s,i)=>({id:id+'s'+i,t:s[0],w:s[1],icon:s[2],date:o.stepDates?o.stepDates[i]:''}))};
 }
 const INTEGS=[
  mkInteg('Setembro/2026','2026-09-18','08:00',34,12,{current:true,active:true,limit:40,link:'https://chat.whatsapp.com/grupo-do-zap',resp:'m3',contact:'https://wa.me/5511987542201',stepDates:['2026-09-21','2026-09-28','2026-10-05','2026-10-18','2026-10-25']}),
@@ -32,7 +34,7 @@ const INTEGS=[
 ];
 {const p0=INTEGS.find(g=>g.current).ppl.find(p=>p.st==='pendente');if(p0)p0.prev={s:'Desligado',d:'2026-04-12',r:'Decisão pastoral'};}
 /* regras da igreja para as integrações (valem como padrão; cada integração ainda pode mudar o seu limite) */
-const INTR={max:30,prazo:3,aceite:'manual',cert:false};
+const INTR={max:30,aceite:'manual',cert:false};
 /* fila de espera: lista da igreja (não de uma integração). Entra quem pede com a integração lotada, fora do prazo ou sem integração aberta; ordem de chegada */
 const IGFILA=[['Mariana Teixeira','(11) 98811-2034','2026-09-12','lotada'],['Gustavo Lopes','(11) 97722-3410','2026-09-15','lotada'],['Paula Menezes','(11) 98123-9087','2026-09-22','prazo'],['Rogério Alves','(11) 99144-7755','2026-09-25','prazo'],['Tatiane Duarte','(11) 96655-2218','2026-09-28','sem']].map((x,i)=>({id:'f'+(i+1),n:x[0],ph:x[1],since:x[2],why:x[3],tone:TONES[i%6]}));
 Object.assign(S,{igTop:'lista'});
@@ -48,11 +50,11 @@ const iPill=g=>g.current?`<span class="stp" style="--c:var(--st-int);--b:var(--s
 /* ---------- list ---------- */
 function integList(){
  const cur=INTEGS.find(g=>g.current);
- return `<header class="ph rise"><div><p class="eb">Pessoas</p><h1>Integração</h1><p class="lede">Fluxo de integração de novos membros</p><p class="who" style="margin:6px 0 0">${INTR.max?'Até '+INTR.max+' pessoas':'Sem limite de pessoas'} · pedidos até ${INTR.prazo} ${INTR.prazo===1?'dia':'dias'} antes do início · aceite ${INTR.aceite==='auto'?'automático':'manual'}${INTR.cert?' · com certificado':''}${IGFILA.length?' · '+IGFILA.length+' na fila de espera':''}</p></div>
+ return `<header class="ph rise"><div><p class="eb">Pessoas</p><h1>Integração</h1><p class="lede">Fluxo de integração de novos membros</p><p class="who" style="margin:6px 0 0">${INTR.max?'Até '+INTR.max+' pessoas':'Sem limite de pessoas'} · aceite ${INTR.aceite==='auto'?'automático':'manual'}${INTR.cert?' · com certificado':''}${IGFILA.length?' · '+IGFILA.length+' na fila de espera':''}</p></div>
   <div class="pact">${rpBtn('integracao','turmas')}<button class="btn sec" data-a="igRules">${ic('sliders',15)}Regras</button>
    <button class="btn pri" data-a="addInteg">${ic('plus',15,2.2)}Nova integração</button></div></header>
  ${cur?`<button class="card icur rise" style="--d:1" data-a="openInteg" data-v="${cur.id}">
-   <div class="ic1"><span class="eb" style="margin:0">Integração atual</span><b>${cur.n}</b><span class="who">Começou em ${dLong(cur.date)} · ${cur.ppl.length}${cur.limit?' de '+cur.limit:''} pessoas</span></div>
+   <div class="ic1"><span class="eb" style="margin:0">Integração atual</span><b>${cur.n}</b><span class="who">Pedidos de ${dLong(cur.date)} a ${dLong(cur.close)} · ${cur.ppl.length}${cur.limit?' de '+cur.limit:''} pessoas</span></div>
    <div class="ic2">${ibar(cur)}</div>
    <div class="ic3"><span class="big">${iprog(cur)}<small>%</small></span><span class="who">integrados</span></div>
   </button>`:''}
@@ -72,23 +74,28 @@ function igFila(){
  const info=!cur?'Não há integração aberta. Crie uma integração para chamar a fila.':free===Infinity?`${esc(cur.n)} está aberta, sem limite de vagas.`:free>0?`${esc(cur.n)} tem ${free} ${free===1?'vaga livre':'vagas livres'}.`:`${esc(cur.n)} está lotada. Aumente o limite ou espere a próxima integração.`;
  return `<section class="card sx-list rise" style="--d:2" aria-label="Fila de espera"><div class="sx-bar"><span class="who" style="margin:0;display:inline-flex;align-items:center;gap:6px">${ic('info',14,2)}${info}</span>${n>0?`<button class="btn pri sm" data-a="igCallN">${ic('userplus',14)}Chamar os próximos ${n}</button>`:''}</div>
   ${IGFILA.length?IGFILA.map((p,i)=>`<div class="sx-r static"><span class="sx-ti" style="font:700 15px/1 var(--font-display)">${i+1}º</span><span class="sx-m"><b>${esc(p.n)}</b><small>${esc(p.ph)} · na fila desde ${dBR(p.since)}</small></span><span class="sx-c">${sxPill(IGWHY[p.why][0],IGWHY[p.why][1],IGWHY[p.why][2])}</span><span class="sx-s"></span><span class="sx-ch"><button class="btn sec sm" data-a="igCall" data-v="${p.id}" ${free>0?'':'disabled'} title="${free>0?'':'Sem vaga na integração atual'}">Chamar</button><button class="ibtn sm" data-a="igRm" data-v="${p.id}" aria-label="Remover da fila" title="Remover da fila">${ic('x',15)}</button></span></div>`).join(''):`<div class="mempty"><p>Ninguém na fila.</p><span>Quando uma integração lotar ou não houver uma aberta, quem pedir entra aqui.</span></div>`}
-  <p class="sx-priv">${ic('info',13,2)} A fila é da igreja, não de uma integração. Entra quem pede com a integração lotada, fora do prazo (${INTR.prazo} ${INTR.prazo===1?'dia':'dias'} antes do início) ou sem integração aberta, por ordem de chegada. Chamar aceita a pessoa na integração atual e avisa no app${INTR.aceite==='auto'?'; com o aceite automático, a fila é chamada sozinha quando uma integração abre':''}.</p></section>`;
+  <p class="sx-priv">${ic('info',13,2)} A fila é da igreja, não de uma integração. Entra quem pede com a integração lotada, fora da janela de pedidos ou sem integração aberta, por ordem de chegada. Chamar aceita a pessoa na integração atual e avisa no app${INTR.aceite==='auto'?'; com o aceite automático, a fila é chamada sozinha quando uma integração abre':''}.</p></section>`;
 }
 {const _il=integList;integList=function(){
  const h=_il(),i=h.indexOf('<section class="card mtab rise" style="--d:2" aria-label="Integrações">');
  /* abas depois do card de status, como em Discipulado */
- const tabs=`<div class="utabs rise" style="--d:2;margin-top:16px" role="tablist">${[['lista','Integrações',0],['fila','Fila de espera',IGFILA.length]].map(t=>`<button role="tab" class="${S.igTop===t[0]?'on':''}" aria-selected="${S.igTop===t[0]}" data-a="igTop" data-v="${t[0]}">${t[1]}${t[2]?`<span class="bdg">${t[2]}</span>`:''}</button>`).join('')}</div>`;
+ const tabs=`<div class="utabs rise" style="--d:2;margin-top:16px" role="tablist">${[['lista','Integrações',0],['fila','Fila de espera',IGFILA.length],['familia','Pedidos de família',IGFAM.length]].map(t=>`<button role="tab" class="${S.igTop===t[0]?'on':''}" aria-selected="${S.igTop===t[0]}" data-a="igTop" data-v="${t[0]}">${t[1]}${t[2]?`<span class="bdg">${t[2]}</span>`:''}</button>`).join('')}</div>`;
  if(i<0)return h;
- return S.igTop==='fila'?h.slice(0,i)+tabs+igFila():h.slice(0,i)+tabs+h.slice(i);};}
+ return S.igTop==='fila'?h.slice(0,i)+tabs+igFila():S.igTop==='familia'?h.slice(0,i)+tabs+igFamilia():h.slice(0,i)+tabs+h.slice(i);};}
+/* Pedidos de família: pedidos de vínculo e de remoção feitos no app; só mostra que existe (aprovar e recusar apenas avisam) */
+const IGFAM=[{id:'fr1',k:'vinculo',q:'Rafael Pereira',n:'Helena Pereira',rel:'Filha',age:3,d:'2026-09-28'},{id:'fr2',k:'remocao',q:'Rafael Pereira',n:'Marcos Lima',rel:'Cunhado',age:41,d:'2026-09-27'}];
+function igFamilia(){
+ return `<section class="card sx-list rise" style="--d:2" aria-label="Pedidos de família"><div class="sx-bar"><span class="who" style="margin:0;display:inline-flex;align-items:center;gap:6px">${ic('info',14,2)}Pedidos feitos no app. Aprovar cria ou liga o cadastro do familiar; recusar fecha o pedido.</span></div>
+  ${IGFAM.map(p=>`<div class="sx-r static"><span class="sx-ti">${ic('users',17)}</span><span class="sx-m"><b>${esc(p.n)}</b><small>${esc(p.rel)} · ${p.age} anos · pedido de ${esc(p.q)} · ${dBR(p.d)}</small></span><span class="sx-c">${sxPill(p.k==='vinculo'?'Vínculo':'Remoção',p.k==='vinculo'?'var(--st-int)':'var(--st-rec)',p.k==='vinculo'?'var(--st-int-bg)':'var(--st-rec-bg)')}</span><span class="sx-s">${sxPill('Em análise','var(--st-sol)','var(--st-sol-bg)')}</span><span class="sx-ch"><button class="btn sec sm" data-a="igFamOk" data-v="${p.id}">Aprovar</button><button class="btn sec sm" data-a="igFamNo" data-v="${p.id}">Recusar</button></span></div>`).join('')}</section>`;}
 function ibar(g,noLeg){const t=g.ppl.length||1,seg=[['integrado',icount(g,'integrado')],['andamento',icount(g,'andamento')],['aceito',icount(g,'aceito')],['pendente',icount(g,'pendente')]];
  return `<div class="ibar">${seg.map(s=>s[1]?`<i style="flex-grow:${s[1]};background:${s[0]==='andamento'?'var(--seq2)':IST[s[0]][1]}" title="${IST[s[0]][0]}: ${s[1]}"></i>`:'').join('')}</div>${noLeg?`<div class="ileg"><span><i style="background:var(--seq2)"></i>Em etapas <b>${icount(g,'andamento')}</b></span><span class="soft">· ${iprog(g)}% concluído</span></div>`:''}${noLeg?'':`
  <div class="ileg">${seg.filter(s=>s[1]).map(s=>`<span><i style="background:${s[0]==='andamento'?'var(--seq2)':IST[s[0]][1]}"></i>${IST[s[0]][0]} <b>${s[1]}</b></span>`).join('')}</div>`}`;}
 function irows(){
  const q=norm(S.iq);const list=INTEGS.filter(g=>(S.ifilter==='todas'||(S.ifilter==='ativa')===g.current)&&(!q||norm(g.n).includes(q)));
  if(!list.length)return `<div class="mempty"><p>Nada encontrado.</p><span>Nenhuma integração corresponde a esses filtros.</span></div>`;
- return `<div class="trow ig thead"><span>Nome</span><span>Data</span><span>Membros</span><span>Integrados</span><span>Progresso</span><span>Status</span><span></span></div>
+ return `<div class="trow ig thead"><span>Nome</span><span>Pedidos</span><span>Membros</span><span>Integrados</span><span>Progresso</span><span>Status</span><span></span></div>
  ${list.map(g=>{const p=iprog(g);return `<div class="trow ig" tabindex="0" data-a="openInteg" data-v="${g.id}">
-  <span class="tn"><b>${esc(g.n)}</b></span><span class="idt">${dBR(g.date)} <span class="soft">às ${g.time.replace(':00','h').replace(/^0/,'')}</span></span>
+  <span class="tn"><b>${esc(g.n)}</b></span><span class="idt">${dBR(g.date)} <span class="soft">a ${dBR(g.close)}</span></span>
   <span class="inum"><b>${g.ppl.length}</b>${g.limit?`<span class="soft">/${g.limit}</span>`:''}<em> membros</em></span><span class="inum"><b>${icount(g,'integrado')}</b><em> integrados</em></span>
   <span class="ipg"><span class="tr"><i style="width:${p}%;${p===100?'background:var(--st-int)':''}"></i></span><b>${p}%</b></span>
   <span class="ts">${iPill(g)}</span><span class="tc">${ic('chevR',16)}</span></div>`;}).join('')}
@@ -102,8 +109,8 @@ function integDetail(){
  const t=g.ppl.length;
  return `<nav class="crumb rise"><span class="soft">Pessoas</span>${ic('chevR',13,2)}<button class="lnk back" data-a="backInteg">Integração</button>${ic('chevR',13,2)}<span>${esc(g.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
-  <div class="pid"><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(g.n)}</h1>${iPill(g)}</div><p>Iniciada em ${dBR(g.date)} às ${g.time.replace(':00','h').replace(/^0/,'')} · ${t} ${t===1?'membro':'membros'}${g.limit?' de '+g.limit:''}</p></div></div>
-  <div class="pact"><button class="btn sec" data-a="resend">${ic('mail',15)}Reenviar e-mail</button>${rpBtn('integracao','pessoas')}
+  <div class="pid"><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(g.n)}</h1>${iPill(g)}</div><p>Pedidos de ${dBR(g.date)} a ${dBR(g.close)} · ${t} ${t===1?'membro':'membros'}${g.limit?' de '+g.limit:''}</p></div></div>
+  <div class="pact">${igEvBtn(g)}<button class="btn sec" data-a="resend">${ic('mail',15)}Reenviar e-mail</button>${rpBtn('integracao','pessoas')}
    <div style="position:relative"><button class="ibtn" data-a="igMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="igPop" style="right:0;top:calc(100% + 6px)"><button class="pi danger" data-a="delInteg">${ic('x',17)}Excluir integração</button></div></div></div>
   <div class="ikpi">
    <div><b>${t}</b><span>Total</span></div><div><b>${icount(g,'integrado')}</b><span>Integrados</span></div><div><b>${icount(g,'aceito')}</b><span>Aceitos</span></div><div><b>${icount(g,'pendente')}</b><span>Pendentes</span></div>
@@ -115,10 +122,10 @@ function integDetail(){
 }
 function itabBody(g){return ({det:iDet,etapas:iSteps,membros:iMembers})[S.itab](g);}
 const ISECS={
- info:{t:'Informações',f:[['n','Nome da integração','text'],['date','Data de início','date'],['time','Horário','time'],['limit','Limite de membros','number','Deixe vazio para sem limite']]},
+ info:{t:'Informações',f:[['n','Nome da integração','text'],['date','Pedidos abrem em','date'],['close','Pedidos fecham em','date'],['limit','Limite de membros','number','Deixe vazio para sem limite']]},
  wa:{t:'Comunicação via WhatsApp',f:[['link','Link do grupo','url'],['resp','Responsável','person'],['contact','Contato do responsável','url']]},
 };
-function iVal(g,f){const v=g[f[0]];if(f[0]==='date')return v?dLong(v):'';if(f[0]==='time')return v?v.replace(':00','h').replace(/^0/,''):'';if(f[0]==='resp')return v&&byId(v)?byId(v).n:'';if(f[0]==='limit')return v?v+' pessoas':'Sem limite';return v;}
+function iVal(g,f){const v=g[f[0]];if(f[0]==='date'||f[0]==='close')return v?dLong(v):'';if(f[0]==='time')return v?v.replace(':00','h').replace(/^0/,''):'';if(f[0]==='resp')return v&&byId(v)?byId(v).n:'';if(f[0]==='limit')return v?v+' pessoas':'Sem limite';return v;}
 function iDet(g){
  return `<div class="dgrid">${Object.keys(ISECS).map(k=>{const s=ISECS[k],ed=S.iedit===k;return `<section class="card pc sec ${ed?'editing':''}" id="isec-${k}"><div class="sh"><h2>${s.t}</h2>${ed?'':`<button class="btn sec sm" data-a="iEdit" data-v="${k}">${ic('pen',14)}Editar</button>`}</div>
   ${ed?`<form class="fgrid" data-isec="${k}" novalidate>${s.f.map(f=>ifield(g,f)).join('')}<div class="dfoot"><button type="button" class="btn sec" data-a="iCancel">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
@@ -167,6 +174,7 @@ function reITab(){const g=ibyId(S.integ);$('#itabBody').innerHTML=itabBody(g);$$
 function saveISec(e){e.preventDefault();const f=e.target,g=ibyId(S.integ),k=f.dataset.isec,fd=new FormData(f);
  const n=f.querySelector('[name=n]');if(n&&!n.value.trim()){n.closest('.fld').classList.add('bad');n.parentNode.querySelector('.err').textContent='Informe um nome';n.focus();return;}
  const l=f.querySelector('[name=link]');if(l&&l.value&&!/^https:\/\/chat\.whatsapp\.com\//.test(l.value)){l.closest('.fld').classList.add('bad');l.parentNode.querySelector('.err').textContent='Use um link de convite do WhatsApp (chat.whatsapp.com/…)';l.focus();return;}
+ const dt=f.querySelector('[name=date]'),cl=f.querySelector('[name=close]');if(dt&&cl&&dt.value&&cl.value&&cl.value<dt.value){cl.closest('.fld').classList.add('bad');cl.parentNode.querySelector('.err').textContent='O fechamento não pode ser antes da abertura';cl.focus();return;}
  const b=f.querySelector('button[type=submit]');b.classList.add('busy');
  setTimeout(()=>{ISECS[k].f.forEach(x=>{if(fd.has(x[0]))g[x[0]]=fd.get(x[0]);});S.iedit=null;render();toast(`${ISECS[k].t} atualizadas`);},800);}
 function curToggle(e){const g=ibyId(S.integ),on=e.target.checked,other=INTEGS.find(x=>x.current&&x!==g);
@@ -174,7 +182,38 @@ function curToggle(e){const g=ibyId(S.integ),on=e.target.checked,other=INTEGS.fi
  e.target.checked=false;
  openDlg(`${dlgHead(`Tornar ${g.n} a integração atual?`,other?`<b>${esc(other.n)}</b> deixará de ser a atual e não receberá novos pedidos. As pessoas que já estão nela continuam no fluxo.`:'Novos pedidos de integração passarão a entrar nela.')}<div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="doCurrent">Tornar atual</button></div>`,'sm');}
 
+/* ---------- evento do dia da integração (tipo "Integração" na Agenda, não público) ----------
+   Quem foi aceito entra como inscrito do evento; a lista é lida da integração (aceitar, remover e chamar da fila refletem sozinhos). */
+const igIn=g=>g.ppl.filter(p=>p.st!=='pendente');
+/* integrações que podem receber um evento: atuais e ainda sem evento ativo (uma por integração) */
+const igOpenList=()=>INTEGS.filter(g=>g.current&&!(g.ev&&eById(g.ev)));
+const igPick=F=>{const l=igOpenList();return l.length?`<label class="fld wide"><span class="fl">Integração</span><span class="selw"><select data-k="ig">${l.map(g=>`<option value="${g.id}" ${F.ig===g.id?'selected':''}>${esc(g.n)}</option>`).join('')}</select>${ic('updown',14)}</span><span class="hint">Cada integração tem um só evento. Quem for aceito entra como inscrito.</span></label>`:`<p class="hint wide">${ic('info',13,2)} Não há integração atual sem evento. Crie uma em Pessoas › Integração ou exclua o evento da atual.</p>`;};
+const igiCount=e=>{const g=ibyId(e.ig);return g?igIn(g).length:0;};
+const igEvBtn=g=>g.ev&&eById(g.ev)?`<button class="btn sec" data-a="igEvOpen" data-v="${g.id}">${ic('calendar',15)}Ver evento</button>`:g.current?`<button class="btn sec" data-a="igEvNew">${ic('calendar',15)}Criar evento da integração</button>`:'';
+function igiTab(e){
+ const g=ibyId(e.ig);if(!g)return '<section class="card pc"><div class="soft-empty"><p>Integração não encontrada.</p></div></section>';
+ const l=igIn(g);
+ return `<section class="card mtab"><div class="tbar"><span class="who" style="margin-right:auto"><b style="color:var(--ink)">${l.length}</b> ${l.length===1?'inscrito':'inscritos'} · gerenciados pela Integração</span><button class="btn sec sm" data-a="igGoto" data-v="${g.id}">${ic('users',14)}Abrir integração</button></div>
+  ${l.length?`<div class="trow im thead"><span>Pessoa</span><span></span><span>Situação na integração</span><span></span></div>${l.map(p=>`<div class="trow im"><span class="tn">${pAv(p)}<span><b>${esc(p.n)}</b></span></span><span></span><span class="ts"><span class="stp" style="--c:${IST[p.st][1]};--b:${IST[p.st][2]}"><i></i>${IST[p.st][0]}</span></span><span></span></div>`).join('')}`:`<div class="mempty"><p>Ninguém aceito ainda.</p><span>Quem for aceito na integração entra aqui sozinho.</span></div>`}
+  <div class="tfoot"><span>Quem é aceito entra como inscrito; quem é removido sai. Para mudar a lista, use a Integração.</span></div></section>`;
+}
 const IA={
+ igEvNew:()=>{const g=ibyId(S.integ);if(!g)return;const n=igIn(g).length;
+  openDlg(`${dlgHead('Criar evento da integração',`É o dia em que a integração acontece. Não aparece no app nem no site. ${n===1?'A pessoa aceita entra':'As '+n+' pessoas aceitas entram'} como inscrita${n===1?'':'s'}.`)}
+   <form class="fgrid" id="igEvF" novalidate style="grid-template-columns:1fr 1fr">
+    <label class="fld wide"><span class="fl">Título</span><input name="t" value="Integração ${esc(g.n)}" autocomplete="off"><span class="err"></span></label>
+    <label class="fld"><span class="fl">Data</span><input name="d" type="date" value="${igAdd(g.close,7)}"><span class="err"></span></label>
+    <label class="fld"><span class="fl">Horário</span><input name="time" type="time" value="${g.time||'08:00'}"></label>
+    <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Criar evento</button></div></form>`,'sm');
+  const f=$('#igEvF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
+  f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f),d=fd.get('d'),t=fd.get('t').trim();
+   const bad=(nm,m)=>{const i=f.querySelector(`[name=${nm}]`);i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;i.focus();};
+   if(!t)return bad('t','Informe o título');if(!d)return bad('d','Escolha a data');if(d<CE_TODAY)return bad('d','A data não pode ser anterior a hoje');
+   f.querySelector('[type=submit]').classList.add('busy');
+   setTimeout(()=>{const ev=EV({kind:'evento',t,type:'Integração',d,time:(fd.get('time')||'08:00').replace(':00','h').replace(/^0/,''),place:'Salão social',min:'Integração',ig:g.id});EVTS.push(ev);g.ev=ev.id;closeDlg();render();toast(`Evento criado para ${dBR(d)} com ${igIn(g).length} ${igIn(g).length===1?'inscrito':'inscritos'}`);},600);});},
+ igEvOpen:v=>{const g=ibyId(v),e=g&&eById(g.ev);if(!e)return;S.evFrom='calendario';S.evt=e.id;S.etab='det';S.active='calendario';render();window.scrollTo({top:0});},
+ igGoto:v=>{S.active='integracao';S.integ=v;S.itab='membros';S.evt=null;render();window.scrollTo({top:0});},
+ igFamOk:v=>toast('Pedido aprovado (demonstração)'),igFamNo:v=>{const p=IGFAM.find(x=>x.id===v);sxDlg('Recusar pedido',esc(p.n)+' · '+(p.k==='vinculo'?'vínculo':'remoção')+' pedido por '+esc(p.q),sxF('Motivo','<input name="w" maxlength="200" placeholder="Ex.: não conseguimos confirmar o parentesco" autocomplete="off">','O motivo fica registrado no pedido.'),sxOk('Recusar pedido'));const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxClr(f);if(!f.w.value.trim())return sxErr(f,'w','Informe o motivo');closeDlg();toast('Pedido recusado (demonstração)');};},
  iexpMenu:()=>{const p=$('#iexpPop');closePops(p);p.classList.toggle('open');},
  igMenu:()=>{const p=$('#igPop');closePops(p);p.classList.toggle('open');},
  ifilter:v=>{S.ifilter=v;$$('.chipf[data-a=ifilter]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#irows').innerHTML=irows();},
@@ -208,8 +247,8 @@ const IA={
  addInteg:()=>{const next='Outubro/2026';openDlg(`${dlgHead('Nova integração','Os novos pedidos feitos pelo app entram na integração atual.')}
   <form class="fgrid" id="igF" novalidate style="grid-template-columns:1fr 1fr">
    <label class="fld wide"><span class="fl">Nome da integração</span><input name="n" value="${next}" autocomplete="off"><span class="err"></span></label>
-   <label class="fld"><span class="fl">Data de início</span><input name="date" type="date" value="2026-10-16"><span class="err"></span></label>
-   <label class="fld"><span class="fl">Horário</span><input name="time" type="time" value="08:00"></label>
+   <label class="fld"><span class="fl">Pedidos abrem em</span><input name="date" type="date" value="2026-10-16"><span class="err"></span></label>
+   <label class="fld"><span class="fl">Pedidos fecham em</span><input name="close" type="date" value="2026-10-31"><span class="err"></span></label>
    <label class="fld wide"><span class="fl">Limite de membros <small>opcional</small></span><input name="limit" type="number" min="1" inputmode="numeric" placeholder="Sem limite" value="${INTR.max||''}"><span class="err"></span></label>
    <p class="fsec wide">${ic('message',15)}Comunicação via WhatsApp</p>
    <label class="fld wide"><span class="fl">Link do grupo <small>opcional</small></span><input name="link" type="url" placeholder="https://chat.whatsapp.com/…"><span class="err"></span></label>
@@ -221,8 +260,8 @@ const IA={
   f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
   f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);let ok=true;const bad=(n,m)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;if(ok)i.focus();ok=false;};
    const n=fd.get('n').trim();if(!n)bad('n','Informe um nome');else if(INTEGS.some(g=>norm(g.n)===norm(n)))bad('n','Já existe uma integração com esse nome');
-   if(!fd.get('date'))bad('date','Escolha a data');const lk=fd.get('link');if(lk&&!/^https:\/\/chat\.whatsapp\.com\//.test(lk))bad('link','Use um link de convite do WhatsApp');if(!ok)return;
+   if(!fd.get('date'))bad('date','Escolha a data de abertura');if(!fd.get('close'))bad('close','Escolha a data de fechamento');else if(fd.get('date')&&fd.get('close')<fd.get('date'))bad('close','O fechamento não pode ser antes da abertura');const lk=fd.get('link');if(lk&&!/^https:\/\/chat\.whatsapp\.com\//.test(lk))bad('link','Use um link de convite do WhatsApp');if(!ok)return;
    const b=f.querySelector('[type=submit]');b.classList.add('busy');
-   setTimeout(()=>{const g=mkInteg(n,fd.get('date'),fd.get('time')||'08:00',0,0,{aceitos:0,pend:0,link:lk,resp:fd.get('resp'),contact:fd.get('contact'),limit:fd.get('limit')});if(fd.get('cur')){INTEGS.forEach(x=>x.current=false);g.current=true;}INTEGS.unshift(g);let called=0;const waiting=IGFILA.length;if(g.current&&waiting&&INTR.aceite==='auto')called=igCallIds(IGFILA.map(x=>x.id));closeDlg();S.integ=g.id;S.itab='det';render();toast(`${n} criada${g.current?' e definida como atual':''}.${waiting?(called?` ${called} ${called===1?'pessoa foi chamada':'pessoas foram chamadas'} da fila (aceite automático).`:g.current?` ${waiting} ${waiting===1?'pessoa espera':'pessoas esperam'} na fila: chame em Fila de espera.`:''):''}`);},900);});},
+   setTimeout(()=>{const g=mkInteg(n,fd.get('date'),'08:00',0,0,{close:fd.get('close'),aceitos:0,pend:0,link:lk,resp:fd.get('resp'),contact:fd.get('contact'),limit:fd.get('limit')});if(fd.get('cur')){INTEGS.forEach(x=>x.current=false);g.current=true;}INTEGS.unshift(g);let called=0;const waiting=IGFILA.length;if(g.current&&waiting&&INTR.aceite==='auto')called=igCallIds(IGFILA.map(x=>x.id));closeDlg();S.integ=g.id;S.itab='det';render();toast(`${n} criada${g.current?' e definida como atual':''}.${waiting?(called?` ${called} ${called===1?'pessoa foi chamada':'pessoas foram chamadas'} da fila (aceite automático).`:g.current?` ${waiting} ${waiting===1?'pessoa espera':'pessoas esperam'} na fila: chame em Fila de espera.`:''):''}`);},900);});},
 };
 

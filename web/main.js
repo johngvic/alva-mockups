@@ -1,5 +1,5 @@
-/* Alva Web · protótipo — manifesto.
- * O código mora nos arquivos abaixo, que compartilham UM escopo e carregam NESTA ordem
+﻿/* Alva Web Â· protÃ³tipo â€” manifesto.
+ * O cÃ³digo mora nos arquivos abaixo, que compartilham UM escopo e carregam NESTA ordem
  * (o plugin vite-include.js inlina cada //#include). Ver web/README.md. */
 //#include ./core.js
 //#include ./screens-membros.js
@@ -25,12 +25,15 @@
 //#include ./core-ui.js
 //#include ./screens-food.js
 //#include ./core-actions.js
+//#include ./screens-doacoes.js
+//#include ./screens-cafeteria.js
+//#include ./screens-restaurante.js
+//#include ./screens-loja.js
 //#include ./screens-ext-1.js
 //#include ./screens-ext-2.js
 //#include ./screens-ext-3.js
 //#include ./screens-ext-4.js
 //#include ./screens-evento-ingressos.js
-//#include ./screens-evento-ingressos-ajustes.js
 //#include ./screens-evento-checkin.js
 //#include ./screens-financeiro-eventos.js
 //#include ./screens-cerimonias.js
@@ -39,11 +42,5 @@
 //#include ./screens-ajuda.js
 //#include ./screens-ext-5.js
 //#include ./screens-ext-6.js
-//#include ./screens-casas-ajustes.js
-//#include ./screens-notificacoes-ajustes.js
 //#include ./screens-parametros.js
-//#include ./screens-conteudo-ajustes.js
-//#include ./screens-ajustes-agenda.js
-//#include ./ui-pickers.js
-//#include ./screens-escalas-aceite.js
 render();

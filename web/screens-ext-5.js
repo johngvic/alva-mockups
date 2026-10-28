@@ -63,7 +63,7 @@ rpPage=function(key){
   +f.opts().map(x=>'<button class="pi" data-a="rpsPick" data-v="'+f.k+'|'+esc(x[0])+'">'+esc(x[1])+(String(x[0])===v?'<span class="ck">'+ic('check',16,2.25)+'</span>':'')+'</button>').join('')+'</div></div>';};
  return sxHead('Relatórios',D.l,D.lede,`<button class="btn sec" data-a="rptCols">${ic('sliders',15)}Colunas</button><button class="btn sec" data-a="rptPdf">${ic('file',15)}Gerar PDF</button><button class="btn pri" data-a="rptCsv">${ic('download',15)}Exportar CSV</button>`)
  +(D.tabs.length>1?sxSeg('rptTab',D.tabs.map(t=>[t.k,t.l]),T.k):'')
- +`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('shield',17,2)}<span><b>Escopo: toda a igreja.</b> <small>Quem tem acesso só a uma Casa ou a um ministério vê, filtra e exporta só o que é dele. ${esc(T.note||'Exportar PDF e CSV exige Editar ou Administrar neste módulo.')}</small></span></div>`
+ +`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('shield',17,2)}<span>${key==='multi'?'<b>Escopo: toda a organização.</b> <small>Vê, filtra e exporta as igrejas e regionais a que a pessoa tem acesso, não só a igreja ativa. ':'<b>Escopo: toda a igreja.</b> <small>Quem tem acesso só a uma Casa ou a um ministério vê, filtra e exporta só o que é dele. '}${esc(T.note||'Exportar PDF e CSV exige Editar ou Administrar neste módulo.')}</small></span></div>`
  +`<section class="card mtab rpt rise" style="--d:3" aria-label="${esc(D.l)}"><div class="tbar"><label class="sbox">${ic('search',16)}<input data-rpq placeholder="Buscar nos campos mostrados" value="${esc(st.q||'')}" autocomplete="off"></label>${(T.fl||[]).map(dd).join('')}
    ${T.chip?`<div class="chips" role="tablist" aria-label="${esc(T.chip.l||'Situação')}">${[['todos','Todos',null,null],...items].map(it=>`<button role="tab" class="chipf ${st.chip===it[0]?'on':''}" data-a="rptChip" data-v="${it[0]}" aria-selected="${st.chip===it[0]}">${it[0]!=='todos'?`<i style="background:${it[2]}"></i>`:''}${esc(it[1])}<small>${it[0]==='todos'?base.length:base.filter(r=>T.chip.by(r)===it[0]).length}</small></button>`).join('')}</div>`:''}</div>
   <div id="rpBody">${rpBody(D,T)}</div></section>`;};
@@ -179,7 +179,7 @@ igFila=function(){
   :'<div class="igq-cap '+(free>0?'':'full')+'"><span class="igq-ci">'+ic('users',18,1.9)+'</span><div><b>'+esc(cur.n)+'</b><span>'+(free===Infinity?'Sem limite de vagas':free>0?free+' '+(free===1?'vaga livre':'vagas livres')+' de '+lim:'Lotada · '+used+' de '+lim+' vagas')+'</span>'+(lim?'<span class="igq-bar"><i style="width:'+Math.min(100,Math.round(used/lim*100))+'%"></i></span>':'')+'</div></div>';
  return `<section class="card igq rise" style="--d:2" aria-label="Fila de espera">
   <div class="igq-top">${cap}<div class="igq-k"><b>${IGFILA.length}</b><span>${IGFILA.length===1?'pessoa na fila':'pessoas na fila'}</span></div>${n>0?`<button class="btn pri" data-a="igCallN">${ic('userplus',15)}Chamar ${n===IGFILA.length&&n>1?'todos os '+n:n===1?'o próximo':'os próximos '+n}</button>`:''}</div>
-  <p class="igq-note">${ic('info',14,2)}<span>A fila é da igreja, não de uma integração. Entra quem pede com a integração lotada, fora do prazo (${INTR.prazo} ${INTR.prazo===1?'dia':'dias'} antes do início) ou sem integração aberta, por ordem de chegada. Chamar aceita a pessoa na integração atual e avisa no app${INTR.aceite==='auto'?'; com o aceite automático, a fila é chamada sozinha quando uma integração abre':''}.</span></p>
+  <p class="igq-note">${ic('info',14,2)}<span>A fila é da igreja, não de uma integração. Entra quem pede com a integração lotada, fora da janela de pedidos ou sem integração aberta, por ordem de chegada. Chamar aceita a pessoa na integração atual e avisa no app${INTR.aceite==='auto'?'; com o aceite automático, a fila é chamada sozinha quando uma integração abre':''}.</span></p>
   ${IGFILA.length?`<div class="igq-r igq-h"><span>#</span><span>Pessoa</span><span>Telefone</span><span>E-mail</span><span>Motivo</span><span>Na fila</span><span></span></div>`+IGFILA.map((p,i)=>`<div class="igq-r ${i<n&&n<IGFILA.length?'next':''}"><span class="igq-pos">${i+1}º</span><span class="igq-p">${avN(p.n)}<span><b>${esc(p.n)}</b><small>${esc(p.or||'Pediu pelo app')}</small></span>${i<n&&n<IGFILA.length?'<em>próxima vaga</em>':''}</span><span class="igq-ct"><a href="tel:${esc(p.ph.replace(/\D/g,''))}" onclick="event.preventDefault()">${esc(p.ph)}</a></span><span class="igq-ct"><a href="mailto:${esc(p.em||'')}" onclick="event.preventDefault()">${esc(p.em||'—')}</a></span><span class="igq-w">${sxPill(IGWHY[p.why][0],IGWHY[p.why][1],IGWHY[p.why][2])}</span><span class="igq-d"><b>${ago(p.since)}</b><small>desde ${dBR(p.since)}</small></span><span class="igq-a"><button class="btn sec sm" data-a="igCall" data-v="${p.id}" ${free>0?'':'disabled'} title="${free>0?'Aceitar em '+esc(cur.n):'Sem vaga na integração atual'}">${ic('userplus',14)}Chamar</button><button class="ibtn sm" data-a="igRm" data-v="${p.id}" aria-label="Remover da fila" title="Remover da fila">${ic('x',14)}</button></span></div>`).join('')
    :`<div class="mempty"><p>Ninguém na fila.</p><span>Quando uma integração lotar ou não houver uma aberta, quem pedir entra aqui.</span></div>`}</section>`;};
 
@@ -338,7 +338,7 @@ tHist=function(m){const h=history(m).reverse();
   </aside></div>`;};
  const _cd=caseDetail;caseDetail=function(){let h=_cd.apply(this,arguments);const c=cById(S.case);if(!c)return h;
   h=h.replace(/<button class="btn sec" data-a="cReg"[^>]*>Registrar encontro<\/button><button class="btn pri" data-a="cSched"[^>]*>[\s\S]*?Agendar<\/button>/,'');
-  const i=h.indexOf('<div class="care-details">');if(i>-1)h=h.slice(0,i)+careDet(c)+'</div>';return h;};
+  const i=h.indexOf('<div class="care-details">');if(i>-1)h=h.slice(0,i)+careDet(c)+'</div>';return (S.careTab||'details')==='details'?h+careTrail(c):h;};
  A.cTriage=cTriage;
  const KIND=t=>/aberto/i.test(t)?['plus','brand','Abertura']:/resolvido/i.test(t)?['check','int','Encerramento']:/cancel/i.test(t)?['x','mute','Encontro']:/realizado/i.test(t)?['check','int','Encontro']:/agendado/i.test(t)?['calendar','ace','Encontro']:/Situa/i.test(t)?['swap','sol','Situação']:['info','mute','Registro'];
  careTimeline=function(c){careInit(c);const ev=c.events.slice().sort((a,b)=>b.d.localeCompare(a.d));
@@ -366,7 +366,7 @@ Object.assign(A,{eiPg:v=>{S.eipg=+v;const b=$('#eirows');if(b){b.innerHTML=eiRow
 Object.assign(S,{rgq:'',rgf:'todos',rgt:'todos',rgpg:1});
 /* a compra tem dois estados: situação (Confirmada, Pendente, Cancelada) e pagamento (Pago, Pendente, Reembolso solicitado, Reembolsado) */
 const rgSit=r=>r.st==='cancelada'?stpill('var(--st-rec)','var(--st-rec-bg)','Cancelada'):r.pay==='pendente'?stpill('var(--st-sol)','var(--st-sol-bg)','Pendente'):stpill('var(--st-int)','var(--st-int-bg)','Confirmada');
-const rgPay=r=>r.pay==='pago'?stpill('var(--st-int)','var(--st-int-bg)','Pago'):r.pay==='pendente'?stpill('var(--st-sol)','var(--st-sol-bg)','Pendente'):r.pay==='reembolso'?stpill('var(--st-sol)','var(--st-sol-bg)','Reembolso solicitado'):r.pay==='reembolsado'?stpill('var(--ink-muted)','var(--surface-2)','Reembolsado'):r.pay==='cancelado'?'<span class="soft">Sem cobrança</span>':'<span class="soft">Gratuita</span>';
+const rgPay=r=>r.pay==='pago'?stpill('var(--st-int)','var(--st-int-bg)','Pago'+(r.cm?' · '+cmLab(r.cm)+' (balcão)':'')):r.pay==='pendente'?stpill('var(--st-sol)','var(--st-sol-bg)','Pendente'):r.pay==='reembolso'?stpill('var(--st-sol)','var(--st-sol-bg)','Reembolso solicitado'):r.pay==='reembolsado'?stpill('var(--ink-muted)','var(--surface-2)','Reembolsado'):r.pay==='cancelado'?'<span class="soft">Sem cobrança</span>':'<span class="soft">Gratuita</span>';
 {const ev=EVTS.find(z=>z.paid&&z.regs.filter(r=>r.pay==='pago').length>2);if(ev){const p=ev.regs.filter(r=>r.pay==='pago');Object.assign(p[1],{st:'cancelada',pay:'reembolso'});Object.assign(p[2],{st:'cancelada',pay:'reembolsado'});}}
 function rgRows(e){const mny=evMoney(e),mt=e.tickets.length>1,q=norm(S.rgq),sig=[e.id,S.rgq,S.rgf,S.rgt].join('|');if(S.rgSig!==sig){S.rgSig=sig;S.rgpg=1;}
  const l=e.regs.filter(r=>(S.rgf==='todos'||r.pay===S.rgf)&&(S.rgt==='todos'||(tkOf(e,r)||{}).id===S.rgt)&&(!q||norm(r.n+' '+(r.vch||'')).includes(q)));
@@ -407,7 +407,7 @@ inscPage=function(){
  const n=[];for(let i=1;i<=P;i++){if(i===1||i===P||Math.abs(i-c)<=1)n.push(i);else if(n[n.length-1]!=='…')n.push('…');}
  const pager=P>1?`<div class="mpg" role="navigation" aria-label="Páginas"><button class="ibtn sm" data-a="iqPg" data-v="${c-1}" ${c===1?'disabled':''} aria-label="Página anterior">${ic('chevL',14,2)}</button>${n.map(i=>i==='…'?'<span class="mpg-e">…</span>':`<button class="mpg-n ${i===c?'on':''}" data-a="iqPg" data-v="${i}">${i}</button>`).join('')}<button class="ibtn sm" data-a="iqPg" data-v="${c+1}" ${c===P?'disabled':''} aria-label="Próxima página">${ic('chevR',14,2)}</button></div>`:'';
  const cnt=k=>k==='todos'?base.length:base.filter(r=>fk(r)===k).length;
- return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>Inscrições</h1><p class="lede">Todas as inscrições em cultos e eventos</p></div><div class="pact">${rpBtn('agenda','inscricoes')}</div></header>
+ return `<header class="ph rise"><div><p class="eb">Agenda</p><h1>Inscrições</h1><p class="lede">Todas as inscrições dos eventos</p></div><div class="pact">${rpBtn('agenda','inscricoes')}</div></header>
  ${insSum(rows,pend)}
  <section class="card mtab iqt rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="iq2" placeholder="Buscar pessoa, evento ou voucher" value="${esc(S.iq)}" autocomplete="off"></label>
   <div class="iq-dd">${dd('iqe',S.iqe,[['todos','Todos os eventos'],...evs.map(e=>[e.id,e.t])])}${tkNames.length?dd('iqt',S.iqt,[['todos','Todos os ingressos'],...tkNames.map(x=>[x,x])]):''}${dd('iqc',S.iqc,[['todos','Qualquer check-in'],['in','Entrou','var(--st-int)'],['part','Parcial','var(--st-sol)'],['wait','Aguardando','var(--ink-soft)'],['nock','Evento sem check-in','var(--line-strong)']])}</div>
@@ -580,7 +580,7 @@ lede=function(){return '';};
  Pessoas:['Integração','Membros'],
  Comunidade:['Casas de Apascentamento','Redes de casa','Ministérios'],
  Cuidado:['Discipulado','Acompanhamento','Pedidos de oração','Como estou me sentindo','Disciplina'],
- Kids:['Visão geral','Turmas','Salas','Times'],
+ Kids:['Visão geral','Turmas','Salas','Times','Planejamento','Escalas'],
  Conteúdo:['Pregações','Séries','Vídeos','Músicas','Cursos','Jornadas','Material de apoio'],
  Agenda:['Calendário','Cultos','Eventos','Inscrições','Escalas','Apresentações','Batismos','Consagrações','Casamentos'],
  Espaços:['Salas','Reservas'],

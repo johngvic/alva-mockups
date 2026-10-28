@@ -33,18 +33,17 @@ Object.assign(A,{
 });
 /* ---------- Integração › Regras ---------- */
 Object.assign(A,{
- igRules:()=>{const v={max:INTR.max,prazo:INTR.prazo,aceite:INTR.aceite,cert:INTR.cert?'sim':'nao'};window._igR=v;
+ igRules:()=>{const v={max:INTR.max,aceite:INTR.aceite,cert:INTR.cert?'sim':'nao'};window._igR=v;
   const step=(id,lab,sub,val)=>`<div class="bb-rr"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><div class="lm2-step"><button type="button" data-s="${id}|-1">${ic('minus',15,2.4)}</button><output><b id="igR${id}">${val}</b></output><button type="button" data-s="${id}|1">${ic('plus',15,2.4)}</button></div></div>`;
   const ch=(id,lab,sub,opts)=>`<div class="bb-rr"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><div class="chips" data-ch="${id}">${opts.map(o=>`<button type="button" class="chipf ${v[id]===o[0]?'on':''}" data-v="${o[0]}">${o[1]}</button>`).join('')}</div></div>`;
   const fx=(lab,sub,icn)=>`<div class="bb-rr fixed"><div class="dkt"><b>${lab}</b><span>${sub}</span></div><span class="bb-lock">${ic(icn||'lock',13,2)}Sempre</span></div>`;
   openDlg(`${dlgHead('Regras da integração','Valem para os pedidos feitos pelo app.')}<div class="bb-rules">
-   ${step('max','Limite de pessoas','padrão ao criar uma integração; ∞ é sem limite',v.max||'∞')}${step('prazo','Prazo para pedir','dias antes do início; depois, o pedido vai para a próxima integração',v.prazo)}
-   ${ch('aceite','Aceite dos pedidos','automático aceita sozinho enquanto houver vaga',[['manual','Manual'],['auto','Automático']])}${ch('cert','Certificado de conclusão','se ligado, a secretaria pode emitir o certificado de integração',[['nao','Não'],['sim','Sim']])}
-   ${fx('Só a integração concluída habilita membro','Convite de acesso nunca transforma pessoa em membro')}${fx('Uma integração atual por igreja','Os pedidos novos entram nela; ao lotar, não aceita mais e o pedido vai para a fila de espera')}${fx('Fila de espera','Quem pede com a integração lotada, fora do prazo ou sem integração aberta entra na fila, por ordem de chegada','clock')}${fx('Quem recebe os pedidos','O responsável da integração aceita ou recusa (no aceite manual)')}</div>
+   ${step('max','Limite de pessoas','padrão ao criar uma integração; ∞ é sem limite',v.max||'∞')}   ${ch('aceite','Aceite dos pedidos','automático aceita sozinho enquanto houver vaga',[['manual','Manual'],['auto','Automático']])}${ch('cert','Certificado de conclusão','se ligado, a secretaria pode emitir o certificado de integração',[['nao','Não'],['sim','Sim']])}
+   ${fx('Só a integração concluída habilita membro','Convite de acesso nunca transforma pessoa em membro')}${fx('Uma integração atual por igreja','Os pedidos novos entram nela; ao lotar, não aceita mais e o pedido vai para a fila de espera')}${fx('Fila de espera','Quem pede com a integração lotada, fora da janela de pedidos ou sem integração aberta entra na fila, por ordem de chegada','clock')}${fx('Quem recebe os pedidos','O responsável da integração aceita ou recusa (no aceite manual)')}</div>
    <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="igRulesSave">Salvar</button></div>`,'sm');
-  const lim={max:[0,200,5],prazo:[0,30,1]};
+  const lim={max:[0,200,5]};
   $('.bb-rules').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(b){const [k,d]=b.dataset.s.split('|');v[k]=Math.max(lim[k][0],Math.min(lim[k][1],v[k]+ +d*lim[k][2]));$('#igR'+k).textContent=k==='max'&&!v[k]?'∞':v[k];return;}
    const c=e.target.closest('[data-ch] .chipf');if(c){const g=c.parentElement;v[g.dataset.ch]=c.dataset.v;g.querySelectorAll('.chipf').forEach(z=>z.classList.toggle('on',z===c));}});},
- igRulesSave:()=>{const v=window._igR;Object.assign(INTR,{max:v.max,prazo:v.prazo,aceite:v.aceite,cert:v.cert==='sim'});closeDlg();render();toast('Regras da integração salvas');}
+ igRulesSave:()=>{const v=window._igR;Object.assign(INTR,{max:v.max,aceite:v.aceite,cert:v.cert==='sim'});closeDlg();render();toast('Regras da integração salvas');}
 });
 

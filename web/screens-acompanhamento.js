@@ -15,6 +15,8 @@ const CASES=[
  CS('Lucia Gomes','resolvido','Visita','Visitação realizada. Membro bem-acolhida e encorajada.','Pra. Daniela Rocha',{tone:'menta',resolved:addDays(-8),meets:[{d:addDays(-8),t:'Visita em casa com a equipe de recepção.'}]}),
  CS('Roberto Nunes','resolvido','Hospital','Recebeu alta após a cirurgia. Recuperação em casa.','Pr. Rafael Pereira',{tone:'salvia',resolved:addDays(-15),meets:[{d:addDays(-15),t:'Visita no dia da alta.'},{d:addDays(-19),t:'Visita no hospital.'}]}),
 ];
+CASES.forEach(c=>{if(!c.trail)c.trail=[];if(c.stage==null)c.stage=2;});
+CASES[0].trail=[{k:'Curso',t:'Vida de oração',note:'Para fazer junto com a família',done:false}];
 Object.assign(S,{cf:'ativos',cq:''});
 const cById=id=>CASES.find(c=>c.id===id);
 const cPill=c=>`<span class="stp" style="--c:${CST[c.st][1]};--b:${CST[c.st][2]}"><i></i>${CST[c.st][0]}</span>`;
@@ -86,3 +88,9 @@ function cTriage(v){const c=cById(v);if(!c)return;const vw=new Set(c.viewers||[c
  f.addEventListener('submit',e=>{e.preventDefault();const r=f.elements.tr.value==='r';c.restr=r;c.resp=f.elements.resp.value;c.vago=false;c.viewers=r?[...f.querySelectorAll('[name=vw]:checked')].map(x=>x.value):[];if(r&&!c.viewers.includes(c.resp))c.viewers.push(c.resp);closeDlg();cRe();toast(r?'Caso marcado como restrito':'Caso aberto a todos os pastores');});}
 function refreshCases(){if(S.active==='acompanhamento'){const y=window.scrollY;render();window.scrollTo(0,y);}}
 
+/* Trilha do caso: a mesma do discipulado (jornada, curso, série, pregação, música ou material) */
+function careTrail(c){const tr=dTrail(c);
+ return `<section class="card pc rise" style="--d:3;margin-top:16px"><div class="sh"><h2>Trilha</h2><span class="who">${tr.filter(j=>j.done>=j.c).length} de ${tr.length} itens concluídos</span></div>
+  <ol class="ct-tl">${tr.map(dTrailRow).join('').replace(/data-a="dJ(Swap|Del|Go)"/g,'data-a="cJ$1"')}
+   <li class="ct-addn"><span class="ct-node add">${ic('plus',14,2.2)}</span><button class="ct-cc add" data-a="cAddJ"><b>Adicionar à trilha</b><span>Jornada, curso, série, pregação, música ou material</span></button></li></ol>
+  <p class="who" style="margin:12px 0 0">Toque em um item para abri-lo. O progresso vem do que a pessoa assiste e conclui no app.</p></section>`;}

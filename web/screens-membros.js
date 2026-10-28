@@ -44,7 +44,7 @@ const MIN_ALL=['Louvor','Kids','Jovens','Recepção','Mídia','Comunicação','I
 Object.assign(S,{sort:{k:'int',d:-1},filter:'todos',q:'',month:'todas',member:null,tab:'geral',edit:null});
 const byId=id=>MEMBERS.find(m=>m.id===id);
 const initials=n=>n.split(' ').filter(w=>w.length>2||w===w.toUpperCase()).map(w=>w[0]).slice(0,2).join('')||n.slice(0,2);
-const mav=(m,cls='')=>`<span class="av ${cls}" style="background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${initials(m.n)}</span>`;
+const mav=(m,cls='')=>m.photo?`<span class="av ${cls}"><img src="${m.photo}" alt=""></span>`:`<span class="av ${cls}" style="background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${initials(m.n)}</span>`;
 const age=d=>{const b=new Date(d),t=new Date(2026,8,30);let a=t.getFullYear()-b.getFullYear();if(t<new Date(t.getFullYear(),b.getMonth(),b.getDate()))a--;return a;};
 const fmtDate=d=>{const [y,m,dd]=d.split('-');return `${+dd} de ${MONTHS[+m-1]} de ${y}`;};
 const dupPairs=()=>{const s=new Set(),out=[];MEMBERS.forEach(m=>{if(m.dup&&byId(m.dup)&&!s.has(m.id)){s.add(m.id);s.add(m.dup);out.push([m,byId(m.dup)]);}});return out;};
@@ -117,6 +117,7 @@ function profile(){
   <div class="pid">${mav(m,'xl')}<div class="pn"><h1>${esc(m.n)}</h1><p>${m.tit?'Titular':'Dependente'} · Integração de ${monthLabel(m.int).toLowerCase()}${m.nasc?` · ${age(m.nasc)} anos`:''}</p>
    <div class="pchips"><span class="chip st" style="--c:${ST[m.st].c};--b:${ST[m.st].bg}"><i></i>${ST[m.st].l}</span>${m.bap?'<span class="chip">Batizado(a)</span>':''}${m.min.map(x=>`<span class="chip">${x}</span>`).join('')}</div></div></div>
   <div class="pact">
+   <button class="ibtn" data-a="mPhoto" data-v="${m.id}" title="Trocar foto" aria-label="Trocar foto">${ic('camera',17)}</button>
    ${m.ph?`<button class="ibtn" data-a="wa" data-v="${m.id}" title="WhatsApp" aria-label="WhatsApp">${ic('message',17)}</button><button class="ibtn" data-a="call" data-v="${m.id}" title="Ligar" aria-label="Ligar">${ic('phone',17)}</button>`:''}
    ${m.e?`<button class="ibtn" data-a="copy" data-v="${esc(m.e)}" title="Copiar e-mail" aria-label="Copiar e-mail">${ic('mail',17)}</button>`:''}
    <div style="position:relative"><button class="ibtn" data-a="profMenu" aria-label="Mais ações">${ic('dots',17)}</button>
@@ -159,9 +160,6 @@ function tGeral(m){
      <div><dt>Endereço</dt><dd>${m.addr.rua}, ${m.addr.num}<br><span class="soft">${m.addr.bairro} · ${m.addr.cid}/${m.addr.uf} · ${m.addr.cep}</span></dd></div>
      <div><dt>Nascimento</dt><dd>${fmtDate(m.nasc)}</dd></div>
     </dl></section>
-   <section class="card pc appc"><div class="sh"><h2>Conta no app</h2><span class="chip st" style="--c:${m.app.st==='ativo'?'var(--st-int)':m.app.st==='suspensa'?'var(--st-rec)':'var(--ink-soft)'};--b:${m.app.st==='ativo'?'var(--st-int-bg)':m.app.st==='suspensa'?'var(--st-rec-bg)':'var(--surface-2)'}"><i></i>${m.app.st==='ativo'?'Ativa':m.app.st==='suspensa'?'Suspensa':'Sem conta'}</span></div>
-    ${m.app.st==='sem conta'?`<p class="who" style="margin:10px 0 14px">Dependentes usam o app pela conta do titular.</p>`:`<p class="who" style="margin:10px 0 14px">${esc(m.e)}${m.app.last?` · último acesso ${m.app.last}`:''}</p><div class="row2"><button class="btn sec" data-a="resetPw">Redefinir senha</button><button class="btn ghostd" data-a="suspend">${m.app.st==='suspensa'?'Reativar acesso':'Suspender acesso'}</button></div>`}
-   </section>
    <section class="card pc"><div class="sh"><h2>Últimos registros</h2><button class="lnk" data-a="tab" data-v="hist">Histórico ${ic('arrowR',14,2)}</button></div>
     <ol class="mini-tl">${history(m).slice(-3).reverse().map(h=>`<li><b>${h[0]}</b><span>${h[3]} · ${h[1]}</span></li>`).join('')}</ol></section>
   </div>
@@ -187,20 +185,25 @@ function famStrip(m){
 const SECS={
  pess:{t:'Dados pessoais',f:[['n','Nome completo','text'],['e','E-mail','email'],['ph','Telefone','tel'],['nasc','Data de nascimento','date'],['gen','Gênero','seg',['Feminino','Masculino']],['civil','Estado civil','select',['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)']]]},
  fe:{t:'Vida na igreja',f:[['bap','Batizado(a)','bool'],['conv','Tempo de conversão','select',['Menos de 1 ano','Entre 1 e 5 anos','Entre 5 e 10 anos','Mais de 10 anos']],['st','Status de integração','select',['solicitado','aceita','integrado','recusado']],['second','Segunda aliança de casamento','bool'],['pastor','Consagrado(a)','bool'],['def','Possui deficiência física','bool']]},
- end:{t:'Endereço',f:[['addr.cep','CEP','text'],['addr.rua','Rua','text'],['addr.num','Número','text'],['addr.bairro','Bairro','text'],['addr.cid','Cidade','text'],['addr.uf','Estado','text'],['addr.comp','Complemento','text']]},
+ end:{t:'Endereço',f:[['addr.pais','País','country'],['addr.uf','Estado, província ou região','sub'],['addr.cid','Cidade','text'],['addr.bairro','Bairro ou distrito','text'],['addr.rua','Rua','text'],['addr.num','Número','text'],['addr.comp','Complemento','text'],['addr.cep','Código postal','text']]},
+ cuid:{t:'Cuidados',note:'Dado de saúde: só quem tem Editar ou Admin em Membros ou em Kids vê e edita.',f:[['alg','Alergia','bool'],['algn','Detalhe da alergia','text'],['atp','Atipicidade','bool'],['atpn','Detalhe da atipicidade','text'],['obs','Observações de cuidado','text']]},
 };
 const gv=(m,k)=>k.split('.').reduce((o,x)=>o&&o[x],m);
 const sv=(m,k,v)=>{const p=k.split('.');if(p.length>1)m[p[0]][p[1]]=v;else m[k]=v;};
-function showVal(f,v){if(f[2]==='bool')return v?'Sim':'Não';if(f[0]==='st')return ST[v].l;if(f[2]==='date')return v?fmtDate(v):'';return v;}
+function showVal(f,v){if(f[2]==='country')return NX_COUNTRIES[v||'BR'].n;if(f[2]==='sub'){const m=byId(S.member),co=(m&&m.addr&&m.addr.pais)||'BR',s=NX_COUNTRIES[co].subs.find(x=>x[0]===v);return v?(co==='BR'?v:(s?s[1]:v)):'';}if(f[2]==='bool')return v?'Sim':'Não';if(f[0]==='st')return ST[v].l;if(f[2]==='date')return v?fmtDate(v):'';return v;}
+document.addEventListener('change',e=>{const t=e.target;if(!t||!t.name)return;
+ if(t.name==='addr.pais'){const co=t.value,uf=t.form.elements[t.name.replace('pais','uf')];if(uf&&NX_COUNTRIES[co]){uf.innerHTML=nxSubOpts(co,'');const lb=uf.closest('.fld')&&uf.closest('.fld').querySelector('.ca-div');if(lb)lb.textContent=NX_COUNTRIES[co].div;}}});
 function tDados(m){return `<div class="dgrid">${Object.keys(SECS).map(k=>secCard(m,k)).join('')}</div>`;}
 function secCard(m,k){
  const s=SECS[k],ed=S.edit===k;
- return `<section class="card pc sec ${ed?'editing':''}" id="sec-${k}"><div class="sh"><h2>${s.t}</h2>${ed?'':`<button class="btn sec sm" data-a="editSec" data-v="${k}">${ic('pen',14)}Editar</button>`}</div>
+ return `<section class="card pc sec ${ed?'editing':''}" id="sec-${k}"><div class="sh"><h2>${s.t}</h2>${ed?'':`<button class="btn sec sm" data-a="editSec" data-v="${k}">${ic('pen',14)}Editar</button>`}</div>${s.note?`<p class="who" style="margin:-4px 0 10px">${ic('lock',12,2)} ${s.note}</p>`:''}
   ${ed?`<form class="fgrid" data-sec="${k}" novalidate>${s.f.map(f=>field(m,f)).join('')}<div class="dfoot"><button type="button" class="btn sec" data-a="cancelSec">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
   :`<dl class="kv grid">${s.f.map(f=>{const v=showVal(f,gv(m,f[0]));return `<div><dt>${f[1]}</dt><dd>${v===''||v==null?'<span class="soft">Não informado</span>':esc(v)}</dd></div>`;}).join('')}</dl>`}
  </section>`;
 }
 function field(m,f){const v=gv(m,f[0]),id='f-'+f[0].replace('.','-');
+ if(f[2]==='country'){const v=gv(m,f[0])||'BR';return `<label class="fld"><span class="fl">${f[1]}</span><span class="selw"><select name="${f[0]}">${Object.entries(NX_COUNTRIES).map(([k,x])=>`<option value="${k}" ${k===v?'selected':''}>${x.n}</option>`).join('')}</select>${ic('updown',14)}</span></label>`;}
+ if(f[2]==='sub'){const co=gv(m,'addr.pais')||'BR';return `<label class="fld"><span class="fl ca-div">${NX_COUNTRIES[co].div}</span><span class="selw"><select name="${f[0]}">${nxSubOpts(co,gv(m,f[0]))}</select>${ic('updown',14)}</span></label>`;}
  if(f[2]==='bool')return `<div class="fld"><span class="fl">${f[1]}</span><div class="yn" role="radiogroup" aria-label="${f[1]}"><label><input type="radio" name="${f[0]}" value="1" ${v?'checked':''}><span>Sim</span></label><label><input type="radio" name="${f[0]}" value="0" ${!v?'checked':''}><span>Não</span></label></div></div>`;
  if(f[2]==='seg')return `<div class="fld"><span class="fl">${f[1]}</span><div class="yn" role="radiogroup">${f[3].map(o=>`<label><input type="radio" name="${f[0]}" value="${o}" ${v===o?'checked':''}><span>${o}</span></label>`).join('')}</div></div>`;
  if(f[2]==='select')return `<label class="fld" for="${id}"><span class="fl">${f[1]}</span><span class="selw"><select id="${id}" name="${f[0]}">${f[3].map(o=>`<option value="${o}" ${v===o?'selected':''}>${f[0]==='st'?ST[o].l:o}</option>`).join('')}</select>${ic('updown',14)}</span></label>`;
@@ -260,6 +263,9 @@ const PA={
  tab:v=>{S.tab=v;S.edit=null;reTab();},
  editSec:v=>{S.edit=v;reTab();const f=$('#sec-'+v+' input,#sec-'+v+' select');f&&f.focus();},
  cancelSec:()=>{S.edit=null;reTab();},
+ mPhoto:v=>{const m=byId(v);openDlg(`${dlgHead('Foto de '+esc(m.n.split(' ')[0]),'A foto aparece no cadastro e no Kids.')}<form id="mpF" class="fgrid one" novalidate><label class="fld"><span class="fl">Arquivo</span><input name="f" type="file" accept="image/*"></label><div class="dfoot">${m.photo?'<button type="button" class="btn sec" id="mpDel">Retirar foto</button>':''}<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`,'sm');
+  const f=$('#mpF'),d=$('#mpDel');if(d)d.onclick=()=>{m.photo='';closeDlg();render();toast('Foto retirada');};
+  f.addEventListener('submit',e=>{e.preventDefault();const fl=f.elements.f.files&&f.elements.f.files[0];if(!fl){toast('Escolha uma imagem');return;}m.photo=URL.createObjectURL(fl);closeDlg();render();toast('Foto atualizada');});},
  closeDlg:()=>closeDlg(),
  addMember:()=>{openDlg(`${dlgHead('Adicionar membro','Os demais dados podem ser preenchidos depois.')}
   <form class="fgrid one" id="addF" novalidate>
@@ -296,10 +302,6 @@ const PA={
    <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="button" class="btn pri" data-a="doMin">Vincular</button></div>`,'sm');},
  doMin:(v,b)=>{const m=byId(S.member),x=$('input[name=mn]:checked').value;b.classList.add('busy');setTimeout(()=>{m.min.push(x);m.role=$('input[name=rl]:checked').value;m.since='out/2026';closeDlg();render();toast(`${m.n.split(' ')[0]} agora serve em ${x}`);},700);},
  unMin:v=>{closePops();const m=byId(S.member),x=m.min[+v];confirmDel({title:`Remover ${m.n.split(' ')[0]} de ${x}?`,body:'A pessoa sai das próximas escalas deste ministério. O histórico de participação é mantido.',label:'Remover',onConfirm:()=>{m.min.splice(+v,1);render();toast(`Removido(a) de ${x}`,()=>{m.min.splice(+v,0,x);render();});}});},
- resetPw:(v,b)=>busy(b,900,'Link enviado',()=>toast(`Link de redefinição enviado para ${byId(S.member).e}`)),
- suspend:()=>{const m=byId(S.member);if(m.app.st==='suspensa'){m.app.st='ativo';reTab();toast('Acesso reativado');return;}
-  openDlg(`${dlgHead('Suspender acesso ao app?',`${m.n.split(' ')[0]} não conseguirá entrar até você reativar. O cadastro continua intacto.`)}<div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn dang" data-a="doSuspend">Suspender acesso</button></div>`,'sm');},
- doSuspend:(v,b)=>{b.classList.add('busy');setTimeout(()=>{byId(S.member).app.st='suspensa';closeDlg();reTab();toast('Acesso suspenso');},700);},
  inactivate:()=>{closePops();const m=byId(S.member);openDlg(`${dlgHead('Inativar cadastro?',`${m.n.split(' ')[0]} sai das listas e escalas, mas o histórico é mantido. Você pode reativar quando quiser.`)}<div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="doInact">Inativar</button></div>`,'sm');},
  doInact:(v,b)=>{b.classList.add('busy');setTimeout(()=>{const m=byId(S.member),i=MEMBERS.indexOf(m);MEMBERS.splice(i,1);closeDlg();S.member=null;render();toast(`${m.n.split(' ')[0]} foi inativado(a)`,()=>{MEMBERS.splice(i,0,m);render();});},700);},
  delMember:()=>{closePops();const m=byId(S.member);openDlg(`${dlgHead('Excluir cadastro?','Esta ação não pode ser desfeita. Para confirmar, digite o primeiro nome.')}<label class="fld"><span class="fl">Digite “${m.n.split(' ')[0]}”</span><input id="delq" autocomplete="off"><span class="err"></span></label><div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn dang" data-a="doDel" disabled id="delb">Excluir definitivamente</button></div>`,'sm');

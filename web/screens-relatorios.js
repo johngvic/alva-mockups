@@ -52,7 +52,7 @@ function rpPage(key){
  const items=rpChipItems(T,T.rows());
  return sxHead('Relatórios',D.l,D.lede,`<button class="btn sec" data-a="rptCols">${ic('sliders',15)}Colunas</button><button class="btn sec" data-a="rptPdf">${ic('file',15)}Gerar PDF</button><button class="btn pri" data-a="rptCsv">${ic('download',15)}Exportar CSV</button>`)
  +(D.tabs.length>1?sxSeg('rptTab',D.tabs.map(t=>[t.k,t.l]),T.k):'')
- +`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('shield',17,2)}<span><b>Escopo: toda a igreja.</b> <small>Quem tem acesso só a uma Casa ou a um ministério vê, filtra e exporta só o que é dele. ${esc(T.note||'Exportar PDF e CSV exige Editar ou Administrar neste módulo.')}</small></span></div>`
+ +`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('shield',17,2)}<span>${key==='multi'?'<b>Escopo: toda a organização.</b> <small>Vê, filtra e exporta as igrejas e regionais a que a pessoa tem acesso, não só a igreja ativa. ':'<b>Escopo: toda a igreja.</b> <small>Quem tem acesso só a uma Casa ou a um ministério vê, filtra e exporta só o que é dele. '}${esc(T.note||'Exportar PDF e CSV exige Editar ou Administrar neste módulo.')}</small></span></div>`
  +`<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><label class="sbox">${ic('search',16)}<input data-rpq placeholder="Buscar nos campos mostrados" value="${esc(st.q||'')}" autocomplete="off"></label>
    ${(T.fl||[]).map(f=>`<label class="fld sx-mes"><span class="selw"><select data-rps="${f.k}" aria-label="${esc(f.l)}"><option value="todos">${esc(f.l)}: todos</option>${f.opts().map(o=>`<option value="${esc(o[0])}" ${String(rpFv(st,f))===String(o[0])?'selected':''}>${esc(o[1])}</option>`).join('')}</select>${ic('updown',14)}</span></label>`).join('')}</div>
   ${T.chip?`<div class="sx-bar" style="padding-top:0"><div class="chips">${[['todos','Todos',null,null],...items].map(it=>`<button class="chipf ${st.chip===it[0]?'on':''}" data-a="rptChip" data-v="${it[0]}">${it[0]!=='todos'?`<i style="background:${it[2]}"></i>`:''}${esc(it[1])}<small>${it[0]==='todos'?base.length:base.filter(r=>T.chip.by(r)===it[0]).length}</small></button>`).join('')}</div></div>`:''}
@@ -118,7 +118,7 @@ rpDef('membros','Membros','Lista de membros com situação, integração e minis
   chip:{l:'Situação',by:r=>sxSitOf(r)||'nao',items:[...Object.keys(SX_SITS).map(k=>rpCh(k,SX_SITS[k][0],SX_SITS[k][1])),rpCh('nao','Não integrados','var(--st-ace)')]},
   fl:[{k:'min',l:'Ministério',opts:()=>MIN_ALL.map(m=>[m,m]),ok:(r,v)=>r.min.includes(v)},{k:'bap',l:'Batismo',opts:()=>[['s','Batizados'],['n','Não batizados']],ok:(r,v)=>v==='s'?r.bap:!r.bap},{k:'int',l:'Integração',opts:()=>[...new Set(MEMBERS.map(m=>m.int))].sort().reverse().map(k=>[k,monthLabel(k)]),ok:(r,v)=>r.int===v}],
   cols:[rpCol('n','Nome',r=>r.n),rpCol('sit','Situação',r=>sxSitOf(r)?SX_SITS[sxSitOf(r)][0]:'Em integração'),rpCol('st','Integração',r=>ST[r.st].l),rpCol('int','Integrada em',r=>monthLabel(r.int)),rpCol('min','Ministérios',r=>r.min.join(', ')||'—'),rpCol('bap','Batizado',r=>rpYes(r.bap)),rpCol('tit','Titular',r=>rpYes(r.tit),{off:true}),rpCol('e','E-mail',r=>r.e||'—',{s:1,off:true}),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true}),rpCol('nasc','Nascimento',r=>rpD(r.nasc),{s:1,off:true})]},
- {k:'aniv',l:'Aniversariantes',rows:()=>MEMBERS.filter(m=>m.nasc&&['ativo','afastado'].includes(sxSitOf(m))),sort:{k:'dia',d:1},
+ {k:'aniv',l:'Aniversariantes',rows:()=>MEMBERS.filter(m=>m.nasc&&['ativo','afastado'].includes(sxSitOf(m))),sort:{k:'dia',d:1},note:'Exportar PDF e CSV exige Editar ou Administrar neste módulo. Respeita a preferência de aniversário de cada pessoa, quando a fundação a definir.',
   fl:[{k:'mes',l:'Mês',def:()=>'9',opts:rpMonths,ok:(r,v)=>+r.nasc.slice(5,7)===+v}],
   cols:[rpCol('n','Nome',r=>r.n),rpCol('dia','Dia',r=>r.nasc.slice(8)+'/'+r.nasc.slice(5,7),{raw:r=>+r.nasc.slice(5,7)*100+ +r.nasc.slice(8)}),rpCol('idade','Faz',r=>(2026-+r.nasc.slice(0,4))+' anos',{n:1,raw:r=>2026-+r.nasc.slice(0,4)}),rpCol('min','Ministérios',r=>r.min.join(', ')||'—'),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true})]},
  {k:'familia',l:'Por família',rows:()=>MEMBERS.filter(m=>m.tit&&m.st==='integrado'),
@@ -179,10 +179,15 @@ rpDef('ministerios','Ministérios','Ministérios, líderes, times e membros por 
   cols:[rpCol('min','Ministério',r=>r.min),rpCol('n','Membro',r=>r.m.n),rpCol('role','Função',r=>r.m.role),rpCol('since','Desde',r=>r.m.since),rpCol('ph','Telefone',r=>r.m.ph||'—',{s:1,off:true})]}
 ]);
 
-rpDef('kids','Kids','Salas do Ministério Infantil, ocupação e equipes.',[
+rpDef('kids','Kids','Salas, turmas e times do Ministério Infantil.',[
  {k:'salas',l:'Salas',rows:()=>SALAS.slice(),
   chip:{l:'Situação',by:r=>r.active?'on':'off',items:[rpC('on','Ativas',rpOk),rpC('off','Inativas',rpOff)]},
-  cols:[rpCol('n','Sala',r=>r.n),rpCol('t','Turma',r=>(tById(r.turma)||{n:'—'}).n),rpCol('age','Faixa etária',r=>{const t=tById(r.turma);return t?t.min+' a '+t.max+' anos':'—';}),rpCol('cap','Capacidade',r=>r.cap,{n:1}),rpCol('pres','Presentes hoje',r=>r.pres,{n:1}),rpCol('oc','Ocupação',r=>Math.round(r.pres/Math.max(1,r.cap)*100)+'%',{n:1,raw:r=>Math.round(r.pres/Math.max(1,r.cap)*100)}),rpCol('mon','Monitor',r=>r.mon||'—'),rpCol('team','Equipe',r=>(kById(r.team)||{n:'—'}).n)]}
+  cols:[rpCol('n','Sala',r=>r.n),rpCol('t','Turma',r=>(tById(r.turma)||{n:'—'}).n),rpCol('age','Faixa etária',r=>{const t=tById(r.turma);return t?t.min+' a '+t.max+' anos':'—';}),rpCol('cap','Capacidade',r=>r.cap,{n:1}),rpCol('team','Time',r=>(kTeamOf(r)&&kTeamOf(r).n)||'Sem time')]},
+ {k:'turmas',l:'Turmas',rows:()=>TURMAS.slice(),
+  cols:[rpCol('n','Turma',r=>r.n),rpCol('age','Faixa etária',r=>faixa(r)),rpCol('sl','Salas',r=>SALAS.filter(s=>s.turma===r.id).map(s=>s.n).join(', ')||'Sem sala'),rpCol('st','Situação',r=>'Ativa'),rpCol('aula','Aula da semana',r=>{const a=kAulaDe(r);return a.length?a[0].t:'—';})]},
+ {k:'times',l:'Times e voluntários',rows:()=>kTeams().flatMap(t=>t.ppl.map(p=>({t,p}))),
+  fl:[{k:'time',l:'Time',opts:()=>kTeams().map(t=>[t.n,t.n]),ok:(r,v)=>r.t.n===v}],
+  cols:[rpCol('t','Time',r=>r.t.n),rpCol('s','Salas atendidas',r=>SALAS.filter(s=>kTeamOf(s)===r.t).map(s=>s.n).join(', ')||'—'),rpCol('v','Voluntário',r=>r.p),rpCol('c','Cargo',r=>r.p===r.t.lead?'Líder':'Voluntário')]}
 ]);
 
 const rpEvRows=()=>EVTS.slice();
@@ -245,7 +250,7 @@ function rpFood(key,label,lede){
   {k:'vendas',l:'Vendas',rows:()=>FOOD_SALES.filter(s=>s.store===key).slice().sort((a,b)=>(a.date+a.time)<(b.date+b.time)?1:-1),
    chip:{l:'Situação',by:r=>r.status,items:Object.keys(rpFoodSt).map(k=>rpC(k,rpFoodSt[k][0],rpFoodSt[k][1]))},
    fl:[{k:'method',l:'Pagamento',opts:()=>[['Pix','Pix'],['Cartão','Cartão'],['Dinheiro','Dinheiro']],ok:(r,v)=>r.method===v},{k:'mes',l:'Mês',opts:()=>['04','05','06','07','08','09'].map(m=>[m,MONTHS[+m-1][0].toUpperCase()+MONTHS[+m-1].slice(1)]),ok:(r,v)=>r.date.slice(5,7)===v}],
-   cols:[rpCol('id','Venda',r=>r.id),rpCol('d','Data',r=>rpD(r.date)+' '+r.time,{raw:r=>r.date+r.time}),rpCol('it','Itens',r=>r.lines.map(l=>l.qty+'× '+l.name).join('; ')),rpCol('m','Pagamento',r=>r.method),rpCol('tot','Total',r=>foodMoney(r.total),{n:1,raw:r=>r.total/100}),rpCol('fee','Taxa',r=>foodMoney(r.fee||0),{n:1,raw:r=>(r.fee||0)/100}),rpCol('st','Situação',r=>rpFoodSt[r.status]?rpFoodSt[r.status][0]:r.status),rpCol('who','Quem vendeu',r=>r.seller||r.who||'—',{off:true})]},
+   cols:[rpCol('id','Venda',r=>r.id),rpCol('d','Data',r=>rpD(r.date)+' '+r.time,{raw:r=>r.date+r.time}),rpCol('it','Itens',r=>r.lines.map(l=>l.qty+'× '+l.name).join('; ')),rpCol('m','Pagamento',r=>r.method),rpCol('tot','Total',r=>foodMoney(r.total),{n:1,raw:r=>r.total/100}),rpCol('st','Situação',r=>rpFoodSt[r.status]?rpFoodSt[r.status][0]:r.status),rpCol('who','Quem vendeu',r=>r.seller||r.who||'—',{off:true})]},
   {k:'itens',l:'Itens e estoque',rows:()=>st().items.slice(),
    chip:{l:'Estoque',by:r=>r.stock<=r.min?'baixo':'ok',items:[rpC('ok','Normal',rpOk),rpC('baixo','No mínimo ou abaixo',rpWarn)]},
    fl:[{k:'cat',l:'Categoria',opts:()=>st().cats.map(c=>[c.id,c.name]),ok:(r,v)=>r.cat===v}],
@@ -286,23 +291,39 @@ rpDef('comunicacao','Comunicação','Notícias e envios de push e e-mail.',[
   cols:[rpCol('t','Envio',r=>r.t),rpCol('seg','Público',r=>r.seg),rpCol('type','Tipo',r=>r.type),rpCol('ch','Canais',r=>(r.ch||[]).join(', ')),rpCol('dt','Data',r=>r.dt||'—'),rpCol('st','Situação',r=>r.st),rpCol('open','Abertura',r=>r.open===null||r.open===undefined?'—':r.open+'%',{n:1})]}
 ]);
 
-rpDef('doacoes','Doações','Doações por campanha, com doador, valor e forma de pagamento.',[
- {k:'doacoes',l:'Doações',rows:()=>CAMPS.flatMap(c=>c.donors.map(d=>({c,n:d[0],v:d[1],d:d[2],m:d[3],pend:!!d[4]}))).sort((a,b)=>a.d<b.d?1:-1),
-  chip:{l:'Doador',by:r=>r.n==='Anônimo'?'anon':'id',items:[rpC('id','Identificados',rpOk),rpC('anon','Anônimas',rpOff)]},
-  fl:[{k:'c',l:'Campanha',opts:()=>CAMPS.map(c=>[c.id,c.n]),ok:(r,v)=>r.c.id===v},{k:'m',l:'Forma',opts:()=>[['PIX','Pix'],['Cartão','Cartão'],['Boleto','Boleto']],ok:(r,v)=>r.m===v}],
-  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('n','Doador',r=>r.n),rpCol('c','Campanha',r=>r.c.n),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('m','Forma',r=>r.m),rpCol('p','Situação',r=>r.pend?'Pendente':'Confirmada')]}
+const rpMesesDn=()=>[...new Set(CAMPS.flatMap(c=>c.donors.map(d=>d[2].slice(5,7))))].sort().map(m=>[m,MONTHS[+m-1][0].toUpperCase()+MONTHS[+m-1].slice(1)]);
+rpDef('doacoes','Doações','Contribuições e campanhas, com doador, valor e situação.',[
+ {k:'doacoes',l:'Contribuições',rows:()=>CAMPS.flatMap(c=>c.donors.map(d=>({c,n:c.lt==='fixed'?'Anônimo':d[0],v:d[1],d:d[2],est:!!d[6]}))).sort((a,b)=>a.d<b.d?1:-1),
+  chip:{l:'Situação',by:r=>r.est?'est':'conf',items:[rpC('conf','Confirmadas',rpOk),rpC('aguard','Aguardando',rpWarn),rpC('est','Estornadas',rpBad)]},
+  fl:[{k:'c',l:'Campanha',opts:()=>CAMPS.map(c=>[c.id,c.n]),ok:(r,v)=>r.c.id===v},{k:'o',l:'Origem',opts:()=>[['person','Por pessoa'],['fixed','Link fixo']],ok:(r,v)=>(r.c.lt==='person'?'person':'fixed')===v},{k:'mes',l:'Mês',opts:rpMesesDn,ok:(r,v)=>r.d.slice(5,7)===v}],
+  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('n','Doador',r=>r.n),rpCol('c','Campanha',r=>r.c.n),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('o','Origem',r=>r.c.lt==='person'?'Por pessoa':'Link fixo'),rpCol('p','Situação',r=>r.est?'Estornada':'Confirmada')]},
+ {k:'campanhas',l:'Campanhas',rows:()=>CAMPS.slice(),
+  chip:{l:'Situação',by:r=>r.st==='ativo'?'on':'off',items:[rpC('on','Ativas',rpOk),rpC('off','Encerradas',rpOff)]},
+  cols:[rpCol('n','Campanha',r=>r.n),rpCol('st','Situação',r=>r.st==='ativo'?'Ativa':'Encerrada'),rpCol('lt','Tipo de link',r=>dnLt(r)),rpCol('meta','Meta',r=>brl2(r.meta),{n:1,raw:r=>r.meta}),rpCol('got','Arrecadado',r=>brl2(r.got),{n:1,raw:r=>r.got}),rpCol('pct','% da meta',r=>Math.round(r.got/Math.max(1,r.meta)*100)+'%',{n:1,raw:r=>Math.round(r.got/Math.max(1,r.meta)*100)}),rpCol('cx','No caixa',r=>brl2(dnTot(r).cx),{n:1,raw:r=>dnTot(r).cx}),rpCol('q','Contribuições',r=>r.donors.filter(d=>!d[6]).length,{n:1})]}
 ]);
 
-rpDef('financeiro','Financeiro','Lançamentos, contas a pagar e contas a receber. DRE e fluxo de caixa ficam em Análises.',[
+const rpConta='Conta principal',rpLcSt={ok:'Aprovado',pend:'Pendente',rej:'Rejeitado'};
+const rpRecSt=r=>(r.got||0)>=r.v?'rec':(r.prev&&r.prev<SX_TODAY)?'atr':'prev';
+const rpCxEx={ex:1,name:'Ministério de Louvor · Caixa principal',kind:'Ministério',in:420000,out:185000};
+const rpCxRows=()=>{const l=CAIXAS.filter(x=>x.entries.length);return l.length?l:[rpCxEx];};
+const rpCxV=x=>x.ex?x:{name:cxOwnerName(x)+' · '+x.name,kind:cxOwnerKind(x),in:cxIn(x),out:cxOut(x)};
+rpDef('financeiro','Financeiro','Lançamentos, contas a pagar e a receber, contas financeiras e caixas. DRE e fluxo de caixa ficam em Análises.',[
  {k:'lancamentos',l:'Lançamentos',rows:()=>LANCS.slice().sort((a,b)=>a.d<b.d?1:-1),
-  chip:{l:'Tipo',by:r=>r.tipo,items:[rpC('e','Entradas',rpOk),rpC('s','Saídas',rpBad)]},
-  fl:[{k:'comp',l:'Competência',opts:()=>[...new Set(LANCS.map(l=>l.comp))].sort().reverse().map(k=>[k,monthName(k)]),ok:(r,v)=>r.comp===v},{k:'cat',l:'Categoria',opts:()=>rpUniq(LANCS.map(l=>l.cat)),ok:(r,v)=>r.cat===v}],
-  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('comp','Competência',r=>monthName(r.comp)),rpCol('desc','Descrição',r=>r.desc),rpCol('cat','Categoria',r=>r.cat),rpCol('tipo','Tipo',r=>r.tipo==='e'?'Entrada':'Saída'),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>r.st==='ok'?'Aprovado':r.st),rpCol('who','Lançado por',r=>r.who||'—',{off:true})]},
+  chip:{l:'Tipo',by:r=>r.tipo,items:[rpC('e','Entradas',rpOk),rpC('s','Saídas',rpBad),rpC('t','Transferências',rpInfo)]},
+  fl:[{k:'comp',l:'Competência',opts:()=>[...new Set(LANCS.map(l=>l.comp))].sort().reverse().map(k=>[k,monthName(k)]),ok:(r,v)=>r.comp===v},{k:'cat',l:'Categoria',opts:()=>rpUniq(LANCS.map(l=>l.cat)),ok:(r,v)=>r.cat===v},{k:'conta',l:'Conta',opts:()=>[[rpConta,rpConta]],ok:(r,v)=>(r.conta||rpConta)===v},{k:'st',l:'Situação',opts:()=>Object.keys(rpLcSt).map(k=>[k,rpLcSt[k]]),ok:(r,v)=>r.st===v}],
+  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('comp','Competência',r=>monthName(r.comp)),rpCol('desc','Descrição',r=>r.desc),rpCol('conta','Conta',r=>r.conta||rpConta),rpCol('cat','Categoria',r=>r.cat),rpCol('tipo','Tipo',r=>r.tipo==='e'?'Entrada':r.tipo==='s'?'Saída':'Transferência'),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>rpLcSt[r.st]||r.st),rpCol('orig','Origem',r=>r.orig||'Manual'),rpCol('who','Lançado por',r=>r.who||'—',{off:true})]},
  {k:'pagar',l:'Contas a pagar',rows:()=>PAGAR.slice().sort((a,b)=>a.venc<b.venc?-1:1),
   chip:{l:'Situação',by:r=>r.paid?'pg':r.venc<SX_TODAY?'ven':'ab',items:[rpC('ab','A vencer',rpWarn),rpC('ven','Vencidas',rpBad),rpC('pg','Pagas',rpOk)]},
   cols:[rpCol('desc','Conta',r=>r.desc),rpCol('cat','Categoria',r=>r.cat),rpCol('venc','Vencimento',r=>rpD(r.venc),{raw:r=>r.venc}),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>r.paid?'Paga':r.venc<SX_TODAY?'Vencida':'A vencer')]},
  {k:'receber',l:'Contas a receber',rows:()=>RECEB.slice(),
-  cols:[rpCol('desc','Descrição',r=>r.desc),rpCol('prev','Previsão',r=>rpD(r.prev),{raw:r=>r.prev||''}),rpCol('v','Valor previsto',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('got','Recebido',r=>brl2(r.got||0),{n:1,raw:r=>r.got||0}),rpCol('src','Origem',r=>r.src||'—')]}
+  chip:{l:'Situação',by:r=>rpRecSt(r),items:[rpC('prev','Previstas',rpInfo),rpC('atr','Atrasadas',rpBad),rpC('rec','Recebidas',rpOk)]},
+  cols:[rpCol('desc','Descrição',r=>r.desc),rpCol('prev','Previsão',r=>rpD(r.prev),{raw:r=>r.prev||''}),rpCol('v','Valor previsto',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>({prev:'Prevista',atr:'Atrasada',rec:'Recebida'})[rpRecSt(r)]),rpCol('got','Valor recebido',r=>rpRecSt(r)==='rec'?brl2(r.got):'—',{n:1,raw:r=>rpRecSt(r)==='rec'?r.got:0})]},
+ {k:'contas',l:'Contas financeiras',rows:()=>[{n:rpConta,tipo:'Corrente',banco:'Banco do Brasil',ini:40000,atual:57830,on:true}],
+  chip:{l:'Situação',by:r=>r.on?'on':'off',items:[rpC('on','Ativas',rpOk),rpC('off','Inativas',rpOff)]},
+  cols:[rpCol('n','Conta',r=>r.n),rpCol('tipo','Tipo',r=>r.tipo),rpCol('b','Banco',r=>r.banco),rpCol('ini','Saldo inicial',r=>brl2(r.ini),{n:1,raw:r=>r.ini}),rpCol('at','Saldo atual',r=>brl2(r.atual),{n:1,raw:r=>r.atual}),rpCol('st','Situação',r=>r.on?'Ativa':'Inativa')]},
+ {k:'caixas',l:'Caixas',rows:()=>rpCxRows(),
+  fl:[{k:'tipo',l:'Tipo',opts:()=>[['Ministério','Ministério'],['Evento','Evento'],['Culto','Culto'],['Campanha','Campanha']],ok:(r,v)=>rpCxV(r).kind===v}],
+  cols:[rpCol('n','Caixa',r=>rpCxV(r).name),rpCol('k','Tipo',r=>rpCxV(r).kind),rpCol('in','Entradas',r=>cxMoney(rpCxV(r).in),{n:1,raw:r=>rpCxV(r).in/100}),rpCol('out','Saídas',r=>cxMoney(rpCxV(r).out),{n:1,raw:r=>rpCxV(r).out/100}),rpCol('bal','No caixa',r=>cxMoney(rpCxV(r).in-rpCxV(r).out),{n:1,raw:r=>(rpCxV(r).in-rpCxV(r).out)/100})]}
 ]);
 
 rpDef('secretaria','Secretaria','Atos, documentos emitidos e mandatos da igreja.',[

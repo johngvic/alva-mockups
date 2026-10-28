@@ -19,7 +19,7 @@ const A={
  event:v=>toast(`${NEXT[v].t}: detalhes em breve`),
  day:v=>{S.day=+v;$$('.day').forEach((d,i)=>d.setAttribute('aria-pressed',i===S.day));const n=$('#daynote');n.innerHTML=dayNote();n.animate([{opacity:0,transform:'translateY(3px)'},{opacity:1,transform:'none'}],{duration:260});},
  range:v=>{if(S.range===v)return;S.range=v;$$('.segc button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));$('#chart').innerHTML=chartSVG();bindChart();$('.kpi .kd.up').textContent=v==='12s'?'+14 no período':'+20 no período';},
- bday:(v,b)=>{const x=BDAYS[+v];if(x.sent){toast(`Você já felicitou ${x[0].n.split(' ')[0]}`);return;}x.sent=true;b.classList.add('sent');toast(`Felicitação enviada para ${x[0].n.split(' ')[0]}`,()=>{x.sent=false;b.classList.remove('sent');});},
+ bday:(v,b)=>{const x=BDAYS[+v];if(x.sent){toast(`Você já felicitou ${x[0].n.split(' ')[0]}`);return;}x.sent=true;b.classList.add('sent');toast(`Felicitação enviada para ${x[0].n.split(' ')[0]}`);},
 };
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');
  if(!e.target.closest('.pop')&&!(b&&/Menu$/.test(b.dataset.a)))closePops();

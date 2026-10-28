@@ -15,9 +15,9 @@ const tkFull=(e,t)=>!!t.cap&&tkSold(e,t)>=t.cap;
 const tkOf=(e,r)=>(e.tickets||[]).find(t=>t.id===r.tk)||null;
 const itById=(e,id)=>(e.items||[]).find(i=>i.id===id);
 const itLabel=i=>i.n+(i.p?' · '+i.p:'');
-const itSold=(e,it)=>e.regs.filter(r=>(r.buy||[]).includes(it.id)).length;
+const itSold=(e,it)=>e.regs.reduce((a,r)=>a+(r.buy||[]).filter(x=>x===it.id).length,0);
 function buyOf(e,r){return (r.buy||[]).map(id=>itById(e,id)).filter(Boolean);}
-function regTot(e,r){return (+r.val||0)+buyOf(e,r).reduce((a,i)=>a+(+i.price||0),0);}
+function regTot(e,r){return (+r.val||0)+buyOf(e,r).reduce((a,i)=>a+(+i.price||0),0)-(+r.cd||0);}
 function evTop(e){const p=(e.tickets||[]).map(t=>+t.price||0);return p.length?Math.max(...p):(+e.price||0);}
 function evFromTxt(e){const act=(e.tickets||[]).filter(t=>!t.off);if(act.length>1){const m=Math.min(...act.map(t=>+t.price||0)),M=Math.max(...act.map(t=>+t.price||0));return m===M?brl(m):'a partir de '+brl(m);}return brl(e.price);}
 function evMulti(e){return (e.tickets||[]).filter(t=>!t.off).length>1;}
@@ -29,12 +29,13 @@ evDet=function(e){
  const base=`<div class="pgrid"><div class="col">
   <section class="card pc evi"><div class="sh"><h2>Informações</h2><button class="btn sec sm" data-a="evEdit">${ic('pen',14)}Editar</button></div><div class="evi-g">${evInfoRows(e)}</div></section>`;
  if(e.st==='previsao')return base+`<section class="card pc"><div class="soft-empty"><p>Ainda é uma previsão.</p><span class="who">Inscrições, pagamento e check-in ficam disponíveis quando a data for confirmada.</span><button class="btn pri" data-a="evConfirm" data-v="${e.id}">Confirmar data</button></div></section></div><div class="col"></div></div>`;
+ if(!SPECIAL.includes(e.type))return base+`</div><div class="col"></div></div>`;
  const tks=e.tickets,act=tks.filter(t=>!t.off);
  const tkCard=`<section class="card pc"><div class="sh"><h2>Ingressos</h2><button class="btn sec sm" data-a="tkNew">${ic('plus',14,2.2)}Novo ingresso</button></div>
   <p class="who" style="margin:-6px 0 12px">${tks.length?'Os tipos que a pessoa escolhe ao se inscrever.':'Hoje a inscrição é uma só. Crie tipos de ingresso se precisar separar, por exemplo, participante e equipe.'}</p>
-  ${tks.length?`<div class="tg-list">${tks.map(t=>{const sold=tkSold(e,t),inc=tkInclTxt(e,t),pr=tkPrice(e,t),ad=tkOffers(e,t);return `<div class="tg-r ${t.off?'off':''}" tabindex="0" data-a="tkEdit" data-v="${t.id}">
+  ${tks.length?`<div class="tg-list">${tks.map(t=>{const sold=tkSold(e,t),inc=tkInclTxt(e,t),pr=tkPrice(e,t);return `<div class="tg-r ${t.off?'off':''}" tabindex="0" data-a="tkEdit" data-v="${t.id}">
    <span class="tg-main"><span class="tg-t"><b>${esc(t.n)}</b>${t.off?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Vendas pausadas</span>':tkFull(e,t)?'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Esgotado</span>':''}</span>${t.desc?`<small>${esc(t.desc)}</small>`:''}
-    ${inc.length||(t.per||[]).length||ad.length?`<span class="tg-chips">${inc.map(x=>`<i>${ic('check',10,3)}${esc(x)}</i>`).join('')}${ad.map(i=>`<i class="add">${ic('plus',10,3)}${esc(itLabel(i))} · ${brl(itPx(e,i,t))}</i>`).join('')}${(t.per||[]).length?`<i class="per">${ic('calendar',10,2.4)}${esc(t.per.join(' + '))}</i>`:''}</span>`:''}</span>
+    ${inc.length||(t.per||[]).length?`<span class="tg-chips">${inc.map(x=>`<i>${ic('check',10,3)}${esc(x)}</i>`).join('')}${(t.per||[]).length?`<i class="per">${ic('calendar',10,2.4)}${esc(t.per.join(' + '))}</i>`:''}</span>`:''}</span>
    <span class="tg-pr"><b class="mono">${brl(pr)}</b><small>${sold}${t.cap?'/'+t.cap:''} ${sold===1?'inscrito':'inscritos'}</small>${t.cap?`<span class="tr"><i style="width:${Math.min(100,sold/t.cap*100)}%"></i></span>`:''}</span>
    <span class="hact"><div style="position:relative"><button class="ibtn sm" data-a="tkMenu" data-v="${t.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="tgPop-${t.id}" style="right:0;top:calc(100% + 4px)"><button class="pi" data-a="tkEdit" data-v="${t.id}">${ic('pen',16)}Editar</button><button class="pi" data-a="tkPause" data-v="${t.id}">${ic(t.off?'check':'pause',16)}${t.off?'Retomar vendas':'Pausar vendas'}</button><hr><button class="pi danger" data-a="tkDel" data-v="${t.id}">${ic('x',16)}Excluir ingresso</button></div></div></span></div>`;}).join('')}</div>`:`<button class="btn sec" data-a="tkNew">${ic('plus',14,2.2)}Criar tipos de ingresso</button>`}
   ${e.paid&&!act.length?`<div class="rgwarn" style="margin-top:12px">${ic('alert',14,2)}Nenhum ingresso à venda. Retome ou crie um ingresso.</div>`:''}</section>`;
@@ -53,7 +54,7 @@ evDet=function(e){
    ${e.checkin==='periodo'?`<div class="fld ckc"><span class="fl">Períodos <small>cada um gera seu próprio código</small></span>
     ${e.periods.length?`<div class="pers">${e.periods.map((p,i)=>`<div class="per"><span class="pn">${esc(p)}</span><span class="mono">${codeOf(e,p)}</span><button class="ibtn sm" data-a="copy" data-v="${codeOf(e,p)}" aria-label="Copiar código de ${esc(p)}" title="Copiar">${ic('clipboard',14)}</button><button class="ibtn sm" data-a="evPerDel" data-v="${i}" aria-label="Remover ${esc(p)}" title="Remover">${ic('x',14)}</button></div>`).join('')}</div>`:'<p class="who" style="margin:0">Nenhum período ainda. Adicione o primeiro, ex.: Sábado.</p>'}
     <form class="perF" id="perF"><input placeholder="Ex.: Sábado" aria-label="Novo período" autocomplete="off"><button class="btn sec sm" type="submit">${ic('plus',13,2.2)}Adicionar período</button></form></div>`:''}</section>`;
- return base+tkCard.replace('<h2>Ingressos</h2>','<h2>Inscrição e ingressos</h2>').replace('</div>',`</div><div class="evpay"><div class="yn pillt" id="payG"><label><input type="radio" name="pay" value="0" ${!e.paid?'checked':''}><span>Gratuita</span></label><label><input type="radio" name="pay" value="1" ${e.paid?'checked':''}><span>Paga</span></label></div><span class="evpay-h">${ic(e.paid?'shield':'check',14,2)}${e.paid?'Pix e cartão. Taxas e repasse seguem a configuração de pagamentos da igreja.':'Sem cobrança. A pessoa só confirma a inscrição.'}</span></div>`)+evFinDet(e)+rfCard+`</div><div class="col">${ckCard}${itCard}${vemCard(e)}</div></div>`;
+ return base+tkCard.replace('<h2>Ingressos</h2>','<h2>Inscrição e ingressos</h2>').replace('</div>',`</div><div class="evpay"><div class="yn" id="payG"><label><input type="radio" name="pay" value="0" ${!e.paid?'checked':''}><span>Gratuita</span></label><label><input type="radio" name="pay" value="1" ${e.paid?'checked':''}><span>Paga</span></label></div><span class="evpay-h">${ic(e.paid?'shield':'check',14,2)}${e.paid?'Pix e cartão. Taxas e repasse seguem a configuração de pagamentos da igreja.':'Sem cobrança. A pessoa só confirma a inscrição.'}</span></div>`)+evFinDet(e)+rfCard+`</div><div class="col">${ckCard}${itCard}${vemCard(e)}</div></div>`;
 };
 
 /* ---------- inscrições do evento ---------- */
@@ -73,7 +74,7 @@ tickets=function(e,r){
  const ps=tk&&tk.per&&tk.per.length?e.periods.filter(p=>tk.per.includes(p)):e.periods;
  const acc=e.checkin==='off'?[{k:'insc',n:'Inscrição'+(tk&&e.tickets.length>1?' · '+tk.n:''),tag:'Inscrição',code:''}]:e.checkin==='inteiro'?[{k:'geral',n:'Entrada geral',tag:'Acesso',code:`ALVA-${num}-ACESSO-GERAL`}]:ps.map(p=>({k:'p:'+p,n:'Entrada · '+p,tag:'Acesso',code:`ALVA-${num}-${slug(p)}`}));
  const inc=(tk?tk.incl:[]).map(id=>itById(e,id)).filter(Boolean).map(it=>({k:'inc:'+it.id,n:itLabel(it),tag:'Incluso',price:0,code:e.checkin==='off'?'':`ALVA-${num}-${slug(it.n+(it.p?'-'+it.p:''))}-INC`}));
- const its=buyOf(e,r).map(it=>({k:'i:'+it.id,n:itLabel(it),tag:'Compra',price:itPx(e,it,tk),code:e.checkin==='off'?'':`ALVA-${num}-${slug(it.n+(it.p?'-'+it.p:''))}`}));
+ const seen={},its=buyOf(e,r).map(it=>{const n=seen[it.id]=(seen[it.id]||0)+1,x=n>1?'-'+n:'';return {k:'i:'+it.id+(n>1?'#'+n:''),n:itLabel(it),tag:'Compra',price:it.price,code:e.checkin==='off'?'':`ALVA-${num}-${slug(it.n+(it.p?'-'+it.p:''))}${x}`};});
  return [...acc,...inc,...its];
 };
 rgDlg=function(e,rid){
@@ -128,6 +129,19 @@ function tkDlg(tid){
  setTimeout(()=>f.elements.n.focus(),80);
 }
 
+/* ---------- venda rápida de balcão: a mesma janela da venda rápida da cafeteria e da loja ---------- */
+const cmLab=k=>k;
+const POS_COR={t:'#2f7de1',i:'#c2410c'};
+function posPayHtml(st){return `<p class="fl">Pagamento</p><div class="pos-pay">${Object.entries(FOOD_PAY).map(([p,[icn,c]])=>`<button type="button" class="${st.m===p?'on':''}" data-pm="${p}"><span class="ax-kt" style="--k:${c};--s:26px">${ic(icn,12)}</span>${p}</button>`).join('')}</div>
+ <p class="fl" style="margin-top:14px">Desconto <small>opcional</small></p><div class="pos-disc"><div class="segc"><button type="button" data-dt="value" aria-pressed="${st.dt==='value'}">R$</button><button type="button" data-dt="percent" aria-pressed="${st.dt==='percent'}">%</button></div><input id="posD" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>`;}
+/* o desconto nunca passa do valor da venda */
+function posDisc(st,base){const v=Math.max(0,+st.dv||0),d=st.dt==='percent'?base*Math.min(100,v)/100:v;return Math.min(base,Math.round(d*100)/100);}
+function posWire(root,st,paint){$(root).addEventListener('click',x=>{const t=x.target.closest('[data-pm],[data-dt]');if(!t)return;
+  if(t.dataset.pm){st.m=t.dataset.pm;$$('.pos-pay button').forEach(b=>b.classList.toggle('on',b===t));}
+  if(t.dataset.dt){st.dt=t.dataset.dt;$$('.pos-disc .segc button').forEach(b=>b.setAttribute('aria-pressed',b===t));}
+  paint();});
+ $('#posD').addEventListener('input',x=>{st.dv=+x.target.value||0;paint();});}
+
 /* ---------- inscrição manual com ingresso, compras e voucher ---------- */
 /* desconto do voucher sobre o valor do ingresso: valor fixo (padrão) ou percentual; nunca passa do ingresso */
 function vDisc(v,price){return v.type==='pct'?Math.min(price,Math.round(price*v.disc)/100):Math.min(price,v.disc);}
@@ -163,29 +177,71 @@ Object.assign(A,{
   const n=itSold(e,it);
   confirmDel({title:`Remover ${itLabel(it)}?`,body:n?`${n} ${n===1?'pessoa já comprou':'pessoas já compraram'}; o item continua valendo para ${n===1?'ela':'elas'} e só deixa de ser vendido.`:'Ele deixa de ser oferecido na inscrição.',label:n?'Parar de vender':'Remover item',onConfirm:()=>{if(n){it.off=true;rerEv();toast(`${it.n} não é mais vendido`,()=>{it.off=false;rerEv();});}else{const i=e.items.indexOf(it);e.items.splice(i,1);rerEv();toast('Item removido',()=>{e.items.splice(i,0,it);rerEv();});}}});},
  evReg:()=>{const e=eById(S.evt);evEnsure(e);
-  if(e.cap&&e.regs.length>=e.cap){toast('Vagas esgotadas. Aumente as vagas para inscrever mais pessoas.');return;}
-  const tks=e.tickets.filter(t=>!t.off);if(e.paid&&!tks.length){toast('Nenhum ingresso à venda. Crie ou retome um ingresso primeiro.');return;}
-  const cand=MEMBERS.filter(m=>!e.regs.some(r=>r.n===m.n)),adds=e.items.filter(i=>!i.off),st={tk:tks.length?(tks.find(t=>!tkFull(e,t))||tks[0]).id:'',buy:new Set(),vc:''},mny=evMoney(e);
-  openDlg(`${dlgHead('Adicionar inscrição',esc(e.t))}<div id="rgW"><label class="sbox" style="margin-bottom:10px">${ic('search',16)}<input id="rq" placeholder="Buscar membro" autocomplete="off"></label><div class="pick" id="rpk" style="max-height:170px">${candList(cand,'')}</div>
-   ${tks.length?`<p class="fl tg-h">Ingresso</p><div class="tg-opts">${tks.map(t=>`<label class="tg-o ${tkFull(e,t)?'off':''}"><input type="radio" name="tk" value="${t.id}" ${st.tk===t.id?'checked':''} ${tkFull(e,t)?'disabled':''}><span><b>${esc(t.n)}</b><small>${tkFull(e,t)?'Esgotado':esc([t.desc,tkInclTxt(e,t).length?'Inclui '+tkInclTxt(e,t).join(', '):''].filter(Boolean).join(' · '))||'&nbsp;'}</small></span><b class="mono">${brl(tkPrice(e,t))}</b></label>`).join('')}</div>`:''}
-   ${adds.length?`<p class="fl tg-h">Compras adicionais <small>opcional</small></p><div class="tg-opts" id="rgAd">${adds.map(i=>`<label class="tg-o"><input type="checkbox" value="${i.id}"><span><b>${esc(i.n)}</b><small>${i.p||'Evento inteiro'}</small></span><b class="mono">${brl(i.price)}</b></label>`).join('')}</div>`:''}
-   ${e.paid&&e.vouchers.length?`<label class="fld" style="margin-top:14px"><span class="fl">Voucher <small>opcional</small></span><input id="rv" class="mono" placeholder="Ex.: ${esc(e.vouchers[0].code)}" autocomplete="off" style="text-transform:uppercase"><span class="err"></span></label>`:''}
-   <div id="rtot"></div>
-   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="evRegDo">Inscrever</button></div></div>`,'sm');
-  const W=$('#rgW'),member=()=>{const s=$('input[name=pm]:checked');return s?byId(s.value):null;},paint=()=>{const c=regCalc(e,st,member());$('#rtot').innerHTML=regTotHtml(e,c);const rv=$('#rv');if(rv){const fl=rv.closest('.fld');fl.classList.toggle('bad',!!c.err&&!!c.code);fl.querySelector('.err').textContent=c.code?c.err:'';}
-   W.querySelectorAll('#rgAd input').forEach(i=>{const inc=c.t&&c.t.incl.includes(i.value),lb=i.closest('.tg-o');lb.classList.toggle('off',!!inc);i.disabled=!!inc;if(inc){i.checked=false;st.buy.delete(i.value);lb.querySelector('small').textContent='Já incluso neste ingresso';}});};
-  $('#rq').addEventListener('input',x=>{$('#rpk').innerHTML=candList(cand,x.target.value);});
-  W.addEventListener('change',x=>{const t=x.target;if(t.name==='tk')st.tk=t.value;else if(t.closest('#rgAd')){t.checked?st.buy.add(t.value):st.buy.delete(t.value);}paint();});
-  const rv=$('#rv');if(rv)rv.addEventListener('input',()=>{st.vc=rv.value;paint();});
-  W._st=st;paint();},
- evRegDo:(v,b)=>{const e=eById(S.evt),s=$('input[name=pm]:checked');if(!s){toast('Escolha um membro');return;}const m=byId(s.value),W=$('#rgW'),st=W._st;
-  const c=regCalc(e,st,m),rv=$('#rv');
-  if(c.code&&c.err){const fl=rv.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=c.err;return;}
-  if(c.t&&tkFull(e,c.t)){toast(`${c.t.n} esgotado`);return;}
+  const tks=e.tickets.length?e.tickets:[{id:'',n:'Inscrição',desc:'',price:0,incl:[],off:false}],adds=e.items.filter(i=>!i.off),mny=evMoney(e);
+  if(e.paid&&!tks.filter(t=>!t.off).length){toast('Nenhum ingresso à venda. Crie ou retome um ingresso primeiro.');return;}
+  const st={tk:{},buy:{},cat:'all',q:'',m:'Pix',dt:'value',dv:0,vc:''};
+  const prods=()=>[...tks.map(t=>({k:'t',id:t.id,n:t.n,price:tkPrice(e,t),off:!!t.off,sub:t.off?'Vendas pausadas':[tkFull(e,t)?'Esgotado · a equipe pode vender':'',t.desc,tkInclTxt(e,t).length?'Inclui '+tkInclTxt(e,t).join(', '):''].filter(Boolean).join(' · '),ic:'ticket'})),...adds.map(i=>({k:'i',id:i.id,n:i.n,price:+i.price||0,off:false,sub:i.p||'Evento inteiro',ic:'gift'}))];
+  const qty=p=>(p.k==='t'?st.tk:st.buy)[p.id]||0;
+  const email=()=>($('#rgE').value||'').trim().toLowerCase();
+  const calc=()=>{const ps=prods(),tl=ps.filter(p=>p.k==='t'&&qty(p)),il=ps.filter(p=>p.k==='i'&&qty(p)),nT=tl.reduce((a,p)=>a+qty(p),0),nI=il.reduce((a,p)=>a+qty(p),0),tkTot=tl.reduce((a,p)=>a+p.price*qty(p),0),itTot=il.reduce((a,p)=>a+p.price*qty(p),0),
+    code=st.vc.trim().toUpperCase(),vc=code?e.vouchers.find(x=>x.code===code):null;let err='',vd=0;
+   if(code&&!vc)err='Voucher não encontrado neste evento';else if(vc&&vc.exp&&inDays(vc.exp)<0)err=`Expirou em ${dBR(vc.exp)}`;else if(vc&&vc.mode==='especifico'&&vc.email!==email())err=`Este voucher é só para ${vc.email}`;else if(vc)vd=vDisc(vc,tkTot);
+   const base=Math.round((tkTot-vd+itTot)*100)/100,disc=mny?posDisc(st,base):0;
+   return {tl,il,nT,nI,tkTot,itTot,code,vc,err,vd,base,disc,tot:Math.round((base-disc)*100)/100};};
+  openDlg(`${dlgHead('Adicionar inscrição','Escolha os ingressos e as compras, a forma de pagamento e confirme.')}<div class="pos"><div class="pos-l"><label class="sbox">${ic('search',16)}<input id="posQ" placeholder="Buscar ingresso ou compra" autocomplete="off"></label>
+   ${adds.length?`<div class="chips pos-cats">${[['all','Todos'],['t','Ingressos'],['i','Compras adicionais']].map(([v,l])=>`<button type="button" class="chipf ${v==='all'?'on':''}" data-pc="${v}">${l}</button>`).join('')}</div>`:''}<div class="pos-g" id="posG"></div></div>
+   <aside class="pos-r"><p class="fl">Carrinho</p><div id="evCart"></div>
+    ${mny?`<div style="margin-top:14px">${posPayHtml(st)}</div>`:''}
+    ${e.paid?`<p class="fl" style="margin-top:14px">Voucher <small>opcional</small></p><div class="pos-disc"><input id="rv" class="mono" placeholder="Código do voucher" autocomplete="off" style="text-transform:uppercase"></div><small class="hint" id="rvH"></small>`:''}
+    <p class="fl" style="margin-top:14px">Comprador</p><div class="pos-buy"><div class="pos-disc"><input id="rgN" placeholder="Nome e sobrenome" autocomplete="off"></div><div class="pos-disc"><input id="rgE" type="email" placeholder="E-mail" autocomplete="off"></div><div class="pos-disc"><input id="rgP" type="tel" placeholder="Telefone com DDD" autocomplete="off"></div><div class="pos-disc"><input id="rgD" placeholder="CPF (opcional)" inputmode="numeric" autocomplete="off"></div></div><small class="hint" id="rgEh">Os ingressos e os QR Codes vão para este e-mail.</small>
+    <div id="posTot" class="pos-tot"></div></aside></div>
+   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" id="evPosOk" data-a="evRegDo">Confirmar venda</button></div>`,'xl pos-dlg');
+  const D=$('.pos-dlg');D._st=st;D._calc=calc;D._tks=tks;
+  const paintG=()=>{const q=norm(st.q),l=prods().filter(p=>(st.cat==='all'||p.k===st.cat)&&(!q||norm(p.n+' '+p.sub).includes(q)));
+   $('#posG').innerHTML=l.length?l.map(p=>{const n=qty(p);return `<button type="button" class="pos-p ${n?'in':''}" data-add="${p.k}|${p.id}" ${p.off?'disabled':''}><span class="ax-kt" style="--k:${POS_COR[p.k]};--s:44px">${ic(p.ic,20)}</span><span class="dkt"><b>${esc(p.n)}</b><span>${esc(p.sub)||'&nbsp;'}</span></span><b class="fd-v">${p.price?brl(p.price):'Grátis'}</b>${n?`<em class="pos-badge">${n}</em>`:`<span class="pos-plus">${ic('plus',13,2.4)}</span>`}</button>`;}).join(''):'<div class="mempty"><p>Nada encontrado.</p></div>';};
+  const paintC=()=>{const c=calc(),ps=prods().filter(p=>qty(p));
+   $('#evCart').innerHTML=ps.length?`<div class="pos-cart">${ps.map(p=>`<div class="pos-ln"><span class="dkt"><b>${esc(p.n)}</b><span>${p.price?brl(p.price)+' cada':'Grátis'}</span></span><span class="pos-q"><button type="button" data-q="${p.k}|${p.id}|-1" aria-label="Menos">${ic('minus',12,2.4)}</button><b>${qty(p)}</b><button type="button" data-q="${p.k}|${p.id}|1" aria-label="Mais">${ic('plus',12,2.4)}</button></span><b class="fd-v">${brl(p.price*qty(p))}</b><button type="button" class="ibtn sm" data-rm="${p.k}|${p.id}" aria-label="Tirar ${esc(p.n)}">${ic('x',12)}</button></div>`).join('')}</div>`:`<div class="pos-empty">${ic('ticket',18)}<span>Toque nos ingressos para adicionar.</span></div>`;
+   const rows=[];if(mny&&c.nT)rows.push(`<div><span>Subtotal</span><b>${brl(c.tkTot+c.itTot)}</b></div>`);if(c.vd)rows.push(`<div><span>Voucher ${esc(c.code)}</span><b>− ${brl(c.vd)}</b></div>`);if(c.disc)rows.push(`<div><span>Desconto</span><b>− ${brl(c.disc)}</b></div>`);
+   $('#posTot').innerHTML=rows.join('')+(mny?`<div class="big"><span>Total · ${st.m}</span><b>${c.nT?brl(c.tot):"—"}</b></div>`:`<div class="big"><span>Inscrições</span><b>${c.nT}</b></div>`);
+   const rv=$('#rv'),h=$('#rvH');if(rv){rv.classList.toggle('bad',!!c.err&&!!c.code);h.textContent=c.code?(c.err||'Voucher aplicado.'):'';}
+   const ok=$('#evPosOk');ok.disabled=!c.nT;ok.textContent=c.nT?(mny?`Confirmar venda · ${brl(c.tot)}`:`Confirmar ${c.nT===1?'inscrição':c.nT+' inscrições'}`):'Confirmar venda';};
+  const act=d=>{const [k,id,dl]=String(d.add||d.q||d.rm||'').split('|'),m=k==='t'?st.tk:st.buy;
+   if(d.pc!=null){st.cat=d.pc;$$('.pos-cats .chipf').forEach(x=>x.classList.toggle('on',x.dataset.pc===d.pc));}
+   if(d.pm!=null)st.m=d.pm;if(d.dt!=null)st.dt=d.dt;
+   if(d.add!=null)m[id]=Math.min(50,(m[id]||0)+1);
+   if(d.q!=null){m[id]=Math.max(0,Math.min(50,(m[id]||0)+(+dl)));if(!m[id])delete m[id];}
+   if(d.rm!=null)delete m[id];
+   paintG();paintC();};
+  D._act=act;
+  D.addEventListener('click',x=>{const t=x.target.closest('[data-pc],[data-pm],[data-dt],[data-add],[data-q],[data-rm]');if(!t||t.disabled)return;if(t.dataset.pm){$$('.pos-pay button').forEach(b=>b.classList.toggle('on',b===t));}if(t.dataset.dt){$$('.pos-disc .segc button').forEach(b=>b.setAttribute('aria-pressed',b===t));}act(t.dataset);});
+  $('#posQ').addEventListener('input',x=>{st.q=x.target.value;paintG();});
+  const pd=$('#posD');if(pd)pd.addEventListener('input',x=>{st.dv=+x.target.value||0;paintC();});
+  const rv=$('#rv');if(rv)rv.addEventListener('input',x=>{st.vc=x.target.value;paintC();});
+  $('#rgE').addEventListener('input',()=>{const em=email(),dup=em&&e.regs.some(r=>r.em===em&&r.st!=='cancelada');$('#rgEh').textContent=dup?'Já existe inscrição neste evento com este e-mail. Você pode continuar.':'Os ingressos e os QR Codes vão para este e-mail.';paintC();});
+  paintG();paintC();setTimeout(()=>$('#posQ')?.focus(),60);},
+ evRegDo:(v,b)=>{const e=eById(S.evt),D=$('.pos-dlg'),st=D._st,c=D._calc(),mny=evMoney(e);
+  const fail=(id,m)=>{const el=$(id);el.classList.add('bad');toast(m);if(el.focus)el.focus();return true;};
+  ['#rgN','#rgE','#rgP','#rgD'].forEach(id=>$(id).classList.remove('bad'));
+  const name=$('#rgN').value.trim().replace(/\s+/g,' '),em=$('#rgE').value.trim().toLowerCase(),ph=$('#rgP').value.trim(),doc=$('#rgD').value.replace(/\D/g,'');
+  if(!c.nT){toast('Adicione ao menos um ingresso');return;}
+  if(name.split(' ').length<2&&fail('#rgN','Informe o nome e o sobrenome'))return;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)&&fail('#rgE','Informe um e-mail válido'))return;
+  if(ph.replace(/\D/g,'').length<10&&fail('#rgP','Informe o telefone com DDD'))return;
+  if($('#rgD').value.trim()&&doc.length!==11&&fail('#rgD','O CPF tem 11 números'))return;
+  if(past(e)){toast('O evento já terminou. Não dá mais para vender no balcão.');return;}
+  if(c.code&&c.err){toast(c.err);return;}
+  if(mny&&c.base>0&&c.tot<=0){toast('O desconto não pode ser igual ao total. Para cortesia, use um voucher de bolsa integral.');return;}
   b.classList.add('busy');
-  setTimeout(()=>{const money=evMoney(e),pay=money?(c.tot>0?'pendente':(e.paid?'pago':'—')):'—',r=R(m.n,'2026-10-01',pay,c.val,c.vc?c.code:'');
-   if(c.vc)c.vc.uses++;if(c.t)r.tk=c.t.id;r.buy=c.adds.map(i=>i.id);e.regs.push(r);closeDlg();rerEv();
-   toast(c.tot>0?`${m.n.split(' ')[0]} inscrito(a) · link de pagamento enviado`:`${m.n.split(' ')[0]} inscrito(a)`);},600);},
+  setTimeout(()=>{const units=[];c.tl.forEach(p=>{for(let k=0;k<st.tk[p.id];k++)units.push(D._tks.find(t=>t.id===p.id));});
+   const buyIds=[];c.il.forEach(p=>{for(let k=0;k<st.buy[p.id];k++)buyIds.push(p.id);});
+   const sale='sl'+Math.random().toString(36).slice(2,7),rd=x=>Math.round(x*100)/100;let left=c.vd;
+   const pre=units.map(t=>{const p=tkPrice(e,t),take=Math.min(p,left);left=rd(left-take);return {t,val:rd(p-take)};});
+   const lt=pre.map((u,i)=>u.val+(i===0?c.itTot:0)),D2=c.disc;let dl=D2;
+   pre.forEach((u,i)=>{const share=i===pre.length-1?dl:Math.min(dl,rd(D2*lt[i]/c.base));dl=rd(dl-share);
+    const r=R(name,'2026-10-01',mny?'pago':'—',u.val,c.vc?c.code:'');
+    Object.assign(r,{tk:u.t.id||undefined,buy:i===0?buyIds.slice():[],sale,em,ph,doc,cm:mny?st.m:undefined,cd:share||undefined});e.regs.push(r);});
+   if(c.vc)c.vc.uses++;closeDlg();rerEv();
+   toast(units.length===1?`${name.split(' ')[0]} inscrito(a)`:`${name.split(' ')[0]} inscrito(a) · ${units.length} ingressos`);},600);},
 });
 {const _ag=agAfter;agAfter=function(){_ag();const e=S.evt&&eById(S.evt);if(!e)return;
  const it=$('#itF2');if(it)it.addEventListener('submit',x=>{x.preventDefault();const fd=new FormData(it),n=fd.get('n').trim(),p=+fd.get('p'),per=fd.get('per')||'';if(!n){it.n.focus();return;}if(!(p>0)){it.p.focus();toast('Informe o preço do item');return;}
