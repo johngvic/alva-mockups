@@ -45,6 +45,8 @@ const ATM_ACT={
  'export.failed':['Failed',a=>`Falha ao gerar o arquivo do pedido #${a}`,'FILES_UNAVAILABLE',0,'export.generated'],
  'event.redelivered':['Succeeded',a=>`Evento #${a} reentregue ao consumidor`],
  'event.deliveryFailed':['Failed',a=>`Falha ao reentregar o evento #${a}`,'CONSUMER_ERROR',0,'event.redelivered'],
+ 'duplicates.detected':['Succeeded',a=>{const n=parseInt(a.slice(0,2),16)%5,m=parseInt(a.slice(2,4),16)%4;return `${n} par${n===1?'':'es'} novo${n===1?'':'s'}, ${m} atualizado${m===1?'':'s'}`;}],
+ 'duplicates.failed':['Failed',a=>`Falha ao detectar duplicados da igreja #${a}`,'DB_TIMEOUT',0,'duplicates.detected'],
 };
 const ATM_PURGE=[['audit.logEntries','audit'],['connectors.calls','connectors'],['communication.inbox','communication'],['pastoral.prayerTexts','pastoral'],['financial.importDrafts','financial'],['identity.controlData','identity'],['files.unused','files'],['files.purge','files'],['automation.runs','automation']];
 // s: k = m (a cada N minutos), h (a cada N horas), d (diária), w (semanal); i = intervalo; t = horário; days = dias (0 = segunda); z = fuso
@@ -62,6 +64,7 @@ const ATM_JOBS=[
  {k:'data.requests',n:'Exportação de dados e exclusão de conta',d:'Gera o arquivo "Baixar meus dados" e conclui a exclusão de conta',opt:0,s:{k:'m',i:5,z:'UTC'},cap:2,t:[['identity','data_export','export.generated'],['identity','user','account.deleted']],f:['identity','data_export','export.failed']},
  {k:'retention.purge',n:'Retenção e expurgo',d:'Apaga o que passou do prazo de guarda, uma política por origem',opt:0,s:{k:'d',i:1,t:'03:00',z:'UTC'},cap:9,t:null,f:null,purge:1},
  {k:'events.redeliver',n:'Entrega durável de eventos',d:'Reentrega aos consumidores os eventos pendentes ou que falharam',opt:0,s:{k:'m',i:1,z:'UTC'},cap:6,t:[['communication','event_delivery','event.redelivered'],['donations','event_delivery','event.redelivered'],['shop','event_delivery','event.redelivered']],f:['communication','event_delivery','event.deliveryFailed']},
+ {k:'members.duplicates',n:'Detecção de cadastros duplicados',d:'Compara os cadastros de cada igreja e deixa prontos os pares que parecem a mesma pessoa',opt:0,s:{k:'d',i:1,t:'03:00',z:'UTC'},cap:4,t:[['membership','church','duplicates.detected']],f:['membership','church','duplicates.failed']},
 ];
 let atmSeed=20261028,atmIC=0;
 const atmR=()=>{atmSeed=(atmSeed*1664525+1013904223)>>>0;return atmSeed/4294967296;};
