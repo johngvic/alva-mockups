@@ -348,6 +348,17 @@ rpDef('multi','Multi-igreja','Regionais e igrejas da organização.',[
   cols:[rpCol('n','Regional',r=>r.n),rpCol('sup','Supervisor',r=>r.sup||'—'),rpCol('q','Igrejas',r=>IGREJAS.filter(g=>g.rede===r.id).length,{n:1}),rpCol('main','Principal',r=>rpYes(r.main))]}
 ]);
 
+/* Usuários e visitantes: relatório sem módulo dono, segue o papel Administrador/Plataforma (IDN-P-30) */
+rpDef('usuarios','Usuários e visitantes','Contas do painel e contas de visitantes. Sem módulo dono: aparece para quem administra a plataforma.',[
+ {k:'usuarios',l:'Usuários',rows:()=>USERS.filter(u=>!u.revoked),
+  chip:{l:'Situação',by:r=>idStatus(r),items:[rpC('Ativo','Ativos',rpOk),rpC('Convidado','Convidados',rpWarn),rpC('Suspenso','Suspensos',rpBad)]},
+  fl:[{k:'role',l:'Papel',opts:()=>rpUniq(USERS.map(u=>u.role)),ok:(r,v)=>r.role===v}],
+  cols:[rpCol('n','Usuário',r=>r.n),rpCol('role','Papel',r=>r.role),rpCol('st','Situação',r=>idStatus(r)),rpCol('last','Último acesso',r=>idLast(r)),rpCol('e','E-mail',r=>r.e||'—',{s:1,off:true})]},
+ {k:'visitantes',l:'Visitantes',rows:()=>ID_VISITORS.slice(),
+  chip:{l:'Situação',by:r=>r.status==='Ativo'?'Ativo':'Revogado',items:[rpC('Ativo','Ativos',rpOk),rpC('Revogado','Revogados',rpBad)]},
+  cols:[rpCol('n','Visitante',r=>r.n),rpCol('church','Igreja',r=>r.church),rpCol('created','Criado em',r=>rpD(r.created),{raw:r=>r.created}),rpCol('int','Integração',r=>r.integration||'—'),rpCol('st','Situação',r=>r.status),rpCol('e','E-mail',r=>r.e||'—',{s:1,off:true})]}
+]);
+
 /* menu Relatórios e roteamento */
 (()=>{const g=NAV.find(x=>x[0]==='Gestão')[1],i=g.findIndex(n=>n[0]==='admin');g.splice(i<0?g.length:i,0,['relatorios','clipboard','Relatórios',RP_ORDER.map(k=>['rp-'+k,RP[k].l])]);})();
 {const _ph2=placeholder;placeholder=id=>typeof id==='string'&&id.slice(0,3)==='rp-'&&RP[id.slice(3)]?rpPage(id.slice(3)):_ph2(id);}

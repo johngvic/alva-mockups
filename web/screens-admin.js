@@ -78,7 +78,7 @@ function usersList(){
   <div class="k4"><span class="kl">Líderes</span><span class="kv">${USERS.filter(u=>u.role==='Líder').length}</span><span class="kd">${Object.keys(ROLES).length} roles cadastradas</span></div>
   <div class="k4"><span class="kl">Acessos por área</span><span class="kv">${SCOPES.length}</span><span class="kd">em ${new Set(SCOPES.map(x=>x.area)).size} áreas</span></div></section>`;
  const tabs=`<div class="segc up-tabs rise" style="--d:2" role="tablist">${[['users','Usuários',USERS.length],['scope','Acessos por área',SCOPES.length],['matrix','Papéis e matriz',Object.keys(ROLES).length],['mods','Módulos e ministérios',MODMAP.filter(m=>MODMIN[m[0]]).length+'/'+MODMAP.length]].map(t=>`<button data-a="uTab" data-v="${t[0]}" aria-pressed="${S.utab===t[0]}">${t[1]}<small class="cm-n">${t[2]}</small></button>`).join('')}</div>`;
- return `${admHead('Usuários e permissões','Pessoas, papéis e acessos por área',`<button class="btn sec" data-a="idExport">Exportar</button><button class="btn pri" data-a="uInvite">${ic('plus',15,2.2)}Adicionar usuário</button>`)}${kp}${tabs}
+ return `${admHead('Usuários e permissões','Pessoas, papéis e acessos por área',`<button class="btn pri" data-a="uInvite">${ic('plus',15,2.2)}Adicionar usuário</button>`)}${kp}${tabs}
  <div class="rise" style="--d:3">${S.utab==='scope'?scopeTab():S.utab==='matrix'?matrixTab():S.utab==='mods'?modsTab():usersTab()}</div>`;
 }
 function usersTab(){const q=norm(S.uq),l=USERS.filter(u=>!q||norm(u.n+' '+u.e+' '+u.role).includes(q));

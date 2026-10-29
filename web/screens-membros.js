@@ -283,9 +283,8 @@ const PA={
    const b=f.querySelector('button[type=submit]');b.classList.add('busy');
    setTimeout(()=>{const m=M(n,em,fd.get('ph'),'2026-09','solicitado',[],{bap:false,app:fd.get('inv')?{st:'ativo',last:'convite enviado'}:{st:'sem conta'}});MEMBERS.unshift(m);S.flash=m.id;S.filter='todos';S.month='todas';S.q='';closeDlg();render();toast(`${n.split(' ')[0]} adicionado(a)${fd.get('inv')&&em?' · convite enviado':''}`,()=>{MEMBERS.splice(MEMBERS.indexOf(m),1);render();});},900);});},
  dupes:()=>{const ps=dupPairs();S.dupI=0;dupDlg(ps);},
- merge:(v,b)=>{const ps=dupPairs(),[a,c]=ps[S.dupI];const keep=$('input[name=keep]:checked').value==='a'?a:c,drop=keep===a?c:a;
-  b.classList.add('busy');setTimeout(()=>{keep.dup=null;MEMBERS.splice(MEMBERS.indexOf(drop),1);if(!keep.min.length)keep.min=drop.min;const left=dupPairs();toast(`Cadastros de ${keep.n.split(' ')[0]} mesclados`);if(left.length){S.dupI=0;dupDlg(left);}else closeDlg();render();},900);},
- notDup:()=>{const ps=dupPairs(),[a,c]=ps[S.dupI];a.dup=null;c.dup=null;const left=dupPairs();toast('Marcados como pessoas diferentes');if(left.length)dupDlg(left);else closeDlg();render();},
+ /* sem mesclar (MEM-P-12): o botão "Ignorar" tira o par da lista */
+ notDup:()=>{const ps=dupPairs(),[a,c]=ps[S.dupI];a.dup=null;c.dup=null;const left=dupPairs();toast('Par ignorado · os dois cadastros foram mantidos');if(left.length)dupDlg(left);else closeDlg();render();},
  addFam:(v)=>{const pre=['Cônjuge','Filho(a)','Pai/Mãe','Irmão(ã)','Outro'].includes(v)?v:'Cônjuge';const m=byId(S.member);const cands=MEMBERS.filter(x=>x.id!==m.id&&!m.fam.some(f=>f[0]===x.id));
   openDlg(`${dlgHead('Vincular familiar',`Quem faz parte da família de ${m.n.split(' ')[0]}?`)}
    <label class="sbox" style="margin:0 0 12px">${ic('search',16)}<input id="fq" placeholder="Buscar membro" autocomplete="off"></label>
@@ -304,16 +303,16 @@ const PA={
  unMin:v=>{closePops();const m=byId(S.member),x=m.min[+v];confirmDel({title:`Remover ${m.n.split(' ')[0]} de ${x}?`,body:'A pessoa sai das próximas escalas deste ministério. O histórico de participação é mantido.',label:'Remover',onConfirm:()=>{m.min.splice(+v,1);render();toast(`Removido(a) de ${x}`,()=>{m.min.splice(+v,0,x);render();});}});},
  inactivate:()=>{closePops();const m=byId(S.member);openDlg(`${dlgHead('Inativar cadastro?',`${m.n.split(' ')[0]} sai das listas e escalas, mas o histórico é mantido. Você pode reativar quando quiser.`)}<div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" data-a="doInact">Inativar</button></div>`,'sm');},
  doInact:(v,b)=>{b.classList.add('busy');setTimeout(()=>{const m=byId(S.member),i=MEMBERS.indexOf(m);MEMBERS.splice(i,1);closeDlg();S.member=null;render();toast(`${m.n.split(' ')[0]} foi inativado(a)`,()=>{MEMBERS.splice(i,0,m);render();});},700);},
- delMember:()=>{closePops();const m=byId(S.member);openDlg(`${dlgHead('Excluir cadastro?','Esta ação não pode ser desfeita. Para confirmar, digite o primeiro nome.')}<label class="fld"><span class="fl">Digite “${m.n.split(' ')[0]}”</span><input id="delq" autocomplete="off"><span class="err"></span></label><div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn dang" data-a="doDel" disabled id="delb">Excluir definitivamente</button></div>`,'sm');
+ delMember:()=>{closePops();const m=byId(S.member);openDlg(`${dlgHead('Excluir cadastro?','O cadastro sai das listas e o histórico é preservado. Os vínculos em outras áreas são encerrados. Para confirmar, digite o primeiro nome.')}<label class="fld"><span class="fl">Digite “${m.n.split(' ')[0]}”</span><input id="delq" autocomplete="off"><span class="err"></span></label><div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn dang" data-a="doDel" disabled id="delb">Excluir cadastro</button></div>`,'sm');
   $('#delq').addEventListener('input',e=>{$('#delb').disabled=e.target.value.trim().toLowerCase()!==m.n.split(' ')[0].toLowerCase();});},
  doDel:(v,b)=>{b.classList.add('busy');setTimeout(()=>{const m=byId(S.member);MEMBERS.splice(MEMBERS.indexOf(m),1);closeDlg();S.member=null;render();toast(`Cadastro de ${m.n.split(' ')[0]} excluído`);},800);},
 };
 function dupDlg(ps){const [a,c]=ps[S.dupI];
  const rowsC=[['E-mail','e'],['Telefone','ph'],['Integração','int'],['Status','st'],['Ministérios','min'],['Batizado(a)','bap']];
  const val=(m,k)=>k==='int'?monthLabel(m.int):k==='st'?ST[m.st].l:k==='min'?(m.min.join(', ')||'—'):k==='bap'?(m.bap?'Sim':'Não'):(m[k]||'—');
- openDlg(`${dlgHead(`Possível duplicado · ${ps.length>1?`1 de ${ps.length}`:''}`.replace(' · ',ps.length>1?' · ':''),`Compare os cadastros de ${a.n} e escolha qual manter.`)}
-  <div class="cmp">${[a,c].map((m,i)=>`<label class="cmpc"><input type="radio" name="keep" value="${i?'c':'a'}" ${m.st==='integrado'||(!i&&a.st!=='integrado'&&c.st!=='integrado')?'checked':''}><span class="cmph">${mav(m)}<span><b>Manter este</b><small>Cadastro de ${monthLabel(m.int).toLowerCase()}</small></span><span class="rd"></span></span>
+ openDlg(`${dlgHead(`Possível duplicado · ${ps.length>1?`1 de ${ps.length}`:''}`.replace(' · ',ps.length>1?' · ':''),`Compare os cadastros de ${a.n}. Se forem pessoas diferentes ou não houver o que fazer, ignore.`)}
+  <div class="cmp">${[a,c].map((m,i)=>`<label class="cmpc"><span class="cmph">${mav(m)}<span><b>${esc(m.n)}</b><small>Cadastro de ${monthLabel(m.int).toLowerCase()}</small></span></span>
    <dl>${rowsC.map(r=>{const same=val(a,r[1])===val(c,r[1]);return `<div class="${same?'':'diff'}"><dt>${r[0]}</dt><dd>${esc(val(m,r[1]))}</dd></div>`;}).join('')}</dl></label>`).join('')}</div>
-  <p class="who" style="margin:12px 0 0">Os campos marcados são diferentes. Ministérios e histórico do outro cadastro são trazidos para o que ficar.</p>
-  <div class="dfoot"><button class="btn sec" data-a="notDup">São pessoas diferentes</button><button class="btn pri" data-a="merge">Mesclar cadastros</button></div>`,'lg');}
+  <p class="who" style="margin:12px 0 0">Os campos marcados são diferentes. Ignorar tira o par desta lista e mantém os dois cadastros como estão.</p>
+  <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="notDup">Ignorar</button></div>`,'lg');}
 
