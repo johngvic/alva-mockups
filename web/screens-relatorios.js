@@ -39,12 +39,12 @@ function rpFilterText(D,T){
  return p.length?p.join(' · '):'Nenhum filtro (todos os registros)';
 }
 function rpBody(D,T){
- const rows=rpFinal(D,T),cols=rpCols(D,T),st=rpState(D.key,T.k),total=T.rows().length,so=st.sort||T.sort,show=rows.slice(0,200);
+ const rows=rpFinal(D,T),cols=rpCols(D,T),st=rpState(D.key,T.k),total=T.rows().length,so=st.sort||T.sort,show=rows.slice(0,50);
  const grid='grid-template-columns:'+cols.map(c=>c.n?'minmax(92px,.55fr)':'minmax(130px,1fr)').join(' ')+';min-width:'+cols.length*132+'px';
  return `<p class="rp-sum"><b>${rows.length}</b> de ${total} ${total===1?'registro':'registros'} · ${cols.length} ${cols.length===1?'coluna':'colunas'} <span>${esc(rpFilterText(D,T))}</span></p>
-  ${rows.length?`<div class="rp-tw"><div class="rp-r head" style="${grid}">${cols.map(c=>`<button class="rp-th ${so&&so.k===c.k?'on':''} ${c.n?'num':''}" data-a="rptSort" data-v="${c.k}">${esc(c.l)}${so&&so.k===c.k?`<span class="sd ${so.d<0?'dn':''}">${ic('chevR',11,2.4)}</span>`:''}${c.s?`<i class="rp-lk" title="Dado pessoal">${ic('lock',10,2.4)}</i>`:''}</button>`).join('')}</div>
+  ${rows.length?`<div class="rp-tw"><div class="rp-r head" style="${grid}">${cols.map(c=>`<button class="rp-th ${so&&so.k===c.k?'on':''} ${c.n?'num':''}" data-a="rptSort" data-v="${c.k}">${esc(c.l)}${so&&so.k===c.k?`<span class="sd ${so.d<0?'dn':''}">${ic('chevR',11,2.4)}</span>`:''}</button>`).join('')}</div>
    ${show.map(r=>`<div class="rp-r" style="${grid}">${cols.map(c=>`<span class="${c.n?'num':''}" title="${esc(String(c.v(r)))}">${c.pill?c.pill(r):esc(String(c.v(r)))}</span>`).join('')}</div>`).join('')}</div>
-   ${rows.length>200?`<p class="rp-more">Mostrando 200 de ${rows.length}. O arquivo exportado leva todos os ${rows.length}.</p>`:''}`
+   ${rows.length>50?`<p class="rp-more">Mostrando 50 de ${rows.length}. O arquivo exportado leva todos os ${rows.length}.</p>`:''}`
   :`<div class="mempty"><p>Nada por aqui.</p><span>Nenhum registro com esses filtros. <button class="lnk" data-a="rptClear">Limpar filtros</button></span></div>`}`;
 }
 function rpPage(key){
@@ -58,7 +58,7 @@ function rpPage(key){
   ${T.chip?`<div class="sx-bar" style="padding-top:0"><div class="chips">${[['todos','Todos',null,null],...items].map(it=>`<button class="chipf ${st.chip===it[0]?'on':''}" data-a="rptChip" data-v="${it[0]}">${it[0]!=='todos'?`<i style="background:${it[2]}"></i>`:''}${esc(it[1])}<small>${it[0]==='todos'?base.length:base.filter(r=>T.chip.by(r)===it[0]).length}</small></button>`).join('')}</div></div>`:''}
   <div id="rpBody">${rpBody(D,T)}</div></section>`;
 }
-/* exportações: CSV de verdade (baixa no navegador) e PDF em pré-visualização; os dois levam só o que está filtrado e as colunas escolhidas */
+/* exportações: CSV de verdade (baixa no navegador) e PDF (baixa direto, sem prévia); os dois levam só o que está filtrado e as colunas escolhidas */
 const rpAct=()=>{const k=S.active.slice(3),D=RP[k];return {D,T:rpTabOf(k)};};
 const rpNum=n=>String(n).replace('.',',');
 function rpLogExp(D,T,kind,n,cols){const sens=cols.some(c=>c.s);sxLog('Exportou','Relatório',D.l+' · '+T.l,kind+' · '+n+' linhas, '+cols.length+' colunas'+(sens?' (com dados pessoais)':''));}
@@ -70,22 +70,11 @@ function rpCsv(){
  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},600);}catch(e){}
  rpLogExp(D,T,'CSV',rows.length,cols);toast(`CSV gerado: ${rows.length} linhas e ${cols.length} colunas (${name})`);
 }
-function rpPdf(){
- const {D,T}=rpAct(),rows=rpFinal(D,T),cols=rpCols(D,T),pages=Math.max(1,Math.ceil(rows.length/28)),show=rows.slice(0,14);
- const ch=CHURCHES[S.church];
- openDlg(dlgHead('Pré-visualização do PDF',`${esc(D.l)} · ${esc(T.l)} · ${rows.length} ${rows.length===1?'linha':'linhas'}`)
-  +`<div class="sx-paper rp-paper"><div class="rp-ph"><span>${sunMark(16)}<b>${esc(ch.n)}</b></span><small>Gerado em ${dBR(SX_TODAY)} por ${esc(sxMe)}</small></div>
-   <h2>${esc(D.l.toUpperCase())} · ${esc(T.l.toUpperCase())}</h2><p class="rp-fl">${esc(rpFilterText(D,T))}</p>
-   <div class="rp-pt"><div class="rp-pr h" style="grid-template-columns:repeat(${cols.length},1fr)">${cols.map(c=>`<b>${esc(c.l)}</b>`).join('')}</div>${show.map(r=>`<div class="rp-pr" style="grid-template-columns:repeat(${cols.length},1fr)">${cols.map(c=>`<span>${esc(String(c.v(r)))}</span>`).join('')}</div>`).join('')}</div>
-   ${rows.length>show.length?`<p class="rp-pm">… e mais ${rows.length-show.length} linhas nas ${pages} páginas do arquivo.</p>`:''}
-   <div class="rp-pf"><span>${esc(ch.n)} · relatório de lista</span><span>Página 1 de ${pages}</span></div></div>
-   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button><button class="btn pri" data-a="rptPdfGo">${ic('download',15)}Baixar PDF</button></div>`,'sc-dlg sc-wide');
-}
 function rpColsDlg(){
  const {D,T}=rpAct(),h=rpHidden(T,rpState(D.key,T.k));
  sxDlg('Colunas do relatório','Valem para a tela, o CSV e o PDF.',
-  `<div class="rp-cl">${T.cols.map(c=>`<label class="chk3"><input type="checkbox" name="c" value="${c.k}" ${h.includes(c.k)?'':'checked'}><span>${esc(c.l)}${c.s?` <em class="rp-sens">${ic('lock',11,2.2)}dado pessoal</em>`:''}</span></label>`).join('')}</div>
-   <p class="hint">Dados pessoais, como telefone, e-mail, endereço e nascimento, vêm desmarcados. Marque só o que o relatório precisa mostrar.</p>`,
+  `<div class="rp-cl">${T.cols.map(c=>`<label class="chk3"><input type="checkbox" name="c" value="${c.k}" ${h.includes(c.k)?'':'checked'}><span>${esc(c.l)}</span></label>`).join('')}</div>
+   <p class="hint">Telefone, e-mail, endereço e nascimento começam desmarcados. Marque só o que o relatório precisa mostrar.</p>`,
   `<button type="button" class="btn sec" id="rpColsReset">Restaurar padrão</button>${sxOk('Aplicar')}`);
  const f=$('#sxF');
  $('#rpColsReset').onclick=()=>{rpState(D.key,T.k).hide=null;closeDlg();render();};
@@ -98,7 +87,7 @@ Object.assign(A,{
  rptChip:v=>{const {D,T}=rpAct();rpState(D.key,T.k).chip=v;render();},
  rptSort:v=>{const {D,T}=rpAct(),st=rpState(D.key,T.k),c=st.sort||T.sort;st.sort=c&&c.k===v?{k:v,d:-c.d}:{k:v,d:1};render();},
  rptClear:()=>{const {D,T}=rpAct(),st=rpState(D.key,T.k);st.chip='todos';st.q='';st.f={};(T.fl||[]).forEach(f=>{st.f[f.k]='todos';});render();},
- rptCols:()=>rpColsDlg(),rptCsv:()=>rpCsv(),rptPdf:()=>rpPdf(),
+ rptCols:()=>rpColsDlg(),rptCsv:()=>rpCsv(),rptPdf:()=>A.rptPdfGo(),
  rptPdfGo:()=>{const {D,T}=rpAct(),rows=rpFinal(D,T),cols=rpCols(D,T);rpLogExp(D,T,'PDF',rows.length,cols);closeDlg();toast(`PDF gerado: ${rows.length} linhas (simulado)`);}
 });
 ACOL.Exportou='var(--st-sol)';ACOL.Enviou='var(--st-int)';

@@ -182,18 +182,24 @@ function reDisc(){const d=dById(S.disc);$('#dtb').innerHTML=S.dpt==='geral'?dGer
 const partsOf=d=>{const p=d.parent&&dById(d.parent);return [d.n,p?p.n:null].filter(Boolean);};
 function partsField(d){return `<div class="fld"><span class="fl">Participantes</span><div class="parts" id="parts">${partsOf(d).map(n=>`<span class="pchip">${esc(n)}</span>`).join('')}<input id="partIn" placeholder="Adicionar…" list="partList" autocomplete="off"></div><datalist id="partList">${MEMBERS.map(m=>`<option value="${esc(m.n)}">`).join('')}</datalist></div>`;}
 function bindParts(){const i=$('#partIn');if(!i)return;const add=()=>{const v=i.value.trim();if(!v)return;i.insertAdjacentHTML('beforebegin',`<span class="pchip">${esc(v)}<button type="button" aria-label="Remover" onclick="this.parentNode.remove()">×</button></span>`);i.value='';};i.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();add();}});i.addEventListener('change',add);}
+/* chamada obrigatória para concluir qualquer encontro (MTG-P-17): cada convocado fica Presente ou Ausente; o ausente pode dizer o motivo */
+const chamadaBlock=names=>`<div class="fld wide chm"><span class="fl">Chamada</span>${names.map((n,i)=>`<div class="chm-r"><span class="chm-n">${esc(n)}</span><div class="yn" role="radiogroup" aria-label="${esc(n)}"><label><input type="radio" name="ch${i}" value="p"><span>Presente</span></label><label><input type="radio" name="ch${i}" value="a"><span>Ausente</span></label></div><input class="chm-m" name="cm${i}" placeholder="Motivo da ausência (opcional)" maxlength="200" hidden></div>`).join('')}<span class="err"></span></div>`;
+function bindChamada(f){f.addEventListener('change',e=>{const n=e.target.name||'';if(!/^ch\d+$/.test(n))return;const m=f.querySelector('[name=cm'+n.slice(2)+']');if(m)m.hidden=e.target.value!=='a';const b=f.querySelector('.chm');if(b)b.classList.remove('bad');});}
+function chamadaOk(f){const rs=[...f.querySelectorAll('.chm-r')],b=f.querySelector('.chm');if(!b||rs.every((r,i)=>f.querySelector('[name=ch'+i+']:checked')))return true;b.classList.add('bad');b.querySelector('.err').textContent='Marque presente ou ausente para cada pessoa';b.scrollIntoView({block:'nearest'});return false;}
 function regDlg(d,from){
- openDlg(`${dlgHead(from?'Concluir encontro':'Registrar encontro',from?'Conte o que foi tratado para fechar o encontro agendado.':'Para um encontro que já aconteceu e não foi agendado antes.')}
+ openDlg(`${dlgHead(from?'Concluir encontro':'Registrar encontro',from?'Faça a chamada e conte o que foi tratado para fechar o encontro agendado.':'Para um encontro que já aconteceu e não foi agendado antes.')}
  <form class="fgrid one" id="regF" novalidate>
   <label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${from?from.d:TODAY.toISOString().slice(0,10)}" max="${TODAY.toISOString().slice(0,10)}"><span class="err"></span></label>
   <label class="fld"><span class="fl">Conteúdo tratado</span><textarea class="ta" name="c" rows="3" placeholder="O que foi conversado ou trabalhado"></textarea><span class="err"></span></label>
   ${partsField(d)}
+  ${chamadaBlock(partsOf(d))}
   <label class="fld"><span class="fl">Anotação pessoal <small>opcional</small></span><textarea class="ta" name="note" rows="2" placeholder="Só você vê"></textarea></label>
   <label class="fld"><span class="fl">Material de apoio <small>opcional</small></span>${atomSel(from&&from.mref)}</label>
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${from?'Concluir':'Registrar'}</button></div></form>`);
- bindParts();const f=$('#regF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
+ bindParts();const f=$('#regF');bindChamada(f);f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
  f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);const bad=(n,m)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;i.focus();};
   if(!fd.get('d'))return bad('d','Escolha a data');if(!fd.get('c').trim())return bad('c','Descreva o que foi tratado');
+  if(!chamadaOk(f))return;
   const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{if(from)d.meets.splice(d.meets.indexOf(from),1);d.meets.push(MT(fd.get('d'),'done',{c:fd.get('c').trim(),note:fd.get('note'),...atomPick(fd.get('mat')),mode:from?from.mode:'Presencial',t:from?from.time:'19:30',parts:$$('#parts .pchip').map(p=>p.textContent.replace('×','').trim())}));
    d.last=Math.max(0,-inDays(fd.get('d')));closeDlg();S.dpt='enc';render();toast(`Encontro com ${first(d)} registrado · contato em dia`);},800);});
 }

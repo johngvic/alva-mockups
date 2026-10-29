@@ -47,6 +47,10 @@ const ATM_ACT={
  'event.deliveryFailed':['Failed',a=>`Falha ao reentregar o evento #${a}`,'CONSUMER_ERROR',0,'event.redelivered'],
  'duplicates.detected':['Succeeded',a=>{const n=parseInt(a.slice(0,2),16)%5,m=parseInt(a.slice(2,4),16)%4;return `${n} par${n===1?'':'es'} novo${n===1?'':'s'}, ${m} atualizado${m===1?'':'s'}`;}],
  'duplicates.failed':['Failed',a=>`Falha ao detectar duplicados da igreja #${a}`,'DB_TIMEOUT',0,'duplicates.detected'],
+ 'sync.imported':['Succeeded',a=>{const n=parseInt(a.slice(0,2),16)%9+1;return `Conexão #${a}: ${n} item${n===1?'':'s'} importado${n===1?'':'s'} do provedor`;}],
+ 'sync.sent':['Succeeded',a=>{const n=parseInt(a.slice(0,2),16)%6+1;return `Conexão #${a}: ${n} item${n===1?'':'s'} enviado${n===1?'':'s'} ao provedor`;}],
+ 'sync.diverged':['Skipped',a=>`Conexão #${a}: divergência registrada para o responsável`,'SYNC_DIVERGENCE',1,'sync.imported'],
+ 'sync.failed':['Failed',a=>`Falha ao sincronizar a conexão #${a}`,'PROVIDER_UNAVAILABLE',0,'sync.imported'],
 };
 const ATM_PURGE=[['audit.logEntries','audit'],['connectors.calls','connectors'],['communication.inbox','communication'],['pastoral.prayerTexts','pastoral'],['financial.importDrafts','financial'],['identity.controlData','identity'],['files.unused','files'],['files.purge','files'],['automation.runs','automation']];
 // s: k = m (a cada N minutos), h (a cada N horas), d (diária), w (semanal); i = intervalo; t = horário; days = dias (0 = segunda); z = fuso
@@ -65,6 +69,7 @@ const ATM_JOBS=[
  {k:'retention.purge',n:'Retenção e expurgo',d:'Apaga o que passou do prazo de guarda, uma política por origem',opt:0,s:{k:'d',i:1,t:'03:00',z:'UTC'},cap:9,t:null,f:null,purge:1},
  {k:'events.redeliver',n:'Entrega durável de eventos',d:'Reentrega aos consumidores os eventos pendentes ou que falharam',opt:0,s:{k:'m',i:1,z:'UTC'},cap:6,t:[['communication','event_delivery','event.redelivered'],['donations','event_delivery','event.redelivered'],['shop','event_delivery','event.redelivered']],f:['communication','event_delivery','event.deliveryFailed']},
  {k:'members.duplicates',n:'Detecção de cadastros duplicados',d:'Compara os cadastros de cada igreja e deixa prontos os pares que parecem a mesma pessoa',opt:0,s:{k:'d',i:1,t:'03:00',z:'UTC'},cap:4,t:[['membership','church','duplicates.detected']],f:['membership','church','duplicates.failed']},
+ {k:'providers.sync',n:'Sincronização com o provedor externo',d:'Importa o que o provedor tem, compara os dois lados, envia o que só o Alva tem e registra as divergências',opt:0,s:{k:'d',i:1,t:'04:00',z:'UTC'},cap:4,t:[['connectors','connection','sync.imported'],['connectors','connection','sync.sent']],f:['connectors','connection','sync.failed'],extra:['connectors','connection','sync.diverged']},
 ];
 let atmSeed=20261028,atmIC=0;
 const atmR=()=>{atmSeed=(atmSeed*1664525+1013904223)>>>0;return atmSeed/4294967296;};

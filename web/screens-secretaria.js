@@ -110,10 +110,12 @@ Object.assign(A,{
 });
 
 /* ---------- atos ---------- */
-const SX_ATO_T={batismo:['Batismo','bucket'],casamento:['Casamento','heart'],consagracao:['Consagração','flame'],apresentacao:['Apresentação','pacifier']};
+const SX_ATO_T={batismo:['Batismo','bucket'],casamento:['Casamento','heart'],consagracao:['Consagração','flame'],apresentacao:['Apresentação','pacifier'],curso:['Curso concluído','book']};
 /* Atos registrados à mão: feitos aqui sem evento na Agenda, ou informados de outra igreja. Os atos de eventos (apresentação, batismo, consagração e casamento) vêm da Agenda: ver sxEvAtos. */
 const SX_ATOS=[
- {id:'at5',t:'batismo',st:'informado',d:'2024-11-10',loc:'Outra igreja (informado pelo membro)',of:'',ppl:['Clara Nunes'],obs:''}];
+ {id:'at5',t:'batismo',st:'informado',d:'2024-11-10',loc:'Outra igreja (informado pelo membro)',of:'',ppl:['Clara Nunes'],obs:''},
+ {id:'at6',t:'curso',st:'realizado',d:'2026-10-18',loc:'Jornada Fundamentos da Fé',of:'',ppl:['Juliana Costa Ferreira'],obs:'Todos os cursos da jornada concluídos. O certificado saiu sozinho.',auto:false},
+ {id:'at7',t:'curso',st:'realizado',d:'2026-10-26',loc:'Curso Liderança Servidora',of:'',ppl:['Thiago Barros'],obs:'Curso concluído.',wait:'Sem modelo do certificado de curso'}];
 /* atos que vêm da Agenda: o evento de apresentação, batismo, consagração ou casamento, depois de realizado, vira ato aqui sem duplicar dado */
 const sxEvAtos=()=>{
  const out=[];
@@ -136,7 +138,8 @@ const sxAtoPill=s=>s==='realizado'?sxPill('Realizado','var(--st-int)','var(--st-
 let _auto=0;
 const SX_DEC={batismo:['bapOk','Batismo'],consagracao:['consOk','Consagração'],casamento:['marOk','Casamento']};
 const sxAtoSit=a=>a.dec==='pendente'?'pendente':a.dec==='recusado'?'recusado':a.st;
-const sxAtoPillA=a=>a.dec==='pendente'?sxPill('Pendente de decisão','var(--st-sol)','var(--st-sol-bg)'):a.dec==='recusado'?sxPill('Recusado','var(--st-rec)','var(--st-rec-bg)'):a.dec==='aceito'?sxPill('Informado · aceito','var(--st-ace)','var(--st-ace-bg)'):sxAtoPill(a.st);
+const sxCursoDoc=n=>{const m=sxMem(n);return m&&SX_DOCS.find(d=>d.t==='Certificado de curso'&&d.mid===m.id&&d.st==='valido');};
+const sxAtoPillA=a=>a.t==='curso'&&a.wait&&!a.ppl.every(sxCursoDoc)?sxPill('Aguardando emissão','var(--st-sol)','var(--st-sol-bg)'):a.dec==='pendente'?sxPill('Pendente de decisão','var(--st-sol)','var(--st-sol-bg)'):a.dec==='recusado'?sxPill('Recusado','var(--st-rec)','var(--st-rec-bg)'):a.dec==='aceito'?sxPill('Informado · aceito','var(--st-ace)','var(--st-ace-bg)'):sxAtoPill(a.st);
 const sxSpouse=m=>{const f=(m.fam||[]).find(x=>/c[ôo]njuge|esposa|marido/i.test(x[1]));const p=f&&byId(f[0]);return p?p.n:'';};
 function sxAutoAtos(m,when){
  const out=[],has=t=>sxAtoAll().some(a=>a.t===t&&a.ppl.includes(m.n)),mk=(t,ppl,obs)=>({id:'au'+(++_auto),t,st:'informado',auto:true,dec:'pendente',mid:m.id,d:when,loc:'Outra igreja (declarado na integração)',of:'',ppl,obs:obs||'Declarado na ficha ao concluir a integração.'});
@@ -206,6 +209,7 @@ function sxAtoView(id){
   if(a.t==='apresentacao'){const p=a.ro?sxBbP(a.id.slice(2)):sxBbP('m'+a.id),d=p&&bbDoc(p);
    return `<div class="sx-pr">${sxAv(n)}<span class="sx-m"><b>${esc(n)}</b><small>Bebê apresentado${!can?' · outra igreja':d?' · certificado nº '+d.num+(p.certOk?', enviado à família':', ainda não enviado'):' · certificado ainda não emitido'}</small></span>${can&&p?(d?`<button class="btn sec sm" data-a="sxDocOpen" data-v="${d.id}">${ic('file',14)}Ver certificado</button>`:`<button class="btn pri sm" data-a="sxBbCert" data-v="${p.id}">${ic('file',14)}Emitir certificado</button>`):''}</div>`;}
   const m=MEMBERS.find(x=>x.n===n&&x.st==='integrado');
+  if(a.t==='curso'){const d=sxCursoDoc(n);return `<div class="sx-pr">${sxAv(n)}<span class="sx-m"><b>${esc(n)}</b><small>${d?'Certificado nº '+d.num+(d.by==='Automático'?' · emitido sozinho':''):'Aguardando emissão'+(a.wait?' · '+esc(a.wait):'')}</small></span>${m?`<button class="lnk" data-a="sxOpenM" data-v="${m.id}">Ficha</button>`:''}${m?(d?`<button class="btn sec sm" data-a="sxDocOpen" data-v="${d.id}">${ic('file',14)}Ver certificado</button>`:`<button class="btn pri sm" data-a="sxDocFromAto" data-v="${m.id}|curso">${ic('file',14)}Emitir certificado</button>`):''}</div>`;}
   return `<div class="sx-pr">${sxAv(n)}<span class="sx-m"><b>${esc(n)}</b><small>${m?'Membro':'Fora da igreja / sem ficha'}</small></span>${m?`<button class="lnk" data-a="sxOpenM" data-v="${m.id}">Ficha</button>`:''}${m&&can?`<button class="btn sec sm" data-a="sxDocFromAto" data-v="${m.id}|${a.t}">${ic('file',14)}Emitir ${a.t==='casamento'?'certidão':a.t==='batismo'?'certidão':'certificado'}</button>`:''}</div>`;};
  const dec=a.dec?(pend?`<p class="fi-note">${ic('clock',15)}<span><b>Declarado pela própria pessoa ao concluir a integração</b> (feito em outra igreja). A Secretaria decide se reconhece. Aceitar ou recusar <b>não muda o que ficou na ficha</b>.</span></p>`
    :`<p class="fi-note">${ic(a.dec==='aceito'?'check':'x',15)}<span><b>${a.dec==='aceito'?'Aceito':'Recusado'}</b> por ${esc(a.decBy)} em ${dBR(a.decAt)}${a.dec==='aceito'&&a.cargo?'. Cargo da consagração: <b>'+esc(a.cargo)+'</b>':''}${a.why?'. Motivo: '+esc(a.why):''}. ${a.auto?'A ficha continua como a pessoa declarou.':'Registrado pela Secretaria.'}</span></p>`):'';
@@ -216,6 +220,7 @@ function sxAtoView(id){
   ${dec}
   ${inf&&!a.dec?`<p class="fi-note">${ic('info',15)}<span><b>Aconteceu em outra igreja.</b> Consta na ficha, mas a Secretaria não emite certidão nem certificado de algo que não foi celebrado aqui. Quem precisa deve pedir à igreja onde aconteceu.</span></p>`:''}
   ${inf&&a.dec&&!pend?`<p class="fi-note">${ic('info',15)}<span>Mesmo aceito, é um ato de outra igreja: a Secretaria <b>não emite certidão nem certificado</b> dele.</span></p>`:''}
+  ${a.t==='curso'?`<p class="fi-note">${ic('info',15)}<span>O ato nasce quando a pessoa conclui o curso ou a jornada, em Conteúdo. O <b>certificado sai sozinho</b> quando há modelo e mandato vigente. Se não saiu, aparece <b>Aguardando emissão</b> e a Secretaria emite aqui.</span></p>`:''}
   ${ev?`<p class="fi-note">${ic('info',15)}<span>Gerado do evento <b>${esc(ev.t)}</b>, em Agenda › Eventos. Pedido, vaga e confirmação ficam lá; <b>a certidão ou o certificado é emitido aqui</b>.</span></p>`:''}
   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button>${pend?`<button class="btn sec" data-a="sxAtoRecusar" data-v="${a.id}">Recusar</button><button class="btn pri" data-a="sxAtoAceitar" data-v="${a.id}">Aceitar</button>`:''}${ev?`<button class="btn pri" data-a="sxOpenEv" data-v="${ev.id}">Abrir o evento</button>`:''}</div>`,'sc-dlg');
 }
@@ -248,7 +253,7 @@ Object.assign(A,{
  sxOpenEv:v=>{closeDlg();A.evOpen(v);},
  sxBbCert:v=>{closeDlg();setTimeout(()=>sxDocDlg({t:'Certificado de apresentação',bb:v}),200);},
  sxBbSend:v=>{const d=SX_DOCS.find(x=>x.id===v),p=sxBbP(d.bb),was=p.certOk;p.certOk=true;if(p.manual){const at=SX_ATOS.find(z=>z.id===p.manual);if(at)at.certOk=true;}sxLog('Enviou','Documento',d.t+' nº '+d.num,p.pais.join(' e '));closeDlg();render();toast(`${was?'Certificado reenviado':'Certificado enviado'} para ${p.pais.map(n=>n.split(' ')[0]).join(' e ')}: no app e por e-mail.`);},
- sxDocFromAto:v=>{const [id,t]=v.split('|');closeDlg();setTimeout(()=>sxDocDlg({mid:id,t:t==='batismo'?'Certidão de batismo':t==='casamento'?'Certidão de casamento':'Certificado de consagração'}),200);}
+ sxDocFromAto:v=>{const [id,t]=v.split('|');closeDlg();setTimeout(()=>sxDocDlg({mid:id,t:t==='batismo'?'Certidão de batismo':t==='casamento'?'Certidão de casamento':t==='curso'?'Certificado de curso':'Certificado de consagração'}),200);}
 });
 
 /* ---------- documentos emitidos ---------- */
@@ -264,6 +269,8 @@ const SX_DOC_T={
   txt:m=>{const a=sxAtosOf(m).find(a=>a.t==='consagracao'&&a.st==='realizado');return `Certificamos que ${m.n} foi consagrado(a) em ${dBR(a.d)}${a.obs&&!/^Consagração de/.test(a.obs)?' — '+a.obs.replace(/\.$/,''):''}, conforme o livro de atos desta igreja.`;}},
  'Certificado de apresentação':{ic:'pacifier',bb:true,need:b=>b.bbp.st==='realizada'?'':'A apresentação ainda não foi realizada.',
   txt:b=>{const p=b.bbp,e=bbEv(p);return `Certificamos que ${b.n}, nascido(a) em ${dBR(p.nasc)}, filho(a) de ${p.pais.join(' e ')}, foi apresentado(a) ao Senhor diante da igreja reunida em ${dBR(e.d)}.`;}},
+ 'Certificado de curso':{ic:'award',need:m=>sxNeedAto(m,'curso','curso concluído'),
+  txt:m=>{const a=sxAtosOf(m).find(a=>a.t==='curso'&&a.st==='realizado');return `Certificamos que ${m.n} concluiu ${a.loc} em ${dBR(a.d)}, conforme os registros de formação desta igreja.`;}},
  'Certificado de integração':{ic:'check',need:m=>!INTR.cert?'O certificado de integração está desligado em Pessoas › Integração › Regras.':m.int?'':'Sem integração concluída.',
   txt:m=>`Certificamos que ${m.n} concluiu a integração desta igreja em ${MONTHS[+m.int.slice(5)-1]} de ${m.int.slice(0,4)}, conforme os registros de integração.`},
  'Declaração de membro':{ic:'idcard',need:m=>sxSitOf(m)==='ativo'?'':'Só membros ativos recebem declaração.',
@@ -281,6 +288,8 @@ const sxCode=n=>'AV'+(10000+n*7919%90000)+'KQXMR'[n%5];
 const sxNewDoc=(t,m,o)=>{const n=SX_DOCS.length+1,T=SX_DOC_T[t];const d={id:'dc'+n,num:'2026-'+String(n).padStart(4,'0'),t,mid:m.id,bb:m.bbp?m.bbp.id:'',pessoa:m.n,d:o.d||SX_TODAY,by:o.by||sxMe,sig:o.sig||'Marcos Souza Ramos — Pastor presidente',dest:o.dest||'',obs:o.obs||'',st:'valido',code:sxCode(n),text:T.txt(m,o),mv:T.fin?0:sxModOf(t)[0].v};SX_DOCS.push(d);return d;};
 [['Certidão de batismo','Ana Clara Lima','2026-06-20'],['Certidão de batismo','Helena Duarte','2026-06-20'],['Declaração de membro','Juliana Costa Ferreira','2026-08-04'],['Carta de transferência','Patrícia Oliveira Nunes','2026-07-03','Comunidade Esperança, Curitiba'],['Carta de recomendação','Thiago Barros','2026-09-12','Igreja Batista Central'],['Certificado de consagração','Larissa Pires','2026-04-15'],['Declaração de membro','Bruno Reis','2026-05-10']].forEach(([t,n,d,dest])=>{const m=sxMem(n);if(m)sxNewDoc(t,m,{d,dest});});
 {const x=SX_DOCS[SX_DOCS.length-1];if(x){x.st='revogado';x.why='Membro desligado em 20/06/2026';}}
+/* emitidos sozinhos (origem Automático): certificado de curso e declaração de membro */
+[['Certificado de curso','Juliana Costa Ferreira','2026-10-18'],['Declaração de membro','Larissa Pires','2026-10-20']].forEach(([t,n,d])=>{const m=sxMem(n);if(m)sxNewDoc(t,m,{d,by:'Automático'});});
 BBP.filter(p=>p.certOk).forEach(p=>sxNewDoc('Certificado de apresentação',{id:'bb'+p.id,n:p.cert,bbp:p},{d:'2026-09-06'}));
 /* modelos: a versão mais nova de cada tipo é a ativa */
 Object.keys(SX_DOC_T).forEach(t=>{if(!SX_DOC_T[t].fin)sxModOf(t);});
@@ -348,7 +357,7 @@ function sxArqList(){
 }
 /* ---------- modelos dos documentos (upload versionado; o Alva só preenche os campos) ---------- */
 const SX_VARS={'Certidão de batismo':['nome','data do batismo','local do batismo','quem oficiou'],'Certidão de casamento':['nome','nome do cônjuge','data do casamento','local do casamento','quem celebrou'],'Certificado de consagração':['nome','data da consagração','observação'],
- 'Certificado de apresentação':['nome do bebê','data de nascimento','responsáveis','data da apresentação','culto'],'Certificado de integração':['nome','mês e ano da integração'],'Declaração de membro':['nome','membro desde'],'Carta de recomendação':['nome','destino'],'Carta de transferência':['nome','destino']};
+ 'Certificado de apresentação':['nome do bebê','data de nascimento','responsáveis','data da apresentação','culto'],'Certificado de curso':['nome','curso ou jornada','data da conclusão'],'Certificado de integração':['nome','mês e ano da integração'],'Declaração de membro':['nome','membro desde'],'Carta de recomendação':['nome','destino'],'Carta de transferência':['nome','destino']};
 const SX_VARS_ALL=['igreja','cidade','data de emissão','signatário','cargo do signatário','número','código de validação'];
 function sxModList(){
  const n=t=>SX_DOCS.filter(d=>d.t===t).length;
@@ -378,8 +387,8 @@ Object.assign(A,{
 /* Pedidos de declaração de membro feitos pelo app: a equipe emite (abre a emissão já preenchida) ou recusa com motivo */
 const SX_DREQ=[];
 const sxReqSt={pendente:['Pendente','var(--st-sol)','var(--st-sol-bg)'],emitido:['Emitida','var(--st-int)','var(--st-int-bg)'],recusado:['Recusada','var(--st-rec)','var(--st-rec-bg)']};
-function sxDReqs(){if(!SX_DREQ.length){const m=sxInteg().filter(x=>sxSitOf(x)==='ativo').slice(0,4);[['2026-09-29','pendente'],['2026-09-28','pendente'],['2026-09-24','emitido'],['2026-09-20','recusado']].forEach((z,i)=>{if(m[i])SX_DREQ.push({id:'dr'+(i+1),mid:m[i].id,d:z[0],st:z[1],doc:z[1]==='emitido'?'0042':'',why:z[1]==='recusado'?'Falta atualizar o endereço no cadastro':''});});}return SX_DREQ;}
-function sxReqCard(){const l=sxDReqs();return `<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><span class="who">Pedidos de declaração de membro feitos pelo app. Ao emitir, a declaração aparece em Meus documentos da pessoa.</span></div>${l.length?l.map(r=>{const m=byId(r.mid),s=sxReqSt[r.st];return `<div class="sx-r" style="cursor:default"><span class="sx-ti">${ic('file',20)}</span><span class="sx-m"><b>Declaração de membro</b><small>${esc(m.n)} · pedida em ${dBR(r.d)}${r.st==='emitido'?' · nº '+r.doc:''}${r.st==='recusado'?' · '+esc(r.why):''}</small></span><span class="sx-s">${sxPill(s[0],s[1],s[2])}</span>${r.st==='pendente'?`<span class="row2"><button class="btn sec sm" data-a="sxReqNo" data-v="${r.id}">Recusar</button><button class="btn pri sm" data-a="sxReqOk" data-v="${r.id}">Emitir</button></span>`:''}</div>`;}).join(''):'<div class="mempty"><p>Nenhum pedido.</p><span>Os pedidos feitos no app aparecem aqui.</span></div>'}</section>`;}
+function sxDReqs(){if(!SX_DREQ.length){const m=sxInteg().filter(x=>sxSitOf(x)==='ativo').slice(0,4);[['2026-09-29','pendente'],['2026-09-28','pendente'],['2026-09-24','emitido'],['2026-09-20','recusado']].forEach((z,i)=>{if(m[i])SX_DREQ.push({id:'dr'+(i+1),mid:m[i].id,d:z[0],st:z[1],doc:z[1]==='emitido'?'0042':'',auto:z[1]==='emitido',why:z[1]==='recusado'?'Falta atualizar o endereço no cadastro':''});});}return SX_DREQ;}
+function sxReqCard(){const l=sxDReqs();return `<section class="card sx-list rise" style="--d:3"><div class="sx-bar"><span class="who">Pedidos de declaração de membro feitos pelo app. Quem é membro ativo, sem caso urgente nem Disciplina em aberto, já recebe a declaração sozinha em Meus documentos. Só ficam aqui os pedidos que não saíram sozinhos: emita à mão ou recuse com motivo.</span></div>${l.length?l.map(r=>{const m=byId(r.mid),s=sxReqSt[r.st];return `<div class="sx-r" style="cursor:default"><span class="sx-ti">${ic('file',20)}</span><span class="sx-m"><b>Declaração de membro</b><small>${esc(m.n)} · pedida em ${dBR(r.d)}${r.st==='emitido'?' · nº '+r.doc+(r.auto?' · saiu sozinha':''):''}${r.st==='recusado'?' · '+esc(r.why):''}</small></span><span class="sx-s">${sxPill(s[0],s[1],s[2])}</span>${r.st==='pendente'?`<span class="row2"><button class="btn sec sm" data-a="sxReqNo" data-v="${r.id}">Recusar</button><button class="btn pri sm" data-a="sxReqOk" data-v="${r.id}">Emitir</button></span>`:''}</div>`;}).join(''):'<div class="mempty"><p>Nenhum pedido.</p><span>Os pedidos feitos no app aparecem aqui.</span></div>'}</section>`;}
 function secDocs(){
  const t=S.sxDocT,val=SX_DOCS.filter(d=>d.st==='valido').length;
  const act=t==='emitidos'?`<button class="btn sec" data-a="sxValidate">${ic('check',15,2.2)}Validar código</button><button class="btn pri" data-a="sxDocNew">${ic('plus',15,2.2)}Emitir documento</button>`:t==='modelos'||t==='pedidos'?'':`<button class="btn pri" data-a="sxArqNew">${ic('upload',15,2)}Enviar arquivo</button>`;

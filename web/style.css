@@ -5382,3 +5382,4 @@ input.uip-open,select.uip-open{box-shadow:inset 0 0 0 1.5px var(--brand-text),0 
  .trow.atm-j .atm-c,.trow.atm-r .atm-c,.trow.atm-i .atm-c{grid-column:auto;flex-direction:column;align-items:flex-start;gap:4px}
  .trow.atm-i .atm-ac{flex-direction:row;justify-content:flex-end;align-items:center}
 }
+.chm-r{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:8px}.chm-n{flex:1 1 140px;font:600 14px/18px var(--font-text)}.chm-r .yn{height:36px;flex:0 0 auto}.chm-m{flex:1 0 100%}.chm-m[hidden]{display:none}
