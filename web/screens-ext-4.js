@@ -71,7 +71,7 @@ dViewMeet=function(id){const d=dById(S.disc),m=d.meets.find(x=>x.id===id);if(!m)
 careMeet=function(id){const c=cById(S.case);careInit(c);const m=[...c.meets,...c.sched,...c.cancelled].find(x=>x.rid===id);if(!m)return;const done=c.meets.includes(m),cancel=c.cancelled.includes(m);
  meetView({title:cancel?'Encontro cancelado':done?'Encontro realizado':'Encontro agendado',sub:esc(c.n),d:m.d,state:cancel?'cancel':done?'done':'sched',stateL:cancel?'Cancelado':done?'Realizado':'Agendado · '+nxEncWhen(m.d),
   time:nxEncTime(done?m.time:m.t),mode:m.mode||'Pastoral',where:m.where,
-  blocks:done?[['Conteúdo tratado',m.t],['Resultado e próximos passos',m.result]]:[['Situação',cancel?'Este encontro foi cancelado.':'Ainda não aconteceu. Ao concluir, registre o que foi tratado e os próximos passos.']]});};
+  blocks:done?[['Conteúdo tratado',m.t],['Resultado e próximos passos',m.result],['Material de apoio',m.mat]]:[['Situação',cancel?'Este encontro foi cancelado.':'Ainda não aconteceu. Ao concluir, registre o que foi tratado e os próximos passos.']]});};
 Object.assign(A,{hViewMeet,dViewMeet,careMeet,
  seView:v=>{const {k,o,m}=SE_PARSE(v),leaders=seLeaders(k,o);
   meetView({title:'Encontro realizado',sub:esc(o.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',

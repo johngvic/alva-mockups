@@ -5,7 +5,7 @@ const TODAY=new Date(2026,8,30);
 const addDays=(n)=>{const d=new Date(TODAY);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
 let _did=0;
 const DN=(n,parent,o={})=>({id:'d'+(++_did),n,parent,tone:o.tone||TONES[_did%6],role:o.role||'Membro',rhythm:o.rhythm||14,last:o.last,stage:o.stage||0,paused:!!o.paused,gone:!!o.gone,notes:o.notes||'',meets:o.meets||[],open:true});
-const MT=(d,type,o={})=>({id:'e'+Math.random().toString(36).slice(2,8),d,type,content:o.c||'',mode:o.mode||'Presencial',link:o.link||'',time:o.t||'19:30',note:o.note||'',mat:o.mat||'',parts:o.parts});
+const MT=(d,type,o={})=>({id:'e'+Math.random().toString(36).slice(2,8),d,type,content:o.c||'',mode:o.mode||'Presencial',link:o.link||'',time:o.t||'19:30',note:o.note||'',mat:o.mat||'',mref:o.mref||'',parts:o.parts});
 const DISC=[
  DN('Pr. Rafael Pereira',null,{role:'Pastor',rhythm:30,last:29,tone:'ceu'}),
  DN('Ana Clara Lima','d1',{role:'Líder',rhythm:14,last:25,tone:'ceu',notes:'Conduz a casa de Vila Nova. Pediu ajuda para organizar a agenda dos discípulos.'}),
@@ -189,12 +189,12 @@ function regDlg(d,from){
   <label class="fld"><span class="fl">Conteúdo tratado</span><textarea class="ta" name="c" rows="3" placeholder="O que foi conversado ou trabalhado"></textarea><span class="err"></span></label>
   ${partsField(d)}
   <label class="fld"><span class="fl">Anotação pessoal <small>opcional</small></span><textarea class="ta" name="note" rows="2" placeholder="Só você vê"></textarea></label>
-  <label class="fld"><span class="fl">Material de apoio <small>opcional</small></span><span class="selw"><select name="mat"><option value="">Nenhum</option>${d.stage?`<option>Trilha · ${TRILHA[d.stage-1]}</option>`:''}<option>Estudo · O Sermão do Monte</option><option>Estudo · Frutos do Espírito</option><option>Livro · Vida com propósito</option></select>${ic('updown',14)}</span></label>
+  <label class="fld"><span class="fl">Material de apoio <small>opcional</small></span>${atomSel(from&&from.mref)}</label>
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${from?'Concluir':'Registrar'}</button></div></form>`);
  bindParts();const f=$('#regF');f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
  f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);const bad=(n,m)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;i.focus();};
   if(!fd.get('d'))return bad('d','Escolha a data');if(!fd.get('c').trim())return bad('c','Descreva o que foi tratado');
-  const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{if(from)d.meets.splice(d.meets.indexOf(from),1);d.meets.push(MT(fd.get('d'),'done',{c:fd.get('c').trim(),note:fd.get('note'),mat:fd.get('mat'),mode:from?from.mode:'Presencial',t:from?from.time:'19:30',parts:$$('#parts .pchip').map(p=>p.textContent.replace('×','').trim())}));
+  const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{if(from)d.meets.splice(d.meets.indexOf(from),1);d.meets.push(MT(fd.get('d'),'done',{c:fd.get('c').trim(),note:fd.get('note'),...atomPick(fd.get('mat')),mode:from?from.mode:'Presencial',t:from?from.time:'19:30',parts:$$('#parts .pchip').map(p=>p.textContent.replace('×','').trim())}));
    d.last=Math.max(0,-inDays(fd.get('d')));closeDlg();S.dpt='enc';render();toast(`Encontro com ${first(d)} registrado · contato em dia`);},800);});
 }
 

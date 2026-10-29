@@ -241,10 +241,10 @@ function atmDetail(){
  const items24=runs.flatMap(x=>x.items).filter(i=>ATM_NOW-i.at<=864e5).length;
  const head=joHead(j,`<span class="soft">Administração</span>${ic('chevR',13,2)}<button class="lnk back" data-a="atmBack">Automações</button>${ic('chevR',13,2)}<span>${esc(j.n)}</span>`,esc(j.n),esc(j.d)+(j.opt?' · a igreja pode desligar':''),
   [[esc(atmRec(j.s)),'Recorrência'],[j.on&&nx?atmFmt(nx):'—','Próxima execução'],[r?atmFmt(r.s):'—','Última execução'],[String(items24),'Atos nas últimas 24 h']],
-  [['exec','Execuções','atmTab',runs.length],['itens','Itens','atmTab'],['rec','Recorrência','atmTab']],tab,
+  [['exec','Execuções','atmTab',runs.length],['itens','Atividade','atmTab'],['rec','Recorrência','atmTab']],tab,
   `<span class="atm-hact">${atmSw(j,1)}<button class="btn sec sm" data-a="atmRunNow" data-v="${j.k}" ${j.on?'':'disabled'} aria-label="Rodar o job agora">${ic('play',14)}Rodar agora</button></span>`);
  const banner=!j.on?`<div class="dupn rise" style="--d:2"><span class="dd"></span><span><b>Desativado por ${esc(j.dis?j.dis.by:'um superusuário')}${j.dis?' em '+atmFmt(j.dis.at):''}.</b> Não roda em nenhuma igreja; Rodar agora e Retentar ficam desabilitados até ativar.</span></div>`:'';
- const body=tab==='rec'?atmRecForm(j):`<section class="card mtab rise" style="--d:3" aria-label="${tab==='itens'?'Itens':'Execuções'}">${atmToolbar(j)}<div id="atmrows">${tab==='itens'?atmItemRows(j):atmRunRows(j)}</div></section>`;
+ const body=tab==='rec'?atmRecForm(j):`<section class="card mtab rise" style="--d:3" aria-label="${tab==='itens'?'Atividade':'Execuções'}">${atmToolbar(j)}<div id="atmrows">${tab==='itens'?atmItemRows(j):atmRunRows(j)}</div></section>`;
  return head+banner+body;
 }
 // ---------- execuções e retentativas
@@ -253,7 +253,7 @@ function atmRunDrawer(r){
  const org=r.from?ATM_RUNS.find(x=>x.id===r.from):null;
  openDlg(`${dlgHead('Execução de '+atmFmt(r.s),esc(j.n))}
   <div class="atm-dg"><div><span>Estado</span>${atmPill(r.st)}</div><div><span>Origem</span><b>${ATM_TRIG[r.trig]}${r.by?' · '+esc(r.by):''}</b></div><div><span>Duração</span><b>${atmDur(r)}</b></div><div><span>Atos</span><b>${c.n}</b></div><div><span>Feitos</span><b>${c.ok}</b></div><div><span>Falhas</span><b class="${c.fail?'atm-bad':''}">${c.fail}</b></div>${c.skip?`<div><span>Pulados</span><b>${c.skip}</b></div>`:''}${r.err?`<div><span>Erro</span><code>${esc(r.err)}</code></div>`:''}${org?`<div><span>Retentativa de</span><button class="lnk" data-a="atmRunView" data-v="${org.id}">${atmFmt(org.s)}</button></div>`:''}</div>
-  ${r.items.length?`<div class="atm-di">${r.items.slice(0,8).map(i=>`<div class="atm-dr"><div>${atmResP(i.res)}<code>${esc(i.act)}</code></div><small>${esc(i.sum)}</small><small>${i.ch?esc(atmOrg(i.org).n)+' · '+esc(atmChurch(i.ch).n):'Plataforma'}</small></div>`).join('')}${r.items.length>8?`<p class="hint" style="margin:6px 2px 0">Mais ${r.items.length-8} atos: veja a aba Itens do job.</p>`:''}</div>`:`<p class="hint" style="margin:10px 2px">${r.st==='Failed'?'A execução falhou antes de registrar algum ato.':'Esta rodada não fez nada (sem atos).'}</p>`}
+  ${r.items.length?`<div class="atm-di">${r.items.slice(0,8).map(i=>`<div class="atm-dr"><div>${atmResP(i.res)}<code>${esc(i.act)}</code></div><small>${esc(i.sum)}</small><small>${i.ch?esc(atmOrg(i.org).n)+' · '+esc(atmChurch(i.ch).n):'Plataforma'}</small></div>`).join('')}${r.items.length>8?`<p class="hint" style="margin:6px 2px 0">Mais ${r.items.length-8} atos: veja a aba Atividade do job.</p>`:''}</div>`:`<p class="hint" style="margin:10px 2px">${r.st==='Failed'?'A execução falhou antes de registrar algum ato.':'Esta rodada não fez nada (sem atos).'}</p>`}
   <div class="dfoot"><button class="btn sec" data-a="closeDlg">Fechar</button>${retr.length?`<button class="btn pri" data-a="atmRetryRun" data-v="${r.id}" ${j.on?'':'disabled'}>${ic('swap',15)}Retentar ${retr.length===1?'o item':'os '+retr.length+' itens'}</button>`:''}${r.st==='Failed'&&!retr.length?`<button class="btn pri" data-a="atmRetryRun" data-v="${r.id}" ${j.on?'':'disabled'}>${ic('swap',15)}Retentar a execução</button>`:''}</div>`,'lg');
 }
 function atmRetryRun(src,items){

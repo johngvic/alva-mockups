@@ -293,47 +293,42 @@ const CTA={
 };
 
 /* ---------- Material de apoio ---------- */
-const MLINKS=[['jornada','Jornada','route'],['disc','Discipulado','heart'],['casas','Casas de Apascentamento','home'],['curso','Curso','book'],['outro','Outro','layers']];
-let _mtid=0;const MTR=(t,desc,d,lk,ref,files,min='',url='')=>({id:'mt'+(++_mtid),t,desc,d,lk,ref,files:files.map((f,i)=>({n:f,kb:[820,1430,2310,640][i%4]})),min,url,dl:Math.round(20+Math.random()*120)});
+let _mtid=0;const MTR=(t,desc,d,files,min='',url='')=>({id:'mt'+(++_mtid),t,desc,d,files:files.map((f,i)=>({n:f,kb:[820,1430,2310,640][i%4]})),min,url,dl:Math.round(20+Math.random()*120)});
 const MATS=[
- MTR('Apostila — Fundamentos da Fé','Apostila de apoio para as 3 primeiras semanas da jornada.','2026-09-02','jornada','j1',['Apostila-Fundamentos-da-Fe.pdf']),
- MTR('Roteiro de Encontro — Discipulado Inicial','Roteiro passo a passo para o primeiro encontro de discipulado.','2026-08-18','disc','',['Roteiro-Discipulado-Inicial.pdf']),
- MTR('Guia do Líder de Casa','Boas práticas para condução de encontros nas Casas de Apascentamento.','2026-03-03','casas','',['Casas-de-Apascentamento_03MAR1.pdf','Dinamicas-quebra-gelo.docx','Lista-de-presenca.xlsx'],'','https://drive.google.com/casas-guia'),
- MTR('Escala de ensaio — Louvor','Planilha com o cronograma de ensaios do semestre.','2026-07-10','outro','Ensaios',['Ensaios-2026-2.xlsx'],'Louvor','https://drive.google.com/…'),
+ MTR('Apostila — Fundamentos da Fé','Apostila de apoio para as 3 primeiras semanas da jornada.','2026-09-02',['Apostila-Fundamentos-da-Fe.pdf']),
+ MTR('Roteiro de Encontro — Discipulado Inicial','Roteiro passo a passo para o primeiro encontro de discipulado.','2026-08-18',['Roteiro-Discipulado-Inicial.pdf']),
+ MTR('Guia do Líder de Casa','Boas práticas para condução de encontros nas Casas de Apascentamento.','2026-03-03',['Casas-de-Apascentamento_03MAR1.pdf','Dinamicas-quebra-gelo.docx','Lista-de-presenca.xlsx'],'','https://drive.google.com/casas-guia'),
+ MTR('Escala de ensaio — Louvor','Planilha com o cronograma de ensaios do semestre.','2026-07-10',['Ensaios-2026-2.xlsx'],'Louvor','https://drive.google.com/…'),
 ];
 Object.assign(S,{mtq:'',mtf:'todos',mat:null});
 const fExt=n=>n.split('.').pop().toLowerCase();
 const fCol=e=>({pdf:['var(--st-rec-bg)','var(--st-rec)'],doc:['var(--brand-soft)','var(--brand-text)'],docx:['var(--brand-soft)','var(--brand-text)'],xlsx:['var(--st-int-bg)','var(--st-int)'],pptx:['var(--st-sol-bg)','var(--st-sol)']})[e]||['var(--surface-2)','var(--ink-muted)'];
 const fSize=kb=>kb>=1000?(kb/1000).toFixed(1).replace('.',',')+' MB':kb+' KB';
-const mtLink=m=>{const L=MLINKS.find(x=>x[0]===m.lk)||MLINKS[4];const tx=m.lk==='jornada'?(jById(m.ref)?.n||'Jornada'):m.lk==='curso'?(csAll().find(r=>r.c.id===m.ref)?.c.n||'Curso'):m.lk==='outro'?(m.ref||'Geral'):L[1];return {L,tx};};
 const fTile=(n,sz=34)=>{const e=fExt(n),c=fCol(e);return `<span class="mt-ft" style="--s:${sz}px;background:${c[0]};color:${c[1]}">${e.toUpperCase().slice(0,4)}</span>`;};
 function mtPage(){
  if(S.mat)return mtEdit();
- const q=norm(S.mtq),l=MATS.filter(m=>(S.mtf==='todos'||m.lk===S.mtf||(S.mtf==='min'&&m.min))&&(!q||norm(m.t+' '+m.desc+' '+mtLink(m).tx+' '+m.files.map(f=>f.n).join(' ')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
+ const q=norm(S.mtq),l=MATS.filter(m=>(S.mtf==='todos'||(S.mtf==='min'&&m.min))&&(!q||norm(m.t+' '+m.desc+' '+m.files.map(f=>f.n).join(' ')).includes(q))).sort((a,b)=>a.d<b.d?1:-1);
  const nf=MATS.reduce((a,m)=>a+m.files.length,0),kb=MATS.reduce((a,m)=>a+m.files.reduce((x,f)=>x+f.kb,0),0);
  return `<header class="ph rise"><div><p class="eb">Conteúdo</p><h1>Material de apoio</h1><p class="lede">Apostilas, roteiros e arquivos para jornadas, discipulado e Casas</p></div><div class="pact">${rpBtn('conteudo','materiais')}<button class="btn pri" data-a="mtNew">${ic('plus',15,2.2)}Novo material</button></div></header>
  <section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Materiais</span><span class="kv">${MATS.length}</span><span class="kd">${MATS.filter(m=>m.min).length} de ministérios</span></div><div class="k4"><span class="kl">Arquivos anexados</span><span class="kv">${nf}</span><span class="kd">${fSize(kb)} no total</span></div><div class="k4"><span class="kl">Downloads no mês</span><span class="kv">${MATS.reduce((a,m)=>a+m.dl,0)}</span><span class="kd">pelos líderes no app</span></div><div class="k4"><span class="kl">Mais baixado</span><span class="kv sp-kvt">${esc(MATS.slice().sort((a,b)=>b.dl-a.dl)[0].t.split(' — ')[0])}</span><span class="kd">${MATS.slice().sort((a,b)=>b.dl-a.dl)[0].dl} downloads</span></div></section>
- <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="mtq" placeholder="Buscar material ou arquivo" value="${esc(S.mtq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos'],...MLINKS.slice(0,4).map(x=>[x[0],x[1]]),['min','De ministério']].map(c=>`<button class="chipf ${S.mtf===c[0]?'on':''}" data-a="mtF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
- ${l.length?`<div class="mt-grid rise" style="--d:3">${l.map(m=>{const {L,tx}=mtLink(m);return `<article class="card mt-c" tabindex="0" data-a="mtOpen" data-v="${m.id}">
+ <div class="ct-bar rise" style="--d:2"><label class="sbox">${ic('search',16)}<input id="mtq" placeholder="Buscar material ou arquivo" value="${esc(S.mtq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos'],['min','De ministério']].map(c=>`<button class="chipf ${S.mtf===c[0]?'on':''}" data-a="mtF" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div>
+ ${l.length?`<div class="mt-grid rise" style="--d:3">${l.map(m=>{return `<article class="card mt-c" tabindex="0" data-a="mtOpen" data-v="${m.id}">
   <div class="mt-stack">${m.files.slice(0,3).map((f,i)=>`<span class="mt-pg" style="--i:${i}">${fTile(f.n,30)}</span>`).join('')||`<span class="mt-pg empty">${ic('file',20)}</span>`}</div>
-  <div class="mt-b"><span class="mt-lk">${ic(L[2],12)}${esc(tx)}</span><b>${esc(m.t)}</b><p>${esc(m.desc)}</p></div>
+  <div class="mt-b"><b>${esc(m.t)}</b><p>${esc(m.desc)}</p></div>
   <footer><span>${m.files.length} arquivo${m.files.length===1?'':'s'}${m.url?` · ${ic('link',11)} link`:''}</span><span>${fmtD(m.d)}</span>${m.min?`<span class="ct-min">${esc(m.min)}</span>`:''}<button class="ibtn sm mt-dl" data-a="mtDl" data-v="${m.id}" aria-label="Baixar" title="Baixar tudo">${ic('arrowDn',14,2)}</button></footer></article>`;}).join('')}
-  <button class="cm-badd" data-a="mtNew" style="min-height:250px"><span>${ic('upload',20,2)}</span><b>Novo material</b><small>Título, vínculo e arquivos</small></button></div>`:'<section class="card mempty rise"><p>Nenhum material aqui.</p><span>Nada corresponde a esse filtro.</span></section>'}`;
+  <button class="cm-badd" data-a="mtNew" style="min-height:250px"><span>${ic('upload',20,2)}</span><b>Novo material</b><small>Título e arquivos</small></button></div>`:'<section class="card mempty rise"><p>Nenhum material aqui.</p><span>Nada corresponde a esse filtro.</span></section>'}`;
 }
-function mtLinkFields(v){return `<div class="fld wide"><span class="fl">Usado em <small>opcional</small></span><div class="cm-dpick" id="mtLk">${MLINKS.map(x=>`<label><input type="radio" name="lk" value="${x[0]}" ${v.lk===x[0]?'checked':''}><span>${ic(x[2],14)}${x[1]}</span></label>`).join('')}</div><div id="mtRef"></div></div>
-  <div class="fld wide"><span class="fl">Ministério <small>opcional</small></span><div class="ct-vin"><div class="cm-q"><button type="button" data-mv="0" class="${v.min?'':'on'}">Avulso</button><button type="button" data-mv="1" class="${v.min?'on':''}">Ministério</button></div><span class="selw ${v.min?'':'ct-hide'}" id="mtMinW"><select name="min">${MINIS.filter(m=>m.active).map(m=>`<option ${m.n===v.min?'selected':''}>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></div><span class="hint">Aparece também na aba Conteúdo do ministério.</span></div>`;}
-function mtBind(f,v,onCh){let ref=v.ref||'';
- const rr=()=>{const t=f.lk.value;$('#mtRef').innerHTML=t==='jornada'?`<span class="selw" style="margin-top:8px"><select id="mtR">${JORNS.map(j=>`<option value="${j.id}" ${ref===j.id?'selected':''}>${esc(j.n)}</option>`).join('')}</select>${ic('updown',14)}</span>`:t==='curso'?`<span class="selw" style="margin-top:8px"><select id="mtR">${csAll().map(r=>`<option value="${r.c.id}" ${ref===r.c.id?'selected':''}>${esc(r.c.n)}</option>`).join('')}</select>${ic('updown',14)}</span>`:t==='outro'?`<input id="mtR" style="margin-top:8px" value="${esc(ref)}" placeholder="Ex.: Retiro de Jovens">`:'';const r=$('#mtR');if(r){ref=r.value;r.addEventListener('input',()=>{ref=r.value;onCh&&onCh();});r.addEventListener('change',()=>{ref=r.value;onCh&&onCh();});}};
- $$('[name=lk]',f).forEach(x=>x.addEventListener('change',()=>{ref='';rr();onCh&&onCh();}));rr();
+function mtLinkFields(v){return `<div class="fld wide"><span class="fl">Ministério <small>opcional</small></span><div class="ct-vin"><div class="cm-q"><button type="button" data-mv="0" class="${v.min?'':'on'}">Avulso</button><button type="button" data-mv="1" class="${v.min?'on':''}">Ministério</button></div><span class="selw ${v.min?'':'ct-hide'}" id="mtMinW"><select name="min">${MINIS.filter(m=>m.active).map(m=>`<option ${m.n===v.min?'selected':''}>${esc(m.n)}</option>`).join('')}</select>${ic('updown',14)}</span></div><span class="hint">Aparece também na aba Conteúdo do ministério.</span></div>`;}
+function mtBind(f,v,onCh){
  let mv=v.min?1:0;$$('[data-mv]',f).forEach(b=>b.onclick=()=>{mv=+b.dataset.mv;$$('[data-mv]',f).forEach(x=>x.classList.toggle('on',x===b));$('#mtMinW').classList.toggle('ct-hide',!mv);onCh&&onCh();});
- return ()=>({lk:f.lk?.value||'',ref:$('#mtR')?.value||'',min:mv?f.min.value:''});}
+ return ()=>({min:mv?f.min.value:''});}
 function mtForm(){openDlg(`${dlgHead('Novo material','Depois você envia os arquivos — sem limite de quantidade.')}<form id="mtF" class="fgrid" novalidate>
   <label class="fld wide"><span class="fl">Título</span><input name="t" autocomplete="off" placeholder="Ex.: Guia do Líder de Casa"></label>
   <label class="fld wide"><span class="fl">Descrição <small>opcional</small></span><textarea class="ta" name="desc" rows="2"></textarea></label>
-  ${mtLinkFields({lk:'',min:''})}
+  ${mtLinkFields({min:''})}
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" disabled>Criar e enviar arquivos</button></div></form>`,'lg');
- const f=$('#mtF'),ok=f.querySelector('[type=submit]'),get=mtBind(f,{lk:''});f.addEventListener('input',()=>ok.disabled=!f.t.value.trim());setTimeout(()=>f.t.focus(),80);
- f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{const g=get(),m=MTR(f.t.value.trim(),f.desc.value.trim(),NOWD,g.lk||'outro',g.ref,[],g.min);m.dl=0;MATS.push(m);closeDlg();S.mat=m.id;ctGo();toast('Material criado — envie os arquivos');},600);});}
+ const f=$('#mtF'),ok=f.querySelector('[type=submit]'),get=mtBind(f,{});f.addEventListener('input',()=>ok.disabled=!f.t.value.trim());setTimeout(()=>f.t.focus(),80);
+ f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{const g=get(),m=MTR(f.t.value.trim(),f.desc.value.trim(),NOWD,[],g.min);m.dl=0;MATS.push(m);closeDlg();S.mat=m.id;ctGo();toast('Material criado — envie os arquivos');},600);});}
 function mtEdit(){const m=MATS.find(x=>x.id===S.mat);if(!m){S.mat=null;return mtPage();}
  return ctPage('material',m.id,{crumbs:`<span class="soft">Conteúdo</span>${ic('chevR',13,2)}<button class="lnk back" data-a="mtBack">Material de apoio</button>${ic('chevR',13,2)}<span>${esc(m.t)}</span>`,title:`<span id="mtH">${esc(m.t)}</span>`,sub:`${m.files.length} arquivo${m.files.length===1?'':'s'} · ${m.dl} downloads no mês`,act:'<span class="who" id="mtSv">As alterações salvam sozinhas</span>',files:m.files.length},`<div class="ct-ed rise" style="--d:2"><section class="card ct-ef"><h2>Sobre o material</h2><form id="mtE" class="fgrid" novalidate>
   <label class="fld wide"><span class="fl">Título</span><input name="t" value="${esc(m.t)}"></label>
@@ -347,7 +342,7 @@ function mtEdit(){const m=MATS.find(x=>x.id===S.mat);if(!m){S.mat=null;return mt
 const mtFiles=m=>`${m.files.map((f,i)=>`<div class="ct-file">${fTile(f.n,38)}<span class="dkt"><b>${esc(f.n)}</b><span>${fSize(f.kb)}</span></span><button class="ibtn sm" data-a="mtFDl" data-v="${i}" aria-label="Baixar">${ic('arrowDn',13,2)}</button><button class="ibtn sm" data-a="mtFDel" data-v="${i}" aria-label="Remover">${ic('x',13)}</button></div>`).join('')}<div class="ct-drop" data-a="mtUp" style="margin-top:${m.files.length?8:0}px">${ic('upload',18)}<span><b>${m.files.length?'Adicionar mais arquivos':'Envie os arquivos'}</b><small>PDF, Word, Excel, PowerPoint — sem limite de quantidade</small></span></div>`;
 function mtAfter(){const q=$('#mtq');if(q)q.addEventListener('input',e=>{S.mtq=e.target.value;const c=e.target.selectionStart;ctRe();const n=$('#mtq');n.focus();n.setSelectionRange(c,c);});
  const m=S.mat&&MATS.find(x=>x.id===S.mat),f=$('#mtE');if(!m||!f)return;let t;
- const sv=()=>{clearTimeout(t);$('#mtSv').textContent='Salvando…';t=setTimeout(()=>{const g=get();Object.assign(m,{t:f.t.value.trim()||m.t,desc:f.desc.value.trim(),d:f.d.value||m.d,url:f.url.value.trim(),lk:g.lk||m.lk,ref:g.ref,min:g.min});$('#mtH').textContent=m.t;$('.crumb>span:last-child').textContent=m.t;$('#mtSv').innerHTML=`${ic('check',13,2.4)} Salvo`;},500);};
+ const sv=()=>{clearTimeout(t);$('#mtSv').textContent='Salvando…';t=setTimeout(()=>{const g=get();Object.assign(m,{t:f.t.value.trim()||m.t,desc:f.desc.value.trim(),d:f.d.value||m.d,url:f.url.value.trim(),min:g.min});$('#mtH').textContent=m.t;$('.crumb>span:last-child').textContent=m.t;$('#mtSv').innerHTML=`${ic('check',13,2.4)} Salvo`;},500);};
  const get=mtBind(f,m,sv);f.addEventListener('input',sv);}
 Object.assign(CTA,{
  mtLinkOpen:()=>{const u=$('#mtE [name=url]').value.trim();if(!u){toast('Cole um link primeiro');return;}window.open(/^https?:/.test(u)?u:'https://'+u,'_blank','noopener');},
@@ -406,6 +401,17 @@ function ctProgTab(kind,id){const {rows,ini,con}=ctProgRows(kind,id),pct=ini?Mat
 
 /* Usos: onde este conteúdo é usado (séries, blocos de escala, trilhas, ministério) */
 const ctUseRow=r=>`<div class="ct-file ct-us"><span class="ct-cert">${ic(r.i,16)}</span><span class="dkt"><b>${esc(r.t)}</b><span>${esc(r.sub)}</span></span>${r.go?`<button class="btn sec sm" data-a="ctUse" data-v="${r.go}">Abrir${ic('arrowR',13,2)}</button>`:''}</div>`;
+/* escolha atômica nos encontros de Casa, discipulado e acompanhamento: pregação, vídeo, música ou material (série, jornada e curso não; CNT-P-24) */
+const ATOMS=()=>[['Pregações','sermon',PREGS],['Vídeos','video',NX_VIDEOS],['Músicas','song',SONGS],['Materiais de apoio','material',MATS]];
+const atomTitle=x=>x.t||x.n;
+const atomSel=cur=>`<span class="selw"><select name="mat"><option value="">Nenhum</option>${ATOMS().map(g=>`<optgroup label="${g[0]}">${g[2].filter(x=>x.active!==false).map(x=>`<option value="${g[1]}|${x.id}" ${cur===g[1]+'|'+x.id?'selected':''}>${esc(atomTitle(x))}</option>`).join('')}</optgroup>`).join('')}</select>${ic('updown',14)}</span>`;
+const atomPick=v=>{const [k,id]=(v||'').split('|'),g=ATOMS().find(z=>z[0]&&z[1]===k),x=g&&g[2].find(z=>z.id===id);return x?{mat:atomTitle(x),mref:v}:{mat:'',mref:''};};
+/* onde um item é usado em encontros: a Casa aparece pelo nome; discipulado e acompanhamento só pelo tipo e a data, sem a pessoa (quem cadastra conteúdo pode não ver a rede nem o caso) */
+const ctMeetUses=ref=>{const r=[],dt=m=>fmtD(m.d);
+ CASAS.forEach(c=>c.meets.forEach(m=>{if(m.mref===ref)r.push({d:m.d,i:'home',t:c.n,sub:dt(m)+' · encontro da Casa',go:'cas|'+c.id});}));
+ DISC.forEach(d=>d.meets.forEach(m=>{if(m.mref===ref)r.push({d:m.d,i:'heart',t:'Encontro de discipulado',sub:dt(m)});}));
+ CASES.forEach(c=>(c.meets||[]).forEach(m=>{if(m.mref===ref)r.push({d:m.d,i:'hand',t:'Encontro de acompanhamento',sub:dt(m)});}));
+ return r.sort((a,b)=>a.d<b.d?1:-1);};
 function ctUses(kind,id){
  const G=[],add=(h,rows)=>{if(rows.length)G.push({h,rows});},ml=m=>{const x=MINIS.find(z=>z.n===m);return {i:'users',t:m,sub:'Restrito aos integrantes do ministério',go:x?'min|'+x.id:''};};
  if(kind==='lesson'){const j=jById(S.jor),c=cuById(j,S.cur);
@@ -414,15 +420,14 @@ function ctUses(kind,id){
  if(kind==='course'){const sj=CSOLO.find(j=>j.courses.some(c=>c.id===id));
   add('Jornadas',JORNS.filter(j=>j.courses.some(c=>c.id===id)).map(j=>({i:'route',t:j.n,sub:'Curso '+(j.courses.findIndex(c=>c.id===id)+1)+' de '+j.courses.length+' na trilha',go:'jor|'+j.id})));
   if(sj&&sj.min)add('Ministério',[ml(sj.min)]);return G;}
- if(kind==='journey'){add('Discipulado',DISC.filter(d=>d.stage&&(dTrail(d),d.trail.some(t=>t.k==='Jornada'&&t.id===id))).map(d=>({i:'heart',t:d.n,sub:'Trilha de discipulado',go:'dsc|'+d.id})));add('Materiais de apoio',MATS.filter(m=>m.lk==='jornada'&&m.ref===id).map(m=>({i:'file',t:m.t,sub:m.files.length+' arquivo'+(m.files.length===1?'':'s'),go:'mat|'+m.id})));return G;}
+ if(kind==='journey'){add('Discipulado',DISC.filter(d=>d.stage&&(dTrail(d),d.trail.some(t=>t.k==='Jornada'&&t.id===id))).map(d=>({i:'heart',t:d.n,sub:'Trilha de discipulado',go:'dsc|'+d.id})));return G;}
  if(kind==='series'){const s=NX_SERIES.find(x=>x.id===id);if(s&&s.min)add('Ministério',[ml(s.min)]);return G;}
  const o=({sermon:()=>PREGS.find(x=>x.id===id),video:()=>NX_VIDEOS.find(x=>x.id===id),song:()=>SONGS.find(x=>x.id===id),material:()=>MATS.find(x=>x.id===id)})[kind]();if(!o)return G;
  const title=o.t||o.n,rows=[];
  add('Séries',NX_SERIES.filter(s=>s.items.includes(id)).map(s=>({i:'layers',t:s.n,sub:s.type+' · item '+(s.items.indexOf(id)+1)+' de '+s.items.length,go:'ser|'+s.id})));
  ESCALAS.forEach(x=>x.dates.forEach(d=>d.blocks.forEach(b=>{if(b.content.some(c=>c.ref===id||c.t===title)){const e=EVTS.find(z=>z.id===d.ev);rows.push({i:'calendar',t:x.n,sub:(e?e.t+' · '+fmtD(e.d):'Data da escala')+' · '+b.label,go:'esc|'+x.id});}})));
  add('Blocos de escala',rows);
- if(kind==='material'){const jn=o.lk==='jornada'&&JORNS.find(j=>j.id===o.ref),k=MLINKS.find(z=>z[0]===o.lk);
-  if(jn)add('Vinculado a',[{i:'route',t:jn.n,sub:'Jornada',go:'jor|'+jn.id}]);else if(k)add('Vinculado a',[{i:k[2],t:k[1],sub:o.ref||'Material de apoio'}]);}
+ add('Encontros',ctMeetUses(kind+'|'+id));
  if(o.min)add('Ministério',[ml(o.min)]);
  return G;}
 function ctUsesCard(kind,id){const G=ctUses(kind,id);
@@ -450,6 +455,7 @@ Object.assign(CTA,{
   else if(k==='min'){S.active='ministerios';S.mini=a;}
   else if(k==='mat'){S.active='material';S.mat=a;}
   else if(k==='dsc'){S.active='discipulado';S.disc=a;}
+  else if(k==='cas'){S.active='casas';S.casa=a;S.ctab='geral';S.chamada=null;S.hedit=null;}
   ctGo();},
  sgEdit:v=>{S.song=v;ctGo();},sgBack:()=>{S.song=null;ctGo();},sgEditForm:v=>sgForm(v),
  alEdit:v=>{S.aula=v;ctGo();},alBack:()=>{S.aula=null;ctGo();}
@@ -460,3 +466,10 @@ cmtSeed('content.sermon:'+PREGS[1].id,[{n:'Carla Mendes',t:'A parte sobre a fraq
 cmtSeed('content.song:'+SONGS[1].id,[{n:'Bruno Reis',t:'Na cifra o tom D fica ótimo para o culto de domingo.',at:'há 2 dias'}]);
 cmtSeed('content.material:'+MATS[2].id,[{n:'Ana Lima',t:'O guia ajudou muito a preparar o primeiro encontro da nossa casa.',at:'há 1 semana'},{n:'Rafael Pereira',t:'Boa a lista de dinâmicas.',at:'há 3 dias'}]);
 cmtSeed('content.video:vd2',[{n:'Helena Duarte',t:'Mandei para quem acabou de chegar na igreja.',at:'há 4 dias'}]);
+
+/* encontros que já usam item da biblioteca (aba Usos) */
+{const pick=(o,x,k)=>{o.mat=atomTitle(x);o.mref=k+'|'+x.id;};
+ const dm=DISC.flatMap(d=>d.meets).find(m=>m.mat==='Trilha · Fundamentos');if(dm)pick(dm,MATS[1],'material');
+ if(CASAS[0]&&CASAS[0].meets[0])pick(CASAS[0].meets[0],MATS[2],'material');
+ if(CASAS[1]&&CASAS[1].meets[0])pick(CASAS[1].meets[0],MATS[2],'material');
+ if(CASES[0]&&CASES[0].meets[0])pick(CASES[0].meets[0],PREGS[1],'sermon');}
