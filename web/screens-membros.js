@@ -271,7 +271,7 @@ const PA={
   <form class="fgrid one" id="addF" novalidate>
    <label class="fld"><span class="fl">Nome completo</span><input name="n" required autocomplete="off" placeholder="Ex.: Maria Souza"><span class="err"></span></label>
    <label class="fld"><span class="fl">E-mail <small>opcional</small></span><input name="e" type="email" autocomplete="off" placeholder="nome@email.com"><span class="err"></span></label>
-   <label class="fld"><span class="fl">Telefone <small>opcional</small></span><input name="ph" type="tel" autocomplete="off" placeholder="(11) 90000-0000" inputmode="tel"><span class="err"></span></label>
+   <label class="fld"><span class="fl">Celular</span><input name="ph" type="tel" autocomplete="off" placeholder="(11) 90000-0000" inputmode="tel"><span class="err"></span></label>
    <label class="tog"><input type="checkbox" name="inv" checked><span class="sw"></span><span><b>Convidar para o app</b><small>Enviamos o acesso por e-mail</small></span></label>
    <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Adicionar membro</button></div>
   </form>`);
@@ -279,6 +279,7 @@ const PA={
   f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
   f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);let ok=true;const bad=(n,msg)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent=msg;if(ok)i.focus();ok=false;};
    const n=fd.get('n').trim(),em=fd.get('e').trim();if(n.split(' ').length<2)bad('n',n?'Informe nome e sobrenome':'Informe o nome');if(em&&!/^\S+@\S+\.\S+$/.test(em))bad('e','E-mail inválido');
+   const tel=fd.get('ph').trim();if(!tel)bad('ph','Informe o celular');else if(tel.replace(/\D/g,'').length<10)bad('ph','Celular incompleto');
    if(em&&MEMBERS.some(m=>m.e===em))bad('e','Já existe um membro com este e-mail');if(!ok)return;
    const b=f.querySelector('button[type=submit]');b.classList.add('busy');
    setTimeout(()=>{const m=M(n,em,fd.get('ph'),'2026-09','solicitado',[],{bap:false,app:fd.get('inv')?{st:'ativo',last:'convite enviado'}:{st:'sem conta'}});MEMBERS.unshift(m);S.flash=m.id;S.filter='todos';S.month='todas';S.q='';closeDlg();render();toast(`${n.split(' ')[0]} adicionado(a)${fd.get('inv')&&em?' · convite enviado':''}`,()=>{MEMBERS.splice(MEMBERS.indexOf(m),1);render();});},900);});},

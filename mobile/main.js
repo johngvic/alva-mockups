@@ -341,6 +341,7 @@ V.signupForm=()=>{const p=S.prefill||{};return{sb:'var(--ink)',html:flow({pct:p.
   <div class="stack g4">
   <div class="row g3" style="align-items:flex-start"><div class="grow">${field({id:'sNome',label:'Nome',ph:'Seu nome',val:p.nome||'',ac:'given-name'})}</div><div class="grow">${field({id:'sSobre',label:'Sobrenome',ph:'Seu sobrenome',val:p.sobre||'',ac:'family-name'})}</div></div>
   ${field({id:'sEmail',label:'E-mail',type:'email',ph:'seu@email.com',val:p.email||'',ac:'email',im:'email'})}
+  ${field({id:'sPhone',label:'Celular',type:'tel',ph:'(11) 91234-5678',ac:'tel',im:'tel',max:15,hint:'Com DDD. É por ele que o Alva reconhece você.'})}
   ${field({id:'sPass',label:'Senha',type:'password',ph:'Crie uma senha',ac:'new-password',reveal:true,hint:'Mínimo de 8 caracteres, com letras e números.'})}
   <div class="stack g2"><div class="bar" aria-hidden="true"><i id="pwBar" style="width:0"></i></div><span class="foot" id="pwTxt">Força da senha</span></div>
   <div class="field" id="f-sTerms">${mobileTermsList()}</div>
@@ -610,7 +611,7 @@ const HOOK={
   if(S.su.att>0)startResend();
  },
  lookup(){const p=$('#lkPhone');if(p)p.addEventListener('input',()=>{p.value=maskPhone(p.value)});},
- signupForm(){const p=$('#sPass'),bar=$('#pwBar'),t=$('#pwTxt');const upd=()=>{const v=p.value;let s=0;if(v.length>=8)s++;if(/[a-z]/i.test(v)&&/\d/.test(v))s++;if(/[^a-z0-9]/i.test(v)||v.length>=12)s++;const L=[['0%','Força da senha','var(--line)'],['34%','Fraca','var(--danger-text)'],['67%','Boa','var(--warning-fill)'],['100%','Forte','var(--accent)']][v?Math.max(s,1):0];bar.style.width=L[0];bar.style.background=L[2];t.textContent=L[1];};p.addEventListener('input',upd);},
+ signupForm(){const p=$('#sPass'),bar=$('#pwBar'),t=$('#pwTxt');const upd=()=>{const v=p.value;let s=0;if(v.length>=8)s++;if(/[a-z]/i.test(v)&&/\d/.test(v))s++;if(/[^a-z0-9]/i.test(v)||v.length>=12)s++;const L=[['0%','Força da senha','var(--line)'],['34%','Fraca','var(--danger-text)'],['67%','Boa','var(--warning-fill)'],['100%','Forte','var(--accent)']][v?Math.max(s,1):0];bar.style.width=L[0];bar.style.background=L[2];t.textContent=L[1];};p.addEventListener('input',upd);const ph=$('#sPhone');if(ph)ph.addEventListener('input',()=>{ph.value=maskPhone(ph.value)});},
  home(){const car=$('#car'),dots=$$('#dots span');const N=dots.length,DUR=5000;let idx=0,paused=false,t0=Date.now(),left=DUR,timer=null;
   const w=()=>car.children[1].offsetLeft-car.children[0].offsetLeft;
   const mark=i=>{dots.forEach((d,k)=>{d.classList.toggle('on',k===i);d.classList.remove('run');});void car.offsetWidth;dots[i].classList.add('run');};
@@ -885,6 +886,7 @@ const F={
   if(!n){setErr('sNome','Informe seu nome.');ok=false;}
   if(!s){setErr('sSobre','Informe seu sobrenome.');ok=false;}
   if(!e){setErr('sEmail','Informe seu e-mail.');ok=false;}else if(!EMAIL_RE.test(e)){setErr('sEmail','Digite um e-mail válido, como nome@email.com.');ok=false;}else if(e.toLowerCase()==='teste@example.org'&&!(S.prefill&&S.prefill.found)){setErr('sEmail','Este e-mail já tem conta. Volte e entre com ele.');ok=false;}
+  const ph=val('sPhone');if(!ph){setErr('sPhone','Informe seu celular.');ok=false;}else if(ph.replace(/\D/g,'').length<10){setErr('sPhone','Digite o celular com DDD.');ok=false;}
   if(!p){setErr('sPass','Crie uma senha.');ok=false;}else if(p.length<8||!/[a-z]/i.test(p)||!/\d/.test(p)){setErr('sPass','Use 8 caracteres ou mais, com letras e números.');ok=false;}
   if(!t){setErr('sTerms','Aceite os termos para continuar.');ok=false;}
   if(!ok){toast('error','Revise os campos destacados','');return;}
