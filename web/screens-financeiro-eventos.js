@@ -1,27 +1,5 @@
 /* ================= Financeiro: eventos pagos ================= */
-function evFinRows(){
- return EVTS.filter(e=>e.st==='confirmado'&&evMoney(e)&&e.regs.length).map(e=>{evEnsure(e);
-  const paid=e.regs.filter(r=>r.pay==='pago'),pend=e.regs.filter(r=>r.pay==='pendente'),sum=(l,f)=>l.reduce((a,r)=>a+f(r),0),net=r=>regTot(e,r)-regFee(e,r);
-  const gross=sum(paid,r=>regTot(e,r)),fees=sum(paid,r=>regFee(e,r));
-  return {e,gross,fees,net:gross-fees,pend:sum(pend,r=>regTot(e,r)),netPaid:sum(paid,net),netAll:sum(paid,net)+sum(pend,net),posted:past(e)?gross-fees:0};});
-}
-/* a lista de recebimentos acompanha as inscrições reais dos eventos */
-function evRecebSync(){
- for(let i=RECEB.length-1;i>=0;i--)if(/^(ev-|cr1$|cr3$)/.test(RECEB[i].id))RECEB.splice(i,1);
- evFinRows().forEach(x=>{if(x.netAll>0)RECEB.push({id:'ev-'+x.e.id,desc:x.e.t+' — inscrições',prev:x.e.d,v:Math.round(x.netAll*100)/100,got:Math.round(x.netPaid*100)/100,src:'Inscrições · líquido de taxas'});});
-}
-function evFinCard(){
- const rows=evFinRows(),t=k=>rows.reduce((a,x)=>a+x[k],0);
- return `<div class="fd-fin"><div class="fd-fin-h">${kTile({c:'var(--tone-lima-ink)',ic:'ticket'},36)}<span class="dkt"><b>Eventos pagos</b><span>${rows.length} ${rows.length===1?'evento':'eventos'} com inscrições</span></span></div>
-  <div class="fd-ln"><span>Vendido (bruto)</span><b>${brl2(t('gross'))}</b></div>
-  <div class="fd-ln"><span>Recebido líquido</span><b style="color:var(--st-int)">${brl2(t('net'))}</b></div>
-  <div class="fd-ln"><span>A receber</span><b>${brl2(t('pend'))}</b></div>
-  <div class="fd-ln"><span>Lançado em Receitas</span><b>${brl2(t('posted'))}</b></div>
-  <button class="lnk" data-a="evFinGo">Ver eventos ${ic('arrowR',13)}</button></div>`;
-}
-{const _v=fVis;fVis=()=>{evRecebSync();return _v();};const _r=fRec;fRec=()=>{evRecebSync();return _r();};}
-Object.assign(A,{evFinGo:()=>{const f=S.rpSt['agenda/financeiro'];if(f)f.f.ev='todos';A.rptGo('agenda|financeiro');},
- evFinRep:v=>{rpState('agenda','financeiro').f.ev=v;A.rptGo('agenda|financeiro');}});
+Object.assign(A,{evFinRep:v=>{rpState('agenda','financeiro').f.ev=v;A.rptGo('agenda|financeiro');}});
 
 
 /* ---------- Integração › fila de espera (ações) ---------- */

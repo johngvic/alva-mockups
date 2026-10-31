@@ -17,7 +17,7 @@ const LANCS=[
 const FLOW=[['Abr',24800,6100],['Mai',27300,7900],['Jun',24100,5600],['Jul',28900,8200],['Ago',30200,6900],['Set',29700,4430]];
 let _pid2=0;const CP=(desc,venc,v,cat,paid=false)=>({id:'cp'+(++_pid2),desc,venc,v,cat,paid});
 const PAGAR=[CP('Energia elétrica','2026-09-28',640,'Estrutura'),CP('Fornecedor gráfica — banners','2026-09-30',890,'Comunicação'),CP('Aluguel do salão — Outubro','2026-10-05',3200,'Estrutura'),CP('Internet e telefonia','2026-10-08',289,'Estrutura'),CP('Seguro do prédio','2026-10-20',1150,'Estrutura'),CP('Material de limpeza','2026-09-10',340,'Manutenção',true)];
-const RECEB=[{id:'cr1',desc:'Inscrições — Retiro de Jovens 2026',prev:'2026-09-27',v:10440,got:10440,src:'Inscrições no app'},{id:'cr2',desc:'Campanha Reforma do Templo',prev:'',v:80000,got:34200,src:'Pix e cartão · contínuo'},{id:'cr3',desc:'Conferência Missões — inscrições',prev:'2026-10-09',v:4800,got:1900,src:'Inscrições no app'}];
+const RECEB=[{id:'cr1',desc:'Inscrições — Retiro de Jovens 2026',prev:'2026-09-27',v:10440,got:10440,src:'Cadastro manual'},{id:'cr2',desc:'Campanha Reforma do Templo',prev:'',v:80000,got:0,src:'Cadastro manual'},{id:'cr3',desc:'Conferência Missões — inscrições',prev:'2026-10-09',v:4800,got:0,src:'Cadastro manual'}];
 let _aid=0;const AP=(tipo,desc,v,d,who,extra={})=>({id:'ap'+(++_aid),tipo,desc,v,d,who,...extra});
 const APROVS=[
  AP('imp','Extrato Bradesco (OFX)',null,'2026-09-17','Rafael Pereira',{n:18,ent:14,sai:4,te:21340,ts:3870,rows:[['16/09','PIX recebido — M. Souza','Dízimos','e',350],['16/09','PIX recebido — A. C. Lima','Dízimos','e',500],['15/09','Boleto Enel','Estrutura','s',640],['15/09','TED recebida — campanha','Doações','e',1200],['14/09','Pag. Gráfica Rápida','Comunicação','s',890]]}),
@@ -61,6 +61,10 @@ function fVis(){
   <button class="card fv-a ${late.length?'bad':'ok'}" data-a="nav" data-v="fpag"><span class="fv-ai">${ic('clock',18)}</span><b class="fv-an">${late.length}</b><span class="fv-at"><b>conta${late.length===1?'':'s'} atrasada${late.length===1?'':'s'}</b><span>${late.length?R$(late.reduce((a,p)=>a+p.v,0)):'Tudo em dia'}</span></span>${ic('arrowR',15,2)}</button>
   <button class="card fv-a wait" data-a="nav" data-v="fpag"><span class="fv-ai">${ic('calendar',18)}</span><b class="fv-an">${soon.length}</b><span class="fv-at"><b>vence${soon.length===1?'':'m'} em 7 dias</b><span>${R$(soon.reduce((a,p)=>a+p.v,0))}</span></span>${ic('arrowR',15,2)}</button>
   <button class="card fv-a brand" data-a="nav" data-v="fapr"><span class="fv-ai">${ic('check',18,2.2)}</span><b class="fv-an">${APROVS.length}</b><span class="fv-at"><b>aguardando aprovação</b><span>${APROVS.length?APROVS.map(a=>a.tipo==='imp'?'extrato':'lançamento').join(' + '):'Nada pendente'}</span></span>${ic('arrowR',15,2)}</button></div>
+ <div class="fv-act rise" style="--d:3">
+  <button class="card fv-a ok" data-a="nav" data-v="fcon"><span class="fv-ai">${ic('wallet',18)}</span><b class="fv-an">${R0(fSaldo())}</b><span class="fv-at"><b>saldo das contas</b><span>${FCONTAS.length} contas ativas</span></span>${ic('arrowR',15,2)}</button>
+  <button class="card fv-a wait" data-a="fCfgGo" data-v="fech"><span class="fv-ai">${ic('check',18,2.2)}</span><b class="fv-an">${compTxt(FCLOSED[0][0]).slice(0,3)}</b><span class="fv-at"><b>último mês fechado</b><span>${monthName(FCLOSED[0][0])}</span></span>${ic('arrowR',15,2)}</button>
+  <button class="card fv-a brand" data-a="nav" data-v="fprev"><span class="fv-ai">${ic('users',18)}</span><b class="fv-an">${R0(pcCom())}</b><span class="fv-at"><b>com as pessoas</b><span>ainda não chegou à conta</span></span>${ic('arrowR',15,2)}</button></div>
  <section class="card fv-flow rise" style="--d:3"><div class="sh"><div><h2>Para onde foi cada real de setembro</h2><p class="who" style="margin:4px 0 0">De ${R0(E)} que entraram, ${R0(Sx)} saíram — o resto ficou no caixa.</p></div><button class="btn ghost sm" data-a="nav" data-v="frel">Ver DRE ${ic('arrowR',13,2)}</button></div>
   <p class="fl fv-lb"><i class="e"></i>Entrou</p><div class="fv-bar">${ent.map(([c,v])=>seg(c,v.e,E,'in')).join('')}</div>
   <div style="height:16px"></div>
@@ -74,15 +78,15 @@ function fLanc(){
  +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Entradas em setembro</span><span class="kv" style="color:var(--st-int)">${R$(sumT(ok,'e'))}</span><span class="kd">${ok.filter(x=>x.tipo==='e').length} lançamentos</span></div><div class="k4"><span class="kl">Saídas em setembro</span><span class="kv" style="color:var(--st-rec)">${R$(sumT(ok,'s'))}</span><span class="kd">${ok.filter(x=>x.tipo==='s').length} lançamentos</span></div><div class="k4"><span class="kl">Saldo</span><span class="kv">${R$(sumT(ok,'e')-sumT(ok,'s'))}</span><span class="kd">competência set/2026</span></div><div class="k4"><span class="kl">Aguardando aprovação</span><span class="kv" style="${LANCS.some(x=>x.st==='pend')?'color:var(--st-sol)':''}">${LANCS.filter(x=>x.st==='pend').length}</span><span class="kd">ainda não contam no saldo</span></div></section>
  <section class="card mtab rise" style="--d:2"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="lq" placeholder="Buscar descrição ou categoria" value="${esc(S.lq)}" autocomplete="off"></label><div class="chips">${[['todos','Todos'],['e','Entradas'],['s','Saídas'],['pend','Aguardando']].map(c=>`<button class="chipf ${S.lf===c[0]?'on':''}" data-a="lcF" data-v="${c[0]}">${c[0]==='e'?'<i style="background:var(--st-int)"></i>':c[0]==='s'?'<i style="background:var(--st-rec)"></i>':''}${c[1]}</button>`).join('')}</div></div>
   ${l.length?`<div class="trow lc thead"><span>Lançamento</span><span>Categoria</span><span>Competência</span><span>Valor</span><span></span></div>${l.map(x=>`<div class="trow lc ${x.st==='pend'?'pend':''}" tabindex="0" data-a="lcEdit" data-v="${x.id}">
-   <span class="tn"><span class="fi-dir ${x.tipo}">${ic(x.tipo==='e'?'arrowDn':'arrowUp',15,2.2)}</span><span class="hn"><b>${esc(x.desc)}</b><span>${dBR(x.d)}${x.st==='pend'?` · <span class="fi-pend">${ic('clock',11)}aguardando aprovação</span>`:''}</span></span></span>
+   <span class="tn"><span class="fi-dir ${x.tipo}">${ic(x.tipo==='e'?'arrowDn':'arrowUp',15,2.2)}</span><span class="hn"><b>${esc(x.desc)}</b><span>${dBR(x.d)}${x.rev?' · revertido':''}${x.st==='pend'?` · <span class="fi-pend">${ic('clock',11)}aguardando aprovação</span>`:''}</span></span></span>
    <span class="lc-c">${catTag(x.cat)}</span><span class="lc-m">${compTxt(x.comp)}</span>
    <span class="lc-v ${x.tipo}">${R$(x.tipo==='e'?x.v:-x.v,true)}</span>
-   <span class="hact" style="position:relative"><button class="ibtn sm" data-a="lcMenu" data-v="${x.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="lcPop-${x.id}" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="lcEdit" data-v="${x.id}">${ic('pen',16)}Editar</button><button class="pi" data-a="lcDup" data-v="${x.id}">${ic('copy',16)}Duplicar</button><hr><button class="pi danger" data-a="lcDel" data-v="${x.id}">${ic('x',16)}Excluir</button></div></span></div>`).join('')}`:'<div class="mempty"><p>Nenhum lançamento aqui.</p><span>Nada corresponde a esse filtro.</span></div>'}
+   <span class="hact" style="position:relative"><button class="ibtn sm" data-a="lcMenu" data-v="${x.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="lcPop-${x.id}" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="lcEdit" data-v="${x.id}">${ic('pen',16)}Editar</button><button class="pi" data-a="lcDup" data-v="${x.id}">${ic('copy',16)}Duplicar</button><hr>${x.st==='pend'?`<button class="pi danger" data-a="lcDel" data-v="${x.id}">${ic('x',16)}Excluir</button>`:`<button class="pi danger" data-a="lcRev" data-v="${x.id}">${ic('swap',16)}Reverter</button>`}</div></span></div>`).join('')}`:'<div class="mempty"><p>Nenhum lançamento aqui.</p><span>Nada corresponde a esse filtro.</span></div>'}
   <div class="tfoot"><span>${l.length} lançamento${l.length===1?'':'s'}</span><span>Saldo do filtro <b>${R$(l.filter(x=>x.st==='ok').reduce((a,x)=>a+(x.tipo==='e'?x.v:-x.v),0))}</b></span></div></section>`;
 }
 function lcForm(id){const x=id?LANCS.find(y=>y.id===id):null,v=x?{...x}:{tipo:'e',desc:'',cat:'',v:'',comp:'2026-09',d:NOWD};
  openDlg(`${dlgHead(x?'Editar lançamento':'Novo lançamento',x?(x.st==='pend'?'Ainda aguardando aprovação.':`Lançado por ${esc(x.who)}`):'')}
-  ${x?'':`<p class="fi-note">${ic('info',14)}<span>Entra como <b>pendente de aprovação</b> e só passa a contar no saldo depois que alguém com alçada aprovar.</span></p>`}
+  ${x?'':`<p class="fi-note">${ic('info',14)}<span>Entra como <b>pendente de aprovação</b> e só passa a contar no saldo depois que o Admin aprovar.</span></p>`}
   <form id="lcF" class="fgrid" novalidate>
    <div class="fld wide"><div class="fi-tg"><button type="button" data-tp="e" class="${v.tipo==='e'?'on':''}">${ic('arrowDn',15,2.2)}Entrada</button><button type="button" data-tp="s" class="${v.tipo==='s'?'on':''}">${ic('arrowUp',15,2.2)}Saída</button></div></div>
    <label class="fld wide fi-val"><span class="fl">Valor</span><span class="fi-amt"><em>R$</em><input name="v" inputmode="decimal" value="${v.v?String(v.v).replace('.',','):''}" placeholder="0,00" autocomplete="off"></span></label>
@@ -104,11 +108,11 @@ function lcForm(id){const x=id?LANCS.find(y=>y.id===id):null,v=x?{...x}:{tipo:'e
 /* ---------- Contas a pagar ---------- */
 function fPag(){
  const open=PAGAR.filter(p=>!p.paid).sort((a,b)=>a.venc<b.venc?-1:1),late=open.filter(p=>dDays(p.venc)<0),wk=open.filter(p=>dDays(p.venc)>=0&&dDays(p.venc)<=7),lt=open.filter(p=>dDays(p.venc)>7),paid=PAGAR.filter(p=>p.paid);
- const grp=(t,l,cls)=>l.length?`<div class="fi-grp ${cls}"><p class="fi-gh"><b>${t}</b><span>${l.length} · ${R$(l.reduce((a,p)=>a+p.v,0))}</span></p>${l.map(p=>{const d=dDays(p.venc);return `<div class="fi-bill" id="${p.id}"><span class="fi-due ${cls}"><b>${+p.venc.slice(8)}</b><small>${MONTHS[+p.venc.slice(5,7)-1].slice(0,3)}</small></span><span class="dkt"><b>${esc(p.desc)}</b><span>${catTag(p.cat)} <span class="${cls==='late'?'fi-latetx':''}">${d<0?`venceu há ${-d} dia${d===-1?'':'s'}`:d===0?'vence hoje':`vence ${relD(p.venc)}`}</span></span></span><b class="fi-amt2">${R$(p.v)}</b><button class="btn ${cls==='late'?'pri':'sec'} sm" data-a="cpPay" data-v="${p.id}">${ic('check',14,2.4)}Marcar como paga</button></div>`;}).join('')}</div>`:'';
+ const grp=(t,l,cls)=>l.length?`<div class="fi-grp ${cls}"><p class="fi-gh"><b>${t}</b><span>${l.length} · ${R$(l.reduce((a,p)=>a+p.v,0))}</span></p>${l.map(p=>{const d=dDays(p.venc);return `<div class="fi-bill" id="${p.id}"><span class="fi-due ${cls}"><b>${+p.venc.slice(8)}</b><small>${MONTHS[+p.venc.slice(5,7)-1].slice(0,3)}</small></span><span class="dkt"><b>${esc(p.desc)}</b><span>${catTag(p.cat)} <span class="${cls==='late'?'fi-latetx':''}">${d<0?`venceu há ${-d} dia${d===-1?'':'s'}`:d===0?'vence hoje':`vence ${relD(p.venc)}`}</span></span></span><b class="fi-amt2">${R$(p.v)}</b><button class="btn ${cls==='late'?'pri':'sec'} sm" data-a="cpPay" data-v="${p.id}">${ic('check',14,2.4)}Dar baixa</button></div>`;}).join('')}</div>`:'';
  return fHead('Contas a pagar','O que a igreja precisa pagar e quando',`${rpBtn('financeiro','pagar')}<button class="btn pri" data-a="cpNew">${ic('plus',15,2.2)}Nova conta</button>`)
  +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Em aberto</span><span class="kv">${R$(open.reduce((a,p)=>a+p.v,0))}</span><span class="kd">${open.length} contas</span></div><div class="k4"><span class="kl">Atrasadas</span><span class="kv" style="${late.length?'color:var(--st-rec)':''}">${late.length}</span><span class="kd">${late.length?R$(late.reduce((a,p)=>a+p.v,0)):'nenhuma'}</span></div><div class="k4"><span class="kl">Próximos 7 dias</span><span class="kv" style="color:var(--st-sol)">${wk.length}</span><span class="kd">${R$(wk.reduce((a,p)=>a+p.v,0))}</span></div><div class="k4"><span class="kl">Pagas no mês</span><span class="kv">${paid.length}</span><span class="kd">${R$(paid.reduce((a,p)=>a+p.v,0))}</span></div></section>
  <section class="card fi-bills rise" style="--d:2">${open.length?grp('Atrasadas',late,'late')+grp('Próximos 7 dias',wk,'soon')+grp('Depois',lt,'later'):'<div class="mempty"><p>Tudo pago 🎉</p><span>Nenhuma conta em aberto.</span></div>'}
-  ${paid.length?`<details class="fi-paid"><summary>${ic('check',13,2.4)}${paid.length} paga${paid.length===1?'':'s'} este mês</summary>${paid.map(p=>`<div class="fi-bill done"><span class="fi-due"><b>${+p.venc.slice(8)}</b><small>${MONTHS[+p.venc.slice(5,7)-1].slice(0,3)}</small></span><span class="dkt"><b>${esc(p.desc)}</b><span>${catTag(p.cat)}</span></span><b class="fi-amt2">${R$(p.v)}</b><button class="btn ghost sm" data-a="cpUnpay" data-v="${p.id}">Desfazer</button></div>`).join('')}</details>`:''}</section>`;
+  ${paid.length?`<details class="fi-paid"><summary>${ic('check',13,2.4)}${paid.length} paga${paid.length===1?'':'s'} este mês</summary>${paid.map(p=>`<div class="fi-bill done"><span class="fi-due"><b>${+p.venc.slice(8)}</b><small>${MONTHS[+p.venc.slice(5,7)-1].slice(0,3)}</small></span><span class="dkt"><b>${esc(p.desc)}</b><span>${catTag(p.cat)}${p.paidAt?` · baixa em ${dBR(p.paidAt)}`:''}${p.link?' · vinculada a um lançamento':''}</span></span><b class="fi-amt2">${R$(p.paidV||p.v)}</b><button class="btn ghost sm" data-a="cpUnpay" data-v="${p.id}">Desfazer</button></div>`).join('')}</details>`:''}</section>`;
 }
 function cpForm(){openDlg(`${dlgHead('Nova conta a pagar','Ela aparece na lista e avisamos 2 dias antes do vencimento.')}<form id="cpF" class="fgrid" novalidate>
   <label class="fld wide"><span class="fl">Descrição</span><input name="desc" placeholder="Ex.: Energia elétrica — outubro" autocomplete="off"></label>
@@ -122,18 +126,19 @@ function cpForm(){openDlg(`${dlgHead('Nova conta a pagar','Ela aparece na lista 
 
 /* ---------- Contas a receber ---------- */
 function fRec(){
- const tot=RECEB.reduce((a,r)=>a+r.v,0),got=RECEB.reduce((a,r)=>a+r.got,0);
- return fHead('Contas a receber','Valores previstos de entrada — inscrições e campanhas',`${rpBtn('financeiro','receber')}`)
- +`<section class="card fi-rh rise" style="--d:1"><div><span class="kl">Já recebido</span><b class="fi-big">${R$(got)}</b><span class="kd">de ${R$(tot)} previstos · ${Math.round(got/tot*100)}%</span></div><div class="fi-rbar"><i style="width:${got/tot*100}%"></i></div><div class="fi-two"><div><span><i class="e"></i>Recebido</span><b>${R$(got)}</b></div><div><span><i class="w"></i>Falta receber</span><b>${R$(tot-got)}</b></div><div><span>Confirmadas</span><b>${RECEB.filter(r=>r.got>=r.v).length} de ${RECEB.length}</b></div></div></section>
- <div class="fi-recs rise" style="--d:2">${RECEB.map(r=>{const p=Math.min(100,Math.round(r.got/r.v*100)),done=p>=100;return `<article class="card fi-rc"><div class="fi-rch"><span class="dkt"><b>${esc(r.desc)}</b><span>${esc(r.src)}</span></span>${done?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Confirmado</span>':'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Parcial</span>'}</div>
-  <div class="fi-rcv"><b>${R$(r.got)}</b><span>de ${R$(r.v)}</span></div><span class="tr ${done?'done':''}"><i style="width:${p}%"></i></span>
-  <footer><span>${r.prev?`${ic('calendar',12)}Previsão ${dBR(r.prev)}`:`${ic('clock',12)}Contínuo`}</span><span>${p}%</span></footer></article>`;}).join('')}</div>`;
+ const tot=RECEB.reduce((a,r)=>a+r.v,0),got=RECEB.filter(r=>r.got>=r.v).reduce((a,r)=>a+r.v,0);
+ return fHead('Contas a receber','Valores previstos de entrada, cadastrados à mão',`${rpBtn('financeiro','receber')}`)
+ +`<p class="fi-note rise" style="--d:1">${ic('info',14)}<span>Previsão manual: <b>não lança</b> no livro caixa. Serve para ter previsibilidade do que vai entrar.</span></p>
+ <section class="card fi-rh rise" style="--d:1"><div><span class="kl">Já recebido</span><b class="fi-big">${R$(got)}</b><span class="kd">de ${R$(tot)} previstos</span></div><div class="fi-two"><div><span><i class="e"></i>Recebido</span><b>${R$(got)}</b></div><div><span><i class="w"></i>Falta receber</span><b>${R$(tot-got)}</b></div><div><span>Recebidas</span><b>${RECEB.filter(r=>r.got>=r.v).length} de ${RECEB.length}</b></div></div></section>
+ <div class="fi-recs rise" style="--d:2">${RECEB.map(r=>{const done=r.got>=r.v;return `<article class="card fi-rc"><div class="fi-rch"><span class="dkt"><b>${esc(r.desc)}</b><span>${esc(r.src)}</span></span>${done?'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Recebida</span>':'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Prevista</span>'}</div>
+  <div class="fi-rcv"><b>${R$(r.v)}</b><span>${done?'recebida':'prevista'}</span></div>
+  <footer><span>${r.prev?`${ic('calendar',12)}Previsão ${dBR(r.prev)}`:`${ic('clock',12)}Sem data prevista`}</span></footer></article>`;}).join('')}</div>`;
 }
 
 /* ---------- Aprovações ---------- */
 function fApr(){
- return fHead('Aprovações','Lançamentos e importações aguardando quem tem alçada',APROVS.length>1?`<button class="btn pri" data-a="apAll">${ic('check',15,2.4)}Aprovar todos (${APROVS.length})</button>`:'')
- +`<p class="fi-note rise" style="--d:1">${ic('shield',15)}<span>Todo lançamento manual e toda importação de extrato nasce aqui. Só depois de aprovado entra no saldo. Quem tem alçada também pode aprovar pelo app.</span></p>
+ return fHead('Aprovações','Lançamentos e importações aguardando o Admin',APROVS.length>1?`<button class="btn pri" data-a="apAll">${ic('check',15,2.4)}Aprovar todos (${APROVS.length})</button>`:'')
+ +`<p class="fi-note rise" style="--d:1">${ic('shield',15)}<span>Todo lançamento manual e toda importação de extrato nasce aqui. Só depois de aprovado entra no saldo. Só o Admin aprova, inclusive o que ele mesmo lançou.</span></p>
  ${APROVS.length?`<div class="fi-aps rise" style="--d:2">${APROVS.map(a=>`<article class="card fi-ap" id="${a.id}"><div class="fi-aph"><span class="htile" style="--s:42px;background:${a.tipo==='imp'?'var(--st-sol-bg)':'var(--brand-soft)'};color:${a.tipo==='imp'?'var(--st-sol)':'var(--brand-text)'}">${ic(a.tipo==='imp'?'upload':a.tp==='e'?'arrowDn':'arrowUp',19,2)}</span>
    <span class="dkt"><span class="fi-apt">${a.tipo==='imp'?'Importação de extrato':'Lançamento manual'}</span><b>${esc(a.desc)}${a.tipo==='imp'?` — ${a.n} lançamentos`:''}</b><span>Enviado por ${esc(a.who)} · ${dBR(a.d)}</span></span>
    ${a.tipo==='imp'?`<span class="fi-apv"><b class="e">+${R0(a.te)}</b><b class="s">−${R0(a.ts)}</b></span>`:`<span class="fi-apv"><b class="${a.tp}">${R$(a.tp==='e'?a.v:-a.v,true)}</b>${catTag(a.cat)}</span>`}</div>
@@ -165,7 +170,8 @@ function fRel(){
  <section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Resultado do mês</span><span class="kv" style="color:${e-s>=0?'var(--st-int)':'var(--st-rec)'}">${R$(e-s)}</span><span class="kd">receitas menos despesas</span></div><div class="k4"><span class="kl">Receitas</span><span class="kv">${R$(e)}</span><span class="kd">${rows.filter(r=>r[1]).length} categorias</span></div><div class="k4"><span class="kl">Despesas</span><span class="kv">${R$(s)}</span><span class="kd">${e?Math.round(s/e*100):0}% das receitas</span></div></section>
  <section class="card fi-dre rise" style="--d:2"><div class="sh"><h2>DRE por categoria · ${monthName(S.relM)}</h2></div>
   ${rows.length?`<div class="fi-dr thead"><span>Categoria</span><span>Entradas</span><span>Saídas</span><span>Resultado</span></div>${rows.map(r=>`<div class="fi-dr"><span>${catTag(r[0])}</span><span class="e">${r[1]?R$(r[1]):'—'}</span><span class="s">${r[2]?R$(r[2]):'—'}</span><span class="fi-net"><span class="fi-dv"><i class="${r[3]>=0?'p':'n'}" style="width:${Math.abs(r[3])/mx*50}%"></i></span><b class="${r[3]>=0?'e':'s'}">${R$(r[3],true)}</b></span></div>`).join('')}
-  <div class="fi-dr tot"><span>Total</span><span class="e">${R$(e)}</span><span class="s">${R$(s)}</span><span class="fi-net"><span></span><b>${R$(e-s,true)}</b></span></div>`:'<div class="mempty"><p>Sem lançamentos aprovados neste mês.</p><span>Os dados de exemplo estão em setembro.</span></div>'}</section>`;
+  <div class="fi-dr tot"><span>Total</span><span class="e">${R$(e)}</span><span class="s">${R$(s)}</span><span class="fi-net"><span></span><b>${R$(e-s,true)}</b></span></div>`:'<div class="mempty"><p>Sem lançamentos aprovados neste mês.</p><span>Os dados de exemplo estão em setembro.</span></div>'}</section>
+ ${modOn('secretaria')?`<p class="fi-note rise" style="--d:3">${ic('file',14)}<span>O <b>informe anual de doações</b> é emitido pela Secretaria. <button class="lnk" data-a="nav" data-v="sec-docs">Abrir Documentos</button></span></p>`:''}`;
 }
 
 /* ---------- Importar/Exportar ---------- */
@@ -177,6 +183,65 @@ function fImp(){const b=BANKS.find(x=>x[0]===S.fbank);
    <p class="fl">2. Arquivo</p>${S.ffile?`<div class="ct-file"><span class="mt-ft" style="--s:38px;height:38px;border-radius:10px;background:var(--st-sol-bg);color:var(--st-sol)">OFX</span><span class="dkt"><b>${esc(S.ffile)}</b><span>${b[1]} · 23 transações encontradas</span></span><button class="ibtn sm" data-a="fFileX" aria-label="Remover">${ic('x',13)}</button></div>`:`<div class="ct-drop" data-a="fFile">${ic('upload',18)}<span><b>Arraste o extrato aqui ou clique para escolher</b><small>OFX ou CSV exportado do internet banking</small></span></div>`}
    <div class="fi-impf"><span class="who">${ic('shield',13)} Entra como pendente em <button class="lnk" data-a="nav" data-v="fapr">Aprovações</button>. Lançamentos repetidos são ignorados.</span><button class="btn pri" data-a="fImport" ${S.ffile?'':'disabled'}>Importar</button></div></section>
   <section class="card fi-exp"><h2>${ic('arrowDn',16,2)} Exportar</h2>${[['Lançamentos','financeiro|lancamentos',LANCS.length+' registros','layers'],['Contas a pagar','financeiro|pagar',PAGAR.length+' contas','clock'],['Contas a receber','financeiro|receber',RECEB.length+' previsões','wallet'],['DRE do mês','o DRE (PDF)','Setembro/2026','file']].map(x=>`<button class="fi-ex" data-a="${x[1].includes('|')?'rptGo':'export'}" data-v="${x[1]}"><span class="htile" style="--s:38px;background:var(--brand-soft);color:var(--brand-text)">${ic(x[3],17)}</span><span class="dkt"><b>${x[0]}</b><span>${x[2]}</span></span><em>${x[1].includes('PDF')?'PDF':'CSV'}</em></button>`).join('')}</section></div>`;
+}
+
+/* ---------- Dados de exemplo: contas, fechamento e caixas (só leitura) ---------- */
+const FCONTAS=[{n:'Conta principal',tipo:'Conta bancária',banco:'Banco do Brasil',ini:40000,atual:57830,desde:'2026-01-01',pend:1},{n:'Caixa físico',tipo:'Caixa físico',banco:'',ini:500,atual:1240,desde:'2026-01-01',pend:0}];
+const FCLOSED=[['2026-08','Fechado'],['2026-07','Selado'],['2026-06','Selado']];
+const PCAIXAS=[
+ {g:'Eventos',n:'Retiro de Homens 2026',in:18400,out:6200,ret:0},
+ {g:'Eventos',n:'Conferência Missões',in:9200,out:3100,ret:2000},
+ {g:'Eventos',n:'Retiro de Jovens 2025',in:12000,out:9500,ret:0,closed:true},
+ {g:'Ministérios',n:'Ministério Kids · Caixa principal',in:5600,out:2100,ret:0},
+ {g:'Ministérios',n:'Ministério de Louvor · Caixa principal',in:4200,out:1850,ret:0},
+ {g:'Cultos',n:'Culto de Domingo',in:3200,out:800,ret:0},
+ {g:'Campanhas',n:'Campanha Reforma do Templo',in:34200,out:0,ret:0}];
+const fSaldo=()=>FCONTAS.reduce((a,c)=>a+c.atual,0);
+const pcVivos=()=>PCAIXAS.filter(c=>!c.closed||c.in-c.out>0);
+const pcCom=()=>pcVivos().reduce((a,c)=>a+c.in-c.out,0);
+
+/* ---------- Contas financeiras ---------- */
+function fCon(){
+ return fHead('Contas financeiras','Onde está o dinheiro da igreja',`<button class="btn sec" data-a="fTransf">${ic('swap',15)}Transferir</button>`)
+ +`<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Saldo total</span><span class="kv">${R$(fSaldo())}</span><span class="kd">somando todas as contas</span></div><div class="k4"><span class="kl">Contas ativas</span><span class="kv">${FCONTAS.length}</span><span class="kd">uma conta bancária e um caixa físico</span></div><div class="k4"><span class="kl">Aguardando aprovação</span><span class="kv">${APROVS.length}</span><span class="kd">ainda não contam no saldo</span></div></section>
+ <section class="card fi-bills rise" style="--d:2">${FCONTAS.map(c=>`<div class="fi-bill"><span class="htile" style="--s:42px;background:var(--brand-soft);color:var(--brand-text)">${ic(c.banco?'building':'wallet',19,2)}</span><span class="dkt"><b>${esc(c.n)}</b><span>${esc(c.tipo)}${c.banco?' · '+esc(c.banco):''} · saldo inicial ${R$(c.ini)} em ${dBR(c.desde)}${c.pend?` · ${c.pend} pendente`:''}</span></span><b class="fi-amt2">${R$(c.atual)}</b></div>`).join('')}</section>`;
+}
+
+/* ---------- Previsibilidade (só leitura) ---------- */
+function fPrev(){
+ const tab=S.fpv||'cx',vw=S.fpvC||'ab',mes=FOOD_DATE.slice(0,7),ant=ymAdd(mes,-1);
+ const list=PCAIXAS.filter(c=>vw==='ab'?!c.closed:(c.closed&&c.in-c.out>0)),com=pcCom(),ret=pcVivos().reduce((a,c)=>a+c.ret,0);
+ const vd=(k,f)=>foodSummary(FOOD_SALES.filter(s=>s.store===k&&f(s.date))),stores=Object.entries(FOOD_STORES).filter(([k])=>['cafe','rest','shop'].includes(k));
+ const rows=stores.map(([k,st])=>({n:st.name,h:vd(k,d=>d===FOOD_DATE),m:vd(k,d=>d.startsWith(mes)),a:vd(k,d=>d.startsWith(ant))}));
+ const vm=rows.reduce((a,r)=>a+r.m.sold,0)/100;
+ const cell=m=>`<span>${brl2(m.sold/100)}<small class="who" style="display:block">${m.count} ${m.count===1?'venda':'vendas'}</small></span>`;
+ const caixas=()=>{const gs=['Eventos','Ministérios','Cultos','Campanhas'].map(g=>[g,list.filter(c=>c.g===g)]).filter(x=>x[1].length);
+  if(!gs.length)return '<div class="mempty"><p>Nenhum caixa aqui.</p><span>Não há caixa encerrado com saldo.</span></div>';
+  const tot=list.reduce((a,c)=>a+c.in-c.out,0);
+  return `<div class="fi-dr thead"><span>Caixa</span><span>Entradas</span><span>Saídas</span><span>No caixa</span></div>`
+  +gs.map(([g,l])=>`<div class="fi-grp later"><p class="fi-gh"><b>${g}</b><span>${l.length} · ${R$(l.reduce((a,c)=>a+c.in-c.out,0))}</span></p>${l.map(c=>`<div class="fi-dr"><span><b>${esc(c.n)}</b>${c.closed?' <span class="who">· encerrado</span>':''}<small class="who" style="display:block">${c.ret?`já devolvido à igreja ${R$(c.ret)}`:'nada devolvido à igreja ainda'}</small></span><span class="e">${R$(c.in)}</span><span class="s">${R$(c.out)}</span><span class="fi-net"><span></span><b>${R$(c.in-c.out)}</b></span></div>`).join('')}</div>`).join('')
+  +`<div class="fi-dr tot"><span>Total com as pessoas</span><span></span><span></span><span class="fi-net"><span></span><b>${R$(tot)}</b></span></div>`;};
+ const vendas=()=>`<div class="fi-dr thead"><span>Estabelecimento</span><span>Hoje</span><span>Neste mês</span><span>Mês anterior</span></div>`
+  +rows.map(r=>`<div class="fi-dr"><span><b>${esc(r.n)}</b></span>${cell(r.h)}${cell(r.m)}${cell(r.a)}</div>`).join('')
+  +`<div class="fi-dr tot"><span>Total</span><span>${brl2(rows.reduce((a,r)=>a+r.h.sold,0)/100)}</span><span>${brl2(vm)}</span><span>${brl2(rows.reduce((a,r)=>a+r.a.sold,0)/100)}</span></div>`;
+ return fHead('Previsibilidade','O dinheiro que ainda não chegou à conta da igreja')
+ +`<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Com as pessoas</span><span class="kv">${R$(com)}</span><span class="kd">nos caixas abertos e nos encerrados com saldo</span></div><div class="k4"><span class="kl">Já devolvido à igreja</span><span class="kv">${R$(ret)}</span><span class="kd">saídas de devolução dos caixas</span></div><div class="k4"><span class="kl">Vendido no mês</span><span class="kv">${R$(vm)}</span><span class="kd">Cafeteria, Restaurante e Loja (bruto)</span></div></section>`
+ +sxSeg('fpvTab',[['cx','Caixas'],['vd','Vendas']],tab)
+ +`<section class="card mtab rise" style="--d:3">${tab==='cx'
+  ?`<div class="tbar"><div class="chips">${[['ab','Abertos'],['en','Encerrados com saldo']].map(c=>`<button class="chipf ${vw===c[0]?'on':''}" data-a="fpvC" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div><p class="fi-note">${ic('info',14)}<span>Dinheiro que ainda não chegou à conta da igreja. É só leitura: a baixa é feita em cada caixa.</span></p>${caixas()}`
+  :`<p class="fi-note">${ic('info',14)}<span>Só leitura: o que as vendas rendem entra na conta pelo extrato, e nada aqui vira lançamento.</span></p>${vendas()}`}</section>`;
+}
+
+/* ---------- Configurar ---------- */
+function fCfg(){
+ const tab=S.fcfg||'cat';
+ const cat=()=>`<div class="fi-bills">${Object.entries(FCATS).map(([c,t])=>`<div class="fi-bill"><span class="dkt"><b>${catTag(c)}</b><span>${t[1]==='e'?'Entrada':'Saída'}</span></span></div>`).join('')}</div>`;
+ const stp=(l,c,b)=>`<span class="stp" style="--c:${c};--b:${b}"><i></i>${l}</span>`;
+ const fech=()=>`<div class="fi-bills">${FCLOSED.map(([ym,s])=>`<div class="fi-bill"><span class="dkt"><b>${monthName(ym)}</b><span>${s==='Fechado'?'Último mês fechado: ainda pode ser reaberto pelo Admin':'Selado: não pode mais ser reaberto'}</span></span>${s==='Fechado'?stp('Fechado','var(--st-int)','var(--st-int-bg)'):stp('Selado','var(--ink-muted)','var(--surface-2)')}</div>`).join('')}
+  <div class="fi-bill"><span class="dkt"><b>${monthName('2026-09')}</b><span>${APROVS.length} ${APROVS.length===1?'item aguardando aprovação impede':'itens aguardando aprovação impedem'} o fechamento</span></span><button class="btn sec sm" disabled>Fechar setembro</button></div></div>`;
+ return fHead('Configurar','Categorias e fechamento do mês')
+ +sxSeg('fCfgTab',[['cat','Categorias',Object.keys(FCATS).length],['fech','Fechamento']],tab)
+ +`<section class="card mtab rise" style="--d:3">${tab==='cat'?cat():fech()}</section>`;
 }
 
 function fAfter(){
@@ -191,7 +256,22 @@ const FIA={
  lcDup:v=>{closePops();const x=LANCS.find(y=>y.id===v);lcForm();setTimeout(()=>{const f=$('#lcF');f.desc.value=x.desc;f.v.value=String(x.v).replace('.',',');$(`[data-tp=${x.tipo}]`).click();setTimeout(()=>{const b=$(`#lcC [data-c="${x.cat}"]`);b&&b.click();},20);},30);},
  lcDel:v=>{closePops();const x=LANCS.find(y=>y.id===v);confirmDel({title:'Excluir este lançamento?',body:`“${esc(x.desc)}” · ${R$(x.v)}. ${x.st==='ok'?'O saldo do mês será recalculado.':'Ele também sai das aprovações.'}`,onConfirm:()=>{const i=LANCS.indexOf(x),ai=APROVS.findIndex(a=>a.lid===x.id),ap=ai>=0?APROVS.splice(ai,1)[0]:null;LANCS.splice(i,1);fRe();toast('Lançamento excluído',()=>{LANCS.splice(i,0,x);if(ap)APROVS.splice(ai,0,ap);fRe();});}});},
  cpNew:()=>cpForm(),
- cpPay:(v,b)=>{const p=PAGAR.find(x=>x.id===v);busy(b,600,'Paga',()=>{const el=document.getElementById(v);el.classList.add('fi-gone');setTimeout(()=>{p.paid=true;LANCS.push(LC(NOWD,'2026-10',p.desc,p.cat,'s',p.v));fRe();toast(`${p.desc} paga · lançada como saída`,()=>{p.paid=false;LANCS.pop();fRe();});},350);});},
+ cpPay:v=>{const p=PAGAR.find(x=>x.id===v),ls=LANCS.filter(l=>l.tipo==='s'&&l.st==='ok');
+  openDlg(`${dlgHead('Dar baixa na conta',`${esc(p.desc)} · previsto ${R$(p.v)}`)}
+  <p class="fi-note">${ic('info',14)}<span>Dar baixa <b>não lança</b> no livro caixa. Para registrar a saída, faça um lançamento ou importe o extrato.</span></p>
+  <form id="cpB" class="fgrid" novalidate>
+   <label class="fld"><span class="fl">Pago em</span><input type="date" name="d" value="${NOWD}"></label>
+   <label class="fld"><span class="fl">Valor pago <small>opcional</small></span><span class="fi-amt s"><em>R$</em><input name="v" inputmode="decimal" placeholder="${String(p.v).replace('.',',')}"></span></label>
+   <label class="fld wide"><span class="fl">Vincular a um lançamento <small>opcional</small></span><span class="selw"><select name="l"><option value="">Sem vínculo</option>${ls.map(l=>`<option value="${l.id}">${esc(l.desc)} · ${R$(l.v)}</option>`).join('')}</select>${ic('updown',14)}</span></label>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit">${ic('check',14,2.4)}Dar baixa</button></div></form>`,'sm');
+  $('#cpB').addEventListener('submit',e=>{e.preventDefault();const f=e.target,pv=+String(f.v.value).replace(/\./g,'').replace(',','.')||p.v,el=document.getElementById(v);closeDlg();if(el)el.classList.add('fi-gone');
+   setTimeout(()=>{Object.assign(p,{paid:true,paidAt:f.d.value||NOWD,paidV:pv,link:f.l.value||null});fRe();toast(`${p.desc} baixada · não lança no livro caixa`,()=>{p.paid=false;fRe();});},350);});},
+ lcRev:v=>{closePops();const x=LANCS.find(y=>y.id===v);
+  openDlg(`<div class="cdel"><span class="cdi">${ic('alert',20,2)}</span>${dlgHead('Reverter este lançamento?',`“${esc(x.desc)}” · ${R$(x.v)}. Em vez de apagar, o Alva cria o lançamento inverso e o original continua no histórico.`)}</div><label class="fld"><span class="fl">Motivo</span><textarea class="ta" id="rvWhy" rows="2" placeholder="Ex.: valor lançado em duplicidade"></textarea></label><div class="dfoot"><button class="btn sec" data-a="closeDlg">Voltar</button><button class="btn dang" id="rvOk" disabled>Reverter</button></div>`,'sm del');
+  const w=$('#rvWhy'),b=$('#rvOk');w.addEventListener('input',()=>{b.disabled=!w.value.trim();});
+  b.onclick=()=>{const n=LC(NOWD,x.comp,'Reversão: '+x.desc,x.cat,x.tipo==='e'?'s':'e',x.v,'ok','Rafael Pereira');LANCS.push(n);x.rev=true;closeDlg();fRe();toast('Lançamento revertido',()=>{LANCS.splice(LANCS.indexOf(n),1);x.rev=false;fRe();});};},
+ fTransf:()=>toast('Transferir gera uma saída na origem e uma entrada no destino; entra como pendente em Aprovações'),
+ fpvTab:v=>{S.fpv=v;fRe();},fpvC:v=>{S.fpvC=v;fRe();},fCfgTab:v=>{S.fcfg=v;fRe();},fCfgGo:v=>{S.fcfg=v;A.nav('fcfg');},
  cpUnpay:v=>{PAGAR.find(x=>x.id===v).paid=false;fRe();toast('Voltou para em aberto');},
  apX:v=>{S.apOpen=S.apOpen===v?null:v;fRe();},
  apOk:(v,b)=>{const a=APROVS.find(x=>x.id===v);busy(b,600,'Aprovado',()=>{document.getElementById(v).classList.add('fi-gone');setTimeout(()=>{APROVS.splice(APROVS.indexOf(a),1);if(a.lid){const l=LANCS.find(x=>x.id===a.lid);if(l)l.st='ok';}fRe();toast(a.tipo==='imp'?`${a.n} lançamentos importados`:'Lançamento aprovado · já conta no saldo');},350);});},

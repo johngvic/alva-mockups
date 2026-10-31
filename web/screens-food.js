@@ -111,20 +111,6 @@ function foodAfter(){const bind=(id,fn)=>{const el=$('#'+id);if(el)el.onchange=e
  const pk=$('#foodPeriod');if(pk)pk.closest('.fd-pick').onclick=e=>{if(e.target!==pk){e.preventDefault();try{pk.showPicker();}catch(_){pk.focus();}}};
  const q=$('#foodSearch');if(q)q.oninput=e=>{S.foodQuery=e.target.value;const pos=e.target.selectionStart;render();const n=$('#foodSearch');n.focus();n.setSelectionRange(pos,pos);};}
 
-/* Demonstrate financial postings once, using the same sales fixtures. */
-Object.assign(FCATS,{'Cafeteria':['damasco','e'],'Restaurante':['menta','e'],'Taxas de vendas':['salvia','s'],'Estornos de vendas':['rosado','s']});
-const FOOD_POSTINGS=[];
-Object.keys(FOOD_STORES).forEach(k=>{
- const st=FOOD_STORES[k];
- [...new Set(FOOD_SALES.filter(s=>s.store===k).map(s=>s.date))].forEach(date=>{
-  const a=FOOD_SALES.filter(s=>s.store===k&&s.date===date&&s.status!=='cancelled'&&s.settled),gross=foodAmount(a),refund=foodAmount(a.filter(s=>s.status==='refunded')),fees=a.reduce((n,s)=>n+s.fee,0);
-  [[gross,'e',st.name,'Recebimentos'],[refund,'s','Estornos de vendas','Estornos'],[fees,'s','Taxas de vendas','Taxas']].forEach(([value,type,cat,label])=>{if(!value)return;const row=LC(date,date.slice(0,7),`${st.name} · ${date.slice(0,7)} · ${label} de ${dBR(date)}`,cat,type,value/100,'ok','Sistema de vendas');row.foodStore=k;LANCS.push(row);FOOD_POSTINGS.push(row);const f=FLOW[+date.slice(5,7)-4];if(f)f[type==='e'?1:2]+=value/100;});
- });
- const pending=foodSummary(FOOD_SALES.filter(s=>s.store===k)).pending;
- if(pending)RECEB.push({id:'food-receivable-'+k,desc:st.name+' — vendas no cartão',prev:'2026-10-02',v:pending/100,got:0,src:'Sistema de vendas · líquido de taxas'});
-});
-function foodFinancePanel(){const month='2026-'+String(S.fbar+4).padStart(2,'0');return `<section class="card fd-card rise"><div class="sh"><div><h2>Cafeteria, Restaurante, Loja e Eventos</h2><p class="fd-sub">${monthName(month)} · vendas lançadas como receita</p></div></div><div class="fd-fins">${Object.entries(FOOD_STORES).map(([k,st])=>{const m=foodSummary(FOOD_SALES.filter(s=>s.store===k&&s.date.startsWith(month)));return `<div class="fd-fin"><div class="fd-fin-h">${kTile({c:st.c,ic:st.icon},36)}<span class="dkt"><b>${st.name}</b><span>${m.count} vendas concluídas</span></span></div><div class="fd-ln"><span>Vendido</span><b>${foodMoney(m.sold)}</b></div>${k==='shop'?'':`${k==='shop'?'':`<div class="fd-ln"><span>Recebido líquido</span><b style="color:var(--st-int)">${foodMoney(m.received)}</b></div><div class="fd-ln"><span>A receber</span><b>${foodMoney(m.pending)}</b></div>`}`}<button class="lnk" data-a="foodFin" data-v="${k}|${month}">Ver lançamentos ${ic('arrowR',13)}</button></div>`;}).join('')}${evFinCard()}</div><p class="fd-cap">Cafeteria e Restaurante têm recebimentos, taxas e valores a receber. Na Loja, vendas geram receita e cancelamentos geram estorno. Nos eventos pagos, o líquido entra em Receitas depois que o evento acontece.</p></section>`;}
-const foodOriginalFVis=fVis;fVis=()=>foodOriginalFVis()+foodFinancePanel();
 const FOODA={foodPkMenu:()=>{const p=$('#fdPk');if(!p)return;const open=!p.classList.contains('open');closePops(p);if(open){FDPK.y=+(S.foodMonth||FOOD_DATE).slice(0,4);FDPK.v=(S.foodDay||FOOD_DATE).slice(0,7);foodPkPaint();}p.classList.toggle('open',open);},
  foodPkNav:v=>{if(S.foodMode==='day'){const [y,m]=FDPK.v.split('-').map(Number),d=new Date(y,m-1+(+v),1);FDPK.v=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}else FDPK.y+=+v;foodPkPaint();},
  foodPkPick:v=>{if(v.length===7){S.foodMode='month';S.foodMonth=v;}else{S.foodMode='day';S.foodDay=v;}S.foodRows=20;closePops();render();},

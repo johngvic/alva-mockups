@@ -351,7 +351,7 @@ evFinDet=function(e){
   </div>
   ${tot?`<div class="efx-bar" role="img" aria-label="Composição do total previsto">${seg.filter(x=>x[1]>0).map(x=>`<i class="b-${x[0]}" style="flex:${x[1]}"></i>`).join('')}</div>
   <div class="efx-lg">${seg.map(x=>`<span><i class="b-${x[0]}"></i>${x[2]} <b>${pc(x[1]).toLocaleString('pt-BR')}%</b></span>`).join('')}<span class="efx-tt">Total previsto <b>${brl2(tot)}</b></span></div>`:''}
-  <div class="sx-note efx-n" style="--c:${past(e)?'var(--st-int)':'var(--brand)'};margin:16px 0 0">${ic(past(e)?'check':'calendar',18,2)}<span>${past(e)?`Líquido de <b>${brl2(f.net)}</b> lançado em Receitas após o evento.`:`O líquido entra em <b>Receitas</b> depois do evento${e.d?`, previsto para <b>${dBR(e.d)}</b>`:''}.`}</span></div></section>`;};
+  <div class="sx-note efx-n" style="--c:${past(e)?'var(--st-int)':'var(--brand)'};margin:16px 0 0">${ic(past(e)?'check':'calendar',18,2)}<span>${past(e)?`Líquido de <b>${brl2(f.net)}</b> recebido nas inscrições. O dinheiro entra na conta pelo extrato.`:`O líquido das inscrições chega à conta pelo extrato${e.d?`, depois do evento (<b>${dBR(e.d)}</b>)`:''}.`}</span></div></section>`;};
 
 Object.assign(A,{eiPg:v=>{S.eipg=+v;const b=$('#eirows');if(b){b.innerHTML=eiRows(eById(S.evt));b.closest('.mtab').scrollIntoView({block:'nearest',behavior:'smooth'});}}});
 
@@ -414,28 +414,6 @@ inscPage=function(){
 Object.assign(A,{iqMenu:v=>{const p=$('#iqPop-'+v);closePops(p);p.classList.toggle('open');},
  iqPick:v=>{const i=v.indexOf('|'),k=v.slice(0,i),val=v.slice(i+1);S[k]=val;if(k==='iqe')S.iqt='todos';closePops();render();},
  iqPg:v=>{S.iqpg=+v;render();$('.iqt')?.scrollIntoView({block:'nearest',behavior:'smooth'});}});
-
-/* ---------- Financeiro: vendas por canal ---------- */
-foodFinancePanel=function(){const month='2026-'+String(S.fbar+4).padStart(2,'0');
- const ch=Object.entries(FOOD_STORES).map(([k,st])=>{const m=foodSummary(FOOD_SALES.filter(x=>x.store===k&&x.date.startsWith(month)));const shop=k==='shop';
-  return {k,n:st.name,ic:st.icon,tone:st.tone,sub:`${m.count} ${m.count===1?'venda concluída':'vendas concluídas'}`,sold:m.sold/100,net:(shop?m.sold:m.received)/100,pend:shop?0:m.pending/100,extra:shop?(m.refund?['Estornos',foodMoney(m.refund)]:['Estornos','nenhum']):['Taxas',foodMoney(m.fees)],money:brl2,act:`data-a="foodFin" data-v="${k}|${month}"`,go:'Ver lançamentos'};});
- const er=evFinRows(),et=x=>er.reduce((q,r)=>q+r[x],0);
- ch.push({k:'ev',n:'Eventos pagos',ic:'ticket',tone:'lima',sub:`${er.length} ${er.length===1?'evento':'eventos'} com inscrições`,sold:et('gross'),net:et('net'),pend:et('pend'),extra:['Lançado em Receitas',brl2(et('posted'))],money:brl2,act:'data-a="evFinGo"',go:'Ver eventos'});
- const tot=ch.reduce((q,c)=>q+c.sold,0),net=ch.reduce((q,c)=>q+c.net,0),pend=ch.reduce((q,c)=>q+c.pend,0),pc=v=>tot?Math.round(v/tot*100):0;
- return `<section class="card fd-card ffx rise"><div class="sh"><div><h2>Cafeteria, Restaurante, Loja e Eventos</h2><p class="fd-sub">${monthName(month)} · vendas lançadas como receita</p></div></div>
-  <div class="ffx-top">
-   <div class="ffx-hero"><span class="ffx-l">Vendido no mês</span><b class="ffx-v">${brl2(tot)}</b><small>${brl2(net)} recebido líquido${pend?` · ${brl2(pend)} a receber`:''}</small></div>
-   <div class="ffx-mix"><div class="ffx-mh"><span class="ffx-l">De onde vem</span><span class="who">participação no vendido</span></div>
-    <div class="ffx-bar">${ch.filter(c=>c.sold>0).map(c=>`<i style="flex:${c.sold};background:color-mix(in srgb,var(--tone-${c.tone}-ink) 72%,var(--tone-${c.tone}))" title="${esc(c.n)} · ${pc(c.sold)}%"></i>`).join('')}</div>
-    <div class="ffx-lg">${ch.map(c=>`<span><i style="background:color-mix(in srgb,var(--tone-${c.tone}-ink) 72%,var(--tone-${c.tone}))"></i>${esc(c.n)}<b>${pc(c.sold)}%</b></span>`).join('')}</div></div>
-  </div>
-  <div class="ffx-g">${ch.map(c=>{const rp=c.sold?Math.min(100,Math.round(c.net/c.sold*100)):0,pp=c.sold?Math.min(100-rp,Math.round(c.pend/c.sold*100)):0;return `<div class="ffx-c" style="--t:var(--tone-${c.tone});--ti:var(--tone-${c.tone}-ink)">
-   <div class="ffx-ch"><span class="ffx-ic">${ic(c.ic,17,2)}</span><span class="ffx-cn"><b>${esc(c.n)}</b><small>${c.sub}</small></span></div>
-   <div class="ffx-cv"><span class="ffx-l">Vendido</span><b>${c.money(c.sold)}</b></div>
-   <div class="ffx-pb"><i class="r" style="width:${rp}%"></i><i class="p" style="width:${pp}%"></i></div>
-   <dl class="ffx-dl"><div><dt><i class="r"></i>Recebido líquido</dt><dd class="ok">${c.money(c.net)}</dd></div>${c.k==='shop'?'':`<div><dt><i class="p"></i>A receber</dt><dd>${c.money(c.pend)}</dd></div>`}<div><dt>${c.extra[0]}</dt><dd>${c.extra[1]}</dd></div></dl>
-   <button class="lnk ffx-go" ${c.act}>${c.go}${ic('arrowR',13)}</button></div>`;}).join('')}</div>
-  <div class="sx-note" style="--c:var(--brand);margin:16px 0 0">${ic('info',18,2)}<span>Cafeteria e Restaurante têm recebimentos, taxas e valores a receber. Na Loja, vendas geram receita e cancelamentos geram estorno. Nos eventos pagos, o líquido entra em <b>Receitas</b> depois que o evento acontece.</span></div></section>`;};
 
 /* ---------- Secretaria: tabelas no padrão ---------- */
 Object.assign(S,{sxAtoQ:'',sxAtoSt:'todos',sxAtoPg:1,sxDocF:'todos',sxDocTy:'todos',sxDocPg:1,sxMdQ:'',sxMdPg:1});
@@ -582,7 +560,7 @@ lede=function(){return '';};
  Restaurante:['Visão geral','Itens','Categorias','Vendas','Caixa diário','Movimentações'],
  Loja:['Visão geral','Itens','Categorias','Vendas','Pedidos do app','Caixa diário','Movimentações'],
  Secretaria:['Visão geral','Atos','Documentos','Cargos e mandatos','Análises'],
- Financeiro:['Visão geral','Lançamentos','Contas a receber','Contas a pagar','Doações','Aprovações','Importar e exportar','Análises'],
+ Financeiro:['Visão geral','Lançamentos','Contas financeiras','Contas a receber','Contas a pagar','Previsibilidade','Doações','Aprovações','Importar e exportar','Análises','Configurar'],
  Comunicação:['Notícias','Banners','Notificações','Transmissões'],
  Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],
  Administração:['Usuários e permissões','Superusuários','Visitantes','Recursos habilitados','Parâmetros do sistema','Multi-igreja','Auditoria e LGPD']};

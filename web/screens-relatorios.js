@@ -307,7 +307,7 @@ rpDef('financeiro','Financeiro','Lançamentos, contas a pagar e a receber, conta
  {k:'receber',l:'Contas a receber',rows:()=>RECEB.slice(),
   chip:{l:'Situação',by:r=>rpRecSt(r),items:[rpC('prev','Previstas',rpInfo),rpC('atr','Atrasadas',rpBad),rpC('rec','Recebidas',rpOk)]},
   cols:[rpCol('desc','Descrição',r=>r.desc),rpCol('prev','Previsão',r=>rpD(r.prev),{raw:r=>r.prev||''}),rpCol('v','Valor previsto',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>({prev:'Prevista',atr:'Atrasada',rec:'Recebida'})[rpRecSt(r)]),rpCol('got','Valor recebido',r=>rpRecSt(r)==='rec'?brl2(r.got):'—',{n:1,raw:r=>rpRecSt(r)==='rec'?r.got:0})]},
- {k:'contas',l:'Contas financeiras',rows:()=>[{n:rpConta,tipo:'Corrente',banco:'Banco do Brasil',ini:40000,atual:57830,on:true}],
+ {k:'contas',l:'Contas financeiras',rows:()=>FCONTAS.map(a=>({n:a.n,tipo:a.tipo,banco:a.banco||'—',ini:a.ini,atual:a.atual,on:true})),
   chip:{l:'Situação',by:r=>r.on?'on':'off',items:[rpC('on','Ativas',rpOk),rpC('off','Inativas',rpOff)]},
   cols:[rpCol('n','Conta',r=>r.n),rpCol('tipo','Tipo',r=>r.tipo),rpCol('b','Banco',r=>r.banco),rpCol('ini','Saldo inicial',r=>brl2(r.ini),{n:1,raw:r=>r.ini}),rpCol('at','Saldo atual',r=>brl2(r.atual),{n:1,raw:r=>r.atual}),rpCol('st','Situação',r=>r.on?'Ativa':'Inativa')]},
  {k:'caixas',l:'Caixas',rows:()=>rpCxRows(),
