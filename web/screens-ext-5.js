@@ -560,7 +560,7 @@ lede=function(){return '';};
  Restaurante:['Visão geral','Itens','Categorias','Vendas','Caixa diário','Movimentações'],
  Loja:['Visão geral','Itens','Categorias','Vendas','Pedidos do app','Caixa diário','Movimentações'],
  Secretaria:['Visão geral','Atos','Documentos','Cargos e mandatos','Análises'],
- Financeiro:['Visão geral','Lançamentos','Contas financeiras','Contas a receber','Contas a pagar','Previsibilidade','Doações','Aprovações','Importar e exportar','Análises','Configurar'],
+ Financeiro:['Visão geral','Lançamentos','Contas financeiras','Contas a receber','Contas a pagar','Previsibilidade','Doações','Aprovações','Importar e exportar','Análises','Plano de contas','Fechamentos'],
  Comunicação:['Notícias','Banners','Notificações','Transmissões'],
  Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],
  Administração:['Usuários e permissões','Superusuários','Visitantes','Recursos habilitados','Parâmetros do sistema','Multi-igreja','Auditoria e LGPD']};

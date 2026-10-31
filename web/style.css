@@ -5383,3 +5383,23 @@ input.uip-open,select.uip-open{box-shadow:inset 0 0 0 1.5px var(--brand-text),0 
  .trow.atm-i .atm-ac{flex-direction:row;justify-content:flex-end;align-items:center}
 }
 .chm-r{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:8px}.chm-n{flex:1 1 140px;font:600 14px/18px var(--font-text)}.chm-r .yn{height:36px;flex:0 0 auto}.chm-m{flex:1 0 100%}.chm-m[hidden]{display:none}
+/* previsibilidade (só leitura) */
+.trow.pv{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"pn pt" "ps ps";align-items:center;cursor:default}
+.trow.pv:not(.thead):hover{background:transparent}
+.trow.pv .pv-n{grid-area:pn;min-width:0;display:flex;flex-direction:column;gap:3px}
+.trow.pv .pv-n b{font:600 14px/1.25 var(--font-text);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow.pv .pv-n small{font:400 12.5px/1.2 var(--font-text);color:var(--ink-muted)}
+.trow.pv .pv-t{grid-area:pt;justify-self:end;font:700 14.5px/1 var(--font-text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.trow.pv .pv-s{grid-area:ps;font:400 12.5px/1.4 var(--font-text);color:var(--ink-muted)}
+.trow.pv .pv-c{display:none;font:400 13.5px/1.25 var(--font-text);font-variant-numeric:tabular-nums;white-space:nowrap;justify-self:end;text-align:right}
+.trow.pv .pv-c small{display:block;margin-top:2px;font:400 12px/1.2 var(--font-text);color:var(--ink-muted)}
+.trow.pv.pv-gh{background:var(--surface-2);padding:9px 16px}.trow.pv.pv-gh .pv-n b{font:700 11px/1 var(--font-text);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.trow.pv.tot{border-top:2px solid var(--ink)}.trow.pv.tot .pv-n b,.trow.pv.tot .pv-t,.trow.pv.tot .pv-c{font-weight:700}
+.trow.pv.thead{display:none}
+@media (min-width:1024px){
+ .trow.pv{grid-template-columns:minmax(0,2fr) 130px 130px 150px 150px;grid-template-areas:"pn pc1 pc2 pc3 pt"}
+ .trow.pv.vd{grid-template-columns:minmax(0,2fr) repeat(4,140px);grid-template-areas:"pn pc1 pc2 pc3 pc4"}
+ .trow.pv .pv-c{display:block}.trow.pv .pv-s{display:none}.trow.pv.vd .pv-t{display:none}
+ .trow.pv .pv-c1{grid-area:pc1}.trow.pv .pv-c2{grid-area:pc2}.trow.pv .pv-c3{grid-area:pc3}.trow.pv .pv-c4{grid-area:pc4}.trow.pv .pv-c5{grid-area:pc5}
+ .trow.pv.thead{display:grid;padding:12px 16px}.trow.pv.thead .pv-t,.trow.pv.thead .pv-c{font:600 11px/14px var(--font-text)}
+}

@@ -35,7 +35,7 @@ const LSTD={
  banners:{list:'.cm-bgrid',item:'.cm-bc',ph:'Buscar banner'},
  transmissoes:{list:'.cm-chs2',item:'.cm-ch',ph:'Buscar canal'},
  fpag:{list:'section.fi-bills',item:'.fi-bill',group:'.fi-grp',ph:'Buscar conta ou categoria'},
- frec:{list:'.fi-recs',item:'.fi-rc',ph:'Buscar previsão'},
+ frec:{list:'section.fi-bills',item:'.fi-bill',group:'.fi-grp',ph:'Buscar previsão'},
  fapr:{list:'.fi-aps',item:'.fi-ap',ph:'Buscar aprovação ou pessoa'},
  fdoa:{list:'.fi-camps',item:'.fi-cm',ph:'Buscar campanha'},
 };
