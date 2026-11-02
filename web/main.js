@@ -34,6 +34,7 @@
 //#include ./screens-ext-3.js
 //#include ./screens-ext-4.js
 //#include ./screens-evento-ingressos.js
+//#include ./screens-evento-ingressos-ajustes.js
 //#include ./screens-evento-checkin.js
 //#include ./screens-financeiro-eventos.js
 //#include ./screens-cerimonias.js
@@ -45,4 +46,6 @@
 //#include ./screens-parametros.js
 //#include ./screens-automacoes.js
 //#include ./ui-pickers.js
+//#include ./screens-ajustes-agenda.js
+//#include ./screens-escalas-aceite.js
 render();

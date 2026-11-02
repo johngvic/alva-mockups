@@ -78,7 +78,7 @@ function mnMeets(m){if(!m.meets){m.meets=[];const sd={Louvor:[[9,'19:30','Presen
 function mnEnc(m){mnMeets(m).forEach(x=>seInv('min',m,x));return seEncounters('min',m);}
 function mnTabBody(m){return ({det:mnDet,mem:mnMembers,times:mnTimes,resp:mnResp,cont:mnCont,esc:mnEsc,enc:mnEnc,quad:m=>bdTab('min',m.id),cx:m=>cxTab('min',m.id)})[S.mtab](m);}
 function mnDet(m){
- return `<div class="pgrid"><div class="col"><section class="card pc sec ${S.mnedit==='desc'?'editing':''}" id="mnsec-desc"><div class="sh"><h2>Descrição</h2>${S.mnedit==='desc'?'':`<button class="btn sec sm" data-a="mnEdit" data-v="desc">${ic('pen',14)}Editar</button>`}</div>
+ return `<div class="sx-note sm" style="--c:var(--brand-text);margin:0 0 16px">${ic('lock',13,2)}<span><b>Acesso ao painel do ministério</b> <small>É concedido em Administração › Usuários e permissões.</small></span></div><div class="pgrid"><div class="col"><section class="card pc sec ${S.mnedit==='desc'?'editing':''}" id="mnsec-desc"><div class="sh"><h2>Descrição</h2>${S.mnedit==='desc'?'':`<button class="btn sec sm" data-a="mnEdit" data-v="desc">${ic('pen',14)}Editar</button>`}</div>
   ${S.mnedit==='desc'?`<form class="fgrid" id="mnF" novalidate style="grid-template-columns:1fr">
    <label class="fld wide"><span class="fl">Descrição</span><textarea class="ta" name="desc" rows="3" placeholder="Para que serve este ministério">${esc(m.desc)}</textarea></label>
    <label class="fld wide"><span class="fl">Quando serve <small>opcional</small></span><textarea class="ta" name="swhen" rows="2" maxlength="300" placeholder="Ex.: domingos de manhã e quartas à noite">${esc(m.serveWhen||'')}</textarea></label>
@@ -91,8 +91,7 @@ function mnDet(m){
   ${S.mnedit==='cont'?`<form class="fgrid" id="mnCF" novalidate style="grid-template-columns:1fr">
    <label class="fld"><span class="fl">Telefone</span><input name="phone" type="tel" value="${esc(m.phone)}"></label>
    <div class="dfoot"><button type="button" class="btn sec" data-a="mnCancel">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
-  :`<dl class="kv grid2"><div><dt>Telefone</dt><dd class="mono">${esc(m.phone)}</dd></div></dl>`}</section>
-  <p class="who" style="margin:4px 4px 0;display:flex;gap:6px;align-items:center">${ic('lock',13)}O acesso ao painel deste ministério é concedido em Administração › Usuários e permissões.</p></div>
+  :`<dl class="kv grid2"><div><dt>Telefone</dt><dd class="mono">${esc(m.phone)}</dd></div></dl>`}</section></div>
   <div class="col"><section class="card pc"><div class="sh"><h2>Resumo</h2></div><div class="mnsum">
    <button data-a="mnTab" data-v="times"><b>${tCount(m)}</b><span>Times</span></button><button data-a="mnTab" data-v="resp"><b>${m.resp.length}</b><span>Responsabilidades</span></button><button data-a="mnTab" data-v="cont"><b>${m.content.length}</b><span>Conteúdos</span></button><button data-a="mnTab" data-v="mem"><b>${mnPpl(m).length}</b><span>Membros</span></button></div></section>
    <section class="card pc"><div class="sh"><h2>Casas ligadas</h2></div>${(()=>{const cs=CASAS.filter(c=>c.min&&m.n.includes(c.min.split(' ')[0]));return cs.length?cs.map(c=>`<button class="dk" data-a="rGoCasa" data-v="${c.id}">${hTile(c,32)}<span class="dkt"><b>${esc(c.n)}</b><span>${c.ppl.length} pessoas</span></span>${ic('chevR',16)}</button>`).join(''):'<p class="who" style="margin:0">Nenhuma casa de apascentamento ligada a este ministério.</p>';})()}</section></div></div>`;}

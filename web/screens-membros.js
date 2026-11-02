@@ -196,7 +196,7 @@ document.addEventListener('change',e=>{const t=e.target;if(!t||!t.name)return;
 function tDados(m){return `<div class="dgrid">${Object.keys(SECS).map(k=>secCard(m,k)).join('')}</div>`;}
 function secCard(m,k){
  const s=SECS[k],ed=S.edit===k;
- return `<section class="card pc sec ${ed?'editing':''}" id="sec-${k}"><div class="sh"><h2>${s.t}</h2>${ed?'':`<button class="btn sec sm" data-a="editSec" data-v="${k}">${ic('pen',14)}Editar</button>`}</div>${s.note?`<p class="who" style="margin:-4px 0 10px">${ic('lock',12,2)} ${s.note}</p>`:''}
+ return `<section class="card pc sec ${ed?'editing':''}" id="sec-${k}"><div class="sh"><h2>${s.t}</h2>${ed?'':`<button class="btn sec sm" data-a="editSec" data-v="${k}">${ic('pen',14)}Editar</button>`}</div>${s.note?(()=>{const i=s.note.indexOf(': ');const h=i>0?s.note.slice(0,i):'',r=i>0?s.note.slice(i+2):s.note;return `<div class="sx-note sm" style="--c:var(--brand-text)">${ic('lock',13,2)}<span>${h?`<b>${h}</b> `:''}<small>${r.charAt(0).toUpperCase()+r.slice(1)}</small></span></div>`;})():''}
   ${ed?`<form class="fgrid" data-sec="${k}" novalidate>${s.f.map(f=>field(m,f)).join('')}<div class="dfoot"><button type="button" class="btn sec" data-a="cancelSec">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`
   :`<dl class="kv grid">${s.f.map(f=>{const v=showVal(f,gv(m,f[0]));return `<div><dt>${f[1]}</dt><dd>${v===''||v==null?'<span class="soft">Não informado</span>':esc(v)}</dd></div>`;}).join('')}</dl>`}
  </section>`;

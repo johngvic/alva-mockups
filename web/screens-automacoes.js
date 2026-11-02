@@ -181,12 +181,13 @@ function atmList(){
   <div class="k4"><span class="kl">Em execução agora</span><span class="kv">${run}</span><span class="kd">${run?'rodando neste momento':'nenhum no momento'}</span></div>
   <div class="k4"><span class="kl">Com falha na última execução</span><span class="kv">${bad}</span><span class="kd">${bad?'abra o job para retentar':'tudo em dia'}</span></div>
  </section>
- <section class="card mtab rise" style="--d:2" aria-label="Lista de jobs">
+ <div class="sx-note rise" style="--d:2;--c:var(--brand-text);margin:0">${ic('clock',13,2)}<span><b>Os horários aparecem no fuso de Brasília;</b> <small>passe o mouse para ver o UTC. Só SuperAdmin e SuperOperator veem esta tela, e a igreja só escolhe se quer receber os avisos, na Comunicação.</small></span></div>
+ <section class="card mtab rise" style="--d:3" aria-label="Lista de jobs">
   <div class="tbar"><label class="sbox">${ic('search',16)}<input id="atmq" placeholder="Pesquisar job" value="${esc(f.q)}" autocomplete="off"></label>
    <div class="chips" role="tablist" aria-label="Situação">${chip('todos','Todos',ATM_JOBS.length)}${chip('ativos','Ativos',on)}${chip('desativados','Desativados',off)}${chip('falha','Com falha',bad)}</div></div>
   <div id="atmrows">${atmListRows()}</div>
  </section>
- <p class="hint rise" style="--d:3;margin:12px 4px 0">Os horários aparecem no fuso de Brasília; passe o mouse para ver o UTC. Só SuperAdmin e SuperOperator veem esta tela, e a igreja só escolhe se quer receber os avisos, na Comunicação.</p>`;
+ `;
 }
 // ---------- ficha do job
 function atmRunRows(j){

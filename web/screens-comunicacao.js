@@ -124,7 +124,7 @@ const ntLim=ch=>ch==='Push'?180:5000;
 const ntSample=s=>s.replace(/\{\{nome\}\}/g,'Marta').replace(/\{\{igreja\}\}/g,'Igreja Alva').replace(/\{\{[a-z]+\}\}/g,'…');
 
 function puModelos(){
- return `<section class="card mtab rise" style="--d:2"><div class="tbar"><p class="who" style="margin:0">Um modelo por tipo de aviso, com texto próprio para cada canal (e-mail e push). Editar cria uma nova versão e o próximo aviso já usa a mais nova. Só a Comunicação edita.</p></div>
+ return `<div class="sx-note rise" style="--d:2;--c:var(--brand-text);margin:0">${ic('info',13,2)}<span><b>Um modelo por tipo de aviso, com texto próprio para cada canal (e-mail e push).</b> <small>Editar cria uma nova versão, e o próximo aviso já usa a mais nova. Só a Comunicação edita.</small></span></div><section class="card mtab rise" style="--d:3">
   <div class="cm-pl">${NTT.map(m=>`<div class="cm-pr enviado">
    <span class="cm-pd"><b>${m.sup.length}</b><small>${m.sup.length>1?'canais':'canal'}</small><em></em></span>
    <div class="cm-pt"><b>${esc(m.n)}</b><span>${esc(m.dom)} · atualizado em ${fmtD(m.when)}</span></div>
@@ -138,7 +138,7 @@ function puPage(){
  if(S.pw)return puWizard();
  const ag=PUSHES.filter(p=>p.st==='agendado'),env=PUSHES.filter(p=>p.st==='enviado');
  const l=PUSHES.filter(p=>S.puf==='todos'||(S.puf==='prox'?p.st==='agendado':S.puf==='env'?p.st==='enviado':p.st==='cancelado')).sort((a,b)=>(a.dt<b.dt?-1:1)*(S.puf==='prox'?1:-1));
-  const auto=`<section class="card cm-auto"><div class="sh"><h2>${ic('zap',16,2)} Automações</h2></div>${AUTOS.map(a=>`<label class="tog cm-au"><span class="htile" style="--s:34px;background:var(--brand-soft);color:var(--brand-text)">${ic(a.icon,16)}</span><span><b>${a.n}</b><small>${a.d}</small></span><input type="checkbox" data-au="${a.id}" ${a.on?'checked':''}><span class="sw"></span></label>`).join('')}</section>`,
+  const auto=`<section class="card cm-auto"><div class="sh"><h2>${ic('zap',16,2)} Automações</h2><span class="who">Enviadas sozinhas, por push e e-mail</span></div>${AUTOS.map(a=>`<label class="tog cm-au"><span class="htile" style="--s:34px;background:var(--brand-soft);color:var(--brand-text)">${ic(a.icon,16)}</span><span><b>${a.n}</b><small>${a.d}</small></span><input type="checkbox" data-au="${a.id}" ${a.on?'checked':''}><span class="sw"></span></label>`).join('')}</section>`,
    envios=`<section class="card mtab rise" style="--d:2"><div class="tbar"><div class="chips">${[['prox','Agendados',ag.length],['env','Enviados',env.length],['canc','Cancelados',PUSHES.filter(p=>p.st==='cancelado').length],['todos','Todos',PUSHES.length]].map(c=>`<button class="chipf ${S.puf===c[0]?'on':''}" data-a="puF" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div></div>
   ${l.length?`<div class="cm-pl">${l.map(p=>{const s=segOf(p.seg);return `<div class="cm-pr ${p.st}">
    <span class="cm-pd"><b>${+p.dt.slice(8,10)}</b><small>${MONTHS[+p.dt.slice(5,7)-1].slice(0,3)}</small><em>${hm(p.dt.slice(11))}</em></span>
@@ -151,7 +151,7 @@ function puPage(){
  <div class="cm-pg rise" style="--d:1">
   <section class="card kpis4 k3"><div class="k4"><span class="kl">Agendados</span><span class="kv">${ag.length}</span><span class="kd">${ag.length?'próximo '+relD(ag.sort((a,b)=>a.dt<b.dt?-1:1)[0].dt.slice(0,10)):'nenhum'}</span></div><div class="k4"><span class="kl">Enviados no mês</span><span class="kv">${env.length}</span><span class="kd">${env.reduce((a,p)=>a+segOf(p.seg)[2],0).toLocaleString('pt-BR')} pessoas alcançadas</span></div><div class="k4"><span class="kl">Automações ligadas</span><span class="kv">${AUTOS.filter(a=>a.on).length}</span><span class="kd">de ${AUTOS.length}</span></div></section>
   </div>`
- + `<div class="ptabs" role="tablist" style="margin-top:6px">${[['auto','Automações'],['modelos','Modelos'],['envios','Envios']].map(t=>`<button role="tab" class="${S.put===t[0]?'on':''}" aria-selected="${S.put===t[0]}" data-a="puT" data-v="${t[0]}">${t[1]}</button>`).join('')}<span class="tind"></span></div>`
+ + `<div class="utabs rise" style="--d:2" role="tablist">${[['auto','Automações',AUTOS.filter(a=>a.on).length+'/'+AUTOS.length],['modelos','Modelos'],['envios','Envios',PUSHES.length]].map(t=>`<button role="tab" class="${S.put===t[0]?'on':''}" aria-selected="${S.put===t[0]}" data-a="puT" data-v="${t[0]}">${t[1]}${t[2]!=null?`<small class="cnt">${t[2]}</small>`:''}</button>`).join('')}</div>`
  + (S.put==='modelos'?puModelos():S.put==='envios'?envios:`<div class="cm-pg rise" style="--d:2">${auto}</div>`);
 }
 const PSTEPS=['Conteúdo','Público','Quando','Revisão'];
@@ -161,8 +161,8 @@ function puWizard(){const w=S.pw,s=segOf(w.seg==='mini'?'mini:'+w.mini:w.seg);
  ${w.done?puDone(w,s):`<ol class="cm-steps rise" style="--d:1">${PSTEPS.map((t,i)=>`<li class="${i<w.step?'done':i===w.step?'on':''}"><button ${i<w.step?`data-a="puStep" data-v="${i}"`:'disabled'}><i>${i<w.step?ic('check',12,3):i+1}</i>${t}</button></li>`).join('')}</ol>
  <div class="cm-wz rise" style="--d:2"><section class="card cm-wc" id="puCard">${puStepHtml(w,s)}</section>
   <aside class="cm-wp"><div class="cm-lock"><span class="cm-pvl">Prévia</span><span class="cm-lt">${w.when==='later'&&w.d?(()=>{const s=`${['domingo','segunda','terça','quarta','quinta','sexta','sábado'][dow(w.d)]}, ${+w.d.slice(8)} de ${MONTHS[+w.d.slice(5,7)-1]}`;return s[0].toUpperCase()+s.slice(1);})():'Quinta, 1 de outubro'}</span><b class="cm-lc">${w.when==='later'&&w.t?(+w.t.slice(0,2))+':'+w.t.slice(3):'9:41'}</b>
-   <div class="cm-nt2 ${w.ch.includes('push')?'':'off'}"><span class="cm-na">a</span><div><span class="cm-nh"><b>Alva</b><small>${w.when==='later'?'agendado':'agora'}</small></span><b id="pvT">${w.title?esc(w.title):'Título da notificação'}</b><p id="pvM">${w.msg?esc(w.msg):'A mensagem aparece aqui…'}</p></div></div>
-   ${w.ch.includes('email')?`<div class="cm-nt2 mail"><span class="cm-na m">${ic('mail',14)}</span><div><span class="cm-nh"><b>Alva Sede</b><small>e-mail</small></span><b>${w.title?esc(w.title):'Assunto do e-mail'}</b><p>${w.msg?esc(w.msg):'…'}</p></div></div>`:''}
+   <div class="cm-nt2 ${w.ch.includes('push')?'':'off'}"><span class="cm-na">a</span><div><span class="cm-nhd"><b>Alva</b><small>${w.when==='later'?'agendado':'agora'}</small></span><b id="pvT">${w.title?esc(w.title):'Título da notificação'}</b><p id="pvM">${w.msg?esc(w.msg):'A mensagem aparece aqui…'}</p></div></div>
+   ${w.ch.includes('email')?`<div class="cm-nt2 mail"><span class="cm-na m">${ic('mail',14)}</span><div><span class="cm-nhd"><b>Alva Sede</b><small>e-mail</small></span><b>${w.title?esc(w.title):'Assunto do e-mail'}</b><p>${w.msg?esc(w.msg):'…'}</p></div></div>`:''}
    <div class="cm-reach in">${ic('users',14)}<b>${s[2].toLocaleString('pt-BR')}</b><span>pessoas vão receber</span></div></div></aside></div>`}`;
 }
 function puStepHtml(w,s){
@@ -181,13 +181,23 @@ function puStepHtml(w,s){
   ${w.when==='later'?`<div class="cm-sug">${[['2026-10-04','08:00','Domingo, 8h'],['2026-10-02','09:00','Amanhã, 9h'],['2026-10-03','18:00','Sábado, 18h']].map(x=>`<button type="button" class="${w.d===x[0]&&w.t===x[1]?'on':''}" data-d="${x[0]}" data-t="${x[1]}">${x[2]}</button>`).join('')}</div>
    <div class="fgrid"><label class="fld"><span class="fl">Data</span><input type="date" id="puD" min="${NOWD}" value="${w.d||''}"></label><label class="fld"><span class="fl">Hora</span><input type="time" id="puH" value="${w.t||'09:00'}" step="900"></label></div>`:''}
   ${foot(w.when==='now'||(w.d&&w.t))}`;
- return `<h2>Tudo certo?</h2><dl class="cm-rev">${[['Canais',w.ch.map(c=>c==='push'?'Push no app':'E-mail').join(' + '),0],['Título',esc(w.title),0],['Mensagem',esc(w.msg),0],['Ao tocar',esc(w.link||'Tela inicial do app'),0],['Público',`${esc(s[1])} · ${s[2].toLocaleString('pt-BR')} pessoas`,1],['Quando',w.when==='now'?'Agora':dtFmt(w.d+' '+w.t),2]].map(r=>`<div><dt>${r[0]}</dt><dd>${r[1]}</dd><button class="lnk" data-a="puStep" data-v="${r[2]}">Editar</button></div>`).join('')}</dl>
+ const ed=v=>`<button class="ibtn sm cm-ed" data-a="puStep" data-v="${v}" aria-label="Editar" title="Editar">${ic('pen',14)}</button>`;
+ const tile=(icn,l,v,step)=>`<div class="cm-rt"><span class="cm-rti">${ic(icn,16,2)}</span><span class="cm-rtx"><small>${l}</small><b>${v}</b></span>${ed(step)}</div>`;
+ return `<h2>Tudo certo?</h2>
+  <div class="cm-rmsg"><span class="cm-rml">${ic('bell',14,2)}Mensagem</span>${ed(0)}<b>${esc(w.title)}</b><p>${esc(w.msg)}</p></div>
+  <div class="cm-rgrid">${tile('send','Canais',w.ch.map(c=>c==='push'?'Push no app':'E-mail').join(' + '),0)}${tile('users','Público',`${esc(s[1])} · ${s[2].toLocaleString('pt-BR')} pessoas`,1)}${tile(w.when==='now'?'zap':'clock','Quando',w.when==='now'?'Agora':dtFmt(w.d+' '+w.t),2)}${tile('link','Ao tocar',esc(w.link||'Tela inicial do app'),0)}</div>
   ${foot(true,w.when==='now'?ic('send',15)+'Enviar agora':ic('clock',15)+'Agendar envio')}`;
 }
-function puDone(w,s){return `<section class="card cm-done rise" style="--d:2"><span class="cm-ok">${ic('check',30,2.6)}</span><h2>${w.when==='now'?'Enviado!':'Envio agendado'}</h2><p>${w.when==='now'?`Sua mensagem está chegando para <b>${s[2].toLocaleString('pt-BR')}</b> pessoas.`:`Vai para <b>${esc(s[1])}</b> em ${dtFmt(w.d+' '+w.t)}.`}</p>
- <div class="cm-dsum"><b>${esc(w.title)}</b><span>${esc(w.msg)}</span></div><div class="row2" style="justify-content:center"><button class="btn sec" data-a="puNew">Novo envio</button><button class="btn pri" data-a="puBack">Ver envios</button></div></section>`;}
+function puDone(w,s){const now=w.when==='now',ch=w.ch.map(c=>c==='push'?'Push no app':'E-mail').join(' + ');
+ return `<section class="card cm-done rise" style="--d:2">
+  <div class="cm-dh ${now?'':'sch'}"><span class="cm-ok"><i></i>${ic(now?'check':'clock',30,2.6)}</span><h2>${now?'Enviado!':'Envio agendado'}</h2>
+   <p>${now?`Sua mensagem está chegando para <b>${s[2].toLocaleString('pt-BR')}</b> pessoas.`:`Vai para <b>${esc(s[1])}</b> em <b>${dtFmt(w.d+' '+w.t)}</b>.`}</p></div>
+  <div class="cm-db">
+   <div class="cm-dg"><div><span>${ic('users',15,2)}</span><small>Público</small><b>${esc(s[1])}</b></div><div><span>${ic('send',15,2)}</span><small>Canais</small><b>${ch}</b></div><div><span>${ic(now?'zap':'clock',15,2)}</span><small>Quando</small><b>${now?'Agora':dtFmt(w.d+' '+w.t)}</b></div></div>
+   <div class="cm-da"><button class="btn sec" data-a="puNew">${ic('plus',15,2.2)}Novo envio</button><button class="btn pri" data-a="puBack">Ver envios${ic('arrowR',14,2)}</button></div>
+  </div></section>`;}
 function puAfter(){
- $$('[data-au]').forEach(i=>i.addEventListener('change',()=>{const a=AUTOS.find(x=>x.id===i.dataset.au);a.on=i.checked;toast(`${a.n}: envio automático ${a.on?'ligado':'desligado'}`);}));
+ $$('[data-au]').forEach(i=>i.addEventListener('change',()=>{const a=AUTOS.find(x=>x.id===i.dataset.au);a.on=i.checked;const n=AUTOS.filter(x=>x.on).length,t=$('.utabs [data-v=auto] .cnt'),k=$$('.cm-pg .kpis4 .k4 .kv')[2];if(t)t.textContent=n+'/'+AUTOS.length;if(k)k.textContent=n;toast(`${a.n}: envio automático ${a.on?'ligado':'desligado'}`);}));
  const w=S.pw;if(!w||w.done)return;const c=$('#puCard');if(!c)return;
  const valid=()=>{const nx=$('#puNx');if(!nx)return;nx.disabled=w.step===0?!(w.title.trim()&&w.msg.trim()&&w.ch.length):w.step===1?(w.seg==='mini'&&!w.mini):w.step===2?!(w.when==='now'||(w.d&&w.t)):false;};
  const T=$('#puT'),M=$('#puM');
@@ -266,7 +276,7 @@ function txPage(){
    <div class="cm-sch">${c.sch.length?c.sch.map(([d,t])=>`<span><b>${WDN[d].slice(0,3)}</b>${hm(t)}</span>`).join(''):'<span class="soft">Sem horário fixo</span>'}</div>
    <footer><label class="tog cm-bt"><input type="checkbox" data-ch2="${c.id}" ${c.act?'checked':''}><span class="sw"></span><span>${c.act?'Visível no app':'Oculto'}</span></label></footer></article>`).join('')}</div></div>`;
 }
-const chPlHtml=sel=>Object.entries(PLAT).map(([k,p])=>`<label><input type="radio" name="pl" value="${k}" ${sel===k?'checked':''}><span><i style="width:8px;height:8px;border-radius:50%;background:${p[1]}"></i>${p[0]}</span></label>`).join('')+`<button type="button" class="new" data-new style="border:1px dashed var(--line,rgba(0,0,0,.25));border-radius:999px;padding:4px 12px;background:none">${ic('plus',13,2.2)}Nova</button>`;
+const chPlHtml=sel=>Object.entries(PLAT).map(([k,p])=>`<label><input type="radio" name="pl" value="${k}" ${sel===k?'checked':''}><span><i style="width:8px;height:8px;border-radius:50%;background:${p[1]}"></i>${p[0]}</span></label>`).join('')+`<button type="button" class="ch-new" data-new>${ic('plus',13,2.2)}Nova</button>`;
 function chForm(id){const c=id?chById(id):null,v=c?{...c,sch:c.sch.map(x=>[...x])}:{n:'',pl:'youtube',url:'',sch:[[0,'09:00']]};
  openDlg(`${dlgHead(c?'Editar canal':'Novo canal','As lives desse canal aparecem na aba Ao vivo do app.')}<form id="chF" class="fgrid one" novalidate>
   <label class="fld"><span class="fl">Nome</span><input name="n" value="${esc(v.n)}" placeholder="Ex.: Culto de domingo" autocomplete="off"></label>

@@ -74,7 +74,7 @@ function evFinRepRows(){
   evEnsure(e);const acc={};
   const add=(g,id,lab,o)=>{const k=g+'|'+id,x=acc[k]||(acc[k]={e,g,lab,q:0,gross:0,fee:0,rec:0});x.q+=o.q||0;x.gross+=o.gross||0;x.fee+=o.fee||0;x.rec+=o.rec||0;};
   e.regs.forEach(r=>{
-   const tk=tkOf(e,r),parts=[{g:'ing',id:tk?tk.id:'base',lab:tk?tk.n:'Inscrição',v:+r.val||0},...buyOf(e,r).map(i=>({g:'buy',id:i.id,lab:itLabel(i),v:+i.price||0}))],tot=regTot(e,r);
+   const tk=tkOf(e,r),parts=[{g:'ing',id:tk?tk.id:'base',lab:tk?tk.n:'Inscrição',v:+r.val||0},...buyOf(e,r).map(i=>({g:'buy',id:i.id,lab:itLabel(i),v:itPx(e,i,tk)}))],tot=regTot(e,r);
    if(r.pay==='pago'){
     let left=regFee(e,r);
     parts.forEach((p,i)=>{const fee=i===parts.length-1?left:Math.round(regFee(e,r)*(tot?p.v/tot:0)*100)/100;left=Math.round((left-fee)*100)/100;add(p.g,p.id,p.lab,{q:1,gross:p.v,fee});});

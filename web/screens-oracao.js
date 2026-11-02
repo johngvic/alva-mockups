@@ -21,17 +21,17 @@ function prayerList(){
   <div class="k4"><span class="kl">Você está orando</span><span class="kv">${mine}<small class="kof"> de ${act.length}</small></span><span class="kmeter"><i style="width:${act.length?Math.round(mine/act.length*100):0}%"></i></span></div>
  </section>
  <div class="chips rise" style="--d:2">${[['ativo','Ativos',act.length],['pend','Sem sua oração',act.filter(p=>!p.mine).length],['respondido','Respondidos',PRAYERS.filter(p=>p.st==='respondido').length],['todos','Todos',PRAYERS.length]].map(c=>`<button class="chipf ${S.pf===c[0]?'on':''}" data-a="pFilter" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div>
- <div class="pgrid2 rise" style="--d:3">${l.length?l.map(pCard).join(''):`<div class="card mempty" style="grid-column:1/-1"><p>Você está orando por todos.</p><span>Nenhum pedido esperando sua oração.</span></div>`}</div>`;
+ <div class="flist pl rise" style="--d:3">${l.length?`<div class="frow fh"><span>Pessoa</span><span>Pedido</span><span>Orando</span><span></span><span></span></div>`+l.map(pCard).join(''):`<div class="mempty"><p>Você está orando por todos.</p><span>Nenhum pedido esperando sua oração.</span></div>`}</div>`;
 }
 function pCard(p){
- return `<article class="card prc ${p.st}" id="${p.id}">
-  <div class="pr1"><span class="av" style="background:var(--tone-${p.tone});color:var(--tone-${p.tone}-ink)">${initials(p.n)}</span><div class="prn"><b>${esc(p.n)}</b><span>${whenL(p.when)}${p.priv?` · <span class="crestr">${ic('lock',11,2.2)}Pedido anônimo</span>`:''}</span></div>
-   <div style="position:relative;margin-left:auto"><button class="ibtn sm" data-a="pMenu" data-v="${p.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="pPop-${p.id}" style="right:0;top:calc(100% + 4px)">${p.st==='ativo'?`<button class="pi" data-a="pAnswer" data-v="${p.id}">${ic('check',16)}Marcar como respondido</button>`:`<button class="pi" data-a="pReopen" data-v="${p.id}">${ic('swap',16)}Reabrir pedido</button>`}<hr><button class="pi danger" data-a="pDel" data-v="${p.id}">${ic('x',16)}Excluir pedido</button></div></div></div>
-  <blockquote class="prq">${esc(p.text)}</blockquote>
-  <div class="pr3"><span class="prw"><span class="stack sm">${p.who.map(t=>`<span class="av" style="background:var(--tone-${t});color:var(--tone-${t}-ink)"></span>`).join('')}${p.mine?'<span class="av" style="background:var(--brand);color:var(--on-brand)">RP</span>':''}</span><span><b>${p.count}</b> orando</span></span>
-   ${p.st==='respondido'?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Oração respondida</span>`:`<button class="btn ${p.mine?'sec on':'pri'} sm pray" data-a="pPray" data-v="${p.id}" aria-pressed="${p.mine}">${p.mine?`${ic('check',14,2.4)}Você está orando`:`${ic('hands',15)}Estou orando`}</button>`}</div>
-  ${p.mine&&p.st==='ativo'?`<p class="prnote">${ic('bell',13)}${p.n.split(' ')[0]} foi avisada que você está orando</p>`.replace('avisada',p.n.split(' ')[0].endsWith('a')?'avisada':'avisado'):''}
- </article>`;
+ const f=p.n.split(' ')[0],avisa=f+(f.endsWith('a')?' foi avisada':' foi avisado')+' que você está orando';
+ return `<div class="frow ${p.st}" id="${p.id}">
+  <span class="fr-p"><span class="av" style="background:var(--tone-${p.tone});color:var(--tone-${p.tone}-ink)">${initials(p.n)}</span><span class="fr-n"><b>${esc(p.n)}</b><small>${whenL(p.when)}${p.priv?` · <span class="crestr">${ic('lock',11,2.2)}Anônimo</span>`:''}</small></span></span>
+  <span class="fr-t fr-tx" title="${esc(p.text)}">${esc(p.text)}</span>
+  <span class="prw fr-o"><span class="stack sm">${p.who.map(t=>`<span class="av" style="background:var(--tone-${t});color:var(--tone-${t}-ink)"></span>`).join('')}${p.mine?'<span class="av" style="background:var(--brand);color:var(--on-brand)">RP</span>':''}</span><span><b>${p.count}</b> orando</span></span>
+  <span class="fr-a">${p.st==='respondido'?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Oração respondida</span>`:`<button class="btn ${p.mine?'sec on':'pri'} sm pray" data-a="pPray" data-v="${p.id}" aria-pressed="${p.mine}"${p.mine&&p.st==='ativo'?` title="${avisa}"`:''}>${p.mine?`${ic('check',14,2.4)}Você está orando`:`${ic('hands',15)}Estou orando`}</button>`}</span>
+  <div class="fr-x"><button class="ibtn sm" data-a="pMenu" data-v="${p.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="pPop-${p.id}" style="right:0;top:calc(100% + 4px)">${p.st==='ativo'?`<button class="pi" data-a="pAnswer" data-v="${p.id}">${ic('check',16)}Marcar como respondido</button>`:`<button class="pi" data-a="pReopen" data-v="${p.id}">${ic('swap',16)}Reabrir pedido</button>`}<hr><button class="pi danger" data-a="pDel" data-v="${p.id}">${ic('x',16)}Excluir pedido</button></div></div>
+ </div>`;
 }
 function cuidadoAfter(){
  if(S.case){caseAfter();return;}

@@ -34,7 +34,7 @@ function cadence(d){const pct=Math.min(100,Math.round(d.last/d.rhythm*100)),over
  return `<span class="cad ${d.paused?'pz':over?'over':''}" title="${RHY[d.rhythm]} · último contato ${dLbl(d.last)}"><span class="cadt"><i style="width:${pct}%"></i></span><span class="cadl">${dLbl(d.last)}</span></span>`;}
 function dProg(d){const t=dTrail(d),c=t.reduce((a,x)=>a+x.c,0),n=t.reduce((a,x)=>a+x.done,0);return {c,n,p:c?Math.round(n/c*100):0};}
 function dProgTxt(d){const g=dProg(d);return g.c?`${g.n} de ${g.c} ${g.c===1?'etapa':'etapas'} · ${g.p}%`:'Sem trilha';}
-function stageDots(d){if(!d.stage)return '';const g=dProg(d);return `<span class="tp" style="width:48px" title="${dProgTxt(d)}"><i style="width:${g.p}%"></i></span>`;}
+function stageDots(d){if(!d.stage)return '';const g=dProg(d);return `<span class="tpb" style="width:48px" title="${dProgTxt(d)}"><i style="width:${g.p}%"></i></span>`;}
 
 /* ---------- list ---------- */
 function discList(){
@@ -79,7 +79,7 @@ function dResumo(){
   <section class="card kpis4"><div class="k4"><span class="kl">Em andamento</span><span class="kv">${andam}</span><span class="kd">${paus} pausado</span></div><div class="k4"><span class="kl">Encontros em setembro</span><span class="kv">${month}</span><span class="kd">${done.length} em 2026</span></div><div class="k4"><span class="kl">Próximos 7 dias</span><span class="kv">${next7}</span><span class="kd">${sched.length} agendados no total</span></div><div class="k4"><span class="kl">Formados</span><span class="kv">${form}</span><span class="kd">concluíram a trilha</span></div></section>
   <section class="card pc rtrail"><div class="sh"><h2>Trilha por pessoa</h2><span class="who">etapas da trilha</span></div>
    <div class="trl">${trail.sort((a,b)=>dProg(b).p-dProg(a).p).map(d=>`<button class="trr" data-a="dOpen" data-v="${d.id}">${dAv(d)}<span class="trn"><b>${first(d)} ${d.n.split(' ').slice(-1)}</b><span>${dProgTxt(d)}${d.paused?' · pausado':''}</span></span>
-    <span class="tp ${d.paused?'pz':''}" style="width:96px"><i style="width:${dProg(d).p}%"></i></span><b class="trp">${dProg(d).p}%</b></button>`).join('')}</div>
+    <span class="tpb ${d.paused?'pz':''}" style="width:96px"><i style="width:${dProg(d).p}%"></i></span><b class="trp">${dProg(d).p}%</b></button>`).join('')}</div>
    </section>
   <div class="col">
    <section class="card pc"><div class="sh"><h2>Próximos encontros</h2><span class="who">${sched.length}</span></div>
