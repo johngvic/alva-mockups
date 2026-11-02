@@ -305,19 +305,18 @@ const FEELS=[];
 Object.assign(S,{ff:'todos'});
 const feelHouse=n=>CASAS.find(c=>c.ppl.some(p=>p.n===n));
 function feelCard(f){
- const c=feelHouse(f.n),t=FEEL_TONE[f.mood],canPray=!f.prayer;
- return '<article class="card prc ativo" id="'+f.id+'"><div class="pr1">'+avN(f.n)+'<div class="prn"><b>'+esc(f.n)+'</b><span>'+whenL(f.when)+'</span></div>'
-  +'<div style="position:relative;margin-left:auto"><button class="ibtn sm" data-a="fMenu" data-v="'+f.id+'" aria-label="Ações">'+ic('dots',15)+'</button><div class="pop" id="fPop-'+f.id+'" style="right:0;top:calc(100% + 4px)">'+(canPray?'<button class="pi" data-a="fToPray" data-v="'+f.id+'">'+ic('hands',16)+'Virar pedido de oração</button>':'<button class="pi" data-a="fSeePray" data-v="'+f.id+'">'+ic('hands',16)+'Ver em Pedidos de oração</button>')+'<button class="pi" data-a="fCase" data-v="'+f.id+'">'+ic('heart',16)+'Abrir caso pastoral</button></div></div></div>'
-  +'<div><span class="stp" style="--c:var(--tone-'+t+'-ink);--b:var(--tone-'+t+')"><i></i>'+f.mood+'</span></div>'
-  +(f.text?'<blockquote class="prq">'+esc(f.text)+'</blockquote>':'')
-  +(f.prayer?'<p class="prnote">'+ic('hands',13)+'Virou pedido de oração</p>':'')+'</article>';
+ const t=FEEL_TONE[f.mood],canPray=!f.prayer;
+ return '<div class="frow" id="'+f.id+'"><span class="fr-p">'+avN(f.n)+'<span class="fr-n"><b>'+esc(f.n)+'</b><small>'+whenL(f.when)+'</small></span></span>'
+  +'<span class="fr-m"><span class="stp" style="--c:var(--tone-'+t+'-ink);--b:var(--tone-'+t+')"><i></i>'+f.mood+'</span></span>'
+  +'<span class="fr-t">'+(f.text?'<span class="fr-q" title="'+esc(f.text)+'">“'+esc(f.text)+'”</span>':'')+(f.prayer?'<span class="fr-pr">'+ic('hands',12)+'Virou pedido</span>':'')+'</span>'
+  +'<div class="fr-x"><button class="ibtn sm" data-a="fMenu" data-v="'+f.id+'" aria-label="Ações">'+ic('dots',15)+'</button><div class="pop" id="fPop-'+f.id+'" style="right:0;top:calc(100% + 4px)">'+(canPray?'<button class="pi" data-a="fToPray" data-v="'+f.id+'">'+ic('hands',16)+'Virar pedido de oração</button>':'<button class="pi" data-a="fSeePray" data-v="'+f.id+'">'+ic('hands',16)+'Ver em Pedidos de oração</button>')+'<button class="pi" data-a="fCase" data-v="'+f.id+'">'+ic('heart',16)+'Abrir caso pastoral</button></div></div></div>';
 }
 function feelList(){
  const l=FEELS.filter(f=>S.ff==='todos'||f.mood===S.ff),cnt=m=>FEELS.filter(f=>f.mood===m).length,top=FEEL_L.map(m=>[m,cnt(m)]).sort((a,b)=>b[1]-a[1])[0],need=cnt('Preciso de oração');
  return '<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Como estou me sentindo</h1><p class="lede">Como os membros dizem que estão, pelo app. Cada envio é um registro novo e não pode ser editado nem apagado.</p></div><div class="pact"></div></header>'
   +'<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Registros</span><span class="kv">'+FEELS.length+'</span><span class="kd">nos últimos 7 dias</span></div><div class="k4"><span class="kl">Mais frequente</span><span class="kv" style="font-size:22px">'+top[0]+'</span><span class="kd">'+top[1]+' registro'+(top[1]===1?'':'s')+'</span></div><div class="k4"><span class="kl">Preciso de oração</span><span class="kv" style="'+(need?'color:var(--st-sol)':'')+'">'+need+'</span><span class="kd">'+FEELS.filter(f=>f.prayer).length+' viraram pedido de oração</span></div></section>'
   +'<div class="chips rise" style="--d:2">'+[['todos','Todos',FEELS.length]].concat(FEEL_L.map(m=>[m,m,cnt(m)])).map(c=>'<button class="chipf '+(S.ff===c[0]?'on':'')+'" data-a="fFilter" data-v="'+c[0]+'">'+c[1]+'<small>'+c[2]+'</small></button>').join('')+'</div>'
-  +'<div class="pgrid2 rise" style="--d:3">'+(l.length?l.map(feelCard).join(''):'<div class="card mempty" style="grid-column:1/-1"><p>Nenhum registro aqui.</p><span>Ninguém registrou este sentimento nos últimos dias.</span></div>')+'</div>';
+  +'<div class="flist rise" style="--d:3">'+(l.length?'<div class="frow fh"><span>Pessoa</span><span>Sentimento</span><span>Mensagem</span><span></span></div>'+l.map(feelCard).join(''):'<div class="mempty"><p>Nenhum registro aqui.</p><span>Ninguém registrou este sentimento nos últimos dias.</span></div>')+'</div>';
 }
 Object.assign(A,{
  fFilter:v=>{S.ff=v;render();},
@@ -326,6 +325,6 @@ Object.assign(A,{
  fSeePray:()=>{closePops();A.nav('oracao');},
  fCase:v=>{closePops();const f=FEELS.find(x=>x.id===v);A.nav('acompanhamento');toast('Em Adicionar caso, escolha '+f.n.split(' ')[0]+' para abrir o caso pastoral');}
 });
-LSTD.sentimentos={list:'.pgrid2',move:'.wrap>.chips',item:'.pgrid2>.card',ph:'Buscar pessoa ou sentimento'};
+LSTD.sentimentos={list:'.flist',move:'.wrap>.chips',item:'.flist>.frow:not(.fh)',ph:'Buscar pessoa ou sentimento'};
 NAV.find(g=>g[0]==='Geral')[1].find(i=>i[0]==='cuidado')[3].push(['sentimentos','Como estou me sentindo']);
 

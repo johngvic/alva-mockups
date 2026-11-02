@@ -14,7 +14,7 @@ const BKA={};BKA.crumbBack=(v,b)=>{const n=b.closest('nav.crumb'),bs=n.querySele
 document.addEventListener('keydown',e=>{if(e.altKey&&e.key==='ArrowLeft'){const b=$('.crumb-bk');if(b){e.preventDefault();b.click();}}});
 /* ===== Padrão de lista: busca + filtros sempre no topo do container da lista ===== */
 const LSTD={
- oracao:{list:'.pgrid2',move:'.wrap>.chips',item:'.pgrid2>.card',ph:'Buscar pedido ou pessoa'},
+ oracao:{list:'.flist',move:'.wrap>.chips',item:'.flist>.frow:not(.fh)',ph:'Buscar pedido ou pessoa'},
  ksalas:{list:'section.card.mtab',item:'.trow:not(.thead)',ph:'Buscar sala ou monitor'},
  ktimes:{list:'.rgrid2',item:'.rgrid2>.card',ph:'Buscar time ou voluntário'},
  kturmas:{list:'section.card.pc',item:'.ages>*',ph:'Buscar turma'},
