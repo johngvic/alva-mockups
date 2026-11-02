@@ -5245,8 +5245,8 @@ mark{background:color-mix(in srgb,var(--st-sol-bg) 85%,transparent);color:inheri
 .kpa:hover{background:var(--brand-soft)}
 .kpa.empty{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line-strong,var(--line));justify-content:center;align-items:center;min-height:52px;border-radius:12px}
 .kpa.empty:hover{box-shadow:inset 0 0 0 1.5px var(--brand);background:var(--brand-soft)}
-.kpi{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-text)}
-.kpi.alt{background:var(--surface);color:var(--ink-muted);box-shadow:inset 0 0 0 1px var(--line)}
+.kpic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-text)}
+.kpic.alt{background:var(--surface);color:var(--ink-muted);box-shadow:inset 0 0 0 1px var(--line)}
 .kpx{min-width:0}
 .kpx b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600;font-size:13.5px;line-height:1.3}
 .kpx small{display:block;margin-top:2px;color:var(--ink-muted);font-size:12px}
@@ -5403,3 +5403,53 @@ input.uip-open,select.uip-open{box-shadow:inset 0 0 0 1.5px var(--brand-text),0 
  .trow.pv .pv-c1{grid-area:pc1}.trow.pv .pv-c2{grid-area:pc2}.trow.pv .pv-c3{grid-area:pc3}.trow.pv .pv-c4{grid-area:pc4}.trow.pv .pv-c5{grid-area:pc5}
  .trow.pv.thead{display:grid;padding:12px 16px}.trow.pv.thead .pv-t,.trow.pv.thead .pv-c{font:600 11px/14px var(--font-text)}
 }
+/* pulse card layout (dashboard) */
+.pulse .kpis{gap:14px}
+.pulse .kpi{justify-content:flex-start}
+.pulse .kpi+.kpi{padding-left:14px;border-left:1px solid var(--line)}
+.pulse .kpi .kl{min-height:16px}
+@media (min-width:1200px){
+  .pulse .kpis{padding-bottom:18px;border-bottom:1px solid var(--line);gap:24px}
+  .pulse .kpi+.kpi{padding-left:24px}
+  .pulse .kpi .kv{font-size:32px}
+  .pulse .pbody{align-items:center}
+  .pulse .chart{height:176px;margin:0}
+  .pulse .funnel{gap:14px}
+  .pulse .fleg{gap:10px}
+}
+/* secretaria rows: chips keep their natural width; action buttons spaced */
+.sx-c .stp{align-self:flex-start}
+.sx-ch{gap:8px;align-items:center}
+/* pedidos de família: tipo e status em colunas fixas, alinhados à direita junto das ações */
+@media (min-width:721px){
+.sx-r.sx-fam{grid-template-columns:44px minmax(0,1fr) 92px 104px auto;gap:6px 16px}
+.sx-r.sx-fam .sx-c,.sx-r.sx-fam .sx-s{justify-content:flex-start}
+.sx-r.sx-fam .sx-ch{padding-left:8px}
+}
+/* regras da integração */
+.bb-rules{gap:14px}
+.igr-card{border-radius:16px;background:var(--surface-2);overflow:hidden}
+.igr-card .bb-rr{background:none;border-radius:0;padding:13px 16px}
+.igr-card .bb-rr+.bb-rr{border-top:1px solid var(--line)}
+.igr-h{display:flex;align-items:center;justify-content:space-between;padding:0 4px;margin-top:2px;font:600 11.5px/1 var(--font-text);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.igr-h .bb-lock{letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink-soft)}
+.igr-fx{border-radius:16px;box-shadow:inset 0 0 0 1px var(--line);margin-top:-6px}
+.igr-fr{display:flex;flex-direction:column;gap:2px;padding:11px 16px}
+.igr-fr+.igr-fr{border-top:1px solid var(--line)}
+.igr-fr b{font:600 13.5px/18px var(--font-text);color:var(--ink)}
+.igr-fr span{font:400 12px/16px var(--font-text);color:var(--ink-muted)}
+.bb-rules+.dfoot{margin-top:18px}
+.bb-rr .chipf,.bb-rr .chipf:first-child{padding:0 16px;justify-content:center;text-align:center}
+/* regras da integração: limite com campo que abre/fecha */
+.igr-card>.bb-rr:not(:first-child){border-top:1px solid var(--line)}
+.igr-fold{display:grid;grid-template-rows:0fr;opacity:0;transform:translateY(-4px);transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1),opacity .2s ease,transform .3s cubic-bezier(.2,.8,.2,1)}
+.igr-fold.open{grid-template-rows:1fr;opacity:1;transform:none}
+.igr-fold>div{overflow:hidden;min-height:0}
+.igr-step{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 16px;padding:12px 0 14px;border-top:1px solid var(--line);font:500 13px/18px var(--font-text);color:var(--ink-muted)}
+.igr-step .lm2-step output{min-width:44px}
+.igr-step .lm2-step output b{font-size:20px}
+.igr-step .lm2-step button{width:32px;height:32px}
+#igRlimS{transition:opacity .12s ease}
+#igRlimS.sw{opacity:0}
+@media (prefers-reduced-motion:reduce){.igr-fold,#igRlimS{transition:none!important}}
+.sx-list>.sx-r:first-child{border-top:0}
