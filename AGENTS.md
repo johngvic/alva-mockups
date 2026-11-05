@@ -1,6 +1,6 @@
 # Alva Mockups — regras para agentes
 
-Protótipos navegáveis do Alva (web, mobile, site, subscriptions). São HTML/CSS/JS puro,
+Protótipos navegáveis do Alva (web, mobile, site). São HTML/CSS/JS puro,
 servidos por Vite. **Não existe build step de aplicação**: o `npm run dev` apenas serve os
 arquivos e recarrega a página.
 

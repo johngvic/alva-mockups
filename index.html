@@ -20,7 +20,7 @@ h1{margin:48px 0 0;font:400 44px/48px var(--serif);letter-spacing:-.01em}
 h1 em{color:var(--brand)}
 .lede{margin:14px 0 0;font:400 16px/24px var(--sans);color:var(--muted);max-width:520px}
 .grid{margin-top:40px;display:grid;grid-template-columns:1fr;gap:16px}
-@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}h1{font-size:54px;line-height:58px}}
+@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}.grid a.card:first-child{grid-column:1/-1}h1{font-size:54px;line-height:58px}}
 a.card{display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:24px;background:var(--surface);color:inherit;text-decoration:none;box-shadow:0 1px 2px rgba(1,15,18,.04),0 10px 30px rgba(1,15,18,.06);transition:transform .2s,box-shadow .2s}
 a.card:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(1,15,18,.04),0 16px 40px rgba(1,15,18,.1),inset 0 0 0 1.5px var(--brand)}
 .tag{align-self:flex-start;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
@@ -37,11 +37,8 @@ footer{padding:20px;text-align:center;font:400 12.5px/18px var(--sans);color:var
  <p class="lede">Versões navegáveis do app da comunidade e do painel de gestão. Os dados são fictícios e nada é salvo.</p>
  <div class="grid">
   <a class="card" href="./site/"><span class="tag">Site comercial</span><b>Conheça o Alva</b><p>Apresentação do produto, experiência do app e proposta de planos, do gratuito ao atendimento personalizado.</p><span class="go">Explorar o site →</span></a>
-  <a class="card" href="./subscriptions/"><span class="tag">Administração comercial</span><b>Assinaturas</b><p>Clientes, planos, cobranças e operação dos produtos Alva e Zelos Kids. Valores e regras apenas demonstrativos.</p><span class="go">Abrir assinaturas →</span></a>
   <a class="card" href="/web/"><span class="tag">Painel de gestão</span><b>Alva Web</b><p>Acesso multi-igreja, dashboard, pessoas, cuidado, comunidade, kids e administração. Funciona no desktop e no celular.</p><span class="go">Abrir protótipo →</span></a>
   <a class="card" href="/mobile/"><span class="tag">App da comunidade</span><b>Alva App</b><p>Login, início, agenda, grupos, cursos, ingressos e perfis de acesso. Use o menu ao lado para trocar de tela, tema e cenário.</p><span class="go">Abrir protótipo →</span></a>
-  <a class="card" href="./registrations/web/"><span class="tag">Inscrições · web</span><b>VEM Web</b><p>Organizadores (empresas e igrejas via Alva), compradores e equipe: eventos, ingressos, inscrições, financeiro e portaria. Cobrança configurada no Assinaturas.</p><span class="go">Abrir VEM web →</span></a>
-  <a class="card" href="./registrations/mobile/"><span class="tag">Inscrições · app</span><b>VEM App</b><p>Descobrir eventos, comprar ingressos, mostrar o QR Code de cada item e, para a equipe, fazer o check-in.</p><span class="go">Abrir VEM app →</span></a>
  </div>
 </main>
 <footer>Alva · protótipos de design · não é o produto final</footer>
