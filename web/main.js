@@ -48,4 +48,5 @@
 //#include ./ui-pickers.js
 //#include ./screens-ajustes-agenda.js
 //#include ./screens-escalas-aceite.js
+//#include ./screens-zeladoria.js
 render();
