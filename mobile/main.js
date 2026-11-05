@@ -122,10 +122,10 @@ const evKey=e=>e.y*10000+e.m*100+e.d;
 const todayKey=TODAY.y*10000+TODAY.m*100+TODAY.d;
 const dow=(y,m,d)=>new Date(y,m-1,d).getDay();
 const CASAS=[
- {id:'g1',t:'Casa Jardins',day:'Quarta-feira',h:'19h30',km:'1,2',n:14,open:true,leader:'Ana e Paulo Costa',addr:'Rua das Acácias, 120 · Jardins'},
- {id:'g2',t:'Casa Centro',day:'Quinta-feira',h:'20h',km:'3,4',n:9,open:true,leader:'Marcos Lima',addr:'Av. São João, 800 · Centro'},
- {id:'g3',t:'Casa Pinheiros',day:'Sexta-feira',h:'19h',km:'2,8',n:11,open:false,leader:'Juliana Reis',addr:'Rua dos Pinheiros, 455 · Pinheiros'},
- {id:'g4',t:'Casa Jovens SP',day:'Terça-feira',h:'20h30',km:'4,1',n:18,open:true,leader:'Davi Melo',addr:'Rua Augusta, 1500 · Consolação'}
+ {id:'g1',tags:[],t:'Casa Jardins',day:'Quarta-feira',h:'19h30',km:'1,2',n:14,open:true,leader:'Ana e Paulo Costa',addr:'Rua das Acácias, 120 · Jardins'},
+ {id:'g2',tags:['Homens'],t:'Casa Centro',day:'Quinta-feira',h:'20h',km:'3,4',n:9,open:true,leader:'Marcos Lima',addr:'Av. São João, 800 · Centro'},
+ {id:'g3',tags:['Mulheres'],t:'Casa Pinheiros',day:'Sexta-feira',h:'19h',km:'2,8',n:11,open:false,leader:'Juliana Reis',addr:'Rua dos Pinheiros, 455 · Pinheiros'},
+ {id:'g4',tags:['Connect','Jovens'],t:'Casa Jovens SP',day:'Terça-feira',h:'20h30',km:'4,1',n:18,open:true,leader:'Davi Melo',addr:'Rua Augusta, 1500 · Consolação'}
 ];
 const MINIS=[
  {id:'m1',t:'Jovens e Adolescentes',s:'Encontros de 12 a 29 anos',tone:'lima',i:'sparkle',d:'Sábado à noite a Alva vira ponto de encontro: louvor alto, mensagem direta e muita conversa depois. Aqui se serve em tudo, da banda ao lanche.',when:'Sábados · 19h30',lead:'Davi e Bia Melo',n:42,need:['Ter entre 18 e 35 anos para servir na equipe','Participar do encontro de líderes às quintas']},
@@ -173,7 +173,7 @@ const S={
  discs:[{id:'d1',who:'Gabriel Souza',tone:'ceu',theme:'Identidade em Cristo',y:2026,m:10,d:1,h:'18h30',place:'Sala 3, Igreja',remote:false,st:'pendente'},{id:'d2',who:'Isabela Rocha',tone:'rosado',theme:'Serviço e doação',y:2026,m:10,d:2,h:'9h',place:'Remoto',remote:true,st:'aceito'},{id:'d3',who:'Fernanda Lima',tone:'lima',theme:'Multiplicação',y:2026,m:10,d:6,h:'19h',place:'Café Central',remote:false,st:'pendente'}],
  blocks:[],
  gr:{tab:'Casas',q:''},cu:{tab:'andamento',open:'fund',view:null,playing:false},
- rsvp:{},joined:{},serving:{},mood:null,notif:{Eventos:true,Escalas:true,'Pedidos de oração':true,Cursos:false,'Avisos gerais':true},nch:{Push:true,'E-mail':false,WhatsApp:true},quiet:true
+ rsvp:{},joined:{},serving:{},mood:null,notif:{Eventos:true,Escalas:true,'Pedidos de oração':true,Cursos:false,'Avisos gerais':true,'Mensagens de líderes':true},nch:{Push:true,'E-mail':false,WhatsApp:true},quiet:true
 };
 const K=(y,m,d)=>y*10000+m*100+d;const KD=k=>({y:Math.floor(k/10000),m:Math.floor(k/100)%100,d:k%100});
 const kDate=k=>{const o=KD(k);return new Date(o.y,o.m-1,o.d);};
@@ -181,6 +181,23 @@ const fmtK=k=>{const o=KD(k);return WD[dow(o.y,o.m,o.d)]+', '+o.d+' '+MONTHS[o.m
 const daysBetween=(a,b)=>Math.round((kDate(b)-kDate(a))/864e5)+1;
 const blockedAt=k=>S.blocks.find(b=>k>=b.a&&k<=b.b);
 const initials=n=>n.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+/* Foto no lugar das iniciais (melhoria 1, 04/11/2026): com foto mostra a foto; sem foto, as iniciais coloridas de sempre. */
+const _hs=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+const _MASC=new Set(['Rafael','Marcos','Rodrigo','Diego','André','Renan','Thiago','Ricardo','Bruno','Carlos','Felipe','Gabriel','Henrique','Rogério']);
+const _SKIN=['#F6D5BC','#EBBE98','#D9A074','#BC8159','#8F5B3C','#613B27'],_HAIR=['#1c1713','#3b2a1d','#6a4426','#9b5a2e','#caa23a','#8a8a8a'],_BG=['#DCEBFA','#DDF3E7','#FBE6D2','#F9DDE5','#EAF3CF','#E1E8EE'],_SHIRT=['#2F6FB5','#2E8B6E','#C46A2D','#B84A6A','#6E8F2E','#5A6B7A'];
+const _AVC={};
+const avatarUri=n=>_AVC[n]||(_AVC[n]=(()=>{const h=_hs(n),m=_MASC.has(n.split(' ')[0]),sk=_SKIN[h%6],hr=_HAIR[(h>>>3)%6],bg=_BG[(h>>>5)%6],sh=_SHIRT[(h>>>7)%6],st=(m?['short','short','bald','curly']:['long','bun','curly','long'])[(h>>>9)%4],beard=m&&st!=='curly'&&(h>>>11)%3===0;
+ const back=st==='long'?`<path d="M16 36c0-15 6-24 16-24s16 9 16 24v16H16z" fill="${hr}"/>`:'';
+ const front=st==='short'||st==='long'||st==='bun'?`<path d="M20.5 29c0-9 5-14.5 11.5-14.5S43.5 20 43.5 29c-3-4.5-6.5-6.5-11.5-6.5S23.5 24.5 20.5 29z" fill="${hr}"/>`:st==='curly'?[[22,23],[27,18],[33,17],[39,19],[43,24],[32,21]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="6" fill="${hr}"/>`).join(''):'';
+ const bun=st==='bun'?`<circle cx="32" cy="12.5" r="5" fill="${hr}"/>`:'';
+ const bd=beard?`<path d="M21.5 31c0 9 4.5 13 10.5 13s10.5-4 10.5-13c-2 5-5 7-10.5 7s-8.5-2-10.5-7z" fill="${hr}"/>`:'';
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="${bg}"/>${back}<path d="M8 64c0-12 10-18 24-18s24 6 24 18z" fill="${sh}"/><rect x="28" y="40" width="8" height="9" fill="${sk}"/><ellipse cx="32" cy="30" rx="11" ry="13" fill="${sk}"/>${front}${bun}${bd}<circle cx="27.5" cy="30" r="1.3" fill="#2a2018"/><circle cx="36.5" cy="30" r="1.3" fill="#2a2018"/><path d="M28.5 36q3.5 3 7 0" stroke="#7a3b2a" fill="none" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+ return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);})());
+/* Quem tem retrato de exemplo: pastores, supervisores, líderes de casa e de ministério e alguns membros comuns. */
+const FOTOS_EX=new Set(['Rafael Pereira','Ana Costa','Marcos Lima','Daniela Rocha','Rodrigo Alves','Camila Duarte','Diego Martins','André Rocha','Fernanda Alves Melo','Renan Ferreira','Larissa Pinto Rocha','Thiago Mendes','Isabela Rocha','Ricardo Santos','Camila Sousa','Bruno Carvalho','Mônica Souza','Ana Clara Lima','Cláudia Ferraz','Carlos Eduardo Silva','Marina Costa','Patrícia Lima','Beatriz Martins Silva','Juliana Costa Ferreira','Bruno Reis','Helena Duarte','Felipe Andrade','Gabriel Souza','Elisa Moura','Diego Faria','Clara Nunes','Fernanda Lima','Lucas Pereira']);
+const _phName=n=>String(n||'').replace(/^(Pr\.|Pra\.|Diác\.|Diac\.)\s+/,'').trim();
+const photoOf=n=>{const k=_phName(n),m=typeof MEMBERS!=='undefined'?MEMBERS.find(x=>x.n===k):null;if(m&&m.photo!==undefined)return m.photo;return FOTOS_EX.has(k)?avatarUri(k):'';};
+const pavM=(name,toneName,cls='',extra='')=>{const ph=photoOf(name);return ph?`<span class="avatar ${cls}" style="${extra}"><img src="${ph}" alt=""></span>`:`<span class="avatar ${cls}" style="${tone(toneName)};${extra}">${initials(_phName(name))}</span>`;};
 
 /* ---------- toast ---------- */
 const TI={success:['check','var(--success-fill)','var(--success-ink)'],error:['x','var(--danger-fill)','var(--danger-ink)'],info:['info','var(--info-fill)','var(--info-ink)']};
@@ -349,7 +366,7 @@ V.signupForm=()=>{const p=S.prefill||{};return{sb:'var(--ink)',html:flow({pct:p.
  dock:`<button class="btn primary block" type="submit" id="identityCreate" disabled>Criar conta</button>`})};};
 
 const CH_META={sede:{g:'aurora',next:'Dom · 18h30',last:true,short:'Sede'},alpha:{g:'mar',next:'Dom · 10h',short:'Alphaville'},camp:{g:'lima',next:'Sáb · 19h30',short:'Campinas'}};
-V.church=()=>({sb:'var(--ink)',html:`${appHead(`<div class="row g4"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><h1 class="big" style="margin:0">Olá, ${esc(S.user.first)}</h1></div>`)}
+V.church=()=>({sb:'var(--ink)',html:`${appHead(`<div class="row g4">${pavM(S.user.name,'ceu','lg')}<h1 class="big" style="margin:0">Olá, ${esc(S.user.first)}</h1></div>`)}
  <div class="pad stack g6">
   <div class="stack g2"><h2 class="t2">Escolha a igreja</h2><p class="body">Você tem acesso a ${CHURCHES.length} igrejas. Dá para trocar depois em Mais.</p></div>
   <div class="chlist">${CHURCHES.map(c=>{const m=CH_META[c.id];return `<button class="chrow" data-a="pickChurch" data-v="${c.id}"><span class="chdot" style="background:${MK[c.tone==='ceu'?'oceano':c.tone]}"></span><span class="grow stack" style="gap:2px"><span class="row" style="gap:10px;align-items:baseline"><span class="chn">${m.short}</span>${m.last?'<span class="chl">Último acesso</span>':''}</span><span class="chm">${c.city} · ${c.members} membros</span></span><span class="ma" aria-hidden="true">${ic('arrowR',18,2)}</span></button>`;}).join('')}</div>
@@ -476,13 +493,13 @@ V.agenda=()=>{const {y,m}=S.ag;const isNow=y===TODAY.y&&m===TODAY.m&&S.ag.sel===
  </div>`};};
 
 /* grupos */
-function casasList(){const q=S.gr.q.toLowerCase();const l=CASAS.filter(c=>!q||(c.t+' '+c.addr).toLowerCase().includes(q));
+function casasList(){const q=S.gr.q.toLowerCase();const l=CASAS.filter(c=>!q||(c.t+' '+c.addr+' '+(c.tags||[]).join(' ')).toLowerCase().includes(q));
  if(!l.length)return `<div class="empty"><span class="it-title" style="color:var(--ink)">Nenhuma Casa encontrada</span><span class="callout">Tente outro bairro ou limpe a busca.</span><button class="link" data-a="clearQ">Limpar busca</button></div>`;
- return `<div class="chlist">${l.map(c=>{const st=S.joined[c.id]?['Pedido enviado','var(--brand-text)']:c.open?null:['Lotada','var(--mk-warn)'];return `<button class="chrow" data-a="group" data-v="${c.id}"><span class="chdot" style="background:${c.open?'var(--mk-lima)':'var(--mk-warn)'}"></span><span class="grow stack" style="gap:2px"><span class="row" style="gap:10px;align-items:baseline"><span class="chn">${c.t.replace('Casa ','')}</span>${st?`<span class="chl" style="color:${st[1]}">${st[0]}</span>`:''}</span><span class="chm">${c.day.replace('-feira','')} · ${c.h} · ${c.km} km · ${c.n} membros</span></span><span class="ma" aria-hidden="true">${ic('arrowR',18,2)}</span></button>`;}).join('')}</div>`;}
+ return `<div class="chlist">${l.map(c=>{const st=S.joined[c.id]?['Pedido enviado','var(--brand-text)']:c.open?null:['Lotada','var(--mk-warn)'];return `<button class="chrow" data-a="group" data-v="${c.id}"><span class="chdot" style="background:${c.open?'var(--mk-lima)':'var(--mk-warn)'}"></span><span class="grow stack" style="gap:2px"><span class="row" style="gap:10px;align-items:baseline"><span class="chn">${c.t.replace('Casa ','')}</span>${st?`<span class="chl" style="color:${st[1]}">${st[0]}</span>`:''}</span><span class="chm">${c.day.replace('-feira','')} · ${c.h} · ${c.km} km · ${c.n} membros</span>${(c.tags||[]).length?`<span class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px">${c.tags.map(t=>`<span class="chl">${t}</span>`).join('')}</span>`:''}</span><span class="ma" aria-hidden="true">${ic('arrowR',18,2)}</span></button>`;}).join('')}</div>`;}
 V.grupos=()=>({sb:'var(--ink)',tabs:'grupos',html:`${appHead(`<div class="stack g2"><p class="eyebrow">Comunhão</p><h1 class="t1">Grupos</h1><p class="callout">Casas de Apascentamento e ministérios para você pertencer e servir.</p></div>`,['#008582','#b1e454'])}
  <div class="pad stack g5">
   <div class="seg" role="tablist">${[['Casas','Casas'],['Ministérios','Ministérios']].map(t=>`<button role="tab" aria-selected="${S.gr.tab===t[0]}" data-a="grTab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
-  ${S.gr.tab==='Casas'?`<div class="fbox" style="min-height:48px">${ic('search',20)}<input id="grQ" type="search" placeholder="Buscar por bairro ou endereço" value="${esc(S.gr.q)}" aria-label="Buscar Casa"></div>
+  ${S.gr.tab==='Casas'?`<div class="fbox" style="min-height:48px">${ic('search',20)}<input id="grQ" type="search" placeholder="Buscar por bairro, endereço ou tag" value="${esc(S.gr.q)}" aria-label="Buscar Casa"></div>
    <div class="stack g2"><p class="eb2">Casas de Apascentamento · ${CASAS.length}</p><div id="casas">${casasList()}</div></div>`
   :`<div class="stack g2"><p class="eb2">Ministérios · ${MINIS.length}</p><div class="chlist">${MINIS.map(mi=>`<button class="chrow" data-a="mini" data-v="${mi.id}"><span class="mico" style="color:${MK[mi.tone]||'var(--tone-'+mi.tone+'-ink)'}">${ic(mi.i,24,1.6)}</span><span class="grow stack" style="gap:2px"><span class="row" style="gap:10px;align-items:baseline"><span class="chn">${mi.t}</span>${S.serving[mi.id]?'<span class="chl">Interesse enviado</span>':''}</span><span class="chm">${mi.s}</span></span><span class="ma" aria-hidden="true">${ic('arrowR',18,2)}</span></button>`).join('')}</div></div>`}
  </div>`});
@@ -536,7 +553,7 @@ const MAIS_ITEMS=[['Meus dados','user','damasco','meusDados'],['Notificações',
 V.mais=()=>{const nN=S.notifs.filter(n=>n.unread).length,miss=ME_MISS(S.me).length,ins=S.insc.mine.filter(m=>m.st!=='cancelada').length,prW=S.prayers.filter(p=>p.st==='aguardando').length,care=S.care.next&&S.care.next.st==='pendente';
  const row=(label,v,meta,hot)=>`<button class="mrow" data-a="sub" data-v="${v}"><span class="mt">${label}</span>${meta?`<span class="mm ${hot?'hot':''}">${meta}</span>`:''}<span class="ma" aria-hidden="true">${ic('arrowR',16,2)}</span></button>`;
  const grp=(t,rows)=>`<section class="mgrp"><p class="eb2">${t}</p>${rows}</section>`;
- return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados"><span class="avatar lg" style="${tone('ceu')}">${initials(S.user.name)}</span><span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
+ return{sb:'var(--ink)',tabs:'mais',html:`${appHead(`<button class="mhead" data-a="sub" data-v="meusDados">${pavM(S.user.name,'ceu','lg')}<span class="stack" style="align-items:flex-start;gap:2px"><span class="t2">${esc(S.user.name)}</span><span class="callout">${S.church.name}</span></span></button>`)}
  <div class="pad stack g8" style="padding-top:16px">
   ${S.role==='visitante'?'':ccMini()}
   ${grp('Você',row('Meus dados','meusDados',miss?miss+' dados faltando':'')+row('Notificações','notifs',nN?nN+(nN>1?' novas':' nova'):'',nN>0)+row('Privacidade e dados','privacidade',''))}
@@ -646,11 +663,11 @@ function groupSheet(id){
  const c=CASAS.find(x=>x.id===id);const j=S.joined[id];const st=j?['Pedido enviado','var(--brand-text)']:c.open?['Aberta','var(--mk-lima)']:['Lotada','var(--mk-warn)'];
  const leaders=c.leader.replace(/^(\w+) e (\w+) (\w+)$/,'$1 $3|$2 $3').split('|');
  sheet(`<div class="stack g5">
-  <div class="stack" style="gap:6px"><div class="row between"><p class="eb2">Casa de Apascentamento</p><span class="gst"><i style="background:${st[1]}"></i>${st[0]}</span></div><h3 class="gname">${c.t.replace('Casa ','')}</h3></div>
+  <div class="stack" style="gap:6px"><div class="row between"><p class="eb2">Casa de Apascentamento</p><span class="gst"><i style="background:${st[1]}"></i>${st[0]}</span></div><h3 class="gname">${c.t.replace('Casa ','')}</h3>${(c.tags||[]).length?`<div class="row" style="gap:6px;flex-wrap:wrap">${c.tags.map(t=>`<span class="chl">${t}</span>`).join('')}</div>`:''}</div>
   <div class="gfacts"><div><span class="eb2">Quando</span><b>${c.day.replace('-feira','')}</b><small>${c.h}</small></div><div><span class="eb2">Distância</span><b>${c.km}</b><small>km de você</small></div><div><span class="eb2">Membros</span><b>${c.n}</b><small>${c.open?'vagas abertas':'sem vagas'}</small></div></div>
   <div class="chlist">
    <div class="prow"><span class="grow stack" style="gap:2px"><span class="eb2">Endereço</span><span class="pt" style="font-size:16px">${esc(c.addr)}</span></span><button class="link" data-a="openMap">Ver no mapa</button></div>
-   <div class="prow"><span class="grow stack" style="gap:6px"><span class="eb2">${leaders.length>1?'Líderes':'Líder'}</span><span class="row g2">${leaders.map((l,k)=>`<span class="avatar" style="${tone(['menta','damasco'][k%2])};width:30px;height:30px;font-size:11px">${initials(l)}</span>`).join('')}<span class="pt" style="font-size:16px">${esc(c.leader)}</span></span></span></div>
+   <div class="prow"><span class="grow stack" style="gap:6px"><span class="eb2">${leaders.length>1?'Líderes':'Líder'}</span><span class="row g2">${leaders.map((l,k)=>`${pavM(l,['menta','damasco'][k%2],'','width:30px;height:30px;font-size:11px')}`).join('')}<span class="pt" style="font-size:16px">${esc(c.leader)}</span></span></span></div>
   </div>
   ${j?`<button class="btn outline block" data-a="joinGroup" data-v="${id}">Cancelar pedido</button>`:c.open?`<button class="btn primary block split" data-a="joinGroup" data-v="${id}"><span>Quero participar</span><span class="meta">${c.day.slice(0,3)} · ${c.h}</span></button>`:`<button class="btn inverse block" data-a="joinGroup" data-v="${id}">Entrar na lista de espera</button>`}
   <button class="btn secondary block talkbtn" data-a="talkLeader" data-v="g|${id}">${ic('message',18)}Falar com o líder</button>
@@ -673,9 +690,9 @@ function prayerSheet(){
    await busy(e.currentTarget,1100,null,'Enviado');await closeSheet();toast('success','Pedido enviado','Nossa equipe de intercessão vai orar por você.');});
  });
 }
-const NDESC={Eventos:'Cultos, conferências e eventos da sua igreja','Escalas':'Novas escalas e lembretes de confirmação','Pedidos de oração':'Quando alguém orar pelo seu pedido','Cursos':'Novas aulas e lembretes de estudo','Avisos gerais':'Comunicados da secretaria e da liderança'};
+const NDESC={Eventos:'Cultos, conferências e eventos da sua igreja','Escalas':'Novas escalas e lembretes de confirmação','Pedidos de oração':'Quando alguém orar pelo seu pedido','Cursos':'Novas aulas e lembretes de estudo','Avisos gerais':'Comunicados da secretaria e da liderança','Mensagens de líderes':'Recados dos líderes da sua casa, ministério e escalas'};
 function notifSheet(){sheet(`<div class="stack g5"><div class="row between" style="align-items:center"><h3 class="t2">Preferências</h3><span class="saved" id="nSaved" aria-live="polite"></span></div>
- <section class="stack"><p class="eb2" style="margin-bottom:4px">O que avisar</p><div class="chlist">${Object.keys(S.notif).map(k=>`<div class="prow"><span class="grow stack" style="gap:2px"><span class="pt">${k}</span><span class="chm">${NDESC[k]}</span></span><button type="button" class="switch" role="switch" aria-checked="${S.notif[k]}" aria-label="${k}" data-a="notifSw" data-v="${k}"></button></div>`).join('')}</div></section>
+ <section class="stack"><p class="eb2" style="margin-bottom:4px">O que avisar</p><div class="chlist">${Object.keys(S.notif).map(k=>`<div class="prow"><span class="grow stack" style="gap:2px"><span class="pt">${k}</span><span class="chm">${NDESC[k]}</span></span><button type="button" class="switch" role="switch" aria-checked="${S.notif[k]}" aria-label="${k}" data-a="notifSw" data-v="${k}"></button></div>`).join('')}</div><p class="chm" style="margin:6px 2px 0">Desligar um tipo tira o alerta no celular e o e-mail, mas o aviso continua na sua caixa de Notificações.</p></section>
  <section class="stack g3"><p class="eb2">Como avisar</p><div class="row g2" style="flex-wrap:wrap">${Object.keys(S.nch).map(k=>k==='WhatsApp'?`<button type="button" class="chip" disabled aria-disabled="true" style="opacity:.55">WhatsApp · em breve</button>`:`<button type="button" class="chip" aria-pressed="${S.nch[k]}" data-a="nch" data-v="${k}">${k}</button>`).join('')}</div></section>
  <div class="chlist"><div class="prow"><span class="grow stack" style="gap:2px"><span class="pt">Silenciar à noite</span><span class="chm">Das 22h às 7h</span></span><button type="button" class="switch" role="switch" aria-checked="${S.quiet}" aria-label="Silenciar à noite" data-a="quietSw"></button></div></div>
 </div>`);}
@@ -939,7 +956,7 @@ Object.assign(S,{
   since:'2019',integ:'Integrado',bap:'12/05/2019',conv:'Mais de 5 anos',casa:'Casa Jardins',casaLead:'Gabriela Nunes',disc:'Gabriel Souza',
   fam:[{id:'f1',n:'Camila Pereira',rel:'Esposa',g:'sp',app:true,tone:'rosado'},{id:'f2',n:'Lucas Pereira',rel:'Filho',g:'kid',age:'3 anos',kids:true,tone:'ambar'},{id:'f3',n:'Helena Pereira',rel:'Filha',g:'kid',age:'7 meses',kids:true,tone:'lima'},{id:'f4',n:'Antônio Pereira',rel:'Pai',g:'par',app:false,tone:'salvia'},{id:'f5',n:'Marta Pereira',rel:'Mãe',g:'par',app:true,tone:'menta'}],
   hist:[['Cadastro criado','pelo app','12/03/2019'],['Integração aceita','por Pr. Rafael Pereira','02/04/2019'],['Batismo','Culto de Celebração','12/05/2019'],['Integrado(a) à comunidade','por Pr. Rafael Pereira','26/05/2019'],['Entrou na Casa Jardins','com Gabriela Nunes','08/09/2019'],['Começou a servir no Louvor','Vocal','03/2021'],['Família vinculada','Camila, Lucas e Helena','14/05/2023']]},meEdit:false,meTab:'dados',
- notifs:[{id:'n0',t:'Convite acima do seu limite: Louvor · Vocal',s:'Dom, 25 out. Você já tem 3 escalas em outubro. Tudo bem recusar.',when:'Hoje · 09h05',grp:'Hoje',tone:'vinho',i:'alert',go:'escalas',unread:true},{id:'n1',t:'Você tem uma nova escala: Infantil · Monitor',s:'Dom, 18 out · 9h. Aceite até sexta.',when:'Hoje · 08h12',grp:'Hoje',tone:'lima',i:'calendar',go:'escalas',unread:true},
+ notifs:[{id:'n8',t:'Encontro de quinta muda de horário',s:'André Rocha · Líder da Casa Norte — Lapa: O encontro desta semana será às 20h, na casa do anfitrião.',when:'Hoje · 08h40',grp:'Hoje',tone:'ceu',i:'users',go:'encontros',unread:true},{id:'n0',t:'Convite acima do seu limite: Louvor · Vocal',s:'Dom, 25 out. Você já tem 3 escalas em outubro. Tudo bem recusar.',when:'Hoje · 09h05',grp:'Hoje',tone:'vinho',i:'alert',go:'escalas',unread:true},{id:'n1',t:'Você tem uma nova escala: Infantil · Monitor',s:'Dom, 18 out · 9h. Aceite até sexta.',when:'Hoje · 08h12',grp:'Hoje',tone:'lima',i:'calendar',go:'escalas',unread:true},
   {id:'n2',t:'Inscrições abertas: Conferência Anual 2026',s:'18 a 20 de outubro · gratuito',when:'Hoje · 07h30',grp:'Hoje',tone:'brasa',i:'ticket',go:'inscricoes',unread:true},
   {id:'n3b',t:'Você chegou ao limite de escalas de outubro',s:'3 de 3. Novos convites só chegam como exceção, com aviso.',when:'Hoje · 08h12',grp:'Hoje',tone:'damasco',i:'calendar',go:'escalas',unread:false},
   {id:'n3',t:'Sua escala de domingo foi aprovada',s:'Louvor · Vocal · Dom, 4 out',when:'Sex, 25 set · 09h20',grp:'Esta semana',tone:'laranja',i:'check',go:'escalas',unread:false},
@@ -980,7 +997,7 @@ function meDados(m,member){const miss=ME_MISS(m);
   <button class="btn primary block" data-a="meEdit">Editar meus dados</button>
   ${member?`<button class="tlink" data-a="go" data-v="secretaria">Algo errado em “Na igreja”? Fale com a secretaria</button>`:''}`;}
 function famNode(p,me){const app=me?'':p.kids?'<span class="fn-tag kid">Kids</span>':p.rem?'<span class="fn-tag wait">Remoção em análise</span>':p.pend?'<span class="fn-tag wait">Em análise</span>':p.app?'<span class="fn-tag on">No app</span>':'<span class="fn-tag">Sem o app</span>';
- return `<button class="fnode ${me?'me':''}" ${me?'disabled':`data-a="famOpen" data-v="${p.id}"`}><span class="avatar" style="${tone(p.tone||'ceu')}">${initials(me?p.nome:p.n)}</span><span class="grow stack" style="gap:3px;min-width:0"><span class="fn-n">${esc(me?p.nome:p.n)}</span><span class="fn-r">${me?'Você':esc(p.rel)+(p.age?' · '+esc(p.age):'')}</span></span>${app}${me?'':`<span class="chev">${ic('chevR',18,2)}</span>`}</button>`;}
+ return `<button class="fnode ${me?'me':''}" ${me?'disabled':`data-a="famOpen" data-v="${p.id}"`}>${pavM(me?p.nome:p.n,p.tone||'ceu')}<span class="grow stack" style="gap:3px;min-width:0"><span class="fn-n">${esc(me?p.nome:p.n)}</span><span class="fn-r">${me?'Você':esc(p.rel)+(p.age?' · '+esc(p.age):'')}</span></span>${app}${me?'':`<span class="chev">${ic('chevR',18,2)}</span>`}</button>`;}
 function meFamilia(m){const by=g=>m.fam.filter(p=>p.g===g),sp=by('sp');
  const grp=(lbl,inner)=>`<section class="fgen"><p class="eb2">${lbl}</p><div class="fgen-l">${inner}</div></section>`;
  const blocks=[by('par').length?grp('Pais',by('par').map(p=>famNode(p)).join('')):'',grp(sp.length?'Você e '+(sp[0].rel==='Esposa'?'sua esposa':sp[0].rel==='Marido'?'seu marido':'seu cônjuge'):'Você',famNode(m,true)+sp.map(p=>famNode(p)).join('')),by('kid').length?grp('Filhos',by('kid').map(p=>famNode(p)).join('')):'',by('oth').length?grp('Outros familiares',by('oth').map(p=>famNode(p)).join('')):''].filter(Boolean);
@@ -996,7 +1013,7 @@ function meCaminhada(m){const steps=[['Cadastro',1,'2019'],['Integração aceita
 V.meusDados=()=>{const m=S.me,member=S.role!=='visitante';
  if(!S.meEdit){const t=member?(S.meTab||'dados'):'dados';
   return sub('Meus dados','',`
-  <div class="mhead"><span class="avatar lg" style="${tone('ceu')}">${initials(m.nome)}</span><div class="stack" style="gap:6px;min-width:0"><span class="t3">${esc(m.nome)}</span><span class="foot">${member?`Membro desde ${m.since} · ${esc(S.church.name)}`:`Visitante · ${esc(S.church.name)}`}</span>${member?ST2('ok',m.integ):''}</div></div>
+  <div class="mhead">${pavM(m.nome,'ceu','lg')}<div class="stack" style="gap:6px;min-width:0"><span class="t3">${esc(m.nome)}</span><span class="foot">${member?`Membro desde ${m.since} · ${esc(S.church.name)}`:`Visitante · ${esc(S.church.name)}`}</span>${member?ST2('ok',m.integ):''}</div></div>
   ${member?`<div class="seg" role="tablist">${[['dados','Dados'],['familia','Família'],['caminhada','Caminhada']].map(z=>`<button role="tab" aria-selected="${t===z[0]}" data-a="meTab" data-v="${z[0]}">${z[1]}</button>`).join('')}</div>`:''}
   ${t==='familia'?meFamilia(m):t==='caminhada'?meCaminhada(m):meDados(m,member)}
   <p class="foot" style="margin:0;text-align:center">Atualizado em ${m.upd}. Só a liderança da sua igreja vê esses dados.</p>`);}
@@ -1046,7 +1063,7 @@ function careBody(inTab){const c=S.care,nx=c.next;return `${inTab===false?'':'<p
    ${c.urg==='Urgente'?`<p class="foot" style="margin:4px 0 0">Respondemos pedidos urgentes no mesmo dia. Em risco imediato, ligue 188 (CVV) ou 192 (SAMU).</p>`:''}</div>
    <button class="btn primary block" type="submit">Solicitar atendimento</button>
   </form>
-  ${nx?`<section class="stack g3"><p class="eb2">Meu próximo encontro</p><article class="ev-c es2 care1" style="--t:var(--tone-oceano)"><div class="es2-r"><span class="avatar" style="${tone('oceano')};width:44px;height:44px;font-size:14px">${initials(nx.who.replace(/^\w+\.\s/,''))}</span>
+  ${nx?`<section class="stack g3"><p class="eb2">Meu próximo encontro</p><article class="ev-c es2 care1" style="--t:var(--tone-oceano)"><div class="es2-r">${pavM(nx.who,'oceano','','width:44px;height:44px;font-size:14px')}
    <span class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><span class="ev-t">${nx.who}</span><span class="ev-m">${ic('clock',13,2)}${nx.when}<span class="ev-dot"></span>${ic(nx.remote?'monitor':'pin',13,2)}${nx.remote?'Remoto':'Presencial'}</span></span>
    ${nx.st==='aceito'?ST2('ok','Confirmado'):nx.st==='recusado'?ST2('mute','Recusado'):ST2('warn','Responda')}</div>
    ${nx.st==='pendente'?`<div class="es2-a"><button class="btn primary sm" data-a="careOk">Aceitar</button><button class="btn ghost2 sm" data-a="careNo">Recusar</button></div>`:`<p class="es2-note">${nx.st==='aceito'?'O link da chamada aparece aqui 15 minutos antes.':'Avisamos o pastor. Ele vai propor outro horário.'}</p>`}</article></section>`:''}
@@ -1194,7 +1211,7 @@ Object.assign(A,{
   meTab:v=>{S.meTab=v;softRender();},
   meOpt:(v,el)=>{const [id,o]=v.split('|');$('#'+id).value=o;$$('button',el.parentElement).forEach(b=>{const on=b===el;b.setAttribute('aria-pressed',on);b.setAttribute('aria-checked',on);});
   if(id==='mPais'){const lb=$('#f-mUf label'),ip=$('#mUf');if(lb)lb.textContent=ME_DIV[o]||'Estado';if(ip){ip.maxLength=o==='Brasil'?2:40;ip.value='';}}},
-  famOpen:v=>{const p=S.me.fam.find(x=>x.id===v);if(!p)return;sheet(`<div class="stack g5"><div class="row g4"><span class="avatar lg" style="${tone(p.tone||'ceu')}">${initials(p.n)}</span><div class="stack" style="gap:4px"><h3 class="t2">${esc(p.n)}</h3><span class="foot">${esc(p.rel)}${p.age?' · '+esc(p.age):''}</span></div></div>
+  famOpen:v=>{const p=S.me.fam.find(x=>x.id===v);if(!p)return;sheet(`<div class="stack g5"><div class="row g4">${pavM(p.n,p.tone||'ceu','lg')}<div class="stack" style="gap:4px"><h3 class="t2">${esc(p.n)}</h3><span class="foot">${esc(p.rel)}${p.age?' · '+esc(p.age):''}</span></div></div>
    <div class="kv">${meRow('Parentesco',p.rel)}${meRow('No app',p.kids?'Pelo seu cadastro (Kids)':p.rem?'Remoção em análise':p.pend?'Em análise':p.app?'Sim, tem conta própria':'Ainda não')}${p.kids?meRow('Check-in Kids','Você é responsável'):''}</div>
    ${!p.app&&!p.kids&&!p.pend?`<button class="btn primary block" data-a="famInvite" data-v="${p.id}">Convidar para o app</button>`:''}
    ${p.rem?'':`<button class="btn outline block" data-a="famDel" data-v="${p.id}">Pedir remoção do vínculo</button>`}</div>`);},
@@ -1346,7 +1363,7 @@ V.svcTeam=()=>{const x=svcEsc(),t=S.svc.team,c=k=>t.filter(p=>svcOf(p)===k).leng
   <div class="svc-sum ${ph}"><div class="row g4" style="align-items:center"><span class="ring" style="--p:${Math.round(c('ok')/t.length*100)}"><span><b style="font:700 20px/1 var(--font-display)">${c('ok')}</b><small style="display:block;font-size:10px;opacity:.7">de ${t.length}</small></span></span>
    <div class="grow stack" style="gap:6px"><span class="it-title">${ph==='antes'?'Check-in abre às '+svcHM(w.open):ph==='fim'?'Check-in encerrado às '+svcHM(w.close):'Check-in aberto até '+svcHM(w.close)}</span><div class="svc-cn"><span><b>${c('pend')}</b> sem check-in</span>${c('falta')?`<span class="falta"><b>${c('falta')}</b> ausente${c('falta')===1?'':'s'}</span>`:''}</div></div></div>
    </div>
-  <div class="stack g3"><p class="eb2">Time</p><div class="svc-list">${t.map((p,i)=>{const k=svcOf(p);return `<div class="svc-row ${k}"><span class="avatar" style="${tone(['ceu','menta','lima','damasco','vinho'][i%5])};width:40px;height:40px;font-size:13px">${initials(p.n)}</span>
+  <div class="stack g3"><p class="eb2">Time</p><div class="svc-list">${t.map((p,i)=>{const k=svcOf(p);return `<div class="svc-row ${k}">${pavM(p.n,['ceu','menta','lima','damasco','vinho'][i%5],'','width:40px;height:40px;font-size:13px')}
    <div class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(p.n.split(' ')[0])}${p.me?' <span class="it-sub">· você</span>':' '+esc(p.n.split(' ').slice(1).join(' '))}</span><span class="it-sub">${p.fn} · ${k==='ok'?(p.manual?'marcado por você'+(p.why?' · '+p.why:''):'presente · check-in '+p.ck.at):k==='falta'?'ausente':'sem check-in'}</span></div>
    ${k==='pend'?'':status(k==='ok'?'success':'danger',k==='ok'?'Presente':'Ausente')}<button type="button" class="svc-more" data-a="svcPend" data-v="${i}" aria-label="Opções para ${esc(p.n)}">${ic('dots',18,2)}</button></div>`;}).join('')}</div></div>
   <p class="foot" style="text-align:center">O check-in da pessoa já a deixa presente. Quem esqueceu, você marca aqui.</p></div>`};};
@@ -1583,7 +1600,7 @@ V.nxSeriesDetail=()=>{const s=NX_MSERIES.find(x=>x.id===S.nxSeries),tr=nxTrack(s
 S.cmts={'lesson:fund:0':[{n:'Helena Duarte',t:'A aula sobre a graça me ajudou muito.',at:'há 4 dias'}],'lesson:fund:9':[{n:'Bruno Reis',t:'Boa reflexão para o dia a dia.',at:'há 2 dias'}],'course:fund':[{n:'Helena Duarte',t:'A aula sobre a graça me ajudou muito.',at:'há 4 dias'}],'journey:Primeiros passos':[{n:'Bruno Reis',t:'Boa sequência para quem está começando.',at:'há 1 semana'}],'series:s2':[{n:'Ana Lima',t:'Cada mensagem me ajudou muito.',at:'há 2 dias'}],'sermon:pg1':[{n:'Bruno Reis',t:'Fortaleceu a minha semana.',at:'há 1 dia'}],'video:v3':[{n:'Helena Duarte',t:'Compartilhei com a minha casa.',at:'há 3 dias'}]};
 const cmtId=k=>'cmtIn_'+k.replace(/\W/g,'_');
 const cmtHtml=(k,title='Comentários')=>{const l=S.cmts[k]||(S.cmts[k]=[]);return `<section class="stack g3 cmt-m" data-k="${k}"><div class="row between" style="align-items:baseline"><p class="eb2">${title}</p><span class="foot">${l.length}</span></div>
-  ${l.length?`<div class="list">${l.map((c,i)=>`<div class="item" style="align-items:flex-start"><span class="avatar" style="${tone('ceu')};width:34px;height:34px;font-size:12px">${initials(c.n)}</span><span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(c.n)} <span class="it-sub">· ${c.at}</span></span><span class="callout" style="margin:0;white-space:normal">${esc(c.t)}</span></span>${c.me?`<button type="button" class="svc-more" data-a="cmtDelM" data-v="${k}|${i}" aria-label="Apagar meu comentário">${ic('x',16,2)}</button>`:''}</div>`).join('')}</div>`:'<p class="foot">Seja a primeira pessoa a comentar.</p>'}
+  ${l.length?`<div class="list">${l.map((c,i)=>`<div class="item" style="align-items:flex-start">${pavM(c.n,'ceu','','width:34px;height:34px;font-size:12px')}<span class="grow stack" style="gap:2px;min-width:0"><span class="it-title">${esc(c.n)} <span class="it-sub">· ${c.at}</span></span><span class="callout" style="margin:0;white-space:normal">${esc(c.t)}</span></span>${c.me?`<button type="button" class="svc-more" data-a="cmtDelM" data-v="${k}|${i}" aria-label="Apagar meu comentário">${ic('x',16,2)}</button>`:''}</div>`).join('')}</div>`:'<p class="foot">Seja a primeira pessoa a comentar.</p>'}
   ${field({id:cmtId(k),label:'Seu comentário',area:true,ph:'Escreva um comentário',max:500})}<button type="button" class="btn secondary md block" data-a="cmtAddM" data-v="${k}">Comentar</button></section>`;};
 const cmtPaintM=k=>{const el=document.querySelector(`.cmt-m[data-k="${k}"]`);if(el)el.outerHTML=cmtHtml(k,el.querySelector('.eb2').textContent);};
 Object.assign(A,{

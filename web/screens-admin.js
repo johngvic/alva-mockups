@@ -46,7 +46,7 @@ const ACOL={Excluiu:'var(--st-rec)',Editou:'var(--st-ace)',Adicionou:'var(--st-i
 const LGPD=[{id:'l1',n:'Ricardo Santos',type:'Exportação de dados',st:'concluido',d:'2026-09-10',done:'2026-09-11'},{id:'l2',n:'Fernanda Lima',type:'Exclusão de conta',st:'pendente',d:'2026-09-15'}];
 Object.assign(S,{user:null,uq:'',atab:'log',aq:'',af:'todas'});
 const uById=id=>USERS.find(u=>u.id===id),gById=id=>IGREJAS.find(g=>g.id===id);
-const uAv=(u,c='')=>`<span class="av ${c}" style="background:var(--tone-${u.tone});color:var(--tone-${u.tone}-ink)">${initials(u.n)}</span>`;
+const uAv=(u,c='')=>`${pav(u.n,u.tone,`${c}`)}`;
 const rPill=r=>`<span class="stp" style="--c:var(--${ROLES[r][0]});--b:var(--${ROLES[r][0]}-bg)"><i></i>${r}</span>`;
 const permCount=u=>AREAS_P.reduce((a,k)=>a+u.perm[k].length,0);
 const dBRs=d=>{const [y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;};
@@ -106,7 +106,7 @@ function scopeTab(owner=null){
  return `${owner?'':`<p class="fi-note">${ic('info',15)}<span>Acesso restrito a <b>uma área</b> (só o Almoxarifado, só o Louvor…): a pessoa não vê os outros módulos. Quem é <b>Admin</b> da área pode conceder Visualizar ou Editar a outros ali — nunca acima do próprio nível. O acesso global por role fica na <button class="lnk" data-a="uTab" data-v="matrix">Matriz de permissões</button>.</span></p>
  `}
  <div class="sc-g">${Object.entries(byA).map(([a,xs])=>{const canManage=!owner||xs.some(x=>x.who===owner.n&&x.perm==='Admin');const ai=(SAREAS.find(s=>s[0]===a)||[a,'layers'])[1];return `<article class="card sc-c"><div class="sc-h"><span class="sc-ai">${ic(ai,18)}</span><div class="dkt"><b>${esc(a)}</b><span>${xs.length} pessoa${xs.length>1?'s':''} com acesso${MODMIN[a]?' · Ministério: '+esc(MODMIN[a]):''}</span></div>${canManage?`<button class="ibtn sm" data-a="scNew" data-v="${esc(a)}" aria-label="Adicionar acesso em ${esc(a)}" title="Adicionar pessoa">${ic('plus',14,2.2)}</button>`:''}</div>
-  ${xs.sort((p,q)=>Object.keys(SPERM).indexOf(q.perm)-Object.keys(SPERM).indexOf(p.perm)).map(x=>`<div class="sc-r" id="${x.id}"><span class="av" style="background:var(--tone-${TONES[x.who.length%6]});color:var(--tone-${TONES[x.who.length%6]}-ink)">${initials(x.who)}</span><span class="dkt"><b>${esc(x.who)}</b><span>${SPERM[x.perm][0]}</span></span>
+  ${xs.sort((p,q)=>Object.keys(SPERM).indexOf(q.perm)-Object.keys(SPERM).indexOf(p.perm)).map(x=>`<div class="sc-r" id="${x.id}">${pav(x.who,TONES[x.who.length%6],'')}<span class="dkt"><b>${esc(x.who)}</b><span>${SPERM[x.perm][0]}</span></span>
    ${!canManage||(owner&&x.who===owner.n)?`<span class="who">${x.perm==='Visualizar'?'Ver':x.perm}</span>`:`<div class="sc-seg" role="radiogroup" aria-label="Permissão de ${esc(x.who)}">${Object.keys(SPERM).map(p=>`<button class="${x.perm===p?'on':''}" data-a="scSet" data-v="${x.id}|${p}" style="--c:${SPERM[p][2]};--b:${SPERM[p][3]}" title="${SPERM[p][0]}">${p==='Visualizar'?'Ver':p}</button>`).join('')}</div>`}
    <button class="lnk" data-a="idScopeHistory" data-v="${esc(x.who)}">Histórico</button>${!canManage||(owner&&x.who===owner.n)?'':`<button class="ibtn sm sc-x" data-a="scDel" data-v="${x.id}" aria-label="Remover acesso">${ic('x',13)}</button>`}</div>`).join('')}</article>`;}).join('')}
   ${owner?'':`<button class="cm-badd" data-a="scNew" style="min-height:180px"><span>${ic('plus',20,2)}</span><b>Adicionar acesso</b><small>Área, pessoa e nível</small></button>`}</div>`;}
@@ -205,7 +205,7 @@ function aAccess(){
 function aLgpd(){
  return `<section class="card mtab">
   <div class="trow lg thead"><span>Membro</span><span>Pedido</span><span>Status</span><span>Solicitado</span><span></span></div>
-  ${LGPD.map(x=>{const left=15+inDays(x.d);return `<div class="trow lg"><span class="tn"><span class="av" style="background:var(--tone-${x.st==='pendente'?'damasco':'ceu'});color:var(--tone-${x.st==='pendente'?'damasco':'ceu'}-ink)">${initials(x.n)}</span><span><b>${esc(x.n)}</b></span></span>
+  ${LGPD.map(x=>{const left=15+inDays(x.d);return `<div class="trow lg"><span class="tn">${pav(x.n,x.st==='pendente'?'damasco':'ceu','')}<span><b>${esc(x.n)}</b></span></span>
    <span class="lty">${ic(x.type.startsWith('Exclus')?'x':'share',14)}${x.type}</span>
    <span class="ts">${x.st==='pendente'?`<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>${left<=0?'Vence hoje':'Pendente · '+left+(left>1?' dias':' dia')}</span>`:`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Concluído</span>`}</span>
    <span class="ldt">${dBRs(x.d)}${x.done?`<small>concluído ${dBRs(x.done)}</small>`:''}</span>

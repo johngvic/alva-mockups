@@ -208,7 +208,7 @@ Object.assign(A,{dsBack:v=>dsBackForm(v)});
 const MN_POOL=[...new Set([...MEMBERS.map(x=>x.n),...HPOOL])];
 const MN_ROLES={Louvor:['Vocal','Violão','Teclado','Bateria','Baixo','Guitarra','Técnico de som'],Kids:['Professor(a)','Auxiliar','Recepção Kids','Coordenação'],Mídia:['Câmera','Transmissão','Projeção','Fotografia','Redes sociais'],Recepção:['Porta principal','Boas-vindas','Estacionamento']};
 const mnTone=n=>TONES[[...n].reduce((a,c)=>a+c.charCodeAt(0),0)%6];
-const mnAv=(n,cls='')=>`<span class="av ${cls}" style="background:var(--tone-${mnTone(n)});color:var(--tone-${mnTone(n)}-ink)">${initials(n)}</span>`;
+const mnAv=(n,cls='')=>`${pav(n,mnTone(n),`${cls}`)}`;
 function mnPpl(m){if(!m.ppl){const k=MINIS.indexOf(m),n=Math.max(4,Math.min(m.mem,14)),roles=MN_ROLES[m.n]||['Equipe','Apoio','Coordenação'];const own=MEMBERS.filter(x=>x.tit&&x.min.includes(m.n)).map(x=>x.n);const names=[m.lead,...own,...Array.from({length:HPOOL.length},(_,i)=>HPOOL[(k*5+i*3)%HPOOL.length])].filter((x,i,a)=>a.indexOf(x)===i).slice(0,n);
   m.ppl=names.map((x,i)=>({n:x,role:i===0?'Líder do ministério':roles[(i+k)%roles.length],since:['2019','2021','2022','2023','2024','2025'][(i+k)%6]}));
   m.teams.forEach((t,ti)=>{if(t.ppl)return;const ps=names.filter((x,i)=>i&&(i+ti)%Math.max(2,m.teams.length)===0).slice(0,Math.max(2,Math.min(t.m,6)));if(!names.includes(t.lead)){m.ppl.push({n:t.lead,role:'Líder de time',since:'2023'});names.push(t.lead);}t.ppl=[t.lead,...ps.filter(x=>x!==t.lead)];t.m=t.ppl.length;});m.ppl.forEach(p=>mnLinkMember(p.n,m.n,true));m.mem=m.ppl.length;}

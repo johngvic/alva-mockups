@@ -6,7 +6,7 @@ const CST={urgente:['Urgente','var(--st-rec)','var(--st-rec-bg)'],acompanhando:[
 const PASTORS=[['Pr. Rafael Pereira','ceu'],['Diác. Ana Costa','rosado'],['Pr. Marcos Lima','salvia'],['Pra. Daniela Rocha','damasco']];
 let _cid=0;
 const CS=(n,st,type,desc,resp,o={})=>({id:'c'+(++_cid),sched:o.sched||[],n,tone:o.tone||TONES[_cid%6],st,type,desc,resp,restr:!!o.restr,meets:o.meets||[],opened:o.opened||addDays(-10),resolved:o.resolved||'',vago:!!o.vago});
-const crespInner=c=>c.vago?'Sem responsável · pendente':`<span class="av" style="background:var(--tone-${pTone(c.resp)});color:var(--tone-${pTone(c.resp)}-ink)">${pInit(c.resp)}</span>${esc(c.resp)}`;
+const crespInner=c=>c.vago?'Sem responsável · pendente':`${pav(c.resp,pTone(c.resp))}${esc(c.resp)}`;
 const CASES=[
  CS('Maria Santos','urgente','Hospital','Internada no Hospital São Paulo — cirurgia programada para sexta.','Pr. Rafael Pereira',{tone:'rosado',opened:addDays(-4),meets:[{d:addDays(-1),t:'Visita no hospital. Família presente, pediu oração pela cirurgia.',result:'Combinar novo contato com a família após a cirurgia.',mode:'Presencial',time:'15:00',where:'Hospital São Paulo'},{d:addDays(-4),t:'Ligação após a internação.'}]}),
  CS('João Oliveira','acompanhando','Aconselhamento','Passando por divórcio. Terceira sessão de aconselhamento agendada.','Diác. Ana Costa',{restr:true,tone:'ceu',opened:addDays(-40),sched:[{d:addDays(5),t:'19:30',mode:'Presencial',where:'Gabinete pastoral'}],meets:[{d:addDays(-6),t:'2ª sessão de aconselhamento.'},{d:addDays(-20),t:'1ª sessão.'},{d:addDays(-40),t:'Primeira conversa após o culto.'}]}),
@@ -45,7 +45,7 @@ function cRows(){
  const l=CASES.filter(c=>(S.cf==='todos'||(S.cf==='ativos'?c.st!=='resolvido':c.st===S.cf))&&(!q||norm(c.n+' '+c.desc+' '+c.type+' '+c.resp).includes(q))).sort((a,b)=>ord[a.st]-ord[b.st]);
  if(!l.length)return `<div class="mempty"><p>Nenhum caso aqui.</p><span>${S.cf==='urgente'?'Nenhum caso urgente no momento.':'Nada corresponde a esse filtro.'}</span></div>`;
  return `<div class="clist">${l.map(c=>{const last=c.meets[0];return `<div class="crow ${c.st}" tabindex="0" data-a="cOpen" data-v="${c.id}">
-  <span class="av" style="background:var(--tone-${c.tone});color:var(--tone-${c.tone}-ink)">${initials(c.n)}</span>
+  ${pav(c.n,c.tone,'')}
   <div class="cb"><div class="c1"><b>${esc(c.n)}</b>${cPill(c)}<span class="ctype">${ic(CTYPE[c.type],14)}${c.type}</span>${c.restr?`<span class="crestr" title="Só o Administrar e os pastores escolhidos veem o caso completo">${ic('lock',12,2.2)}Restrito</span>`:''}</div>
    <p class="cdesc">${esc(c.desc)}</p>
    <div class="c3"><span class="cresp${c.vago?' vago':''}">${crespInner(c)}</span><span class="sep">·</span><span>${c.meets.length?`${c.meets.length} encontro${c.meets.length>1?'s':''} · último ${ago(last.d)}`:'<b style="color:var(--st-sol)">Nenhum encontro ainda</b>'}</span>${(c.sched||[]).length?`<span class="c-nxp">${ic('calendar',12,2)}Próximo: ${wd(c.sched[0].d).slice(0,3)}, ${fmtD(c.sched[0].d)} · ${c.sched[0].t}</span>`:''}</div></div>
@@ -57,7 +57,7 @@ function caseDetail(){
  const sch=c.sched||[];
  return `<nav class="crumb rise"><span class="soft">Cuidado</span>${ic('chevR',13,2)}<button class="lnk back" data-a="cBack">Acompanhamento</button>${ic('chevR',13,2)}<span>${esc(c.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
-  <div class="pid"><span class="av xl" style="background:var(--tone-${c.tone});color:var(--tone-${c.tone}-ink)">${initials(c.n)}</span><div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(c.n)}</h1>${cPill(c)}</div>
+  <div class="pid">${pav(c.n,c.tone,'xl')}<div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(c.n)}</h1>${cPill(c)}</div>
    <p><span class="ctype">${ic(CTYPE[c.type],14)}${c.type}</span> · aberto ${ago(c.opened)}${c.restr?` · <span class="crestr">${ic('lock',12,2.2)}Restrito</span>`:''}</p></div></div>
   <div class="pact"><button class="btn sec" data-a="cReg" data-v="${c.id}">Registrar encontro</button><button class="btn pri" data-a="cSched" data-v="${c.id}">${ic('calendar',15)}Agendar</button>
    <div style="position:relative"><button class="ibtn" data-a="cMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="cPop" style="right:0;top:calc(100% + 6px)"><button class="pi danger" data-a="cDel" data-v="${c.id}">${ic('x',17)}Excluir caso</button></div></div></div>

@@ -87,7 +87,7 @@ const hm=t=>{const [h,m]=t.split(':');return `${+h}h${m!=='00'?m:''}`;};
 const tt=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 const addD=(iso,n)=>{const d=new Date(iso+'T12:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
 const dow=iso=>new Date(iso+'T12:00').getDay();
-const avN=n=>`<span class="av" style="background:var(--tone-${TONES[n.length%6]});color:var(--tone-${TONES[n.length%6]}-ink)">${initials(n)}</span>`;
+const avN=n=>`${pav(n,TONES[n.length%6],'')}`;
 const rvEnd=r=>r.d2||r.d;
 const rvPast=r=>rvEnd(r)<NOWD||(rvEnd(r)===NOWD&&mm(r.t)<NOWM);
 const rvStarted=r=>r.d<NOWD||(r.d===NOWD&&mm(r.f)<=NOWM);

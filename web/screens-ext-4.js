@@ -112,22 +112,26 @@ seEncounters=function(k,o){
  return qdRenewFor(o.meets,{act:'seRenew',pre:seKey(k,o)+'|',title:m=>m.topic||'Encontro com os convocados'})+'<section class="card pc"><div class="sh"><h2>Encontros</h2><div class="row2"><button class="btn sec sm" data-a="seReg" data-v="'+seKey(k,o)+'">Registrar</button><button class="btn pri sm" data-a="seSched" data-v="'+seKey(k,o)+'">Agendar</button></div></div>'
   +nxEncList('Agendados',sched.map(m=>item(m,'sched')))+nxEncList('Realizados',done.map(m=>item(m,'done')))+nxEncList('Cancelados',canc.map(m=>item(m,'canc')))+'</section>';};
 {const _s=seEncounters;seEncounters=function(){return encPost(_s.apply(this,arguments));};}
-seDetail=function(){
- const k=S.seK,o=SE_O(k,S.seId);if(!o){S.seK=null;S.seId=null;return k==='net'?multiList():redesList();}
- const isNet=k==='net',pool=sePool(k,o),units=isNet?netChurches(o).length:o.casas.length,unitL=isNet?(units===1?'igreja':'igrejas'):(units===1?'casa':'casas');
- const crumb='<nav class="crumb rise" aria-label="Você está em"><span class="soft">'+(isNet?'Administração':'Comunidade')+'</span>'+ic('chevR',13,2)+'<button class="lnk back" data-a="seBack">'+(isNet?'Multi-igreja':'Redes de casa')+'</button>'+ic('chevR',13,2)+'<span>'+esc(o.n)+'</span></nav>';
- if(!seCanSee(o))return crumb+'<section class="card mempty rise"><p>Sem acesso aos encontros desta rede.</p><span>Só o supervisor e quem tem Editar ou Admin na rede veem os encontros e as respostas.</span></section>';
+function seBody(k,o){
+ if(!seCanSee(o))return '<section class="card mempty rise"><p>Sem acesso aos encontros desta rede.</p><span>Só o supervisor e quem tem Editar ou Admin na rede veem os encontros e as respostas.</span></section>';
  o.meets.forEach(m=>seInv(k,o,m));
  const done=o.meets.filter(m=>m.done&&!m.cancelled),sched=o.meets.filter(m=>!m.done&&!m.cancelled).sort((a,b)=>a.d.localeCompare(b.d)),nx=sched[0];
  const tp=done.reduce((a,m)=>a+m.inv.length,0),avg=tp?Math.round(done.reduce((a,m)=>a+m.inv.filter(x=>m.pres&&m.pres[x.n]).length,0)/tp*100):0;
  const c=nx?rsCount(nx.inv):null;
- return crumb
-  +'<header class="ph rise"><div><p class="eb">Encontros do supervisor</p><h1>'+esc(o.n)+'</h1><p class="lede">'+(o.sup?'Supervisor: '+esc(o.sup):'Sem supervisor definido')+' · '+units+' '+unitL+' · '+pool.length+' pessoas que podem ser convocadas</p></div></header>'
+ return ''
   +'<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Realizados</span><span class="kv">'+done.length+'</span><span class="kd">encontros da rede</span></div><div class="k4"><span class="kl">Agendados</span><span class="kv">'+sched.length+'</span><span class="kd">'+(nx?'próximo em '+fmtD(nx.d):'nenhum marcado')+'</span></div><div class="k4"><span class="kl">Presença média</span><span class="kv">'+(done.length?avg+'%':'—')+'</span><span class="kd">dos convocados nos encontros</span></div></section>'
   +(nx?'<section class="card pc rise se-next" style="--d:2"><div class="sh"><div><h2>Próximo encontro · respostas</h2><span class="who">'+esc(nx.topic||'Encontro com os convocados')+' · '+wd(nx.d)+', '+fmtD(nx.d)+(nx.start?' · '+nxEncTime(nx.start):'')+'</span></div><button class="btn sec sm" data-a="seInvView" data-v="'+seKey(k,o,nx)+'">Ver respostas</button></div>'
    +'<div class="se-rs"><div class="se-k ok"><b>'+c.ok+'</b><span>aceitaram</span></div><div class="se-k no"><b>'+c.no+'</b><span>recusaram</span></div><div class="se-k pe"><b>'+c.pe+'</b><span>sem resposta</span></div><div class="se-av">'+nx.inv.slice(0,8).map(x=>'<span class="se-a '+(x.r==='sim'?'ok':x.r==='nao'?'no':'pe')+'" title="'+esc(x.n+' · '+RS_L[x.r])+'">'+avN(x.n)+'</span>').join('')+(nx.inv.length>8?'<small>+'+(nx.inv.length-8)+'</small>':'')+'</div></div>'
    +'<p class="rs-note">'+ic('lock',13,2)+'Visível ao supervisor e a quem tem Editar ou Admin nesta rede.</p></section>':'')
   +'<div class="rise" style="--d:3">'+seEncounters(k,o)+'</div>';};
+seDetail=function(){
+ const k=S.seK,o=SE_O(k,S.seId);if(!o){S.seK=null;S.seId=null;return k==='net'?multiList():redesList();}
+ const isNet=k==='net',pool=sePool(k,o),units=isNet?netChurches(o).length:o.casas.length,unitL=isNet?(units===1?'igreja':'igrejas'):(units===1?'casa':'casas');
+ const crumb='<nav class="crumb rise" aria-label="Você está em"><span class="soft">'+(isNet?'Administração':'Comunidade')+'</span>'+ic('chevR',13,2)+'<button class="lnk back" data-a="seBack">'+(isNet?'Multi-igreja':'Redes de casa')+'</button>'+ic('chevR',13,2)+'<span>'+esc(o.n)+'</span></nav>';
+ if(!seCanSee(o))return crumb+'<section class="card mempty rise"><p>Sem acesso aos encontros desta rede.</p><span>Só o supervisor e quem tem Editar ou Admin na rede veem os encontros e as respostas.</span></section>';
+ return crumb
+  +'<header class="ph rise"><div><p class="eb">Encontros do supervisor</p><h1>'+esc(o.n)+'</h1><p class="lede">'+(o.sup?'Supervisor: '+esc(o.sup):'Sem supervisor definido')+' · '+units+' '+unitL+' · '+pool.length+' pessoas que podem ser convocadas</p></div></header>'
+  +seBody(k,o);};
 function seConvPicker(k,o,sel){const pool=sePool(k,o),groups={};pool.forEach(p=>{(groups[p.from]=groups[p.from]||[]).push(p);});
  const pastors=['Pr. Marcos Souza','Pr. Rafael Pereira'],extra=k==='net'||k==='min'?'':'<div class="scv-g" id="seExtra"><div class="scv-gh"><b>'+ic('users',13,2)+'Pastores e outras pessoas</b></div>'
   +pastors.map(n=>'<label class="scv-p" data-q="'+esc(norm(n+' pastor'))+'"><input type="checkbox" name="cv" value="'+esc(n)+'" data-from="Igreja" data-role="Pastor" data-lead="0"'+(sel.includes(n)?' checked':'')+'>'+avN(n)+'<span><b>'+esc(n)+'</b><small>Pastor da igreja</small></span><i class="cb">'+ic('check',12,2.8)+'</i></label>').join('')+'</div>'

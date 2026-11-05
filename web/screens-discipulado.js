@@ -16,14 +16,33 @@ const DISC=[
  DN('Lucas Mendes','d6',{rhythm:14,last:51,stage:2,paused:true,tone:'lima',notes:'Pausou por mudança de turno no trabalho. Retomar em novembro.',meets:[MT(addDays(-51),'done',{c:'Vida de oração: ACTS'})]}),
  DN('Fernanda Lima','d6',{rhythm:14,last:26,stage:6,tone:'damasco',meets:[MT(addDays(-26),'done',{c:'Missão e chamado: dons'}),MT(addDays(9),'sched',{t:'10:00'})]}),
 ];
-Object.assign(S,{disc:null,dtab:'rede',dpt:'geral',dq:'',df:'todos'});
+/* Melhoria 2 (reunião com líderes, 04/11/2026): a casa de apascentamento também é rede de discipulado.
+ * Supervisor da rede de casas → líder da casa → participantes. `sup` = rede que supervisiona, `casa` = casa que liga o vínculo,
+ * `cpart` = casa em que participa mas é discipulado por outra pessoa. */
+const _ds=(n,parent,o)=>{const d=DN(n,parent,o);DISC.push(d);return d;};
+const dMarcos=_ds('Pr. Marcos Lima','d1',{role:'Pastor',rhythm:30,last:21,tone:'salvia'});
+const dRod=_ds('Rodrigo Alves','d1',{role:'Supervisor',rhythm:14,last:9,tone:'ceu',sup:'Rede Norte'});
+const dCam=_ds('Camila Duarte','d1',{role:'Supervisor',rhythm:14,last:12,tone:'damasco',sup:'Rede Sul'});
+const dDie=_ds('Diego Martins','d1',{role:'Supervisor',rhythm:14,last:20,tone:'lima',sup:'Rede Leste/Oeste'});
+const dAnd=_ds('André Rocha',dRod.id,{role:'Líder de casa',rhythm:14,last:6,tone:'menta',casa:'Casa Norte — Lapa'});
+const dThi=_ds('Thiago Mendes',dRod.id,{role:'Líder de casa',rhythm:14,last:11,tone:'ceu',casa:'Casa Centro — República'});
+const dFer=_ds('Fernanda Alves Melo',dCam.id,{role:'Líder de casa',rhythm:14,last:8,tone:'rosado',casa:'Casa Sul — Ipiranga'});
+const dRen=_ds('Renan Ferreira',dDie.id,{role:'Líder de casa',rhythm:14,last:19,tone:'lima',casa:'Casa Leste — Tatuapé'});
+const dLar=_ds('Larissa Pinto Rocha',dDie.id,{role:'Líder de casa',rhythm:14,last:7,tone:'salvia',casa:'Casa Oeste — Pinheiros'});
+[['Cláudia Ferraz',dAnd,'Casa Norte — Lapa',5],['Henrique Costa',dAnd,'Casa Norte — Lapa',13],['Mônica Souza',dAnd,'Casa Norte — Lapa',2],['Gisele Prado',dAnd,'Casa Norte — Lapa',27],
+ ['Eduarda Lins',dThi,'Casa Centro — República',9],['Fábio Moura',dThi,'Casa Centro — República',16],
+ ['Lívia Santos',dFer,'Casa Sul — Ipiranga',4],['Mateus Leal',dFer,'Casa Sul — Ipiranga',10],['Nina Castro',dFer,'Casa Sul — Ipiranga',31],
+ ['Raul Teles',dRen,'Casa Leste — Tatuapé',6],['Sara Brito',dRen,'Casa Leste — Tatuapé',22],
+ ['Yara Mendes',dLar,'Casa Oeste — Pinheiros',3],['Zeca Arruda',dLar,'Casa Oeste — Pinheiros',12]].forEach((x,i)=>_ds(x[0],x[1].id,{rhythm:14,last:x[3],stage:i%3?0:2,casa:x[2]}));
+[['Hugo Lemos',dMarcos,'Casa Norte — Lapa',14],['Patrícia Lima',dMarcos,'Casa Norte — Lapa',8],['Beatriz Nogueira',dMarcos,'Casa Oeste — Pinheiros',17],['Caio Ramos','d2','Casa Oeste — Pinheiros',5]].forEach(x=>_ds(x[0],x[1].id||x[1],{rhythm:14,last:x[3],cpart:x[2]}));
+Object.assign(S,{disc:null,dtab:'rede',dpt:'geral',dq:'',df:'todos',dscope:'geral'});
 const dById=id=>DISC.find(x=>x.id===id);
 const kids=id=>DISC.filter(x=>x.parent===id);
 const desc=id=>kids(id).flatMap(k=>[k,...desc(k.id)]);
 const dStatus=d=>d.paused?'pausado':d.last<=d.rhythm?'emdia':'atrasado';
 const DST={emdia:['Em dia','var(--st-int)','var(--st-int-bg)'],atrasado:['Atrasado','var(--st-rec)','var(--st-rec-bg)'],pausado:['Pausado','var(--ink-muted)','var(--surface-2)']};
 const dPill=d=>{const s=DST[dStatus(d)];return `<span class="stp" style="--c:${s[1]};--b:${s[2]}"><i></i>${s[0]}</span>`;};
-const dAv=(d,c='')=>`<span class="av ${c}" style="background:var(--tone-${d.tone});color:var(--tone-${d.tone}-ink)">${initials(d.n.replace('Pr. ',''))}</span>`;
+const dAv=(d,c='')=>`${pav(d.n.replace('Pr. ',''),d.tone,`${c}`)}`;
 const first=d=>d.n.replace('Pr. ','').split(' ')[0];
 const dLbl=n=>n===0?'hoje':n===1?'ontem':`há ${n} dias`;
 const fmtD=iso=>{const [y,m,d]=iso.split('-');return `${+d} ${MONTHS[+m-1].slice(0,3)}`;};
@@ -40,15 +59,16 @@ function stageDots(d){if(!d.stage)return '';const g=dProg(d);return `<span class
 function discList(){
  const c=k=>DISC.filter(d=>dStatus(d)===k).length;
  return `<header class="ph rise"><div><p class="eb">Cuidado</p><h1>Discipulado</h1><p class="lede">Rede de discipulado, cadência de contato e encontros de acompanhamento</p></div>
-  <div class="pact">${rpBtn('discipulado','pares')}<button class="btn pri" data-a="dAdd">${ic('plus',15,2.2)}Adicionar pessoa</button></div></header>
+  <div class="pact">${rpBtn('discipulado','pares')}${msgBtn('disc|Seus discípulos|'+desc('d1').length)}<button class="btn pri" data-a="dAdd">${ic('plus',15,2.2)}Adicionar pessoa</button></div></header>
  <section class="card dsum rise" style="--d:1">
   <div class="dsn"><b>${DISC.length}</b><span>pessoas na rede</span></div>
   <div class="dsbar">${['emdia','atrasado','pausado'].map(k=>c(k)?`<i style="flex-grow:${c(k)};background:${DST[k][1]}"></i>`:'').join('')}</div>
   <div class="dsl">${['emdia','atrasado','pausado'].map(k=>`<span><i style="background:${DST[k][1]}"></i><b>${c(k)}</b> ${DST[k][0].toLowerCase()}${c(k)>1&&k!=='emdia'?'s':''}</span>`).join('')}</div>
  </section>
- <div class="utabs rise" style="--d:2" role="tablist">${[['rede','Rede'],['resumo','Resumo']].map(t=>`<button role="tab" class="${S.dtab===t[0]?'on':''}" aria-selected="${S.dtab===t[0]}" data-a="dtab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
- <div id="dbody" class="rise" style="--d:3">${S.dtab==='rede'?dRede():dResumo()}</div>`;
+ <div class="utabs rise" style="--d:2" role="tablist">${[['rede','Rede'],['resumo','Resumo'],['msg','Mensagens']].map(t=>`<button role="tab" class="${S.dtab===t[0]?'on':''}" aria-selected="${S.dtab===t[0]}" data-a="dtab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
+ <div id="dbody" class="rise" style="--d:3">${dBody()}</div>`;
 }
+const dBody=()=>S.dtab==='rede'?dRede():S.dtab==='msg'?msgTabHtml('disc'):dResumo();
 function dRede(){
  const q=norm(S.dq);const match=d=>(S.df==='todos'||dStatus(d)===S.df)&&(!q||norm(d.n).includes(q));
  const visible=d=>match(d)||desc(d.id).some(match);
@@ -57,14 +77,14 @@ function dRede(){
    <div class="drow" tabindex="0" data-a="dOpen" data-v="${d.id}">
     ${ch.length?`<button class="dtog ${d.open?'open':''}" data-a="dToggle" data-v="${d.id}" aria-label="${d.open?'Recolher':'Expandir'}" aria-expanded="${d.open}">${ic('chevR',14,2.2)}</button>`:'<span class="dtog nil"></span>'}
     ${dAv(d)}
-    <span class="dtx"><span class="dt1"><b>${d.gone?'Vaga · antes: '+esc(d.n):esc(d.n)}</b>${d.role!=='Membro'&&!d.gone?`<em class="tag">${d.role}</em>`:''}${d.gone?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Vaga</span>':dPill(d)}</span>
+    <span class="dtx"><span class="dt1"><b>${d.gone?'Vaga · antes: '+esc(d.n):esc(d.n)}</b>${d.role!=='Membro'&&!d.gone?`<em class="tag">${d.role}</em>`:''}${d.sup&&!d.gone?`<em class="tag">${esc(d.sup)}</em>`:''}${d.casa&&!d.gone?`<em class="tag">${ic('home',11,2)}${esc(d.casa)}</em>`:''}${d.gone?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Vaga</span>':dPill(d)}</span>
      <span class="dt2">${d.gone?`<span class="vac">${ic('user',13,2)}Sem discipulador${ch.length?` · ${ch.length} ${ch.length>1?'discípulos aguardam':'discípulo aguarda'}`:''}</span>`:d.stage?`${stageDots(d)}<span>${dProgTxt(d)}</span>`:`<span>${RHY[d.rhythm]}</span>`}${base?`<span class="sep">·</span><span>${base} na base</span>`:''}${d.meets.filter(m=>m.type==='done').length?`<span class="sep">·</span><span>${d.meets.filter(m=>m.type==='done').length} encontro${d.meets.filter(m=>m.type==='done').length>1?'s':''}</span>`:''}</span></span>
     <span class="dr">${d.gone?`<button class="btn sec sm" data-a="dVacant" data-v="${d.id}">Preencher a vaga</button>`:cadence(d)}${ic('chevR',16)}</span>
    </div>
    ${ch.length&&d.open?`<ul class="dkids">${ch.map(k=>node(k,depth+1)).join('')}</ul>`:''}
   </li>`;};
- const roots=DISC.filter(d=>!d.parent&&visible(d));
- return `<section class="card mtab"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="dq" placeholder="Buscar na rede" value="${esc(S.dq)}" autocomplete="off"></label>
+ const roots=S.dscope==='casas'?DISC.filter(d=>d.role==='Supervisor'&&visible(d)):DISC.filter(d=>!d.parent&&visible(d));
+ return `<section class="card mtab"><div class="tbar"><div class="chips">${[['geral','Geral',DISC.length],['casas','Casas',DISC.filter(d=>d.casa||d.role==='Supervisor').length]].map(c=>`<button class="chipf ${S.dscope===c[0]?'on':''}" data-a="dScope" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div><label class="sbox">${ic('search',16)}<input id="dq" placeholder="Buscar na rede" value="${esc(S.dq)}" autocomplete="off"></label>
   <div class="chips">${[['todos','Todos',DISC.length],['atrasado','Atrasados'],['emdia','Em dia'],['pausado','Pausados']].map(c=>`<button class="chipf ${S.df===c[0]?'on':''}" data-a="dFilter" data-v="${c[0]}">${c[0]!=='todos'?`<i style="background:${DST[c[0]][1]}"></i>`:''}${c[1]}<small>${c[2]??DISC.filter(d=>dStatus(d)===c[0]).length}</small></button>`).join('')}</div>
   <div class="tlegend"><span>Último contato</span><span class="cad"><span class="cadt"><i style="width:60%"></i></span></span><span>dentro do ritmo</span><span class="cad over"><span class="cadt"><i style="width:100%"></i></span></span><span>atrasado</span></div></div>
   ${roots.length?`<ul class="dtree">${roots.map(r=>node(r,0)).join('')}</ul>`:`<div class="mempty"><p>Ninguém por aqui.</p><span>Ninguém na rede corresponde a esse filtro.</span></div>`}
@@ -205,8 +225,9 @@ function regDlg(d,from){
 }
 
 const DA={
- dtab:v=>{S.dtab=v;$$('.utabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===v);});$('#dbody').innerHTML=v==='rede'?dRede():dResumo();discAfter();},
+ dtab:v=>{S.dtab=v;$$('.utabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===v);});$('#dbody').innerHTML=dBody();discAfter();},
  dFilter:v=>{S.df=v;$('#dbody').innerHTML=dRede();discAfter();},
+ dScope:v=>{S.dscope=v;$('#dbody').innerHTML=dRede();discAfter();},
  dVacant:(v,b,e)=>{e.stopPropagation();toast('Escolha quem entra na vaga: só quem tem Editar ou Admin em Discipulado.');},
  dToggle:(v,b,e)=>{e.stopPropagation();const d=dById(v);d.open=!d.open;$('#dbody').innerHTML=dRede();discAfter();},
  dOpen:(v,b,e)=>{if(e&&e.target.closest('.dtog'))return;S.disc=v;S.dpt='geral';closePops();render();window.scrollTo({top:0,behavior:'smooth'});},

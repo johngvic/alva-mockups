@@ -380,3 +380,6 @@ const FIA={
  
 };
 
+/* Melhoria 3 (reunião com líderes, 05/11/2026): página Mensagens do Financeiro — o mesmo componente das abas Mensagens, em nome do setor. */
+function fMsg(){return fHead('Mensagens','O que o Financeiro já mandou à igreja e o que está na fila',msgBtn('free|Financeiro|','btn pri'))+msgTabHtml('fin');}
+{const _phf=placeholder;placeholder=id=>id==='fmsg'?fMsg():_phf(id);}

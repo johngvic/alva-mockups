@@ -44,7 +44,7 @@ const icount=(g,st)=>g.ppl.filter(p=>p.st===st).length;
 const iprog=g=>g.ppl.length?Math.round(icount(g,'integrado')/g.ppl.length*100):0;
 const dBR=d=>{if(!d)return '';const [y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;};
 const dLong=d=>{if(!d)return '';const [y,m,dd]=d.split('-');return `${+dd} ${MONTHS[+m-1].slice(0,3)} ${y}`;};
-const pAv=p=>`<span class="av" style="background:var(--tone-${p.tone});color:var(--tone-${p.tone}-ink)">${initials(p.n)}</span>`;
+const pAv=p=>`${pav(p.n,p.tone,'')}`;
 const iPill=g=>g.current?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Atual</span>`:`<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Encerrada</span>`;
 
 /* ---------- list ---------- */

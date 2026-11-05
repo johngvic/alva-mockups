@@ -25,7 +25,7 @@ const sxOk=(label)=>`<button type="button" class="btn sec" data-a="closeDlg">Can
 const sxHead=(eb,t,lede,act)=>`<header class="ph rise"><div><p class="eb">${eb}</p><h1>${t}</h1><p class="lede">${lede}</p></div><div class="pact">${act||''}</div></header>`;
 const sxKpis=(l)=>`<section class="card kpis4 rise${l.length===3?' k3':''}" style="--d:1">${l.map(k=>`<div class="k4"><span class="kl">${k[0]}</span><span class="kv" ${k[3]?`style="color:${k[3]}"`:''}>${k[1]}</span><span class="kd">${k[2]}</span></div>`).join('')}</section>`;
 const sxSeg=(act,items,cur)=>`<div class="utabs rise" style="--d:2" role="tablist">${items.map(t=>`<button role="tab" class="${cur===t[0]?'on':''}" aria-selected="${cur===t[0]}" data-a="${act}" data-v="${t[0]}">${t[1]}${t[2]!==undefined?`<small class="cnt">${t[2]}</small>`:''}</button>`).join('')}</div>`;
-const sxAv=n=>`<span class="av" style="background:var(--tone-${TONES[n.length%6]});color:var(--tone-${TONES[n.length%6]}-ink)">${initials(n)}</span>`;
+const sxAv=n=>`${pav(n,TONES[n.length%6],'')}`;
 const sxPill=(t,c,b)=>`<span class="stp" style="--c:${c};--b:${b}"><i></i>${t}</span>`;
 const sxOpenMember=id=>{closeDlg();S.member=id;S.tab='geral';S.active='membros';render();window.scrollTo(0,0);};
 Object.assign(S,{sxSit:'todas',sxAto:'todos',sxDocT:'emitidos',sxArq:'todas',sxArqQ:'',sxCg:'mandatos',sxRel:'mov',sxMes:'10',sxDi:'todos',sxIc:'2026'});
@@ -33,7 +33,7 @@ Object.assign(S,{sxSit:'todas',sxAto:'todos',sxDocT:'emitidos',sxArq:'todas',sxA
 /* ---------- permissões e menu ---------- */
 (()=>{
  const g=NAV.find(x=>x[0]==='Gestão')[1];
- g.unshift(['secretaria','file','Secretaria',[['sec-vis','Visão geral'],['sec-atos','Atos'],['sec-docs','Documentos'],['sec-cargos','Cargos e mandatos'],['sec-ana','Análises']]]);
+ g.unshift(['secretaria','file','Secretaria',[['sec-vis','Visão geral'],['sec-atos','Atos'],['sec-docs','Documentos'],['sec-cargos','Cargos e mandatos'],['sec-ana','Análises'],['sec-msg','Mensagens']]]);
  NAV.find(x=>x[0]==='Geral')[1].find(n=>n[0]==='cuidado')[3].push(['disciplina','Disciplina']);
  SAREAS.push(['Secretaria','file']);
  ['Secretaria','Disciplina'].forEach(k=>MODS.push(k));
@@ -632,7 +632,8 @@ Object.assign(A,{
 {const _fr=fRel;fRel=()=>_fr().replace('<h1>Relatórios</h1>','<h1>Análises</h1>').replace('DRE por categoria e fluxo de caixa','DRE, fluxo de caixa e informe de contribuições')}
 
 /* ---------- ligações e eventos ---------- */
-{const _ph=placeholder;placeholder=id=>{const f={'sec-vis':secVis,'sec-atos':secAtos,'sec-docs':secDocs,'sec-cargos':secCargos,'sec-ana':secAna,disciplina:discPage}[id];return f?f():_ph(id);};}
+function secMsg(){return sxHead('Secretaria','Mensagens','O que a Secretaria já mandou aos membros e o que está na fila',msgBtn('free|Secretaria|','btn pri'))+msgTabHtml('sec');}
+{const _ph=placeholder;placeholder=id=>{const f={'sec-msg':secMsg,'sec-vis':secVis,'sec-atos':secAtos,'sec-docs':secDocs,'sec-cargos':secCargos,'sec-ana':secAna,disciplina:discPage}[id];return f?f():_ph(id);};}
 document.addEventListener('input',e=>{const t=e.target,k=t&&t.dataset&&t.dataset.scq;if(!k)return;
  if(k==='doc'){S.sxDocQ=t.value;$('#sxDl').innerHTML=sxDocList();}
  else if(k==='arq'){S.sxArqQ=t.value;$('#sxAl').innerHTML=sxArqList();}

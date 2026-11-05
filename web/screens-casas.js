@@ -17,6 +17,8 @@ const CASAS=[
  mkCasa('Casa Oeste — Pinheiros','Larissa Pinto Rocha','Marcelo Rocha',20,35,'2026-09-14',{tone:'rosado',addr:'Rua dos Pinheiros, 870 — Pinheiros, São Paulo/SP',phone:'(11) 97700-4411',rate:8.1}),
  mkCasa('Casa Centro — República','Thiago Mendes','Ana Mendes',9,15,'2026-09-10',{tone:'salvia',addr:'Av. Ipiranga, 200 — República, São Paulo/SP',rate:6.9}),
 ];
+/* Melhoria 4: tags nas casas (mock) */
+[[],['Casais'],['Connect','Jovens'],['Mulheres'],['Homens']].forEach((t,i)=>{if(CASAS[i])CASAS[i].tags=t;});
 Object.assign(S,{casa:null,ctab:'geral',chamada:null,hq:'',hmin:'todos',hedit:null});
 const hById=id=>CASAS.find(c=>c.id===id);
 const mRate=(c,m)=>{const t=c.ppl.length;return t?Math.round(c.ppl.filter(p=>m.pres[p.id]).length/t*100):0;};
@@ -24,7 +26,7 @@ const cRate=c=>{const ms=c.meets.filter(m=>m.done).slice(0,4);return ms.length?M
 const cPrev=c=>{const ms=c.meets.filter(m=>m.done).slice(4,8);return ms.length?Math.round(ms.reduce((a,m)=>a+mRate(c,m),0)/ms.length):0;};
 const lastMeet=c=>c.meets.filter(m=>m.done)[0];
 const hTile=(c,s=38)=>`<span class="htile" style="--s:${s}px;background:var(--tone-${c.tone});color:var(--tone-${c.tone}-ink)">${ic('home',Math.round(s*.47),1.9)}</span>`;
-const pv=p=>`<span class="av" style="background:var(--tone-${p.tone});color:var(--tone-${p.tone}-ink)">${initials(p.n)}</span>`;
+const pv=p=>`${pav(p.n,p.tone,'')}`;
 const dmy=iso=>{const [y,m,d]=iso.split('-');return `${d}/${m}/${y}`;};
 function spark6(c){const ms=c.meets.filter(m=>m.done).slice(0,6).reverse();return `<span class="hspark" title="Presença nos últimos ${ms.length} encontros">${ms.map(m=>{const r=mRate(c,m);return `<i style="height:${Math.max(12,r)}%" title="${fmtD(m.d)}: ${r}%"></i>`;}).join('')}</span>`;}
 
@@ -42,18 +44,18 @@ function casasList(){
   <div class="k4"><span class="kl">Presença média</span><span class="kv">${avg}%</span><span class="kd ${avg>=prev?'up':''}">${avg>=prev?'+':''}${avg-prev} p.p. vs. 4 anteriores</span></div>
  </section>
  <section class="card mtab rise" style="--d:2">
-  <div class="tbar"><label class="sbox">${ic('search',16)}<input id="hq" placeholder="Buscar por casa, líder ou bairro" value="${esc(S.hq)}" autocomplete="off"></label>
+  <div class="tbar"><label class="sbox">${ic('search',16)}<input id="hq" placeholder="Buscar por casa, líder, bairro ou tag" value="${esc(S.hq)}" autocomplete="off"></label>
    <div style="position:relative"><button class="btn sec sel" data-a="hminMenu">${S.hmin==='todos'?'Todos os ministérios':S.hmin==='geral'?'Casas gerais':S.hmin}${ic('updown',14)}</button>
     <div class="pop" id="hminPop" style="left:0;top:calc(100% + 6px)">${[['todos','Todos os ministérios'],['geral','Casas gerais (sem ministério)'],...HMIN.map(m=>[m,m])].map(o=>`<button class="pi" data-a="hMin" data-v="${o[0]}">${o[1]}${S.hmin===o[0]?`<span class="ck">${ic('check',16,2.25)}</span>`:''}</button>`).join('')}</div></div></div>
   <div id="hrows">${hRows()}</div>
  </section>`;
 }
 function hRows(){
- const q=norm(S.hq);const l=CASAS.filter(c=>(S.hmin==='todos'||(S.hmin==='geral'?!c.min:c.min===S.hmin))&&(!q||norm(c.n+' '+c.leaders.join(' ')+' '+c.addr).includes(q)));
+ const q=norm(S.hq);const l=CASAS.filter(c=>(S.hmin==='todos'||(S.hmin==='geral'?!c.min:c.min===S.hmin))&&(!q||norm(c.n+' '+c.leaders.join(' ')+' '+c.addr+' '+(c.tags||[]).join(' ')).includes(q)));
  if(!l.length)return `<div class="mempty"><p>Nenhuma casa encontrada.</p><span>Tente outro termo ou ministério.</span></div>`;
  return `<div class="trow hs thead"><span>Casa</span><span>Líder</span><span>Participantes</span><span>Presença</span><span>Último encontro</span><span></span></div>
  ${l.map(c=>{const lm=lastMeet(c),ago_=lm?-inDays(lm.d):0,r=cRate(c);return `<div class="trow hs" tabindex="0" data-a="hOpen" data-v="${c.id}">
-  <span class="tn">${hTile(c)}<span class="hn"><b>${esc(c.n)}</b>${c.min?`<span>Ministério de ${c.min}</span>`:`<span>${esc(c.addr.split('— ')[1]||'')}</span>`}</span></span>
+  <span class="tn">${hTile(c)}<span class="hn"><b>${esc(c.n)}</b>${c.min?`<span>Ministério de ${c.min}</span>`:`<span>${esc(c.addr.split('— ')[1]||'')}</span>`}${(c.tags||[]).length?`<span class="hnt">${c.tags.map(t=>`<button type="button" class="tag tg" data-a="hTagF" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</span>`:''}</span></span>
   <span class="hl">${pv({n:c.leader,tone:c.tone})}${esc(c.leader)}${c.leaders.length>1?` <small class="soft">+${c.leaders.length-1}</small>`:''}</span>
   <span class="hp"><b>${c.ppl.length}</b>${caFull(c)?'<em class="tag warn">Lotada</em>':''}${c.req.length?`<em class="tag warn">+${c.req.length} pedido${c.req.length>1?'s':''}</em>`:''}</span>
   <span class="hr">${spark6(c)}<b>${r}%</b></span>
@@ -68,18 +70,30 @@ function casaDetail(){
  const lm=lastMeet(c),r=cRate(c),pr=cPrev(c);
  return `<nav class="crumb rise"><span class="soft">Comunidade</span>${ic('chevR',13,2)}<button class="lnk back" data-a="hBack">Casas de Apascentamento</button>${ic('chevR',13,2)}<span>${esc(c.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
-  <div class="pid">${hTile(c,64)}<div class="pn"><h1>${esc(c.n)}</h1><p>${c.leaders.length>1?'Líderes: ':'Líder: '}${c.leaders.map(esc).join(' e ')} · ${c.ppl.length} participantes${c.max?' · '+c.max+' vagas'+(caFull(c)?' (lotada)':''):''}${c.min?` · Ministério de ${c.min}`:''}</p></div></div>
-  <div class="pact">${rpBtn('casas','presenca')}
+  <div class="pid">${hTile(c,64)}<div class="pn"><h1>${esc(c.n)}</h1>${(c.tags||[]).length?`<div class="ca-tgs">${c.tags.map(t=>`<em class="tag">${esc(t)}</em>`).join('')}</div>`:''}<p>${c.leaders.length>1?'Líderes: ':'Líder: '}${c.leaders.map(esc).join(' e ')} · ${c.ppl.length} participantes${c.max?' · '+c.max+' vagas'+(caFull(c)?' (lotada)':''):''}${c.min?` · Ministério de ${c.min}`:''}</p></div></div>
+  <div class="pact">${rpBtn('casas','presenca')}${msgBtn('casa|'+c.n+'|'+c.ppl.length)}
    <div style="position:relative"><button class="ibtn" data-a="hMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="hPop" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="hRules">${ic('sliders',17)}Regras da casa</button><hr><button class="pi danger" data-a="hDel">${ic('x',17)}Excluir casa</button></div></div></div>
   <div class="ikpi hk">
    <div><b>${c.ppl.length}</b><span>Participantes</span></div><div><b>${c.total}</b><span>Encontros</span></div>
    <div><b>${r}%</b><span>Presença média <em class="${r>=pr?'up':'dn'}">${r>=pr?'↑':'↓'} ${Math.abs(r-pr)} p.p.</em></span></div><div><b>${lm?fmtD(lm.d):'—'}</b><span>Último encontro</span></div>
   </div>
-  <div class="ptabs" role="tablist">${[['geral','Visão geral'],['part','Participantes'],['enc','Encontros']].map(t=>`<button role="tab" class="${S.ctab===t[0]?'on':''}" data-a="hTab" data-v="${t[0]}">${t[1]}${t[0]==='part'&&c.req.length?`<small class="warn">${c.req.length}</small>`:''}</button>`).join('')}<button role="tab" class="${S.ctab==='hist'?'on':''}" data-a="hTab" data-v="hist">Histórico</button><span class="tind"></span></div>
+  <div class="ptabs" role="tablist">${[['geral','Visão geral'],['part','Participantes'],['enc','Encontros'],['disc','Discipulado'],['msg','Mensagens']].map(t=>`<button role="tab" class="${S.ctab===t[0]?'on':''}" data-a="hTab" data-v="${t[0]}">${t[1]}${t[0]==='part'&&c.req.length?`<small class="warn">${c.req.length}</small>`:''}</button>`).join('')}<button role="tab" class="${S.ctab==='hist'?'on':''}" data-a="hTab" data-v="hist">Histórico</button><span class="tind"></span></div>
  </header>
  <div id="htb" class="rise" style="--d:2">${hTabBody(c)}</div>`;
 }
-function hTabBody(c){if(S.ctab==='hist'&&!S.chamada)return caHist(c);if(S.ctab==='enc'&&S.chamada)return hChamada(c);return ({geral:hGeral,part:hPart,enc:hEnc})[S.ctab](c);}
+function hTabBody(c){if(S.ctab==='hist'&&!S.chamada)return caHist(c);if(S.ctab==='enc'&&S.chamada)return hChamada(c);return ({geral:hGeral,part:hPart,enc:hEnc,disc:hDisc,msg:c=>msgTabHtml('casa')})[S.ctab](c);}
+/* Melhoria 2: aba Discipulado da casa. Mostra o recorte da rede discipular: supervisor → líder → discípulos da casa; embaixo, quem participa da casa mas é discipulado por outra pessoa. */
+function hDisc(c){
+ const lead=DISC.find(d=>d.casa===c.n&&/^Líder/.test(d.role)),rede=casaRede(c.id),sup=rede&&DISC.find(d=>d.role==='Supervisor'&&d.sup===rede.n);
+ const mine=lead?kids(lead.id).filter(d=>d.casa===c.n):[],others=DISC.filter(d=>d.cpart===c.n);
+ const li=(d,dep,inner,open)=>`<li class="dn" style="--dep:${dep}"><div class="drow${open?' dlink':''}"${open?` tabindex="0" data-a="hDiscOpen" data-v="${d.id}"`:''}><span class="dtog nil"></span>${dAv(d)}<span class="dtx"><span class="dt1"><b>${esc(d.n)}</b>${d.role!=='Membro'?`<em class="tag">${d.role}</em>`:''}${d.sup?`<em class="tag">${esc(d.sup)}</em>`:''}${dPill(d)}</span><span class="dt2"><span>${RHY[d.rhythm]}</span></span></span><span class="dr">${cadence(d)}</span></div>${inner?`<ul class="dkids">${inner}</ul>`:''}</li>`;
+ const leaf=mine.map(d=>li(d,2,'',true)).join(''),mid=lead?li(lead,sup?1:0,leaf):'',top=sup&&lead?li(sup,0,mid):mid;
+ return `<section class="card mtab rise" style="--d:2"><div class="sh"><h2>Discipulado da casa</h2><span class="soft">${mine.length} ${mine.length===1?'discípulo':'discípulos'}</span></div>
+  ${top?`<ul class="dtree">${top}</ul>`:`<div class="mempty"><p>Nenhum discípulo ligado a esta casa.</p><span>Quem entra na casa sem discipulador passa a ser discipulado pelo líder.</span></div>`}
+ </section>
+ ${others.length?`<section class="card mtab rise" style="--d:3"><div class="sh"><h2>Participantes discipulados por outra pessoa</h2><span class="soft">${others.length}</span></div>
+  <ul class="dtree">${others.map(d=>`<li class="dn dim" style="--dep:0"><div class="drow"><span class="dtog nil"></span>${dAv(d)}<span class="dtx"><span class="dt1"><b>${esc(d.n)}</b></span><span class="dt2"><span>Discipulado por ${esc(dById(d.parent).n)}</span></span></span></div></li>`).join('')}</ul></section>`:''}`;
+}
 function caHist(c){
  const ev=[];c.meets.filter(m=>m.done).slice(0,4).forEach(m=>{const n=c.ppl.filter(p=>m.pres[p.id]).length;ev.push([m.d,'Encontro realizado e chamada registrada',n+' de '+c.ppl.length+' presentes','por '+c.leader]);});
  c.meets.filter(m=>m.series&&!m.done).slice(0,1).forEach(m=>ev.push(['2026-09-28','Série de encontros criada','Toda semana, até '+fmtD(c.meets.filter(x=>x.series===m.series).map(x=>x.d).sort().pop()),'por '+c.leader]));
@@ -116,7 +130,8 @@ function hGeral(c){
  const min=caSec('min','Ministério responsável',`<dl class="kv grid2"><div><dt>Ministério</dt><dd>${c.min?esc('Ministério de '+c.min):'<span class="soft">Nenhum — casa geral da igreja</span>'}</dd></div></dl>`,
   `<label class="fld wide"><span class="fl">Ministério</span><span class="selw"><select name="min"><option value="">Nenhum — casa geral da igreja</option>${HMIN.map(m=>`<option ${m===c.min?'selected':''}>${m}</option>`).join('')}</select>${ic('updown',14)}</span><span class="hint">Diz para qual público a casa é voltada e ajuda a filtrar a lista.</span></label>`);
  const des=caSec('desc','Descrição',`<p class="ca-desc">${c.desc?esc(c.desc):'<span class="soft">Sem descrição</span>'}</p>`,`<label class="fld wide"><span class="fl">Descrição <small>opcional</small></span><textarea class="ta" name="desc" rows="3" maxlength="500" placeholder="Para quem é a casa, como são os encontros">${esc(c.desc||'')}</textarea></label>`);
- return `<div class="pgrid"><div class="col">${des}${lid}${loc}${min}</div>
+ const tgs=caSec('tags','Tags',`<div class="ca-tgs">${(c.tags||[]).map(t=>`<em class="tag">${esc(t)}</em>`).join('')||'<span class="soft">Sem tags</span>'}</div>`,`<div class="fld wide"><span class="fl">Tags <small>opcional</small></span><div class="ca-tgin" id="caTg">${(c.tags||[]).map(t=>`<span class="tag tg">${esc(t)}<input type="hidden" name="tags" value="${esc(t)}"><button type="button" data-a="caTagDel" aria-label="Remover ${esc(t)}">${ic('x',11,2.4)}</button></span>`).join('')}<input id="caTgI" placeholder="Digite e toque em +" maxlength="30" autocomplete="off"><button type="button" class="btn sec sm" data-a="caTagAdd">${ic('plus',14,2.2)}Adicionar</button></div><span class="hint">Ajudam a achar a casa na busca: Connect, Jovens, Mulheres, Homens...</span></div>`);
+ return `<div class="pgrid"><div class="col">${des}${lid}${loc}${min}${tgs}</div>
   <div class="col"><section class="card pc"><div class="sh"><h2>Presença</h2><span class="who">últimos ${ms.length} encontros</span></div>
    <div class="hbars">${ms.map(m=>{const r=mRate(c,m);return `<div class="hb" title="${fmtD(m.d)}: ${c.ppl.filter(p=>m.pres[p.id]).length} de ${c.ppl.length}"><span class="hbv">${r}%</span><span class="hbt"><i style="height:${r}%"></i></span><span class="hbl">${fmtD(m.d)}</span></div>`;}).join('')}</div>
    <p class="who" style="margin:14px 0 0">Média de <b>${cRate(c)}%</b> nos últimos 4 encontros${c.req.length?` · <button class="lnk inl" data-a="hTab" data-v="part">${c.req.length} ${c.req.length>1?'pedidos':'pedido'} para entrar</button>`:''}</p></section>
@@ -130,8 +145,9 @@ function caSave(e){e.preventDefault();const f=e.target,k=f.dataset.hsec2,c=hById
   sel.forEach(n=>{add(n,'Líder').role='Líder';});if(!sel.includes(host))add(host,'Anfitrião').role='Anfitrião';c.leaders=sel;c.leader=sel[0];c.host=host;}
  if(k==='loc'){const a=caAddrCheck(f,'ad',bad);if(!a)return;c.a=a;caSync(c);c.phone=fd.get('phone')||'';}
  if(k==='min')c.min=fd.get('min')||'';
+ if(k==='tags')c.tags=fd.getAll('tags');
  if(k==='desc')c.desc=(fd.get('desc')||'').trim();
- S.hedit=null;render();toast({lid:'Liderança atualizada',loc:'Local e contato atualizados',min:'Ministério atualizado',desc:'Descrição atualizada'}[k]);}
+ S.hedit=null;render();toast({lid:'Liderança atualizada',loc:'Local e contato atualizados',min:'Ministério atualizado',desc:'Descrição atualizada',tags:'Tags atualizadas'}[k]);}
 function hPart(c){
  const l4=c.meets.filter(m=>m.done).slice(0,6).reverse();const ord={'Líder':0,'Anfitrião':1,'Participante':2};
  return `${c.req.length?`<section class="card pc reqs"><div class="sh"><h2>Pedidos para entrar</h2><span class="who">${c.req.length}</span></div>${c.req.map((r,i)=>`<div class="req">${pv(r)}<span class="rq"><b>${esc(r.n)}</b><span>pediu pelo app em ${dmy(r.d)}</span></span><button class="btn ghostd sm" data-a="hReject" data-v="${i}">Recusar</button><button class="btn pri sm" data-a="hAccept" data-v="${i}">Aceitar</button></div>`).join('')}</section>`:''}
@@ -187,7 +203,11 @@ const HA={
  hMenu:()=>{const p=$('#hPop');closePops(p);p.classList.toggle('open');},
  hOpen:v=>{S.casa=v;S.ctab='geral';S.chamada=null;S.hedit=null;render();window.scrollTo({top:0});},
  hBack:()=>{S.casa=null;render();},
+ hDiscOpen:v=>{S.active='discipulado';S.disc=v;S.dpt='geral';closePops();render();window.scrollTo({top:0});},
  hTab:v=>{S.ctab=v;S.chamada=null;S.hedit=null;reH();},
+ hTagF:v=>{S.hq=v;render();},
+ caTagAdd:(v,b)=>{const f=b.closest('form'),i=f.querySelector('#caTgI'),t=i.value.trim();if(!t)return;const w=f.querySelector('#caTg');if([...w.querySelectorAll('[name=tags]')].some(x=>norm(x.value)===norm(t))){i.value='';return;}const s=document.createElement('span');s.className='tag tg';s.innerHTML=esc(t)+'<input type="hidden" name="tags" value="'+esc(t)+'"><button type="button" data-a="caTagDel" aria-label="Remover '+esc(t)+'">'+ic('x',11,2.4)+'</button>';w.insertBefore(s,i);i.value='';i.focus();},
+ caTagDel:(v,b)=>{b.closest('.tag').remove();},
  hEdit:v=>{S.hedit=v;reH();},
  hCancel:()=>{S.hedit=null;reH();},
  hCall:v=>{S.chamada=v;reH();$('#htb').scrollIntoView({behavior:'smooth',block:'start'});},
@@ -215,6 +235,7 @@ const HA={
    ${caAddrFields({pais:'BR',uf:'SP'},'ad')}
    <label class="fld"><span class="fl">Telefone <small>opcional</small></span><input name="phone" type="tel" inputmode="tel" placeholder="(11) 90000-0000" autocomplete="off"></label>
    <label class="fld"><span class="fl">Ministério <small>opcional</small></span><span class="selw"><select name="min"><option value="">Nenhum — casa geral</option>${HMIN.map(m=>`<option>${m}</option>`).join('')}</select>${ic('updown',14)}</span></label>
+    <div class="fld wide"><span class="fl">Tags <small>opcional</small></span><div class="ca-tgin" id="caTg"><input id="caTgI" placeholder="Digite e toque em +" maxlength="30" autocomplete="off"><button type="button" class="btn sec sm" data-a="caTagAdd">${ic('plus',14,2.2)}Adicionar</button></div><span class="hint">Ajudam a achar a casa na busca: Connect, Jovens, Mulheres, Homens...</span></div>
    <p class="hint wide" style="margin:-6px 0 0">O mapa localiza a casa a partir do endereço. O endereço completo só aparece para quem for aceito na casa.</p>
    <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Criar casa</button></div></form>`,'lg');
  const f=$('#haF'),bad=caBad(f),ph=f.elements.phone;ph.addEventListener('input',()=>{let d=ph.value.replace(/\D/g,'').slice(0,11);ph.value=d.length>6?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:d.length>2?`(${d.slice(0,2)}) ${d.slice(2)}`:d;});
@@ -224,7 +245,7 @@ const HA={
   if(!sel.length){const fl=f.querySelector('.cpick').closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Escolha ao menos um líder';return;}
   const a=caAddrCheck(f,'ad',bad);if(!a)return;
   const b=f.querySelector('[type=submit]');b.classList.add('busy');
-  setTimeout(()=>{const host=fd.get('host'),c=mkCasa(n,sel[0],host,2,0,TODAY.toISOString().slice(0,10),{addr:caAddrStr(a),phone:fd.get('phone'),min:fd.get('min')});c.meets=[];c.total=0;
+  setTimeout(()=>{const host=fd.get('host'),c=mkCasa(n,sel[0],host,2,0,TODAY.toISOString().slice(0,10),{addr:caAddrStr(a),phone:fd.get('phone'),min:fd.get('min')});c.tags=fd.getAll('tags');c.meets=[];c.total=0;
    c.a=a;c.desc=(fd.get('desc')||'').trim();c.late=14;c.max=null;c.leaders=sel;
    c.ppl=c.ppl.filter((p,i)=>!(i===1&&host===sel[0]));c.ppl[0].role='Líder';if(host!==sel[0]&&!sel.includes(host)){const h=c.ppl.find(p=>p.n===host);if(h)h.role='Anfitrião';}
    sel.slice(1).forEach(x=>{const p=c.ppl.find(q=>q.n===x);if(p)p.role='Líder';else c.ppl.push({id:c.id+'p'+Date.now()+x.length,n:x,tone:caTone(x),role:'Líder',since:'set/2026'});});

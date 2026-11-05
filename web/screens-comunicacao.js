@@ -327,7 +327,40 @@ function cmAfter(){
  if(S.active==='push')puAfter();
 }
 const cmRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
+/* ---------- Melhoria 3 (reunião com líderes, 04/11/2026): líder envia mensagem aos liderados ----------
+ * O envio é composição, como os Relatórios: cada tela dona do público tem o botão "Enviar mensagem" (modal) e, onde há ficha, a aba "Mensagens".
+ * O protótipo só mostra o que existe; não simula limite, permissão nem fila. */
+const msgBtn=(k,cls='btn sec')=>`<button class="${cls}" data-a="msgNew" data-v="${esc(k)}">${ic('mail',15)}Enviar mensagem</button>`;
+const MSG_TXT={
+ casa:{p:[['Encontro de quinta muda de horário','O encontro desta semana será às 20h, na casa do anfitrião. Confirme sua presença no app.','Push e e-mail','sex, 6 nov · 18h',18]],
+  s:[['Estudo da semana','Leia o capítulo 3 de Gálatas antes do nosso encontro. Vamos conversar sobre os frutos do Espírito.','Push','qui, 29 out · 09h',17,1,'sem aparelho'],['Lanche coletivo','Cada um leva algo para o lanche de quinta. Combinem pelo grupo.','Push e e-mail','ter, 20 out · 10h',18,0,''],['Casa fechada na semana do feriado','Na semana do feriado não teremos encontro. Voltamos no dia 5.','Push','seg, 12 out · 08h',16,2,'canal desligado']]},
+ rede:{p:[],s:[['Reunião de líderes','Reunião dos líderes da rede na segunda, às 19h30, na sede. Tragam as dúvidas das casas.','Push e e-mail','qua, 28 out · 15h',9,0,''],['Ajuste no cronograma de visitas','As visitas às casas começam na próxima semana. O supervisor passa o roteiro.','Push','seg, 19 out · 11h',9,1,'sem aparelho']]},
+ mini:{p:[['Escala do domingo','A escala de domingo foi publicada. Confirmem até sexta, por favor.','Push','qui, 5 nov · 18h',12]],
+  s:[['Ensaio extra','Teremos ensaio extra na sexta, às 20h. Presença de todos.','Push e e-mail','qua, 28 out · 16h',11,1,'sem e-mail'],['Obrigado pelo fim de semana','Obrigado pelo serviço no evento. Foi lindo ver todos juntos.','Push','seg, 26 out · 09h',12,0,'']]},
+ evento:{p:[],s:[['Mudança de local','A programação de sábado agora acontece no auditório principal. Entrada pela portaria da frente.','Push e e-mail','ter, 27 out · 17h',86,4,'sem aparelho'],['Falta pouco!','Faltam poucos dias para o evento. Leve o seu QR Code de entrada.','Push','qua, 21 out · 10h',90,0,'']]},
+ escala:{p:[['Chegada antecipada','Quem está escalado no domingo chega 30 minutos antes para a passagem de som.','Push','sex, 6 nov · 16h',8]],
+  s:[['Escala aprovada','A escala do mês foi aprovada. Confira seus dias no app.','Push e e-mail','seg, 2 nov · 10h',8,0,'']]},
+ disc:{p:[],s:[['Encontro de oração','Quinta, às 6h, teremos um encontro de oração com os discípulos. Quem puder, venha.','Push','qua, 28 out · 12h',12,2,'sem aparelho'],['Material novo','Deixei um estudo novo na sua trilha. Leia antes do nosso próximo encontro.','Push e e-mail','sex, 16 out · 09h',12,0,'']]},
+ fin:{p:[['Prestação de contas da campanha','Já está no app a prestação de contas da campanha da reforma. Obrigado por contribuir.','Push e e-mail','sex, 6 nov · 10h',412]],
+  s:[['Prazo do reembolso de despesas','Quem tem despesa para reembolso envia o comprovante até o dia 10.','Push','qui, 29 out · 09h',38,0,''],['Obrigado pela generosidade','Obrigado pelas ofertas e dízimos de setembro. O balanço do mês está no app.','Push e e-mail','seg, 5 out · 08h',405,12,'sem aparelho']]},
+ sec:{p:[],s:[['Atualize o seu cadastro','Confira os seus dados no app. A secretaria precisa do seu telefone e endereço atuais.','Push e e-mail','ter, 27 out · 10h',380,9,'sem aparelho'],['Aniversariantes de novembro','Parabéns aos aniversariantes de novembro! Que Deus abençoe o novo ano de vida de vocês.','Push','sex, 30 out · 09h',402,0,'']]}
+};
+function msgTabHtml(kind){const d=MSG_TXT[kind]||MSG_TXT.casa,who=ME.n;
+ const row=(m,pend)=>`<li class="msg-r"><span class="msg-ic ${pend?'p':''}">${ic(pend?'clock':'check',15,2)}</span><div class="msg-tx"><b>${esc(m[0])}</b><p>${esc(m[1])}</p><small>${m[2]} · ${pend?'agendada para '+m[3]:m[3]} · por ${esc(who)}</small></div><div class="msg-st">${pend?`<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Agendada</span><button class="btn sec sm" type="button">Cancelar</button>`:`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Enviada</span><small>${m[4]} receberam${m[5]?` · ${m[5]} ignorado${m[5]>1?'s':''} (${m[6]})`:''}</small>`}</div></li>`;
+ return `<section class="card mtab rise" style="--d:2"><div class="sh"><h2>Pendentes</h2><span class="soft">${d.p.length}</span></div>
+  ${d.p.length?`<ul class="msg-l">${d.p.map(m=>row(m,true)).join('')}</ul>`:`<div class="mempty"><p>Nenhuma mensagem pendente.</p><span>As mensagens agendadas e na fila aparecem aqui até serem enviadas.</span></div>`}</section>
+ <section class="card mtab rise" style="--d:3"><div class="sh"><h2>Enviadas</h2><span class="soft">${d.s.length}</span></div>
+  ${d.s.length?`<ul class="msg-l">${d.s.map(m=>row(m,false)).join('')}</ul>`:`<div class="mempty"><p>Nada enviado ainda.</p></div>`}</section>`;}
 const CMA={
+ msgNew:v=>{const [kind,label,n]=v.split('|'),free=kind==='free',ttl=free?'Quem recebe':'Para quem vai';
+  openDlg(`${dlgHead('Enviar mensagem',free?esc(label)+': escolha quem recebe':'Para '+esc(label))}<form id="msgF" class="fgrid one" novalidate>
+   ${free?`<label class="fld"><span class="fl">${ttl}</span><span class="selw"><select>${SEGS.slice(0,4).map(s=>`<option>${esc(s[1])}</option>`).join('')}<option>Pessoas escolhidas…</option></select>${ic('updown',14)}</span></label>`:`<div class="cm-reach in">${ic('users',14)}<b>${n}</b><span>pessoas vão receber · o público é o desta tela</span></div>`}
+   <div class="fld"><span class="fl">Enviar por</span><div class="cm-chpick">${[['push','Push no app','bell'],['email','E-mail','mail']].map(c=>`<label><input type="checkbox" checked><span>${ic(c[2],15)}${c[1]}</span></label>`).join('')}</div></div>
+   <label class="fld"><span class="fl cm-cnt">Título <small>0/65</small></span><input maxlength="65" placeholder="Ex.: Encontro de quinta muda de horário"></label>
+   <label class="fld"><span class="fl cm-cnt">Mensagem <small>0/180</small></span><textarea class="ta" maxlength="180" rows="3" placeholder="Escreva o recado. Quem recebe vê o seu nome e o seu papel."></textarea></label>
+   <label class="fld"><span class="fl">Quando</span><span class="selw"><select><option>Agora (sai no próximo ciclo de envio)</option><option>Agendar para outro dia e hora</option></select>${ic('updown',14)}</span></label>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${ic('mail',15)}Enviar</button></div></form>`,'sm');
+  $('#msgF').addEventListener('submit',e=>{e.preventDefault();closeDlg();toast('Mensagem na fila de envio');});},
  ntTab:v=>{S.ntab=v;cmRe();},ntF:v=>{S.ntf=v;cmRe();},
  ntNew:()=>ntForm(),ntEdit:(v,b,e)=>{if(e&&e.target.closest('.hact')&&!e.target.closest('.pi'))return;closePops();ntForm(v);},
  ntMenu:v=>{const p=$('#ntPop-'+v);closePops(p);p.classList.toggle('open');},

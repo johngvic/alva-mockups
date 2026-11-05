@@ -26,9 +26,9 @@ function prayerList(){
 function pCard(p){
  const f=p.n.split(' ')[0],avisa=f+(f.endsWith('a')?' foi avisada':' foi avisado')+' que você está orando';
  return `<div class="frow ${p.st}" id="${p.id}">
-  <span class="fr-p"><span class="av" style="background:var(--tone-${p.tone});color:var(--tone-${p.tone}-ink)">${initials(p.n)}</span><span class="fr-n"><b>${esc(p.n)}</b><small>${whenL(p.when)}${p.priv?` · <span class="crestr">${ic('lock',11,2.2)}Anônimo</span>`:''}</small></span></span>
+  <span class="fr-p">${pav(p.n,p.tone,'')}<span class="fr-n"><b>${esc(p.n)}</b><small>${whenL(p.when)}${p.priv?` · <span class="crestr">${ic('lock',11,2.2)}Anônimo</span>`:''}</small></span></span>
   <span class="fr-t fr-tx" title="${esc(p.text)}">${esc(p.text)}</span>
-  <span class="prw fr-o"><span class="stack sm">${p.who.map(t=>`<span class="av" style="background:var(--tone-${t});color:var(--tone-${t}-ink)"></span>`).join('')}${p.mine?'<span class="av" style="background:var(--brand);color:var(--on-brand)">RP</span>':''}</span><span><b>${p.count}</b> orando</span></span>
+  <span class="prw fr-o"><span class="stack sm">${p.who.map(t=>`<span class="av" style="background:var(--tone-${t});color:var(--tone-${t}-ink)"></span>`).join('')}${p.mine?(photoOf('Rafael Pereira')?pav('Rafael Pereira','ceu'):'<span class="av" style="background:var(--brand);color:var(--on-brand)">RP</span>'):''}</span><span><b>${p.count}</b> orando</span></span>
   <span class="fr-a">${p.st==='respondido'?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Oração respondida</span>`:`<button class="btn ${p.mine?'sec on':'pri'} sm pray" data-a="pPray" data-v="${p.id}" aria-pressed="${p.mine}"${p.mine&&p.st==='ativo'?` title="${avisa}"`:''}>${p.mine?`${ic('check',14,2.4)}Você está orando`:`${ic('hands',15)}Estou orando`}</button>`}</span>
   <div class="fr-x"><button class="ibtn sm" data-a="pMenu" data-v="${p.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="pPop-${p.id}" style="right:0;top:calc(100% + 4px)">${p.st==='ativo'?`<button class="pi" data-a="pAnswer" data-v="${p.id}">${ic('check',16)}Marcar como respondido</button>`:`<button class="pi" data-a="pReopen" data-v="${p.id}">${ic('swap',16)}Reabrir pedido</button>`}<hr><button class="pi danger" data-a="pDel" data-v="${p.id}">${ic('x',16)}Excluir pedido</button></div></div>
  </div>`;

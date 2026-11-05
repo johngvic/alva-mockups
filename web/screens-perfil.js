@@ -7,7 +7,7 @@ function perfilPage(){
  const c=CHURCHES[S.church],role=c.role,perm=(typeof RPERM!=='undefined'&&RPERM[role])||{},mods=Object.keys(perm),full=mods.filter(m=>perm[m].length>=4).length;
  const tabs=[['dados','Dados pessoais'],['acesso','Igrejas e acesso',CHURCHES.length],['seg','Segurança'],['pref','Preferências']];
  return `<header class="card prof pf-h rise" style="--d:1">
-  <div class="pid"><div class="pf-av"><span class="av xl" style="background:var(--tone-${ME.tone});color:var(--tone-${ME.tone}-ink)">${initials(ME.n)}</span></div>
+  <div class="pid"><div class="pf-av">${pav(ME.n,ME.tone,'xl')}</div>
    <div class="pn"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1>${esc(ME.n)}</h1><span class="stp" style="--c:var(--brand-text);--b:var(--brand-soft)"><i></i>${role}</span></div>
    <p>${esc(ME.email)}</p></div></div>
   <div class="pact"><button class="btn sec" data-a="openMobile">${ic('phone',15)}Ver no app</button></div>

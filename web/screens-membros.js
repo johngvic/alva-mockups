@@ -44,7 +44,8 @@ const MIN_ALL=['Louvor','Kids','Jovens','Recepção','Mídia','Comunicação','I
 Object.assign(S,{sort:{k:'int',d:-1},filter:'todos',q:'',month:'todas',member:null,tab:'geral',edit:null});
 const byId=id=>MEMBERS.find(m=>m.id===id);
 const initials=n=>n.split(' ').filter(w=>w.length>2||w===w.toUpperCase()).map(w=>w[0]).slice(0,2).join('')||n.slice(0,2);
-const mav=(m,cls='')=>m.photo?`<span class="av ${cls}"><img src="${m.photo}" alt=""></span>`:`<span class="av ${cls}" style="background:var(--tone-${m.tone});color:var(--tone-${m.tone}-ink)">${initials(m.n)}</span>`;
+const mph=m=>m.photo!==undefined?m.photo:(FOTOS_EX.has(m.n)?avatarUri(m.n):'');
+const mav=(m,cls='')=>{const ph=mph(m);return ph?`<span class="av ${cls}"><img src="${ph}" alt=""></span>`:`${pav(m.n,m.tone,`${cls}`)}`;};
 const age=d=>{const b=new Date(d),t=new Date(2026,8,30);let a=t.getFullYear()-b.getFullYear();if(t<new Date(t.getFullYear(),b.getMonth(),b.getDate()))a--;return a;};
 const fmtDate=d=>{const [y,m,dd]=d.split('-');return `${+dd} de ${MONTHS[+m-1]} de ${y}`;};
 const dupPairs=()=>{const s=new Set(),out=[];MEMBERS.forEach(m=>{if(m.dup&&byId(m.dup)&&!s.has(m.id)){s.add(m.id);s.add(m.dup);out.push([m,byId(m.dup)]);}});return out;};
@@ -263,7 +264,7 @@ const PA={
  tab:v=>{S.tab=v;S.edit=null;reTab();},
  editSec:v=>{S.edit=v;reTab();const f=$('#sec-'+v+' input,#sec-'+v+' select');f&&f.focus();},
  cancelSec:()=>{S.edit=null;reTab();},
- mPhoto:v=>{const m=byId(v);openDlg(`${dlgHead('Foto de '+esc(m.n.split(' ')[0]),'A foto aparece no cadastro e no Kids.')}<form id="mpF" class="fgrid one" novalidate><label class="fld"><span class="fl">Arquivo</span><input name="f" type="file" accept="image/*"></label><div class="dfoot">${m.photo?'<button type="button" class="btn sec" id="mpDel">Retirar foto</button>':''}<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`,'sm');
+ mPhoto:v=>{const m=byId(v);openDlg(`${dlgHead('Foto de '+esc(m.n.split(' ')[0]),'A foto aparece no cadastro e no Kids.')}<form id="mpF" class="fgrid one" novalidate><label class="fld"><span class="fl">Arquivo</span><input name="f" type="file" accept="image/*"></label><div class="dfoot">${mph(m)?'<button type="button" class="btn sec" id="mpDel">Retirar foto</button>':''}<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>`,'sm');
   const f=$('#mpF'),d=$('#mpDel');if(d)d.onclick=()=>{m.photo='';closeDlg();render();toast('Foto retirada');};
   f.addEventListener('submit',e=>{e.preventDefault();const fl=f.elements.f.files&&f.elements.f.files[0];if(!fl){toast('Escolha uma imagem');return;}m.photo=URL.createObjectURL(fl);closeDlg();render();toast('Foto atualizada');});},
  closeDlg:()=>closeDlg(),
