@@ -1,11 +1,15 @@
 /* ================= Zeladoria (módulo novo, 05/11/2026) =================
- * Departamento de obras da igreja: pedidos de manutenção, melhoria e instalação viram TRABALHOS que andam por cinco etapas fixas
+ * Departamento de obras da igreja: pedidos de manutenção e de melhoria viram TRABALHOS que andam por cinco etapas fixas
  * (Pedido → Orçamento → Aprovação → Execução → Concluído; cancelável até começar a execução). Cada trabalho tem o seu caixa:
  * a igreja libera dinheiro (entradas) e a Zeladoria gasta (despesas com comprovante) até o saldo acabar.
  * Menu: Visão geral · Trabalhos (Quadro e Lista) · Fornecedores · Análises. Só web nesta etapa (o app fica para depois).
  * Reaproveita os quadros (bd-*), os cartões de resumo, a ficha com abas (prof/ptabs), o histórico (mh-*) e os pickers do Alva. */
-const ZCATS=['Ar-condicionado','Pintura','Elétrica','Hidráulica','Portas e portões','Cobertura','Iluminação','Marcenaria','Jardim','Segurança'];
-const ZTIPOS=['Manutenção','Melhoria','Instalação'];
+const ZICONS=['snow','bucket','zap','droplet','door','home','sparkle','chair','sprout','shield','wrench','key','box','layers','flame','camera'];
+const ZCAT=[['Ar-condicionado','#0ea5a4','snow'],['Pintura','#db2777','bucket'],['Elétrica','#d4a017','zap'],['Hidráulica','#2f7de1','droplet'],['Portas e portões','#7c3aed','door'],['Cobertura','#c25a12','home'],['Iluminação','#84a516','sparkle'],['Marcenaria','#475569','chair'],['Jardim','#1f9a52','sprout'],['Segurança','#dc2626','shield']].map((c,i)=>({id:'zc'+(i+1),n:c[0],c:c[1],ic:c[2]}));
+const ZCATS=ZCAT.map(c=>c.n);
+const zCatSync=()=>{ZCATS.length=0;ZCAT.forEach(c=>ZCATS.push(c.n));};
+const zCatCol=n=>(ZCAT.find(c=>c.n===n)||{}).c||'';
+const ZTIPOS=['Manutenção','Melhoria'];
 const ZLOCAIS=['Salão principal','Sala 3','Banheiros','Estacionamento','Anexo','Hall de entrada','Sala de Kids','Cozinha','Jardim'];
 const ZST=[['pedido','Pedido'],['orcamento','Orçamento'],['aprovacao','Aprovação'],['execucao','Execução'],['concluido','Concluído']];
 const ZSTL={pedido:'Aguardando avaliação',orcamento:'Em orçamento',aprovacao:'Aguardando o Financeiro',execucao:'Em execução',concluido:'Concluído',cancelado:'Cancelado'};
@@ -36,7 +40,7 @@ const ZJ=[
   mat:[{id:'m1',i:'Gás e tubulação',v:1100}],
   props:[{id:'p1',forn:'zf1',v:6800,prazo:5,arq:['Proposta-A-FrioTotal.pdf'],esc:false},{id:'p2',forn:'zf2',v:7450,prazo:4,arq:['Proposta-B-ClimaSul.pdf','Catalogo-split.pdf'],esc:false},{id:'p3',forn:'zf3',v:6200,prazo:7,arq:['Proposta-C-RefriMax.pdf'],esc:true}],
   apr:{by:'Rafael Pereira',d:'2026-09-18',v:7300},fim:'2026-10-05',
-  cx:{in:[zIn('2026-09-20',7300,'Liberado pelo Financeiro')],out:[zOut('2026-09-24',1100,'Material','Gás e tubulação','', 'nota-material-0924.pdf'),zOut('2026-09-29',3100,'Mão de obra','Primeira parcela da instalação','zf3','recibo-refrimax-1.pdf')]},
+  cx:{in:[zIn('2026-09-20',7300,'Liberado pelo Financeiro')],out:[zOut('2026-09-24',1100,'Material','Gás e tubulação','', 'nota-material-0924.pdf'),zOut('2026-09-29',3100,'Mão de obra','Primeira parcela da instalação','zf3','recibo-refrimax-1.pdf'),Object.assign(zOut('2026-09-30',350,'Material','Ajuste na fiação do aparelho','','nota-fiacao.pdf'),{cat:'Elétrica'})]},
   hist:[['2026-08-24','Pedido feito por Ana Costa','Ana Costa'],['2026-08-26','Avaliado: será feito por fornecedor','Bruno Carvalho'],['2026-09-10','Proposta C (RefriMax) escolhida','Bruno Carvalho'],['2026-09-18','Aprovado pelo Financeiro: R$ 7.300','Rafael Pereira'],['2026-09-20','Entrada de R$ 7.300 no caixa','Rafael Pereira'],['2026-09-22','Execução iniciada','Bruno Carvalho']]}),
  ZJOB({n:'Pintar o salão principal',cat:'Pintura',tipo:'Melhoria',local:'Salão principal',st:'orcamento',pedBy:'Pr. Marcos Lima',pedDate:'2026-09-12',desc:'A pintura das paredes está desgastada, com manchas perto das janelas. Pensar numa cor mais clara.',exec:'terceiro',resp:'Bruno Carvalho',
   mat:[{id:'m1',i:'Tinta e massa corrida',v:4300}],
@@ -44,11 +48,11 @@ const ZJ=[
   hist:[['2026-09-12','Pedido feito por Pr. Marcos Lima','Pr. Marcos Lima'],['2026-09-15','Avaliado: será feito por fornecedor','Bruno Carvalho']]}),
  ZJOB({n:'Torneira do banheiro masculino vazando',cat:'Hidráulica',tipo:'Manutenção',local:'Banheiros',st:'pedido',pedBy:'Pr. Marcos Lima',pedDate:'2026-09-30',desc:'A torneira da pia do meio está pingando o dia todo.',urg:'Urgente',hist:[['2026-09-30','Pedido feito por Pr. Marcos Lima','Pr. Marcos Lima']]}),
  ZJOB({n:'Consertar a porta da sala de Kids',cat:'Portas e portões',tipo:'Manutenção',local:'Sala de Kids',st:'pedido',pedBy:'Ana Costa',pedDate:'2026-09-29',desc:'A porta está raspando no chão e não fecha direito.',hist:[['2026-09-29','Pedido feito por Ana Costa','Ana Costa']]}),
- ZJOB({n:'Instalar o portão eletrônico do estacionamento',cat:'Portas e portões',tipo:'Instalação',local:'Estacionamento',st:'aprovacao',pedBy:'Pr. Rafael Pereira',pedDate:'2026-08-30',desc:'Hoje o portão é aberto à mão, e a segurança pediu automação com controle remoto.',exec:'terceiro',resp:'Bruno Carvalho',
+ ZJOB({n:'Instalar o portão eletrônico do estacionamento',cat:'Portas e portões',tipo:'Melhoria',local:'Estacionamento',st:'aprovacao',pedBy:'Pr. Rafael Pereira',pedDate:'2026-08-30',desc:'Hoje o portão é aberto à mão, e a segurança pediu automação com controle remoto.',exec:'terceiro',resp:'Bruno Carvalho',
   mat:[{id:'m1',i:'Motor e controles remotos',v:1500}],
   props:[{id:'p1',forn:'zf5',v:9800,prazo:12,arq:['Proposta-PortaoFacil.pdf'],esc:true}],
   hist:[['2026-08-30','Pedido feito por Pr. Rafael Pereira','Pr. Rafael Pereira'],['2026-09-02','Avaliado: será feito por fornecedor','Bruno Carvalho'],['2026-09-26','Proposta escolhida e enviada para aprovação','Bruno Carvalho']]}),
- ZJOB({n:'Instalar um bebedouro no hall',cat:'Hidráulica',tipo:'Instalação',local:'Hall de entrada',st:'orcamento',pedBy:'Daniela Rocha',pedDate:'2026-09-20',desc:'As pessoas pedem água no hall. Já existe ponto de água na parede.',exec:'equipe',resp:'Josias Almeida',
+ ZJOB({n:'Instalar um bebedouro no hall',cat:'Hidráulica',tipo:'Melhoria',local:'Hall de entrada',st:'orcamento',pedBy:'Daniela Rocha',pedDate:'2026-09-20',desc:'As pessoas pedem água no hall. Já existe ponto de água na parede.',exec:'equipe',resp:'Josias Almeida',
   mat:[{id:'m1',i:'Bebedouro industrial',v:1850},{id:'m2',i:'Registro e mangueira',v:140}],
   hist:[['2026-09-20','Pedido feito por Daniela Rocha','Daniela Rocha'],['2026-09-22','Avaliado: será feito pela equipe da Zeladoria','Bruno Carvalho']]}),
  ZJOB({n:'Trocar as lâmpadas do corredor do anexo',cat:'Iluminação',tipo:'Manutenção',local:'Anexo',st:'concluido',pedBy:'Pr. Marcos Lima',pedDate:'2026-08-28',desc:'Várias lâmpadas queimadas, o corredor fica escuro à noite.',exec:'equipe',resp:'Edson Ramos',
@@ -69,7 +73,7 @@ const ZJ=[
  ZJ.push(ZJOB({n:x[0],cat:x[1],tipo:x[2],local:'Anexo',st:'concluido',pedBy:'Pr. Marcos Lima',pedDate:x[5],exec:x[4]?'terceiro':'equipe',resp:x[6],mat:[{id:'m1',i:'Material',v:x[3]}],cx:{in:[zIn(x[5],x[3]+x[4],'Liberado pelo Financeiro')],out:o},hist:[[x[5],'Trabalho concluído',x[6]]]}));
 });
 /* histórico do ano passado, para as Análises (trabalhos concluídos em 2025) */
-[['Trocar o ar-condicionado do salão','Ar-condicionado','Manutenção',1800,3600,'2025-03-12'],['Instalar split na sala de reunião','Ar-condicionado','Instalação',2100,1800,'2025-08-20'],['Pintura externa do templo','Pintura','Melhoria',3700,5000,'2025-05-18'],['Trocar o quadro de luz','Elétrica','Manutenção',1500,600,'2025-04-02'],['Consertar a pia da cozinha','Hidráulica','Manutenção',350,1000,'2025-06-14'],['Trocar a porta de entrada','Portas e portões','Melhoria',2800,0,'2025-09-09'],['Calha da lateral','Cobertura','Manutenção',1200,3000,'2025-02-22'],['Lâmpadas do salão','Iluminação','Manutenção',680,0,'2025-10-05'],['Câmeras de segurança','Segurança','Instalação',3400,0,'2025-11-12'],['Poda e adubação','Jardim','Manutenção',300,600,'2025-07-01']].forEach(x=>{
+[['Trocar o ar-condicionado do salão','Ar-condicionado','Manutenção',1800,3600,'2025-03-12'],['Instalar split na sala de reunião','Ar-condicionado','Melhoria',2100,1800,'2025-08-20'],['Pintura externa do templo','Pintura','Melhoria',3700,5000,'2025-05-18'],['Trocar o quadro de luz','Elétrica','Manutenção',1500,600,'2025-04-02'],['Consertar a pia da cozinha','Hidráulica','Manutenção',350,1000,'2025-06-14'],['Trocar a porta de entrada','Portas e portões','Melhoria',2800,0,'2025-09-09'],['Calha da lateral','Cobertura','Manutenção',1200,3000,'2025-02-22'],['Lâmpadas do salão','Iluminação','Manutenção',680,0,'2025-10-05'],['Câmeras de segurança','Segurança','Melhoria',3400,0,'2025-11-12'],['Poda e adubação','Jardim','Manutenção',300,600,'2025-07-01']].forEach(x=>{
  const o=[];if(x[3])o.push(zOut(x[5],x[3],'Material',x[0]+' (material)'));if(x[4])o.push(zOut(x[5],x[4],'Mão de obra',x[0]+' (mão de obra)'));
  ZJ.push(ZJOB({n:x[0],cat:x[1],tipo:x[2],st:'concluido',pedBy:'Pr. Marcos Lima',pedDate:x[5],exec:x[4]?'terceiro':'equipe',resp:'Bruno Carvalho',cx:{in:[zIn(x[5],x[3]+x[4],'Liberado pelo Financeiro')],out:o},hist:[[x[5],'Trabalho concluído','Bruno Carvalho']],old:true}));
 });
@@ -93,6 +97,10 @@ const zSaldo=j=>cxBal(zCx(j))/100;
 const zOutsOf=j=>cxValid(zCx(j)).filter(e=>e.t==='out'&&!e.xfer);
 const zGastoAno=(y,j)=>(j?[j]:ZJ).reduce((s,x)=>s+zOutsOf(x).filter(e=>e.d.slice(0,4)===String(y)).reduce((a,e)=>a+e.v,0)/100,0);
 const zLate=j=>j.st==='execucao'&&j.fim&&j.fim<NOWD;
+/* A categoria mora no LANÇAMENTO (despesa), não no trabalho: um trabalho pode ter pintura, piso, ar-condicionado, luminária... */
+const zJobCats=j=>[...new Set(zOutsOf(j).map(e=>e.cat||j.cat).filter(Boolean))];
+const zCatTags=j=>{const l=zJobCats(j);return l.slice(0,2).map(n=>`<em class="tag">${esc(n)}</em>`).join('')+(l.length>2?`<em class="tag">+${l.length-2}</em>`:'');};
+const zLastCat=id=>{const j=zJob(id);if(!j)return '';const l=zOutsOf(j).slice().sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);return l.length?(l[l.length-1].cat||''):'';};
 const zJob=id=>ZJ.find(j=>j.id===id);
 const zQuem=j=>j.exec==='terceiro'?'Fornecedor':j.exec==='equipe'?'Equipe da Zeladoria':'A definir';
 const zBar=(v,t)=>`<span class="bd-bar"><i style="width:${t>0?Math.min(100,Math.round(v/t*100)):0}%"></i></span>`;
@@ -101,8 +109,8 @@ Object.assign(S,{zj:null,ztab:'resumo',zview:'quadro',zq:'',zst:'todos',zcat:'to
 
 /* ---------- menu e permissões ---------- */
 (()=>{
- const g=NAV.find(x=>x[0]==='Gestão')[1],i=g.findIndex(x=>x[0]==='financeiro');
- g.splice(i<0?g.length:i,0,['zeladoria','bucket','Zeladoria',[['zel-vis','Visão geral'],['zel-trab','Trabalhos'],['zel-forn','Fornecedores'],['zel-ana','Análises']]]);
+ const g=NAV.find(x=>x[0]==='Operação')[1],i=g.findIndex(x=>x[0]==='espacos');
+ g.splice(i<0?g.length:i+1,0,['zeladoria','bucket','Zeladoria',[['zel-vis','Visão geral'],['zel-trab','Trabalhos'],['zel-forn','Fornecedores'],['zel-cat','Categorias'],['zel-ana','Análises']]]);
  SAREAS.push(['Zeladoria','bucket']);MODS.push('Zeladoria');
  Object.keys(RPERM).forEach(r=>{RPERM[r].Zeladoria=r==='Administrador'?ACTS.slice():r==='Pastor'?['Ver','Criar','Editar']:[];});
  if(typeof MODMIN!=='undefined')MODMIN.Zeladoria='Zeladoria';
@@ -136,7 +144,7 @@ function zelVis(){
   <section class="card pc"><div class="sh"><h2>Em execução</h2><span class="who">${exec.length}</span></div>
    ${exec.length?`<div class="zl-ex">${exec.map(j=>`<button class="zl-xc" data-a="zOpen" data-v="${j.id}"><b>${esc(j.n)}</b><span class="who">${esc(j.local)} · ${esc(j.resp)}</span><span class="zl-xt">${zLate(j)?'<em class="tag warn">Atrasada</em>':'<em class="tag">No prazo</em>'}${j.fim?`<small>previsão ${fmtD(j.fim)}</small>`:''}</span>${zBar(zGasto(j),zLib(j))}<span class="zl-xn"><b>${zR(zGasto(j))}</b> gastos de ${zR(zLib(j))} liberados<small>previsto ${zR(zPrev(j))}</small></span></button>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma obra em execução.</p></div>'}</section>
   <section class="card pc"><div class="sh"><h2>Concluídos recentemente</h2></div>
-   <ul class="zl-att">${ZJ.filter(j=>j.st==='concluido'&&!j.old).map(j=>`<li><span class="zl-ai ok">${ic('check',16,2.4)}</span><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.cat)} · gasto ${zR(zGasto(j))}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${j.id}">Ver</button></li>`).join('')||'<li class="who">Nenhum ainda.</li>'}</ul></section>
+   <ul class="zl-att">${ZJ.filter(j=>j.st==='concluido'&&!j.old).map(j=>`<li><span class="zl-ai ok">${ic('check',16,2.4)}</span><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.tipo)} · gasto ${zR(zGasto(j))}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${j.id}">Ver</button></li>`).join('')||'<li class="who">Nenhum ainda.</li>'}</ul></section>
  </div></div>`;
 }
 
@@ -144,7 +152,7 @@ function zelVis(){
 function zCard(j){
  const urg=j.urg==='Urgente',cx=j.st==='execucao'||j.st==='concluido';
  return `<div class="bd-t" tabindex="0" data-a="zOpen" data-v="${j.id}"><b>${esc(j.n)}</b>
-  <div class="bd-m"><em class="tag">${esc(j.cat)}</em>${urg?'<em class="tag warn">Urgente</em>':''}${zLate(j)?'<em class="tag warn">Atrasada</em>':''}</div>
+  <div class="bd-m">${zCatTags(j)}${urg?'<em class="tag warn">Urgente</em>':''}${zLate(j)?'<em class="tag warn">Atrasada</em>':''}</div>
   <div class="bd-m"><span class="bd-mn">${ic('pin',11,2)}${esc(j.local)}</span>${j.resp?`<span class="bd-who">${pav(j.resp,'ceu','')}<i>${esc(j.resp.split(' ')[0])}</i></span>`:`<span class="bd-who"><i>${esc(j.pedBy)}</i></span>`}</div>
   ${cx&&zLib(j)?`<div class="zl-cm">${zBar(zGasto(j),zLib(j))}<small>${zR(zGasto(j))} de ${zR(zLib(j))}</small></div>`:zPrev(j)?`<small class="zl-pv">Previsto ${zR(zPrev(j))}</small>`:''}</div>`;
 }
@@ -157,14 +165,14 @@ function zelTrab(){
  if(S.zview==='quadro')body=`<section class="card pc bd-board rise" style="--d:3"><p class="bd-note">${ic('info',13,2)}As etapas são fixas. Abra o trabalho para dar o próximo passo.</p><div class="bd-cols">${ZST.map(s=>{const l=act.filter(j=>j.st===s[0]);return `<div class="bd-col"><header class="bd-ch"><b>${s[1]}</b><small>${l.length}</small></header><div class="bd-list">${l.map(zCard).join('')||'<p class="bd-empty">Nenhum trabalho</p>'}</div></div>`;}).join('')}</div></section>`;
  else body=`<section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="zq" placeholder="Buscar trabalho, categoria ou local" value="${esc(S.zq)}" autocomplete="off"></label>
    <div class="chips">${[['todos','Todos'],...ZST.map(s=>[s[0],s[1]]),['cancelado','Cancelados']].map(c=>`<button class="chipf ${S.zst===c[0]?'on':''}" data-a="zSt" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div><div id="zrows">${zRows()}</div></section>`;
- return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Trabalhos</h1><p class="lede">Pedidos de manutenção, melhoria e instalação da igreja</p></div><div class="pact"><button class="btn pri" data-a="zNew">${ic('plus',15,2.2)}Pedir um trabalho</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Trabalhos</h1><p class="lede">Pedidos de manutenção e de melhoria da igreja</p></div><div class="pact"><button class="btn pri" data-a="zNew">${ic('plus',15,2.2)}Pedir um trabalho</button></div></header>
   <section class="card kpis4 k5 rise" style="--d:1">${cards}</section>${tabs}${body}`;
 }
 function zRows(){
- const q=norm(S.zq||''),l=ZJ.filter(j=>!j.old&&(S.zst==='todos'?j.st!=='cancelado':j.st===S.zst)&&(!q||norm(j.n+' '+j.cat+' '+j.local).includes(q)));
+ const q=norm(S.zq||''),l=ZJ.filter(j=>!j.old&&(S.zst==='todos'?j.st!=='cancelado':j.st===S.zst)&&(!q||norm(j.n+' '+zJobCats(j).join(' ')+' '+j.local).includes(q)));
  if(!l.length)return '<div class="mempty"><p>Nenhum trabalho encontrado.</p><span>Tente outra busca ou outra etapa.</span></div>';
- return `<div class="trow zt thead"><span>Trabalho</span><span>Categoria</span><span>Situação</span><span>Responsável</span><span>Previsto</span><span>Gasto</span><span></span></div>
- ${l.map(j=>`<div class="trow zt" tabindex="0" data-a="zOpen" data-v="${j.id}"><span class="tn"><span class="zt-n"><b>${esc(j.n)}</b><span>${esc(j.local)} · pedido por ${esc(j.pedBy)}</span></span></span><span>${esc(j.cat)}</span><span>${zPill(j.st)}</span><span>${esc(j.resp||'A definir')}</span><span class="num">${zPrev(j)?zR(zPrev(j)):'—'}</span><span class="num">${zGasto(j)?zR(zGasto(j)):'—'}</span><span class="tc">${ic('chevR',16)}</span></div>`).join('')}
+ return `<div class="trow zt thead"><span>Trabalho</span><span>Categorias</span><span>Situação</span><span>Responsável</span><span>Previsto</span><span>Gasto</span><span></span></div>
+ ${l.map(j=>`<div class="trow zt" tabindex="0" data-a="zOpen" data-v="${j.id}"><span class="tn"><span class="zt-n"><b>${esc(j.n)}</b><span>${esc(j.local)} · pedido por ${esc(j.pedBy)}</span></span></span><span>${zJobCats(j).map(esc).join(', ')||'<span class="soft">—</span>'}</span><span>${zPill(j.st)}</span><span>${esc(j.resp||'A definir')}</span><span class="num">${zPrev(j)?zR(zPrev(j)):'—'}</span><span class="num">${zGasto(j)?zR(zGasto(j)):'—'}</span><span class="tc">${ic('chevR',16)}</span></div>`).join('')}
  <div class="tfoot"><span>${l.length} ${l.length===1?'trabalho':'trabalhos'}</span></div>`;
 }
 
@@ -181,7 +189,7 @@ function zelJob(){
  const nx=zNext(j),tabs=[['resumo','Resumo'],['orc','Orçamento'],['caixa','Caixa'],['com','Comentários'],['hist','Histórico']];
  return `<nav class="crumb rise"><span class="soft">Zeladoria</span>${ic('chevR',13,2)}<button class="lnk back" data-a="zBack">Trabalhos</button>${ic('chevR',13,2)}<span>${esc(j.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
-  <div class="pid"><span class="htile" style="--s:64px;background:var(--tone-salvia);color:var(--tone-salvia-ink)">${ic('wrench',30,1.9)}</span><div class="pn"><h1>${esc(j.n)}</h1><p>${esc(j.cat)} · ${esc(j.tipo)} · ${esc(j.local)}</p><div class="ca-tgs">${zPill(j.st)}${j.urg==='Urgente'&&j.st!=='concluido'&&j.st!=='cancelado'?'<em class="tag warn">Urgente</em>':''}</div></div></div>
+  <div class="pid"><span class="htile" style="--s:64px;background:var(--tone-salvia);color:var(--tone-salvia-ink)">${ic('wrench',30,1.9)}</span><div class="pn"><h1>${esc(j.n)}</h1><p>${esc(j.tipo)} · ${esc(j.local)}</p><div class="ca-tgs">${zPill(j.st)}${zCatTags(j)}${j.urg==='Urgente'&&j.st!=='concluido'&&j.st!=='cancelado'?'<em class="tag warn">Urgente</em>':''}</div></div></div>
   <div class="pact">${nx?`<button class="btn pri" data-a="${nx[0]}" data-v="${j.id}" ${nx[2]?'':'disabled'}>${nx[1]}</button>`:''}
    ${j.st!=='concluido'&&j.st!=='cancelado'&&j.st!=='execucao'?`<div style="position:relative"><button class="ibtn" data-a="zMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="zPop" style="right:0;top:calc(100% + 6px)"><button class="pi danger" data-a="zCancel" data-v="${j.id}">${ic('x',16)}Cancelar o trabalho</button></div></div>`:''}</div>
   <div class="ikpi hk"><div><b>${zPrev(j)?zR(zPrev(j)):'—'}</b><span>Previsto</span></div><div><b>${zR(zLib(j))}</b><span>Liberado</span></div><div><b>${zR(zGasto(j))}</b><span>Gasto</span></div><div><b class="${zSaldo(j)<0?'neg':''}">${zR(zSaldo(j))}</b><span>Saldo do caixa</span></div></div>
@@ -268,7 +276,7 @@ function zelAna(){
  const byForn=grp(cur.filter(x=>x.e.forn),x=>zFn(x.e.forn)),forns=Object.entries(byForn).sort((a,b)=>b[1]-a[1]),direto=sum(cur.filter(x=>!x.e.forn));
  const byJob={};cur.forEach(x=>{byJob[x.j.id]=(byJob[x.j.id]||0)+x.v;});const jobs=Object.entries(byJob).sort((a,b)=>b[1]-a[1]).slice(0,6);
  const semComp=cur.filter(x=>!x.e.file),delta=ptot?Math.round((tot-ptot)/ptot*100):null,nJ=Object.keys(byJob).length;
- const rowC=(label,v,pv,mx)=>`<li><div class="zl-ah"><b>${esc(label)}</b><span>${zR(v)}<small>${pv?zR(pv)+' em '+plab:'sem gasto em '+plab}</small></span></div><span class="bd-bar"><i style="width:${Math.round(v/mx*100)}%"></i></span><span class="bd-bar zl-prev"><i style="width:${Math.round(pv/mx*100)}%"></i></span></li>`;
+ const rowC=(label,v,pv,mx,col)=>`<li><div class="zl-ah"><b>${col?`<span class="zl-dot" style="background:${col}"></span>`:''}${esc(label)}</b><span>${zR(v)}<small>${pv?zR(pv)+' em '+plab:'sem gasto em '+plab}</small></span></div><span class="bd-bar"><i style="width:${Math.round(v/mx*100)}%;${col?'background:'+col:''}"></i></span><span class="bd-bar zl-prev"><i style="width:${Math.round(pv/mx*100)}%"></i></span></li>`;
  return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Análises</h1><p class="lede">Quanto a igreja gasta com as obras, e em quê</p></div></header>
  ${fMes()}
  <section class="card kpis4 rise" style="--d:1">
@@ -278,7 +286,7 @@ function zelAna(){
   <div class="k4"><span class="kl">Sem comprovante</span><span class="kv ${semComp.length?'dn':''}">${semComp.length}</span><span class="kd">${semComp.length?zR(sum(semComp))+' sem nota ou recibo':'tudo com comprovante'}</span></div>
  </section>
  <div class="pgrid rise" style="--d:2"><div class="col">
-  <section class="card pc"><div class="sh"><h2>Por categoria</h2><span class="who">${lab} × ${plab}</span></div>${cats.length&&tot?`<ul class="zl-an">${cats.map(c=>rowC(c,byCat[c]||0,pCat[c]||0,mxC)).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Por categoria</h2><span class="who">${lab} × ${plab}</span></div>${cats.length&&tot?`<ul class="zl-an">${cats.map(c=>rowC(c,byCat[c]||0,pCat[c]||0,mxC,zCatCol(c))).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
   <section class="card pc"><div class="sh"><h2>Por tipo de trabalho</h2><span class="who">${lab} × ${plab}</span></div>${tot?`<ul class="zl-an">${ZTIPOS.map(t=>rowC(t,byTipo[t]||0,pTipo[t]||0,mxT)).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
   <section class="card pc"><div class="sh"><h2>Por fornecedor</h2></div>${forns.length||direto?`<ul class="zl-lines">${forns.map(f=>`<li><span>${esc(f[0])}</span><b>${zR(f[1])}</b></li>`).join('')}${direto?`<li><span>Compras diretas, sem fornecedor cadastrado</span><b>${zR(direto)}</b></li>`:''}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
  </div><div class="col">
@@ -287,9 +295,32 @@ function zelAna(){
   <section class="card pc"><div class="sh"><h2>Para conferir com o Financeiro</h2><span class="who">${lab}</span></div>
    <div class="zl-ln"><span>Saídas lançadas</span><b>${zR(tot)}</b></div><div class="zl-ln"><span>Lançamentos</span><b>${cur.length}</b></div><div class="zl-ln"><span>Com comprovante</span><b>${cur.length-semComp.length}</b></div><div class="zl-ln tot"><span>Sem comprovante</span><b class="${semComp.length?'neg':''}">${semComp.length}</b></div>
    ${semComp.length?`<ul class="zl-att" style="margin-top:12px">${semComp.slice(0,5).map(x=>`<li><span class="zl-ai">${ic('alert',16,2)}</span><span class="zl-at"><b>${esc(x.e.desc)}</b><small>${esc(x.j.n)} · ${fmtD(x.e.d)} · ${zR2(x.v)}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${x.j.id}">Abrir</button></li>`).join('')}</ul>`:''}</section>
-  <section class="card pc"><div class="sh"><h2>Maiores trabalhos</h2><span class="who">${lab}</span></div>${jobs.length?`<ul class="zl-att">${jobs.map(([id,v])=>{const j=zJob(id);return `<li><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.cat)} · previsto ${zPrev(j)?zR(zPrev(j)):'—'}</small></span><b class="zl-n">${zR(v)}</b></li>`;}).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Maiores trabalhos</h2><span class="who">${lab}</span></div>${jobs.length?`<ul class="zl-att">${jobs.map(([id,v])=>{const j=zJob(id);return `<li><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.tipo)} · previsto ${zPrev(j)?zR(zPrev(j)):'—'}</small></span><b class="zl-n">${zR(v)}</b></li>`;}).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
  </div></div>`;
 }
+
+/* ---------- Categorias (cadastro igual ao do Almoxarifado: nome, cor e ícone) ---------- */
+function zCatUse(c){
+ const ent=[];ZJ.forEach(j=>zOutsOf(j).forEach(e=>{if((e.cat||j.cat)===c.n)ent.push({j,e});}));
+ const jobs=new Set();ent.forEach(x=>jobs.add(x.j.id));
+ return {n:ent.length,y:ent.filter(x=>x.e.d.slice(0,4)==='2026').reduce((s,x)=>s+x.e.v,0)/100,jobs:[...jobs].map(zJob)};
+}
+function zelCats(){
+ const U=ZCAT.map(c=>[c,zCatUse(c)]),tot=U.reduce((a,u)=>a+u[1].y,0);
+ return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Categorias</h1><p class="lede">Como os gastos das obras se organizam: ar-condicionado, pintura, elétrica...</p></div><div class="pact"><button class="btn pri" data-a="zcNew">${ic('plus',15,2.2)}Nova categoria</button></div></header>
+ <section class="card ax-kbar rise" style="--d:1"><div class="ax-kbh"><b>${ZCAT.length} categorias</b><span>${zR(tot)} gastos em 2026 · ${U.filter(u=>!u[1].n).length} sem lançamentos</span></div><div class="ax-kst">${U.map(u=>u[1].y?`<i style="flex:${u[1].y};--k:${u[0].c}" title="${esc(u[0].n)} · ${zR(u[1].y)}"></i>`:'').join('')}</div></section>
+ <div class="ax-kg rise" style="--d:2">${U.map(([c,u])=>`<article class="card ax-kc" style="--k:${c.c}"><div class="ax-kch">${kTile(c,30)}<b class="ax-kn">${esc(c.n)}</b>
+  <span style="position:relative"><button class="ibtn sm" data-a="zcMenu" data-v="${c.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="zcPop-${c.id}" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="zcEdit" data-v="${c.id}">${ic('pen',16)}Editar</button><hr><button class="pi danger" data-a="zcDel" data-v="${c.id}">${ic('x',16)}Excluir</button></div></span></div>
+  <div class="ax-km"><span>${u.n} lançamento${u.n===1?'':'s'} · ${u.jobs.length} trabalho${u.jobs.length===1?'':'s'}</span><b>${zR(u.y)} em 2026</b></div>
+  <div class="ax-kit">${u.jobs.length?u.jobs.slice(0,4).map(j=>`<span>${esc(j.n)}</span>`).join('')+(u.jobs.length>4?`<span class="soft">+${u.jobs.length-4}</span>`:''):'<span class="soft">Nenhum trabalho ainda</span>'}</div></article>`).join('')}
+  <button class="cm-badd" data-a="zcNew" style="min-height:150px"><span>${ic('plus',20,2)}</span><b>Nova categoria</b><small>Nome, cor e ícone</small></button></div>`;
+}
+const zcSnap=()=>{S._zcB=ZCAT.map(c=>[c.id,c.n]);};
+const zcRe=()=>{
+ (S._zcB||[]).forEach(([id,old])=>{const c=ZCAT.find(x=>x.id===id);if(!c||c.n===old)return;
+  ZJ.forEach(j=>{if(j.cat===old)j.cat=c.n;});CAIXAS.filter(x=>x.ownerType==='zel').forEach(x=>x.entries.forEach(e=>{if(e.cat===old)e.cat=c.n;}));ZFORN.forEach(f=>{if(f.serv===old)f.serv=c.n;});});
+ zCatSync();S._zcB=null;zRe();
+};
 
 /* ---------- diálogos e ações ---------- */
 const zSelOpts=(arr,sel)=>arr.map(o=>`<option ${o===sel?'selected':''}>${esc(o)}</option>`).join('');
@@ -315,14 +346,13 @@ const ZA={
  zNew:()=>{
   zForm('Pedir um trabalho','Conte o que precisa ser feito. A Zeladoria avalia e responde.',
    `<label class="fld"><span class="fl">O que precisa ser feito?</span><input name="n" maxlength="90" placeholder="Ex.: Trocar a fechadura da sala 2" autocomplete="off"><span class="err"></span></label>
-    <div class="fgrid"><label class="fld"><span class="fl">Categoria</span><span class="selw"><select name="cat">${zSelOpts(ZCATS)}</select>${ic('updown',14)}</span></label>
-    <label class="fld"><span class="fl">Tipo</span><span class="selw"><select name="tipo">${zSelOpts(ZTIPOS)}</select>${ic('updown',14)}</span></label></div>
+    <label class="fld"><span class="fl">Tipo</span><span class="selw"><select name="tipo">${zSelOpts(ZTIPOS)}</select>${ic('updown',14)}</span><span class="hint">Manutenção conserta ou troca o que já existe. Melhoria traz algo novo ou melhor. A categoria do gasto é escolhida ao lançar cada despesa.</span></label>
     <div class="fgrid"><label class="fld"><span class="fl">Onde?</span><span class="selw"><select name="local">${zSelOpts(ZLOCAIS)}</select>${ic('updown',14)}</span></label>
     <label class="fld"><span class="fl">Urgência</span><span class="selw"><select name="urg"><option>Normal</option><option>Urgente</option></select>${ic('updown',14)}</span></label></div>
     <label class="fld"><span class="fl">Detalhes <small>opcional</small></span><textarea class="ta" name="desc" rows="3" maxlength="500" placeholder="O que está acontecendo?"></textarea></label>
     <label class="fld"><span class="fl">Foto <small>opcional</small></span><input type="file" name="foto" accept="image/*"></label>`,'Enviar pedido',
    (f,bad)=>{const fd=new FormData(f),n=fd.get('n').trim();if(!n)return bad('n','Diga o que precisa ser feito');
-    const j=ZJOB({n,cat:fd.get('cat'),tipo:fd.get('tipo'),local:fd.get('local'),urg:fd.get('urg'),desc:fd.get('desc').trim(),pedBy:ME.n,pedDate:NOWD,hist:[[NOWD,'Pedido feito por '+ME.n,ME.n]]});
+    const j=ZJOB({n,tipo:fd.get('tipo'),local:fd.get('local'),urg:fd.get('urg'),desc:fd.get('desc').trim(),pedBy:ME.n,pedDate:NOWD,hist:[[NOWD,'Pedido feito por '+ME.n,ME.n]]});
     ZJ.unshift(j);closeDlg();S.zj=null;if(S.active!=='zel-trab'&&S.active!=='zel-vis')S.active='zel-trab';render();toast('Pedido enviado para a Zeladoria');});
  },
  zEval:v=>{const j=zJob(v);
@@ -351,6 +381,12 @@ const ZA={
    (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor');const a=zFile(f);j.props.push({id:'p'+Date.now(),forn:fd.get('forn'),v:val,prazo:+fd.get('prazo')||7,arq:a?[a]:[],esc:false});closeDlg();zRe();toast('Proposta salva');});},
  zPropPick:v=>{const [a,b]=v.split('|'),j=zJob(a);j.props.forEach(p=>p.esc=p.id===b);const p=j.props.find(x=>x.id===b);zLog(j,'Proposta escolhida: '+zFn(p.forn));zRe();toast('Proposta escolhida');},
  zPropDel:v=>{const [a,b]=v.split('|'),j=zJob(a);j.props=j.props.filter(p=>p.id!==b);zRe();},
+ zcNew:()=>{zcSnap();KSTORE={list:ZCAT,re:zcRe,sample:'Troca do ar-condicionado',icons:ZICONS};kForm();},
+ zcEdit:v=>{closePops();zcSnap();KSTORE={list:ZCAT,re:zcRe,sample:'Troca do ar-condicionado',icons:ZICONS};kForm(v);},
+ zcMenu:v=>{const p=$('#zcPop-'+v);closePops(p);p.classList.toggle('open');},
+ zcDel:v=>{closePops();const c=ZCAT.find(x=>x.id===v),u=zCatUse(c);
+  if(u.n||u.jobs.length){toast(`${c.n} está em ${u.n} lançamento${u.n===1?'':'s'} e ${u.jobs.length} trabalho${u.jobs.length===1?'':'s'} — troque a categoria antes`);return;}
+  confirmDel({title:`Excluir ${esc(c.n)}?`,body:'Nenhum lançamento nem trabalho usa essa categoria.',onConfirm:()=>{const i=ZCAT.indexOf(c);ZCAT.splice(i,1);zCatSync();zRe();toast('Categoria excluída',()=>{ZCAT.splice(i,0,c);zCatSync();zRe();});}});},
  zFornNew:()=>zFornForm(null),zFornEdit:v=>zFornForm(ZFORN.find(f=>f.id===v)),
 };
 function zFornForm(f){
@@ -365,7 +401,7 @@ function zFornForm(f){
 Object.assign(A,ZA);
 
 /* ---------- páginas, comentários e buscas ---------- */
-{const _ph=placeholder;placeholder=id=>({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-ana':zelAna})[id]?({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-ana':zelAna})[id]():_ph(id);}
+{const _ph=placeholder;placeholder=id=>({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-cat':zelCats,'zel-ana':zelAna})[id]?({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-cat':zelCats,'zel-ana':zelAna})[id]():_ph(id);}
 {const _nav=A.nav;A.nav=v=>{S.zj=null;if(v!=='zel-ana'&&String(S.relM)[0]==='Y')S.relM=RELN;_nav(v);};}
 {const _r=render;render=function(){_r.apply(this,arguments);
  if(S.active==='zel-trab'&&S.zj)requestAnimationFrame(tabInd);

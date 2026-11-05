@@ -250,7 +250,7 @@ cxEntryDlg=function(cid,t){
   +'<p class="cxf-warn" id="cxH" hidden>'+ic('alert',14,2)+'<span>Esta saída é maior que o saldo e deixa o caixa negativo.</span></p>'
   +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="cxGo">Lançar</button></div></form>','cxfd');
  const f=$('#cxF'),typ=()=>f.querySelector('[name=t]:checked').value;
- const paint=()=>{const k=typ();if(!CC(k).includes(cat))cat=(zel&&k==='out'&&zJob(c.ownerId)&&CC(k).includes(zJob(c.ownerId).cat))?zJob(c.ownerId).cat:CC(k)[0];const nw=$('#cxNatW');if(nw)nw.hidden=k==='in';
+ const paint=()=>{const k=typ();if(!CC(k).includes(cat))cat=(zel&&k==='out'&&CC(k).includes(zLastCat(c.ownerId)))?zLastCat(c.ownerId):CC(k)[0];const nw=$('#cxNatW');if(nw)nw.hidden=k==='in';
   $('#cxCats').innerHTML=CC(k).map(x=>'<button type="button" class="chipf '+(x===cat?'on':'')+'" data-cat="'+esc(x)+'">'+esc(x)+'</button>').join('');
   const v=Math.round((+f.elements.v.value||0)*100);$('#cxH').hidden=!(k==='out'&&v>cxBal(c));
   f.dataset.t=k;$('#cxGo').textContent=(k==='in'?'Lançar entrada':'Lançar saída')+(v?' · '+cxMoney(v):'');};

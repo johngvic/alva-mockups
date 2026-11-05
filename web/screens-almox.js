@@ -8,6 +8,7 @@ Object.assign(I,{
  scale:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
 });
 const AXICONS=['monitor','mic','music','chair','coffee','box','camera','wrench','sparkle','baby','book','droplet'];
+let KSTORE=null;/* quando outro módulo usa o formulário de categoria: {list, re, sample, icons} */
 const ICATS=[{id:'k1',n:'Audiovisual',c:'#2f7de1',ic:'monitor'},{id:'k2',n:'Áudio',c:'#1f9a52',ic:'mic'},{id:'k3',n:'Instrumentos',c:'#c25a12',ic:'music'},{id:'k4',n:'Mobiliário',c:'#7c3aed',ic:'chair'},{id:'k5',n:'Iluminação',c:'#d4a017',ic:'sparkle'}];
 let _ix=0;const IT=(n,tipo,cat,total,sku='',desc='')=>({id:'it'+(++_ix),n,tipo,cat,total,sku,desc});
 const ITEMS=[IT('Câmera Sony A7 III','emp','k1',1,'AV-CAM-001'),IT('Microfone Shure SM58','emp','k2',4,'AU-MIC-058'),IT('Projetor Epson 3000lm','emp','k1',2,'AV-PRJ-002'),IT('Violão Yamaha F310','emp','k3',3,'IN-VIO-310'),IT('Mesa de Som Yamaha','emp','k2',1,'AU-MES-001'),IT('Cadeira dobrável','emp','k4',50,'MO-CAD-050'),IT('Teclado Yamaha','emp','k3',2,'IN-TEC-002'),IT('Luminária LED portátil','emp','k5',6,'IL-LED-006'),IT('Garrafa de água 500 ml','cons','k4',200,'CO-AGU-500'),IT('Copo descartável 200 ml','cons','k4',1000,'CO-COP-200'),IT('Papel higiênico (fardo)','cons','k4',40,'CO-PAP-040')];
@@ -78,19 +79,19 @@ function axCats(){
   <div class="ax-kit">${its.length?its.slice(0,4).map(i=>`<span>${esc(i.n)}</span>`).join('')+(its.length>4?`<span class="soft">+${its.length-4}</span>`:''):'<span class="soft">Nenhum item ainda</span>'}</div></article>`;}).join('')}
   <button class="cm-badd" data-a="kNew" style="min-height:150px"><span>${ic('plus',20,2)}</span><b>Nova categoria</b><small>Nome, cor e ícone</small></button></div>`;
 }
-function kForm(id,after,stack){const c=id?ICATS.find(x=>x.id===id):null;let col=c?c.c:KPRE[ICATS.length%KPRE.length],icn=c?c.ic:'box';let [H,Sa,L]=hex2hsl(col);
+function kForm(id,after,stack){const ST=KSTORE;KSTORE=null;const KL=ST?ST.list:ICATS,kRe=ST?ST.re:axRe,c=id?KL.find(x=>x.id===id):null;let col=c?c.c:KPRE[KL.length%KPRE.length],icn=c?c.ic:'box';let [H,Sa,L]=hex2hsl(col);
  const html=`${dlgHead(c?'Editar categoria':'Nova categoria','Escolha uma cor que dê para reconhecer de longe.')}<form id="kF" class="ax-kf" novalidate>
   <label class="fld"><span class="fl">Nome</span><input name="n" value="${esc(c?c.n:'')}" placeholder="Ex.: Iluminação" autocomplete="off"><span class="err"></span></label>
   <div class="ax-cp"><div class="ax-wheel" id="kW"><div class="ax-wh-in" id="kWi"><span id="kHex">${col}</span><small>arraste na roda</small></div><i class="ax-knob" id="kKnob"></i></div>
    <div class="ax-cpr"><p class="fl">Sugestões</p><div class="ax-pre">${KPRE.map(p=>`<button type="button" data-p="${p}" style="--k:${p}" aria-label="${p}"></button>`).join('')}</div>
-    <p class="fl">Tom</p><input type="range" id="kL" min="28" max="62" value="${L}" class="ax-rng"><p class="fl">Ícone</p><div class="ax-icp">${AXICONS.map(x=>`<button type="button" data-i="${x}" class="${x===icn?'on':''}">${ic(x,15)}</button>`).join('')}</div></div></div>
+    <p class="fl">Tom</p><input type="range" id="kL" min="28" max="62" value="${L}" class="ax-rng"><p class="fl">Ícone</p><div class="ax-icp">${(ST&&ST.icons||AXICONS).map(x=>`<button type="button" data-i="${x}" class="${x===icn?'on':''}">${ic(x,15)}</button>`).join('')}</div></div></div>
   <div class="ax-prev"><p class="fl">Prévia</p><div class="ax-pv"><span id="kPv1"></span><span id="kPv2"></span><span class="ax-pvd" id="kPv3"></span></div><p class="ax-ctr" id="kCtr"></p></div>
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="kOk">${c?'Salvar':'Adicionar categoria'}</button></div></form>`;
  if(stack){const d=document.createElement('div');d.className='dlgw open ax-stack';d.innerHTML=`<div class="dlg" role="dialog" aria-modal="true">${html}</div>`;document.body.appendChild(d);d.addEventListener('click',e=>{if(e.target===d||e.target.closest('[data-a=closeDlg]')){e.stopPropagation();d.remove();}});}else openDlg(html);
  const root=stack?$('.ax-stack'):document,f=root.querySelector('#kF'),ok=root.querySelector('#kOk'),W=root.querySelector('#kW'),kn=root.querySelector('#kKnob');
  const paint=(pop)=>{col=hsl2hex(H,Sa,L);const nm=f.n.value.trim()||'Nova categoria';W.style.setProperty('--k',col);root.querySelector('#kHex').textContent=col.toUpperCase();
   const a=(H-90)*Math.PI/180;kn.style.left=`calc(50% + ${Math.cos(a)*42}%)`;kn.style.top=`calc(50% + ${Math.sin(a)*42}%)`;kn.style.background=col;
-  root.querySelector('#kPv1').outerHTML=`<span id="kPv1">${kChip({n:nm,c:col,ic:icn})}</span>`;root.querySelector('#kPv2').outerHTML=`<span id="kPv2" class="ax-pvi">${kTile({c:col,ic:icn},34)}<span><b>Projetor Epson</b><small>${esc(nm)}</small></span></span>`;root.querySelector('#kPv3').innerHTML=kChip({n:nm,c:col,ic:icn});
+  root.querySelector('#kPv1').outerHTML=`<span id="kPv1">${kChip({n:nm,c:col,ic:icn})}</span>`;root.querySelector('#kPv2').outerHTML=`<span id="kPv2" class="ax-pvi">${kTile({c:col,ic:icn},34)}<span><b>${esc(ST?ST.sample:'Projetor Epson')}</b><small>${esc(nm)}</small></span></span>`;root.querySelector('#kPv3').innerHTML=kChip({n:nm,c:col,ic:icn});
   const cr=(1.05)/(lum(col)+.05);root.querySelector('#kCtr').innerHTML=cr<3?`${ic('alert',12,2)}Cor clara demais — o texto pode sumir no tema Dia`:`${ic('check',12,2.4)}Boa leitura nos dois temas`;root.querySelector('#kCtr').className='ax-ctr '+(cr<3?'warn':'ok');
   $$('[data-p]',root).forEach(b=>b.classList.toggle('on',b.dataset.p.toLowerCase()===col.toLowerCase()));if(pop){const i=root.querySelector('#kWi');i.classList.remove('ax-bump');i.offsetWidth;i.classList.add('ax-bump');}ok.disabled=!f.n.value.trim();};
  const fromPt=e=>{const r=W.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;H=(Math.round(Math.atan2(y,x)*180/Math.PI+90)+360)%360;Sa=72;paint();};
@@ -99,8 +100,8 @@ function kForm(id,after,stack){const c=id?ICATS.find(x=>x.id===id):null;let col=
  root.querySelector('#kL').addEventListener('input',e=>{L=+e.target.value;paint();});
  $$('[data-i]',root).forEach(b=>b.onclick=()=>{icn=b.dataset.i;$$('[data-i]',root).forEach(x=>x.classList.toggle('on',x===b));paint(true);});
  f.addEventListener('input',()=>paint());paint();setTimeout(()=>f.n.focus(),80);
- f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;const n=f.n.value.trim();if(ICATS.some(x=>x!==c&&norm(x.n)===norm(n))){f.n.closest('.fld').classList.add('bad');f.n.nextElementSibling.textContent='Essa categoria já existe';return;}
-  if(c){Object.assign(c,{n,c:col,ic:icn});closeDlg();axRe();toast('Categoria atualizada');}else{const k={id:'k'+Date.now(),n,c:col,ic:icn};ICATS.push(k);if(stack){root.remove();after&&after(k);toast(`Categoria ${n} criada`);}else{closeDlg();axRe();toast(`Categoria ${n} criada`);}}});}
+ f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;const n=f.n.value.trim();if(KL.some(x=>x!==c&&norm(x.n)===norm(n))){f.n.closest('.fld').classList.add('bad');f.n.nextElementSibling.textContent='Essa categoria já existe';return;}
+  if(c){Object.assign(c,{n,c:col,ic:icn});closeDlg();kRe();toast('Categoria atualizada');}else{const k={id:'k'+Date.now(),n,c:col,ic:icn};KL.push(k);if(stack){root.remove();after&&after(k);toast(`Categoria ${n} criada`);}else{closeDlg();kRe();toast(`Categoria ${n} criada`);}}});}
 
 /* ---------- Empréstimos / Devoluções ---------- */
 const lnGroups=()=>{const g={};LOANS.filter(l=>l.st==='pend').forEach(l=>(g[l.rv||l.id]=g[l.rv||l.id]||[]).push(l));return Object.values(g);};
