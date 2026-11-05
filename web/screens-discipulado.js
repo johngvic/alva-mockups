@@ -4,7 +4,7 @@ const RHY={7:'Semanal',14:'Quinzenal',30:'Mensal'};
 const TODAY=new Date(2026,8,30);
 const addDays=(n)=>{const d=new Date(TODAY);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
 let _did=0;
-const DN=(n,parent,o={})=>({id:'d'+(++_did),n,parent,tone:o.tone||TONES[_did%6],role:o.role||'Membro',rhythm:o.rhythm||14,last:o.last,stage:o.stage||0,paused:!!o.paused,gone:!!o.gone,notes:o.notes||'',meets:o.meets||[],open:true});
+const DN=(n,parent,o={})=>({id:'d'+(++_did),n,parent,tone:o.tone||TONES[_did%6],role:o.role||'Membro',rhythm:o.rhythm||14,last:o.last,stage:o.stage||0,paused:!!o.paused,gone:!!o.gone,sup:o.sup||'',casa:o.casa||'',cpart:o.cpart||'',notes:o.notes||'',meets:o.meets||[],open:true});
 const MT=(d,type,o={})=>({id:'e'+Math.random().toString(36).slice(2,8),d,type,content:o.c||'',mode:o.mode||'Presencial',link:o.link||'',time:o.t||'19:30',note:o.note||'',mat:o.mat||'',mref:o.mref||'',parts:o.parts});
 const DISC=[
  DN('Pr. Rafael Pereira',null,{role:'Pastor',rhythm:30,last:29,tone:'ceu'}),
@@ -29,12 +29,7 @@ const dThi=_ds('Thiago Mendes',dRod.id,{role:'Líder de casa',rhythm:14,last:11,
 const dFer=_ds('Fernanda Alves Melo',dCam.id,{role:'Líder de casa',rhythm:14,last:8,tone:'rosado',casa:'Casa Sul — Ipiranga'});
 const dRen=_ds('Renan Ferreira',dDie.id,{role:'Líder de casa',rhythm:14,last:19,tone:'lima',casa:'Casa Leste — Tatuapé'});
 const dLar=_ds('Larissa Pinto Rocha',dDie.id,{role:'Líder de casa',rhythm:14,last:7,tone:'salvia',casa:'Casa Oeste — Pinheiros'});
-[['Cláudia Ferraz',dAnd,'Casa Norte — Lapa',5],['Henrique Costa',dAnd,'Casa Norte — Lapa',13],['Mônica Souza',dAnd,'Casa Norte — Lapa',2],['Gisele Prado',dAnd,'Casa Norte — Lapa',27],
- ['Eduarda Lins',dThi,'Casa Centro — República',9],['Fábio Moura',dThi,'Casa Centro — República',16],
- ['Lívia Santos',dFer,'Casa Sul — Ipiranga',4],['Mateus Leal',dFer,'Casa Sul — Ipiranga',10],['Nina Castro',dFer,'Casa Sul — Ipiranga',31],
- ['Raul Teles',dRen,'Casa Leste — Tatuapé',6],['Sara Brito',dRen,'Casa Leste — Tatuapé',22],
- ['Yara Mendes',dLar,'Casa Oeste — Pinheiros',3],['Zeca Arruda',dLar,'Casa Oeste — Pinheiros',12]].forEach((x,i)=>_ds(x[0],x[1].id,{rhythm:14,last:x[3],stage:i%3?0:2,casa:x[2]}));
-[['Hugo Lemos',dMarcos,'Casa Norte — Lapa',14],['Patrícia Lima',dMarcos,'Casa Norte — Lapa',8],['Beatriz Nogueira',dMarcos,'Casa Oeste — Pinheiros',17],['Caio Ramos','d2','Casa Oeste — Pinheiros',5]].forEach(x=>_ds(x[0],x[1].id||x[1],{rhythm:14,last:x[3],cpart:x[2]}));
+/* Os participantes de cada casa que o líder discipula, e quem é discipulado por outra pessoa, nascem em screens-casas.js, a partir dos participantes reais de cada casa. */
 Object.assign(S,{disc:null,dtab:'rede',dpt:'geral',dq:'',df:'todos',dscope:'geral'});
 const dById=id=>DISC.find(x=>x.id===id);
 const kids=id=>DISC.filter(x=>x.parent===id);

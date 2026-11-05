@@ -19,6 +19,11 @@ const CASAS=[
 ];
 /* Melhoria 4: tags nas casas (mock) */
 [[],['Casais'],['Connect','Jovens'],['Mulheres'],['Homens']].forEach((t,i)=>{if(CASAS[i])CASAS[i].tags=t;});
+/* Melhoria 2: discipulado da casa (mock). Por casa, o líder discipula os primeiros participantes (anfitrião incluído); um outro participante é discipulado pelo pastor, para o exemplo de "discipulado por outra pessoa". */
+CASAS.forEach(c=>{const lead=DISC.find(d=>d.casa===c.n&&/^Líder/.test(d.role));if(!lead)return;
+ const part=c.ppl.filter(p=>p.n!==c.leader&&!DISC.some(d=>d.n===p.n));
+ part.slice(0,5).forEach((p,i)=>_ds(p.n,lead.id,{rhythm:i%2?14:7,last:[5,13,2,27,9][i],stage:i%3?0:2,casa:c.n}));
+ if(part[5])_ds(part[5].n,dMarcos.id,{rhythm:30,last:14,cpart:c.n});});
 Object.assign(S,{casa:null,ctab:'geral',chamada:null,hq:'',hmin:'todos',hedit:null});
 const hById=id=>CASAS.find(c=>c.id===id);
 const mRate=(c,m)=>{const t=c.ppl.length;return t?Math.round(c.ppl.filter(p=>m.pres[p.id]).length/t*100):0;};
@@ -88,11 +93,11 @@ function hDisc(c){
  const mine=lead?kids(lead.id).filter(d=>d.casa===c.n):[],others=DISC.filter(d=>d.cpart===c.n);
  const li=(d,dep,inner,open)=>`<li class="dn" style="--dep:${dep}"><div class="drow${open?' dlink':''}"${open?` tabindex="0" data-a="hDiscOpen" data-v="${d.id}"`:''}><span class="dtog nil"></span>${dAv(d)}<span class="dtx"><span class="dt1"><b>${esc(d.n)}</b>${d.role!=='Membro'?`<em class="tag">${d.role}</em>`:''}${d.sup?`<em class="tag">${esc(d.sup)}</em>`:''}${dPill(d)}</span><span class="dt2"><span>${RHY[d.rhythm]}</span></span></span><span class="dr">${cadence(d)}</span></div>${inner?`<ul class="dkids">${inner}</ul>`:''}</li>`;
  const leaf=mine.map(d=>li(d,2,'',true)).join(''),mid=lead?li(lead,sup?1:0,leaf):'',top=sup&&lead?li(sup,0,mid):mid;
- return `<section class="card mtab rise" style="--d:2"><div class="sh"><h2>Discipulado da casa</h2><span class="soft">${mine.length} ${mine.length===1?'discípulo':'discípulos'}</span></div>
+ return `<div class="col"><section class="card pc rise" style="--d:2"><div class="sh"><h2>Discipulado da casa</h2><span class="soft">${mine.length} ${mine.length===1?'discípulo':'discípulos'}</span></div>
   ${top?`<ul class="dtree">${top}</ul>`:`<div class="mempty"><p>Nenhum discípulo ligado a esta casa.</p><span>Quem entra na casa sem discipulador passa a ser discipulado pelo líder.</span></div>`}
  </section>
- ${others.length?`<section class="card mtab rise" style="--d:3"><div class="sh"><h2>Participantes discipulados por outra pessoa</h2><span class="soft">${others.length}</span></div>
-  <ul class="dtree">${others.map(d=>`<li class="dn dim" style="--dep:0"><div class="drow"><span class="dtog nil"></span>${dAv(d)}<span class="dtx"><span class="dt1"><b>${esc(d.n)}</b></span><span class="dt2"><span>Discipulado por ${esc(dById(d.parent).n)}</span></span></span></div></li>`).join('')}</ul></section>`:''}`;
+ ${others.length?`<section class="card pc rise" style="--d:3"><div class="sh"><h2>Participantes discipulados por outra pessoa</h2><span class="soft">${others.length}</span></div>
+  <ul class="dtree">${others.map(d=>`<li class="dn dim" style="--dep:0"><div class="drow"><span class="dtog nil"></span>${dAv(d)}<span class="dtx"><span class="dt1"><b>${esc(d.n)}</b></span><span class="dt2"><span>Discipulado por ${esc(dById(d.parent).n)}</span></span></span></div></li>`).join('')}</ul></section>`:''}</div>`;
 }
 function caHist(c){
  const ev=[];c.meets.filter(m=>m.done).slice(0,4).forEach(m=>{const n=c.ppl.filter(p=>m.pres[p.id]).length;ev.push([m.d,'Encontro realizado e chamada registrada',n+' de '+c.ppl.length+' presentes','por '+c.leader]);});

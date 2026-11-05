@@ -6064,7 +6064,7 @@ input.uip-open,select.uip-open{box-shadow:inset 0 0 0 1.5px var(--brand-text),0 
 
 /* Melhoria 3: aba Mensagens (líder envia aos liderados) */
 .msg-l{list-style:none;margin:0;padding:0}
-.msg-r{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px 18px;border-top:1px solid var(--line)}
+.msg-r{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
 .msg-ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--st-int-bg);color:var(--st-int)}
 .msg-ic.p{background:var(--surface-2);color:var(--ink-muted)}
 .msg-tx b{display:block;font:600 14px/1.3 var(--font-text)}
@@ -6087,3 +6087,10 @@ button.tag.tg{border:0;cursor:pointer;font:inherit}
 /* Aba Discipulado da casa: a linha do discípulo abre a ficha (05/11/2026) */
 .drow.dlink{cursor:pointer;border-radius:12px}
 .drow.dlink:hover{background:var(--surface-2)}
+.pc>.dtree{padding:0}
+/* Assistente Enviar mensagem (05/11/2026) */
+.mw-blk{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:14px;box-shadow:inset 0 0 0 1px var(--line)}
+.mw-bh{display:inline-flex;align-items:center;gap:8px;font:600 13px/1 var(--font-text);color:var(--ink-muted)}
+.mw-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}.mw-tools .sbox{flex:1;min-width:180px}
+.mw-list{max-height:40vh;overflow:auto}
+.cm-ign{font-style:normal;margin-left:6px;color:var(--st-sol);font:600 11.5px/1 var(--font-text)}

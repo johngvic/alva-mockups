@@ -107,7 +107,7 @@ const PUSHES=[
  PS('Conferência Missões começa sexta','Confira a programação e escolha suas oficinas.','todos','manual','agendado','2026-10-08 18:00',['push','email']),
 ];
 const AUTOS=[{id:'au10',n:'Lembrete de reserva de espaço',d:'1 dia e 15 minutos antes, para quem reservou',icon:'calendar',on:true},{id:'au4',n:'Lembrete de evento',d:'7 dias, 1 dia e 1 hora antes, para inscritos e confirmados',icon:'calendar',on:true},{id:'au5',n:'Lembrete de encontro',d:'1 dia e 1 hora antes, para quem não recusou',icon:'users',on:true},{id:'au6',n:'Lembrete de tarefa',d:'24 horas antes e ao vencer',icon:'check',on:true},{id:'au7',n:'Live ou culto',d:'1 hora antes, só push, para quem tem o app',icon:'video',on:true},{id:'au1',n:'Aniversário',d:'No dia, às 8h, para o aniversariante',icon:'gift',on:true},{id:'au2',n:'Escala',d:'1 dia antes, para quem está escalado',icon:'calendar',on:true},{id:'au3',n:'Boas-vindas',d:'Quando um membro é integrado',icon:'smile',on:false}];
-Object.assign(S,{puf:'prox',pw:null,put:'auto'});
+Object.assign(S,{puf:'prox',pw:null,put:'auto',mf:{com:'prox'}});
 const segOf=k=>k.startsWith('mini:')?['mini','Ministério de '+k.slice(5),(MINIS.find(m=>m.n===k.slice(5))||{m:24}).m||24,'music']:SEGS.find(s=>s[0]===k);
 const dtFmt=dt=>{const [d,t]=dt.split(' ');return `${wd(d)}, ${fmtD(d)} · ${hm(t)}`;};
 
@@ -135,45 +135,41 @@ function puModelos(){
 }
 
 function puPage(){
+ if(S.put==='envios')S.put='auto';
+ const auto=`<section class="card cm-auto"><div class="sh"><h2>${ic('zap',16,2)} Automações</h2><span class="who">Enviadas sozinhas, por push e e-mail</span></div>${AUTOS.map(a=>`<label class="tog cm-au"><span class="htile" style="--s:34px;background:var(--brand-soft);color:var(--brand-text)">${ic(a.icon,16)}</span><span><b>${a.n}</b><small>${a.d}</small></span><input type="checkbox" data-au="${a.id}" ${a.on?'checked':''}><span class="sw"></span></label>`).join('')}</section>`;
+ return `<header class="ph rise"><div><p class="eb">Comunicação</p><h1>Notificações</h1><p class="lede">Automações e modelos dos avisos por push e e-mail. Os envios avulsos estão em Mensagens.</p></div></header>`
+ + `<div class="utabs rise" style="--d:2" role="tablist">${[['auto','Automações',AUTOS.filter(a=>a.on).length+'/'+AUTOS.length],['modelos','Modelos']].map(t=>`<button role="tab" class="${S.put===t[0]?'on':''}" aria-selected="${S.put===t[0]}" data-a="puT" data-v="${t[0]}">${t[1]}${t[2]!=null?`<small class="cnt">${t[2]}</small>`:''}</button>`).join('')}</div>`
+ + (S.put==='modelos'?puModelos():`<div class="cm-pg rise" style="--d:2">${auto}</div>`);
+}
+/* Comunicação › Mensagens: os envios da igreja (a mesma lista de todas as abas Mensagens) */
+function msgsPage(){
  if(S.pw)return puWizard();
  const ag=PUSHES.filter(p=>p.st==='agendado'),env=PUSHES.filter(p=>p.st==='enviado');
- const l=PUSHES.filter(p=>S.puf==='todos'||(S.puf==='prox'?p.st==='agendado':S.puf==='env'?p.st==='enviado':p.st==='cancelado')).sort((a,b)=>(a.dt<b.dt?-1:1)*(S.puf==='prox'?1:-1));
-  const auto=`<section class="card cm-auto"><div class="sh"><h2>${ic('zap',16,2)} Automações</h2><span class="who">Enviadas sozinhas, por push e e-mail</span></div>${AUTOS.map(a=>`<label class="tog cm-au"><span class="htile" style="--s:34px;background:var(--brand-soft);color:var(--brand-text)">${ic(a.icon,16)}</span><span><b>${a.n}</b><small>${a.d}</small></span><input type="checkbox" data-au="${a.id}" ${a.on?'checked':''}><span class="sw"></span></label>`).join('')}</section>`,
-   envios=`<section class="card mtab rise" style="--d:2"><div class="tbar"><div class="chips">${[['prox','Agendados',ag.length],['env','Enviados',env.length],['canc','Cancelados',PUSHES.filter(p=>p.st==='cancelado').length],['todos','Todos',PUSHES.length]].map(c=>`<button class="chipf ${S.puf===c[0]?'on':''}" data-a="puF" data-v="${c[0]}">${c[1]}<small>${c[2]}</small></button>`).join('')}</div></div>
-  ${l.length?`<div class="cm-pl">${l.map(p=>{const s=segOf(p.seg);return `<div class="cm-pr ${p.st}">
-   <span class="cm-pd"><b>${+p.dt.slice(8,10)}</b><small>${MONTHS[+p.dt.slice(5,7)-1].slice(0,3)}</small><em>${hm(p.dt.slice(11))}</em></span>
-   <div class="cm-pt"><b>${esc(p.t)}</b><span>${esc(p.msg)}</span></div>
-   <div class="cm-pm"><span class="cm-seg">${ic(s[3],13)}${esc(s[1])}<small>${s[2].toLocaleString('pt-BR')}</small></span><span class="cm-chs">${p.ch.map(c=>`<i title="${c==='push'?'Push':'E-mail'}">${ic(c==='push'?'bell':'mail',12)}</i>`).join('')}${p.type==='auto'?`<em title="Automático">${ic('zap',11,2)}Auto</em>`:''}</span></div>
-   <div class="cm-ps">${p.st==='enviado'?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Enviado</span>`:p.st==='agendado'?`<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>${relD(p.dt.slice(0,10)).replace(/^./,c=>c.toUpperCase())}</span>`:'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Cancelado</span>'}</div>
-   <div class="cm-pa">${p.st==='agendado'?`<button class="btn sec sm" data-a="puCancel" data-v="${p.id}">Cancelar</button>`:p.st==='enviado'?`<button class="btn ghost sm" data-a="puAgain" data-v="${p.id}">${ic('copy',13)}Reenviar</button>`:''}</div></div>`;}).join('')}</div>`:'<div class="mempty"><p>Nada por aqui.</p><span>Os envios aparecem aqui conforme forem criados.</span></div>'}
-  <div class="tfoot"><span>${l.length} envio${l.length===1?'':'s'}</span><span>${ic('gift',13)} Ao integrar um membro, o aniversário dele já entra nos automáticos.</span></div></section>`;
- return `<header class="ph rise"><div><p class="eb">Comunicação</p><h1>Notificações</h1><p class="lede">Automações, modelos e envios por push e e-mail</p></div><div class="pact">${rpBtn('comunicacao','envios')}<button class="btn pri" data-a="puNew">${ic('send',15)}Novo envio</button></div></header>
+ return `<header class="ph rise"><div><p class="eb">Comunicação</p><h1>Mensagens</h1><p class="lede">O que a igreja enviou por push e e-mail, e o que está agendado</p></div><div class="pact">${rpBtn('comunicacao','envios')}<button class="btn pri" data-a="puNew">${ic('send',15)}Novo envio</button></div></header>
  <div class="cm-pg rise" style="--d:1">
-  <section class="card kpis4 k3"><div class="k4"><span class="kl">Agendados</span><span class="kv">${ag.length}</span><span class="kd">${ag.length?'próximo '+relD(ag.sort((a,b)=>a.dt<b.dt?-1:1)[0].dt.slice(0,10)):'nenhum'}</span></div><div class="k4"><span class="kl">Enviados no mês</span><span class="kv">${env.length}</span><span class="kd">${env.reduce((a,p)=>a+segOf(p.seg)[2],0).toLocaleString('pt-BR')} pessoas alcançadas</span></div><div class="k4"><span class="kl">Automações ligadas</span><span class="kv">${AUTOS.filter(a=>a.on).length}</span><span class="kd">de ${AUTOS.length}</span></div></section>
-  </div>`
- + `<div class="utabs rise" style="--d:2" role="tablist">${[['auto','Automações',AUTOS.filter(a=>a.on).length+'/'+AUTOS.length],['modelos','Modelos'],['envios','Envios',PUSHES.length]].map(t=>`<button role="tab" class="${S.put===t[0]?'on':''}" aria-selected="${S.put===t[0]}" data-a="puT" data-v="${t[0]}">${t[1]}${t[2]!=null?`<small class="cnt">${t[2]}</small>`:''}</button>`).join('')}</div>`
- + (S.put==='modelos'?puModelos():S.put==='envios'?envios:`<div class="cm-pg rise" style="--d:2">${auto}</div>`);
+  <section class="card kpis4 k3"><div class="k4"><span class="kl">Agendados</span><span class="kv">${ag.length}</span><span class="kd">${ag.length?'próximo '+relD(ag.slice().sort((a,b)=>a.dt<b.dt?-1:1)[0].dt.slice(0,10)):'nenhum'}</span></div><div class="k4"><span class="kl">Enviados no mês</span><span class="kv">${env.length}</span><span class="kd">${env.reduce((a,p)=>a+segOf(p.seg)[2],0).toLocaleString('pt-BR')} pessoas alcançadas</span></div><div class="k4"><span class="kl">Cancelados</span><span class="kv">${PUSHES.filter(p=>p.st==='cancelado').length}</span><span class="kd">no mês</span></div></section>
+ </div>
+ ${msgsSection('com',pushItems(),`<span>${ic('gift',13)} Ao integrar um membro, o aniversário dele já entra nos automáticos.</span>`)}`;
 }
+{const _phm=placeholder;placeholder=id=>id==='mensagens'?msgsPage():_phm(id);}
 const PSTEPS=['Conteúdo','Público','Quando','Revisão'];
 function puWizard(){const w=S.pw,s=segOf(w.seg==='mini'?'mini:'+w.mini:w.seg);
- return `<nav class="crumb rise"><span class="soft">Comunicação</span>${ic('chevR',13,2)}<button class="lnk back" data-a="puBack">Notificações</button>${ic('chevR',13,2)}<span>Novo envio</span></nav>
+ return `<nav class="crumb rise"><span class="soft">Comunicação</span>${ic('chevR',13,2)}<button class="lnk back" data-a="puBack">Mensagens</button>${ic('chevR',13,2)}<span>Novo envio</span></nav>
  <header class="ph rise" style="--d:1"><div><h1>Novo envio</h1><p class="lede">Escreva, escolha quem recebe e quando</p></div></header>
  ${w.done?puDone(w,s):`<ol class="cm-steps rise" style="--d:1">${PSTEPS.map((t,i)=>`<li class="${i<w.step?'done':i===w.step?'on':''}"><button ${i<w.step?`data-a="puStep" data-v="${i}"`:'disabled'}><i>${i<w.step?ic('check',12,3):i+1}</i>${t}</button></li>`).join('')}</ol>
  <div class="cm-wz rise" style="--d:2"><section class="card cm-wc" id="puCard">${puStepHtml(w,s)}</section>
   <aside class="cm-wp"><div class="cm-lock"><span class="cm-pvl">Prévia</span><span class="cm-lt">${w.when==='later'&&w.d?(()=>{const s=`${['domingo','segunda','terça','quarta','quinta','sexta','sábado'][dow(w.d)]}, ${+w.d.slice(8)} de ${MONTHS[+w.d.slice(5,7)-1]}`;return s[0].toUpperCase()+s.slice(1);})():'Quinta, 1 de outubro'}</span><b class="cm-lc">${w.when==='later'&&w.t?(+w.t.slice(0,2))+':'+w.t.slice(3):'9:41'}</b>
-   <div class="cm-nt2 ${w.ch.includes('push')?'':'off'}"><span class="cm-na">a</span><div><span class="cm-nhd"><b>Alva</b><small>${w.when==='later'?'agendado':'agora'}</small></span><b id="pvT">${w.title?esc(w.title):'Título da notificação'}</b><p id="pvM">${w.msg?esc(w.msg):'A mensagem aparece aqui…'}</p></div></div>
-   ${w.ch.includes('email')?`<div class="cm-nt2 mail"><span class="cm-na m">${ic('mail',14)}</span><div><span class="cm-nhd"><b>Alva Sede</b><small>e-mail</small></span><b>${w.title?esc(w.title):'Assunto do e-mail'}</b><p>${w.msg?esc(w.msg):'…'}</p></div></div>`:''}
+   <div class="cm-nt2 ${w.ch.includes('push')?'':'off'}"><span class="cm-na">a</span><div><span class="cm-nhd"><b>Alva</b><small>${w.when==='later'?'agendado':'agora'}</small></span><p id="pvM">${w.pText?esc(w.pText):'A mensagem aparece aqui…'}</p></div></div>
+   ${w.ch.includes('email')?`<div class="cm-nt2 mail"><span class="cm-na m">${ic('mail',14)}</span><div><span class="cm-nhd"><b>Alva Sede</b><small>e-mail</small></span><b id="pvET">${w.eTitle?esc(w.eTitle):'Assunto do e-mail'}</b><p id="pvEM">${w.eBody?esc(w.eBody):'…'}</p></div></div>`:''}
    <div class="cm-reach in">${ic('users',14)}<b>${s[2].toLocaleString('pt-BR')}</b><span>pessoas vão receber</span></div></div></aside></div>`}`;
 }
 function puStepHtml(w,s){
  const foot=(ok=true,label='Avançar')=>`<div class="cm-wf"><button class="btn sec" data-a="${w.step?'puPrev':'puBack'}">${w.step?ic('chevL',14,2)+'Voltar':'Cancelar'}</button><button class="btn pri" data-a="puNext" id="puNx" ${ok?'':'disabled'}>${label}${w.step<3?ic('arrowR',14,2):''}</button></div>`;
  if(w.step===0)return `<h2>O que você quer dizer?</h2>
-  <div class="fld"><span class="fl">Enviar por</span><div class="cm-chpick">${[['push','Push no app','bell'],['email','E-mail','mail']].map(c=>`<label><input type="checkbox" data-ch="${c[0]}" ${w.ch.includes(c[0])?'checked':''}><span>${ic(c[2],15)}${c[1]}</span></label>`).join('')}</div></div>
-  <label class="fld"><span class="fl cm-cnt">Título <small id="ctT">${w.title.length}/65</small></span><input id="puT" maxlength="65" value="${esc(w.title)}" placeholder="Ex.: 🙌 Lembrete: Culto de Domingo"></label>
-  <label class="fld"><span class="fl cm-cnt">Mensagem <small id="ctM">${w.msg.length}/200</small></span><textarea class="ta" id="puM" maxlength="200" rows="3" placeholder="Ex.: O culto começa às 10h. Te esperamos!">${esc(w.msg)}</textarea></label>
-  <div class="cm-emo">${['🙌','🙏','❤️','🎉','📖','🎂','⛪'].map(e=>`<button type="button" data-e="${e}">${e}</button>`).join('')}<span class="hint">Toque para inserir na mensagem</span></div>
-  <label class="fld"><span class="fl">Ao tocar, abrir <small>opcional</small></span><span class="selw"><select id="puL"><option value="">A tela inicial do app</option>${EVTS.filter(e=>!past(e)&&e.st!=='previsao').slice(0,6).map(e=>`<option ${w.link===e.t?'selected':''}>${esc(e.t)}</option>`).join('')}<option ${w.link==='Doações'?'selected':''}>Doações</option></select>${ic('updown',14)}</span></label>
-  ${foot(w.title.trim()&&w.msg.trim()&&w.ch.length)}`;
+  ${msgFieldsHtml(w)}
+  ${w.ch.includes('push')?`<div class="cm-emo">${['🙌','🙏','❤️','🎉','📖','🎂','⛪'].map(e=>`<button type="button" data-e="${e}">${e}</button>`).join('')}<span class="hint">Toque para inserir na mensagem</span></div>
+  <label class="fld"><span class="fl">Ao tocar, abrir <small>opcional</small></span><span class="selw"><select id="puL"><option value="">A tela inicial do app</option>${EVTS.filter(e=>!past(e)&&e.st!=='previsao').slice(0,6).map(e=>`<option ${w.link===e.t?'selected':''}>${esc(e.t)}</option>`).join('')}<option ${w.link==='Doações'?'selected':''}>Doações</option></select>${ic('updown',14)}</span></label>`:''}
+  ${foot(mwOk0(w))}`;
  if(w.step===1)return `<h2>Quem vai receber?</h2><div class="cm-segs">${SEGS.map(g=>`<label class="${w.seg===g[0]?'on':''}"><input type="radio" name="seg" value="${g[0]}" ${w.seg===g[0]?'checked':''}><span class="htile" style="--s:36px;background:var(--brand-soft);color:var(--brand-text)">${ic(g[3],17)}</span><span><b>${g[1]}</b><small>${g[0]==='mini'?'escolha abaixo':g[2].toLocaleString('pt-BR')+' pessoas'}</small></span><i class="cm-rd"></i></label>`).join('')}</div>
   ${w.seg==='mini'?`<div class="cm-minis">${MINIS.filter(m=>m.active).map(m=>`<button type="button" class="${w.mini===m.n?'on':''}" data-mini="${esc(m.n)}">${esc(m.n)}<small>${m.m||''}</small></button>`).join('')}</div>`:''}
   ${foot(w.seg!=='mini'||w.mini)}`;
@@ -184,8 +180,9 @@ function puStepHtml(w,s){
  const ed=v=>`<button class="ibtn sm cm-ed" data-a="puStep" data-v="${v}" aria-label="Editar" title="Editar">${ic('pen',14)}</button>`;
  const tile=(icn,l,v,step)=>`<div class="cm-rt"><span class="cm-rti">${ic(icn,16,2)}</span><span class="cm-rtx"><small>${l}</small><b>${v}</b></span>${ed(step)}</div>`;
  return `<h2>Tudo certo?</h2>
-  <div class="cm-rmsg"><span class="cm-rml">${ic('bell',14,2)}Mensagem</span>${ed(0)}<b>${esc(w.title)}</b><p>${esc(w.msg)}</p></div>
-  <div class="cm-rgrid">${tile('send','Canais',w.ch.map(c=>c==='push'?'Push no app':'E-mail').join(' + '),0)}${tile('users','Público',`${esc(s[1])} · ${s[2].toLocaleString('pt-BR')} pessoas`,1)}${tile(w.when==='now'?'zap':'clock','Quando',w.when==='now'?'Agora':dtFmt(w.d+' '+w.t),2)}${tile('link','Ao tocar',esc(w.link||'Tela inicial do app'),0)}</div>
+  ${w.ch.includes('push')?`<div class="cm-rmsg"><span class="cm-rml">${ic('bell',14,2)}Push no app</span>${ed(0)}<p>${esc(w.pText)}</p></div>`:''}
+  ${w.ch.includes('email')?`<div class="cm-rmsg"><span class="cm-rml">${ic('mail',14,2)}E-mail</span>${ed(0)}<b>${esc(w.eTitle)}</b><p>${esc(w.eBody)}</p></div>`:''}
+  <div class="cm-rgrid">${tile('send','Canais',w.ch.map(c=>c==='push'?'Push no app':'E-mail').join(' + '),0)}${tile('users','Público',`${esc(s[1])} · ${s[2].toLocaleString('pt-BR')} pessoas`,1)}${tile(w.when==='now'?'zap':'clock','Quando',w.when==='now'?'Agora':dtFmt(w.d+' '+w.t),2)}${w.ch.includes('push')?tile('link','Ao tocar',esc(w.link||'Tela inicial do app'),0):''}</div>
   ${foot(true,w.when==='now'?ic('send',15)+'Enviar agora':ic('clock',15)+'Agendar envio')}`;
 }
 function puDone(w,s){const now=w.when==='now',ch=w.ch.map(c=>c==='push'?'Push no app':'E-mail').join(' + ');
@@ -199,13 +196,12 @@ function puDone(w,s){const now=w.when==='now',ch=w.ch.map(c=>c==='push'?'Push no
 function puAfter(){
  $$('[data-au]').forEach(i=>i.addEventListener('change',()=>{const a=AUTOS.find(x=>x.id===i.dataset.au);a.on=i.checked;const n=AUTOS.filter(x=>x.on).length,t=$('.utabs [data-v=auto] .cnt'),k=$$('.cm-pg .kpis4 .k4 .kv')[2];if(t)t.textContent=n+'/'+AUTOS.length;if(k)k.textContent=n;toast(`${a.n}: envio automático ${a.on?'ligado':'desligado'}`);}));
  const w=S.pw;if(!w||w.done)return;const c=$('#puCard');if(!c)return;
- const valid=()=>{const nx=$('#puNx');if(!nx)return;nx.disabled=w.step===0?!(w.title.trim()&&w.msg.trim()&&w.ch.length):w.step===1?(w.seg==='mini'&&!w.mini):w.step===2?!(w.when==='now'||(w.d&&w.t)):false;};
- const T=$('#puT'),M=$('#puM');
- if(T){T.addEventListener('input',()=>{w.title=T.value;$('#ctT').textContent=`${T.value.length}/65`;$$('#pvT').forEach(x=>x.textContent=T.value||'Título da notificação');const ms=$('.cm-nt2.mail div>b');if(ms)ms.textContent=T.value||'Assunto do e-mail';valid();});
-  M.addEventListener('input',()=>{w.msg=M.value;$('#ctM').textContent=`${M.value.length}/200`;$('#pvM').textContent=M.value||'A mensagem aparece aqui…';valid();});
-  $('#puL').addEventListener('change',e=>w.link=e.target.value);
-  $$('.cm-emo button').forEach(b=>b.onclick=()=>{const s=M.selectionStart??M.value.length;M.setRangeText(b.dataset.e,s,M.selectionEnd??s,'end');M.focus();M.dispatchEvent(new Event('input'));});
-  $$('[data-ch]').forEach(i=>i.addEventListener('change',()=>{w.ch=$$('[data-ch]').filter(x=>x.checked).map(x=>x.dataset.ch);puRe();}));}
+ const valid=()=>{const nx=$('#puNx');if(!nx)return;nx.disabled=w.step===0?!mwOk0(w):w.step===1?(w.seg==='mini'&&!w.mini):w.step===2?!(w.when==='now'||(w.d&&w.t)):false;};
+ if(w.step===0){
+  const prev=()=>{const pm=$('#pvM');if(pm)pm.textContent=w.pText||'A mensagem aparece aqui…';const et=$('#pvET'),em=$('#pvEM');if(et)et.textContent=w.eTitle||'Assunto do e-mail';if(em)em.textContent=w.eBody||'…';};
+  msgFieldsBind(c,w,re=>{if(re)puRe();else{prev();valid();}});
+  const L=$('#puL');if(L)L.addEventListener('change',e=>w.link=e.target.value);
+  $$('.cm-emo button').forEach(b=>b.onclick=()=>{const f=$('[data-mf=pText]');if(!f)return;const s=f.selectionStart??f.value.length;f.setRangeText(b.dataset.e,s,f.selectionEnd??s,'end');f.focus();f.dispatchEvent(new Event('input',{bubbles:true}));});}
  $$('[name=seg]').forEach(r=>r.addEventListener('change',()=>{w.seg=r.value;if(r.value!=='mini')w.mini=null;puRe();}));
  $$('[data-mini]').forEach(b=>b.onclick=()=>{w.mini=b.dataset.mini;puRe();});
  $$('[name=when]').forEach(r=>r.addEventListener('change',()=>{w.when=r.value;puRe();}));
@@ -324,43 +320,119 @@ function cmAfter(){
  $$('[data-ch2]').forEach(i=>i.addEventListener('change',()=>{const c=chById(i.dataset.ch2);c.act=i.checked;cmRe();toast(`${c.n} ${c.act?'visível no app':'oculto do app'}`);}));
  if(S.active==='banners'){sortable($('#bnGrid'),'.cm-bc','.cm-bgrip',ids=>bnReorder(ids,false));sortable($('.cm-bord'),'li','.cm-grip',ids=>bnReorder(ids,true));}
  clearInterval(window._bnT);if(S.active==='banners'){const n=BANNERS.filter(bnLive).length;if(n>1)window._bnT=setInterval(()=>{if(S.active!=='banners'||!$('.cm-bscr')){clearInterval(window._bnT);return;}S.bnI=(S.bnI+1)%n;$$('.cm-bsl').forEach((s,i)=>s.classList.toggle('on',i===S.bnI));$$('.cm-dots i').forEach((s,i)=>s.classList.toggle('on',i===S.bnI));},5000);}
- if(S.active==='push')puAfter();
+ if(S.active==='push'||S.active==='mensagens')puAfter();
 }
 const cmRe=()=>{const y=window.scrollY;render();window.scrollTo(0,y);};
 /* ---------- Melhoria 3 (reunião com líderes, 04/11/2026): líder envia mensagem aos liderados ----------
  * O envio é composição, como os Relatórios: cada tela dona do público tem o botão "Enviar mensagem" (modal) e, onde há ficha, a aba "Mensagens".
  * O protótipo só mostra o que existe; não simula limite, permissão nem fila. */
-const msgBtn=(k,cls='btn sec')=>`<button class="${cls}" data-a="msgNew" data-v="${esc(k)}">${ic('mail',15)}Enviar mensagem</button>`;
 const MSG_TXT={
- casa:{p:[['Encontro de quinta muda de horário','O encontro desta semana será às 20h, na casa do anfitrião. Confirme sua presença no app.','Push e e-mail','sex, 6 nov · 18h',18]],
-  s:[['Estudo da semana','Leia o capítulo 3 de Gálatas antes do nosso encontro. Vamos conversar sobre os frutos do Espírito.','Push','qui, 29 out · 09h',17,1,'sem aparelho'],['Lanche coletivo','Cada um leva algo para o lanche de quinta. Combinem pelo grupo.','Push e e-mail','ter, 20 out · 10h',18,0,''],['Casa fechada na semana do feriado','Na semana do feriado não teremos encontro. Voltamos no dia 5.','Push','seg, 12 out · 08h',16,2,'canal desligado']]},
- rede:{p:[],s:[['Reunião de líderes','Reunião dos líderes da rede na segunda, às 19h30, na sede. Tragam as dúvidas das casas.','Push e e-mail','qua, 28 out · 15h',9,0,''],['Ajuste no cronograma de visitas','As visitas às casas começam na próxima semana. O supervisor passa o roteiro.','Push','seg, 19 out · 11h',9,1,'sem aparelho']]},
- mini:{p:[['Escala do domingo','A escala de domingo foi publicada. Confirmem até sexta, por favor.','Push','qui, 5 nov · 18h',12]],
-  s:[['Ensaio extra','Teremos ensaio extra na sexta, às 20h. Presença de todos.','Push e e-mail','qua, 28 out · 16h',11,1,'sem e-mail'],['Obrigado pelo fim de semana','Obrigado pelo serviço no evento. Foi lindo ver todos juntos.','Push','seg, 26 out · 09h',12,0,'']]},
- evento:{p:[],s:[['Mudança de local','A programação de sábado agora acontece no auditório principal. Entrada pela portaria da frente.','Push e e-mail','ter, 27 out · 17h',86,4,'sem aparelho'],['Falta pouco!','Faltam poucos dias para o evento. Leve o seu QR Code de entrada.','Push','qua, 21 out · 10h',90,0,'']]},
- escala:{p:[['Chegada antecipada','Quem está escalado no domingo chega 30 minutos antes para a passagem de som.','Push','sex, 6 nov · 16h',8]],
-  s:[['Escala aprovada','A escala do mês foi aprovada. Confira seus dias no app.','Push e e-mail','seg, 2 nov · 10h',8,0,'']]},
- disc:{p:[],s:[['Encontro de oração','Quinta, às 6h, teremos um encontro de oração com os discípulos. Quem puder, venha.','Push','qua, 28 out · 12h',12,2,'sem aparelho'],['Material novo','Deixei um estudo novo na sua trilha. Leia antes do nosso próximo encontro.','Push e e-mail','sex, 16 out · 09h',12,0,'']]},
- fin:{p:[['Prestação de contas da campanha','Já está no app a prestação de contas da campanha da reforma. Obrigado por contribuir.','Push e e-mail','sex, 6 nov · 10h',412]],
-  s:[['Prazo do reembolso de despesas','Quem tem despesa para reembolso envia o comprovante até o dia 10.','Push','qui, 29 out · 09h',38,0,''],['Obrigado pela generosidade','Obrigado pelas ofertas e dízimos de setembro. O balanço do mês está no app.','Push e e-mail','seg, 5 out · 08h',405,12,'sem aparelho']]},
- sec:{p:[],s:[['Atualize o seu cadastro','Confira os seus dados no app. A secretaria precisa do seu telefone e endereço atuais.','Push e e-mail','ter, 27 out · 10h',380,9,'sem aparelho'],['Aniversariantes de novembro','Parabéns aos aniversariantes de novembro! Que Deus abençoe o novo ano de vida de vocês.','Push','sex, 30 out · 09h',402,0,'']]}
+ casa:{p:[['Encontro de quinta muda de horário','O encontro desta semana será às 20h, na casa do anfitrião. Confirme sua presença no app.','Push e e-mail','2026-10-02 18:00',18]],
+  s:[['Estudo da semana','Leia o capítulo 3 de Gálatas antes do nosso encontro. Vamos conversar sobre os frutos do Espírito.','Push','2026-09-24 09:00',17,1,'sem aparelho'],['Lanche coletivo','Cada um leva algo para o lanche de quinta. Combinem pelo grupo.','Push e e-mail','2026-09-15 10:00',18,0,''],['Casa fechada na semana do feriado','Na semana do feriado não teremos encontro. Voltamos no dia 5.','Push','2026-09-07 08:00',16,2,'canal desligado']]},
+ rede:{p:[],s:[['Reunião de líderes','Reunião dos líderes da rede na segunda, às 19h30, na sede. Tragam as dúvidas das casas.','Push e e-mail','2026-09-23 15:00',9,0,''],['Ajuste no cronograma de visitas','As visitas às casas começam na próxima semana. O supervisor passa o roteiro.','Push','2026-09-14 11:00',9,1,'sem aparelho']]},
+ mini:{p:[['Escala do domingo','A escala de domingo foi publicada. Confirmem até sexta, por favor.','Push','2026-10-01 18:00',12]],
+  s:[['Ensaio extra','Teremos ensaio extra na sexta, às 20h. Presença de todos.','Push e e-mail','2026-09-23 16:00',11,1,'sem e-mail'],['Obrigado pelo fim de semana','Obrigado pelo serviço no evento. Foi lindo ver todos juntos.','Push','2026-09-21 09:00',12,0,'']]},
+ evento:{p:[],s:[['Mudança de local','A programação de sábado agora acontece no auditório principal. Entrada pela portaria da frente.','Push e e-mail','2026-09-22 17:00',86,4,'sem aparelho'],['Falta pouco!','Faltam poucos dias para o evento. Leve o seu QR Code de entrada.','Push','2026-09-16 10:00',90,0,'']]},
+ escala:{p:[['Chegada antecipada','Quem está escalado no domingo chega 30 minutos antes para a passagem de som.','Push','2026-10-02 16:00',8]],
+  s:[['Escala aprovada','A escala do mês foi aprovada. Confira seus dias no app.','Push e e-mail','2026-09-28 10:00',8,0,'']]},
+ disc:{p:[],s:[['Encontro de oração','Quinta, às 6h, teremos um encontro de oração com os discípulos. Quem puder, venha.','Push','2026-09-23 12:00',12,2,'sem aparelho'],['Material novo','Deixei um estudo novo na sua trilha. Leia antes do nosso próximo encontro.','Push e e-mail','2026-09-11 09:00',12,0,'']]},
+ fin:{p:[['Prestação de contas da campanha','Já está no app a prestação de contas da campanha da reforma. Obrigado por contribuir.','Push e e-mail','2026-10-02 10:00',412]],
+  s:[['Prazo do reembolso de despesas','Quem tem despesa para reembolso envia o comprovante até o dia 10.','Push','2026-09-24 09:00',38,0,''],['Obrigado pela generosidade','Obrigado pelas ofertas e dízimos de setembro. O balanço do mês está no app.','Push e e-mail','2026-08-31 08:00',405,12,'sem aparelho']]},
+ sec:{p:[],s:[['Atualize o seu cadastro','Confira os seus dados no app. A secretaria precisa do seu telefone e endereço atuais.','Push e e-mail','2026-09-22 10:00',380,9,'sem aparelho'],['Aniversariantes de novembro','Parabéns aos aniversariantes de novembro! Que Deus abençoe o novo ano de vida de vocês.','Push','2026-09-25 09:00',402,0,'']]}
 };
-function msgTabHtml(kind){const d=MSG_TXT[kind]||MSG_TXT.casa,who=ME.n;
- const row=(m,pend)=>`<li class="msg-r"><span class="msg-ic ${pend?'p':''}">${ic(pend?'clock':'check',15,2)}</span><div class="msg-tx"><b>${esc(m[0])}</b><p>${esc(m[1])}</p><small>${m[2]} · ${pend?'agendada para '+m[3]:m[3]} · por ${esc(who)}</small></div><div class="msg-st">${pend?`<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Agendada</span><button class="btn sec sm" type="button">Cancelar</button>`:`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Enviada</span><small>${m[4]} receberam${m[5]?` · ${m[5]} ignorado${m[5]>1?'s':''} (${m[6]})`:''}</small>`}</div></li>`;
- return `<section class="card mtab rise" style="--d:2"><div class="sh"><h2>Pendentes</h2><span class="soft">${d.p.length}</span></div>
-  ${d.p.length?`<ul class="msg-l">${d.p.map(m=>row(m,true)).join('')}</ul>`:`<div class="mempty"><p>Nenhuma mensagem pendente.</p><span>As mensagens agendadas e na fila aparecem aqui até serem enviadas.</span></div>`}</section>
- <section class="card mtab rise" style="--d:3"><div class="sh"><h2>Enviadas</h2><span class="soft">${d.s.length}</span></div>
-  ${d.s.length?`<ul class="msg-l">${d.s.map(m=>row(m,false)).join('')}</ul>`:`<div class="mempty"><p>Nada enviado ainda.</p></div>`}</section>`;}
+const MG_AUD={casa:'Pessoas da casa',rede:'Líderes e pessoas da rede',mini:'Pessoas do ministério',evento:'Inscritos do evento',escala:'Escalados da escala',disc:'Seus discípulos',fin:'Pessoas escolhidas',sec:'Pessoas escolhidas'};
+let _mgid=0;
+const mgMk=(k,m,st)=>({id:'mg'+(++_mgid),kind:k,t:m[0],msg:m[1],ch:m[2]==='Push'?['push']:m[2]==='E-mail'?['email']:['push','email'],dt:m[3],st,n:m[4],ign:m[5]||0,why:m[6]||'',aud:MG_AUD[k]||'Pessoas do escopo',ca:'mgCancel',ag:'mgAgain'});
+const MSGS={};
+Object.entries(MSG_TXT).forEach(([k,d])=>{MSGS[k]=[...d.p.map(m=>mgMk(k,m,'agendado')),...d.s.map(m=>mgMk(k,m,'enviado'))];});
+MSGS.casa.push(mgMk('casa',['Reunião de quarta adiada','A reunião de quarta foi adiada. Avisamos a nova data em breve.','Push','2026-09-20 10:00',18],'cancelado'));
+MSGS.rede.push(mgMk('rede',['Visita do pastor às casas','O pastor visita as casas da rede na próxima semana. Confirmem com o líder.','Push e e-mail','2026-09-18 09:00',9],'cancelado'));
+/* ---------- Mensagens: a MESMA lista em todo lugar (aba da casa, rede, ministério..., páginas Mensagens do Financeiro, Secretaria e Comunicação) ---------- */
+const MG_F=[['prox','Agendados','agendado'],['env','Enviados','enviado'],['canc','Cancelados','cancelado'],['todos','Todos',null]];
+const pushItems=()=>PUSHES.map(p=>{const s=segOf(p.seg);return {id:p.id,t:p.t,msg:p.msg,dt:p.dt,st:p.st,ch:p.ch,aud:s[1],n:s[2],auto:p.type==='auto',ign:0,why:'',ca:'puCancel',ag:'puAgain'};});
+function msgsSection(scope,items,foot){
+ const f=(S.mf&&S.mf[scope])||'todos',cnt=st=>items.filter(i=>i.st===st).length;
+ const l=items.filter(i=>f==='todos'||i.st===MG_F.find(x=>x[0]===f)[2]).sort((a,b)=>(a.dt<b.dt?-1:1)*(f==='prox'?1:-1));
+ return `<section class="card mtab rise" style="--d:2"><div class="tbar"><div class="chips">${MG_F.map(c=>`<button class="chipf ${f===c[0]?'on':''}" data-a="mgF" data-v="${scope}|${c[0]}">${c[1]}<small>${c[2]?cnt(c[2]):items.length}</small></button>`).join('')}</div></div>
+  ${l.length?`<div class="cm-pl">${l.map(p=>`<div class="cm-pr ${p.st}">
+   <span class="cm-pd"><b>${+p.dt.slice(8,10)}</b><small>${MONTHS[+p.dt.slice(5,7)-1].slice(0,3)}</small><em>${hm(p.dt.slice(11))}</em></span>
+   <div class="cm-pt"><b>${esc(p.t)}</b><span>${esc(p.msg)}</span></div>
+   <div class="cm-pm"><span class="cm-seg">${ic('users',13)}${esc(p.aud)}<small>${p.n.toLocaleString('pt-BR')}</small>${p.ign?`<em class="cm-ign" title="${esc(p.why)}">${p.ign} ignorado${p.ign>1?'s':''}</em>`:''}</span><span class="cm-chs">${p.ch.map(c=>`<i title="${c==='push'?'Push':'E-mail'}">${ic(c==='push'?'bell':'mail',12)}</i>`).join('')}${p.auto?`<em title="Automático">${ic('zap',11,2)}Auto</em>`:''}</span></div>
+   <div class="cm-ps">${p.st==='enviado'?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Enviado</span>`:p.st==='agendado'?`<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>${relD(p.dt.slice(0,10)).replace(/^./,c=>c.toUpperCase())}</span>`:'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Cancelado</span>'}</div>
+   <div class="cm-pa">${p.st==='agendado'?`<button class="btn sec sm" data-a="${p.ca}" data-v="${p.id}">Cancelar</button>`:p.st==='enviado'?`<button class="btn ghost sm" data-a="${p.ag}" data-v="${p.id}">${ic('copy',13)}Reenviar</button>`:''}</div></div>`).join('')}</div>`:'<div class="mempty"><p>Nada por aqui.</p><span>Os envios aparecem aqui conforme forem criados.</span></div>'}
+  <div class="tfoot"><span>${l.length} envio${l.length===1?'':'s'}</span>${foot||''}</div></section>`;
+}
+const msgTabHtml=kind=>msgsSection(kind,MSGS[kind]||MSGS.casa,'');
+/* ---------- Enviar mensagem: o mesmo assistente em todas as telas (Mensagem → Pessoas → Envio) ---------- */
+const MW_PUSH=100,MW_SUBJ=150,MW_STEPS=['Mensagem','Pessoas','Envio'];
+const msgBtn=(k,cls='btn sec')=>`<button class="${cls}" data-a="msgNew" data-v="${esc(k)}">${ic('mail',15)}Enviar mensagem</button>`;
+/* campos por canal: e-mail tem título e corpo; push tem só a mensagem, curta. Usado aqui e no Novo envio da Comunicação. */
+const mwOk0=w=>w.ch.length>0&&(!w.ch.includes('email')||(w.eTitle.trim()&&w.eBody.trim()))&&(!w.ch.includes('push')||w.pText.trim());
+const msgFieldsHtml=w=>`<div class="fld"><span class="fl">Enviar por</span><div class="cm-chpick">${[['push','Push no app','bell'],['email','E-mail','mail']].map(c=>`<label><input type="checkbox" data-mch="${c[0]}" ${w.ch.includes(c[0])?'checked':''}><span>${ic(c[2],15)}${c[1]}</span></label>`).join('')}</div></div>
+ ${w.ch.includes('email')?`<div class="mw-blk"><span class="mw-bh">${ic('mail',15,2)}E-mail</span>
+  <label class="fld"><span class="fl cm-cnt">Título <small data-cnt="eTitle">${w.eTitle.length}/${MW_SUBJ}</small></span><input data-mf="eTitle" maxlength="${MW_SUBJ}" value="${esc(w.eTitle)}" placeholder="Ex.: Encontro de quinta muda de horário" autocomplete="off"></label>
+  <label class="fld"><span class="fl">Mensagem do e-mail</span><textarea class="ta" data-mf="eBody" rows="6" placeholder="Escreva o e-mail. Aqui cabe um texto mais longo.">${esc(w.eBody)}</textarea></label></div>`:''}
+ ${w.ch.includes('push')?`<div class="mw-blk"><span class="mw-bh">${ic('bell',15,2)}Push no app</span>
+  <label class="fld"><span class="fl cm-cnt">Mensagem <small data-cnt="pText">${w.pText.length}/${MW_PUSH}</small></span><textarea class="ta" data-mf="pText" maxlength="${MW_PUSH}" rows="2" placeholder="Uma frase curta para aparecer no celular">${esc(w.pText)}</textarea><span class="hint">O push é curto: até ${MW_PUSH} caracteres. Quem recebe vê o nome de quem enviou.</span></label></div>`:''}
+ ${w.ch.length>1?'<p class="hint">Cada canal tem o seu texto: o e-mail aceita um texto longo, o push só uma frase.</p>':''}`;
+function msgFieldsBind(root,w,cb){
+ root.addEventListener('change',e=>{if(!e.target.closest('[data-mch]'))return;w.ch=[...root.querySelectorAll('[data-mch]')].filter(x=>x.checked).map(x=>x.dataset.mch);cb(true);});
+ root.addEventListener('input',e=>{const f=e.target.closest('[data-mf]');if(!f)return;w[f.dataset.mf]=f.value;const k=root.querySelector('[data-cnt="'+f.dataset.mf+'"]');if(k)k.textContent=f.value.length+'/'+f.maxLength;cb(false);});
+}
+function msgPeople(kind,label,n){
+ let l=[];
+ try{
+  if(kind==='casa'){const c=CASAS.find(x=>x.n===label);if(c)l=c.ppl.map(p=>p.n);}
+  else if(kind==='rede'){const r=REDES.find(x=>x.n===label);if(r)l=rCasasOf(r).flatMap(c=>c.ppl.map(p=>p.n));}
+  else if(kind==='disc'){l=desc('d1').map(d=>d.n);}
+  else if(kind==='mini'){const m=MINIS.find(x=>x.n===label);if(m)l=mnPpl(m).map(p=>p.n||p);}
+ }catch(e){l=[];}
+ if(!l.length||kind==='free'||kind==='evento'||kind==='escala')l=MEMBERS.filter(m=>m.st==='integrado').map(m=>m.n).slice(0,kind==='free'?60:Math.max(+n||8,4));
+ return [...new Set(l)];
+}
+const mwCount=w=>w.kind==='free'&&w.seg!=='pick'?SEGS.find(g=>g[0]===w.seg)[2]:w.sel.size;
+const mwList=w=>{const q=norm(w.q||'');return w.people.filter(n=>!q||norm(n).includes(q)).map((n,i)=>`<label><input type="checkbox" data-mp="${esc(n)}" ${w.sel.has(n)?'checked':''}>${pav(n,TONES[i%6],'')}<span><b>${esc(n)}</b></span><i class="cb">${ic('check',12,2.8)}</i></label>`).join('')||'<p class="who">Ninguém com esse nome.</p>';};
+const mwPicker=w=>`<div class="mw-tools"><label class="sbox">${ic('search',15)}<input id="mwQ" placeholder="Buscar pessoa" value="${esc(w.q||'')}" autocomplete="off"></label><button type="button" class="lnk" data-a="mwAll">Marcar todas</button><button type="button" class="lnk" data-a="mwNone">Limpar</button></div>
+ <p class="who"><b id="mwN">${w.sel.size}</b> de ${w.people.length} pessoas vão receber</p><div class="cpick mw-list" id="mwL">${mwList(w)}</div>`;
+function mwStep(){
+ const w=S.mw,n=mwCount(w),foot=(ok,label)=>`<div class="dfoot">${w.step?`<button type="button" class="btn sec" data-a="mwPrev">${ic('chevL',14,2)}Voltar</button>`:`<button type="button" class="btn sec" data-a="closeDlg">Cancelar</button>`}<button type="button" class="btn pri" id="mwNx" data-a="${w.step===2?'mwSend':'mwNext'}" ${ok?'':'disabled'}>${label}</button></div>`;
+ if(w.step===0)return `<div class="fgrid one">${msgFieldsHtml(w)}</div>${foot(mwOk0(w),'Avançar'+ic('arrowR',14,2))}`;
+ if(w.step===1)return `${w.kind==='free'?`<div class="cm-segs">${[...SEGS.filter(g=>g[0]!=='mini'),['pick','Pessoas escolhidas',0,'userplus']].map(g=>`<label class="${w.seg===g[0]?'on':''}"><input type="radio" name="mseg" value="${g[0]}" ${w.seg===g[0]?'checked':''}><span class="htile" style="--s:36px;background:var(--brand-soft);color:var(--brand-text)">${ic(g[3],17)}</span><span><b>${g[1]}</b><small>${g[0]==='pick'?'escolha na lista':g[2].toLocaleString('pt-BR')+' pessoas'}</small></span><i class="cm-rd"></i></label>`).join('')}</div>${w.seg==='pick'?mwPicker(w):''}`:mwPicker(w)}
+  ${foot(n>0,'Avançar'+ic('arrowR',14,2))}`;
+ const ch=w.ch.map(c=>c==='push'?'Push no app':'E-mail').join(' + ');
+ return `<div class="cm-when">${[['now','Enviar agora','Sai no próximo ciclo de envio','zap'],['later','Agendar','Escolha dia e hora','clock']].map(o=>`<label class="${w.when===o[0]?'on':''}"><input type="radio" name="mwhen" value="${o[0]}" ${w.when===o[0]?'checked':''}><span class="htile" style="--s:36px;background:var(--brand-soft);color:var(--brand-text)">${ic(o[3],17)}</span><span><b>${o[1]}</b><small>${o[2]}</small></span><i class="cm-rd"></i></label>`).join('')}</div>
+  ${w.when==='later'?`<div class="fgrid"><label class="fld"><span class="fl">Data</span><input type="date" id="mwD" min="${NOWD}" value="${w.d||''}"></label><label class="fld"><span class="fl">Hora</span><input type="time" id="mwH" value="${w.t||'09:00'}" step="900"></label></div>`:''}
+  <div class="cm-reach in">${ic('users',14)}<b>${n.toLocaleString('pt-BR')}</b><span>pessoas por ${ch}${w.when==='later'&&w.d?' · '+dtFmt(w.d+' '+w.t):''}</span></div>
+  ${foot(w.when==='now'||(w.d&&w.t),w.when==='now'?ic('send',15)+'Enviar agora':ic('clock',15)+'Agendar envio')}`;
+}
+const mwHtml=()=>{const w=S.mw;return `${dlgHead('Enviar mensagem',w.kind==='free'?esc(w.label)+' · escreva, escolha quem recebe e quando':'Para '+esc(w.label))}
+ <ol class="cm-steps">${MW_STEPS.map((t,i)=>`<li class="${i<S.mw.step?'done':i===S.mw.step?'on':''}"><button type="button" ${i<S.mw.step?`data-a="mwGo" data-v="${i}"`:'disabled'}><i>${i<S.mw.step?ic('check',12,3):i+1}</i>${t}</button></li>`).join('')}</ol>
+ <div class="mw-b">${mwStep()}</div>`;};
+const mwRe=()=>{const root=document.querySelector('.dlgw .dlg'),a=document.activeElement&&document.activeElement.id;if(!root)return;root.innerHTML=mwHtml();const el=a&&root.querySelector('#'+a);if(el)el.focus();};
+const mwValid=()=>{const w=S.mw,nx=$('#mwNx');if(!nx)return;nx.disabled=w.step===0?!mwOk0(w):w.step===1?mwCount(w)<1:!(w.when==='now'||(w.d&&w.t));};
+function msgOpen(kind,label,n,pre){
+ const people=msgPeople(kind,label,n);
+ S.mw=Object.assign({kind,label,step:0,ch:['push'],eTitle:'',eBody:'',pText:'',people,sel:new Set(kind==='free'?[]:people),q:'',seg:'todos',when:'now',d:'',t:'09:00'},pre||{});
+ S.mgCtx={kind,label,n};
+ openDlg(mwHtml(),'lg');
+ const root=document.querySelector('.dlgw .dlg'),w=S.mw;
+ msgFieldsBind(root,w,re=>{if(re)mwRe();else mwValid();});
+ root.addEventListener('change',e=>{const t=e.target;
+  if(t.matches('[name=mseg]')){w.seg=t.value;mwRe();}
+  else if(t.matches('[data-mp]')){t.checked?w.sel.add(t.dataset.mp):w.sel.delete(t.dataset.mp);const c=$('#mwN');if(c)c.textContent=w.sel.size;mwValid();}
+  else if(t.matches('[name=mwhen]')){w.when=t.value;mwRe();}
+  else if(t.id==='mwD'){w.d=t.value;mwRe();}
+  else if(t.id==='mwH'){w.t=t.value;mwRe();}});
+ root.addEventListener('input',e=>{if(e.target.id==='mwQ'){w.q=e.target.value;$('#mwL').innerHTML=mwList(w);}});
+}
 const CMA={
- msgNew:v=>{const [kind,label,n]=v.split('|'),free=kind==='free',ttl=free?'Quem recebe':'Para quem vai';
-  openDlg(`${dlgHead('Enviar mensagem',free?esc(label)+': escolha quem recebe':'Para '+esc(label))}<form id="msgF" class="fgrid one" novalidate>
-   ${free?`<label class="fld"><span class="fl">${ttl}</span><span class="selw"><select>${SEGS.slice(0,4).map(s=>`<option>${esc(s[1])}</option>`).join('')}<option>Pessoas escolhidas…</option></select>${ic('updown',14)}</span></label>`:`<div class="cm-reach in">${ic('users',14)}<b>${n}</b><span>pessoas vão receber · o público é o desta tela</span></div>`}
-   <div class="fld"><span class="fl">Enviar por</span><div class="cm-chpick">${[['push','Push no app','bell'],['email','E-mail','mail']].map(c=>`<label><input type="checkbox" checked><span>${ic(c[2],15)}${c[1]}</span></label>`).join('')}</div></div>
-   <label class="fld"><span class="fl cm-cnt">Título <small>0/65</small></span><input maxlength="65" placeholder="Ex.: Encontro de quinta muda de horário"></label>
-   <label class="fld"><span class="fl cm-cnt">Mensagem <small>0/180</small></span><textarea class="ta" maxlength="180" rows="3" placeholder="Escreva o recado. Quem recebe vê o seu nome e o seu papel."></textarea></label>
-   <label class="fld"><span class="fl">Quando</span><span class="selw"><select><option>Agora (sai no próximo ciclo de envio)</option><option>Agendar para outro dia e hora</option></select>${ic('updown',14)}</span></label>
-   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${ic('mail',15)}Enviar</button></div></form>`,'sm');
-  $('#msgF').addEventListener('submit',e=>{e.preventDefault();closeDlg();toast('Mensagem na fila de envio');});},
+ msgNew:v=>{const [kind,label,n]=v.split('|');msgOpen(kind,label,n);},
+ mwNext:()=>{S.mw.step++;mwRe();},mwPrev:()=>{S.mw.step--;mwRe();},mwGo:v=>{S.mw.step=+v;mwRe();},
+ mwAll:()=>{const w=S.mw;w.people.forEach(n=>w.sel.add(n));mwRe();},mwNone:()=>{S.mw.sel.clear();mwRe();},
+ mwSend:()=>{const w=S.mw;closeDlg();toast(w.when==='now'?'Mensagem na fila de envio':'Mensagem agendada para '+dtFmt(w.d+' '+w.t));},
+ mgF:v=>{const [s,f]=v.split('|');(S.mf=S.mf||{})[s]=f;cmRe();},
+ mgCancel:v=>{const p=Object.values(MSGS).flat().find(x=>x.id===v);confirmDel({title:'Cancelar esta mensagem?',body:`“${esc(p.t)}” não será enviada ${relD(p.dt.slice(0,10))}.`,label:'Cancelar envio',onConfirm:()=>{p.st='cancelado';cmRe();toast('Mensagem cancelada',()=>{p.st='agendado';cmRe();});}});},
+ mgAgain:v=>{const p=Object.values(MSGS).flat().find(x=>x.id===v),c=S.mgCtx&&S.mgCtx.kind===p.kind?S.mgCtx:{kind:p.kind,label:p.aud,n:p.n};msgOpen(c.kind,c.label,c.n,{ch:[...p.ch],eTitle:p.t,eBody:p.msg,pText:p.msg.slice(0,MW_PUSH)});},
  ntTab:v=>{S.ntab=v;cmRe();},ntF:v=>{S.ntf=v;cmRe();},
  ntNew:()=>ntForm(),ntEdit:(v,b,e)=>{if(e&&e.target.closest('.hact')&&!e.target.closest('.pi'))return;closePops();ntForm(v);},
  ntMenu:v=>{const p=$('#ntPop-'+v);closePops(p);p.classList.toggle('open');},
@@ -392,12 +464,12 @@ const CMA={
  f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;ok.classList.add('busy');setTimeout(()=>{
   m.sup.forEach(c=>{const x=m.ch[c],on=f.querySelector('[name=ch][value="'+c+'"]').checked;x.on=on;if(!on)return;const t=f['t-'+c].value.trim(),mm=f['m-'+c].value.trim();if(t!==x.t||mm!==x.m){x.v++;x.t=t;x.m=mm;}});
   m.when=NOWD;closeDlg();cmRe();toast('Modelo salvo — o próximo aviso já usa estes textos');},500);});},
- puNew:()=>{S.pw={step:0,ch:['push'],title:'',msg:'',link:'',seg:'todos',mini:null,when:'now',d:'',t:'09:00'};render();window.scrollTo({top:0});},
- puBack:()=>{if(S.pw&&!S.pw.done&&(S.pw.title||S.pw.msg)){confirmDel({title:'Descartar este envio?',body:'O que você escreveu não será salvo.',label:'Descartar',onConfirm:()=>{S.pw=null;render();}});return;}S.pw=null;render();window.scrollTo({top:0});},
+ puNew:()=>{S.pw={step:0,ch:['push'],eTitle:'',eBody:'',pText:'',link:'',seg:'todos',mini:null,when:'now',d:'',t:'09:00'};render();window.scrollTo({top:0});},
+ puBack:()=>{if(S.pw&&!S.pw.done&&(S.pw.eTitle||S.pw.eBody||S.pw.pText)){confirmDel({title:'Descartar este envio?',body:'O que você escreveu não será salvo.',label:'Descartar',onConfirm:()=>{S.pw=null;render();}});return;}S.pw=null;render();window.scrollTo({top:0});},
  puStep:v=>{S.pw.step=+v;puRe();},puPrev:()=>{S.pw.step--;puRe();},
- puNext:(v,b)=>{const w=S.pw;if(w.step<3){w.step++;puRe();window.scrollTo({top:0,behavior:'smooth'});return;}b.classList.add('busy');setTimeout(()=>{const dt=w.when==='now'?NOWD+' '+tt(NOWM):w.d+' '+w.t;PUSHES.push(PS(w.title,w.msg,w.seg==='mini'?'mini:'+w.mini:w.seg,'manual',w.when==='now'?'enviado':'agendado',dt,w.ch,w.when==='now'?null:null));w.done=true;S.puf=w.when==='now'?'env':'prox';render();window.scrollTo({top:0});},800);},
+ puNext:(v,b)=>{const w=S.pw;if(w.step<3){w.step++;puRe();window.scrollTo({top:0,behavior:'smooth'});return;}b.classList.add('busy');setTimeout(()=>{const dt=w.when==='now'?NOWD+' '+tt(NOWM):w.d+' '+w.t;PUSHES.push(PS(w.ch.includes('email')?w.eTitle:w.pText.slice(0,48),w.ch.includes('push')?w.pText:w.eBody.slice(0,140),w.seg==='mini'?'mini:'+w.mini:w.seg,'manual',w.when==='now'?'enviado':'agendado',dt,w.ch,w.when==='now'?null:null));w.done=true;S.puf=w.when==='now'?'env':'prox';render();window.scrollTo({top:0});},800);},
  puCancel:v=>{const p=PUSHES.find(x=>x.id===v);confirmDel({title:'Cancelar este envio?',body:`“${esc(p.t)}” não será enviado ${relD(p.dt.slice(0,10))}.`,label:'Cancelar envio',onConfirm:()=>{p.st='cancelado';cmRe();toast('Envio cancelado',()=>{p.st='agendado';cmRe();});}});},
- puAgain:v=>{const p=PUSHES.find(x=>x.id===v);S.pw={step:3,ch:[...p.ch],title:p.t,msg:p.msg,link:'',seg:p.seg.startsWith('mini:')?'mini':p.seg,mini:p.seg.startsWith('mini:')?p.seg.slice(5):null,when:'now',d:'',t:'09:00'};render();window.scrollTo({top:0});},
+ puAgain:v=>{const p=PUSHES.find(x=>x.id===v);S.pw={step:3,ch:[...p.ch],eTitle:p.t,eBody:p.msg,pText:p.msg.slice(0,MW_PUSH),link:'',seg:p.seg.startsWith('mini:')?'mini':p.seg,mini:p.seg.startsWith('mini:')?p.seg.slice(5):null,when:'now',d:'',t:'09:00'};render();window.scrollTo({top:0});},
  bnNew:()=>bnForm(),bnEdit:v=>bnForm(v),
  bnDel:v=>{const b=BANNERS.find(x=>x.id===v);confirmDel({title:'Excluir este banner?',body:`“${esc(b.t)}” sai do app e do site.`,onConfirm:()=>{const i=BANNERS.indexOf(b);BANNERS.splice(i,1);cmRe();toast('Banner excluído',()=>{BANNERS.splice(i,0,b);cmRe();});}});},
  bnUp:v=>{const a=BANNERS.filter(b=>b.act),i=a.findIndex(b=>b.id===v),x=BANNERS.indexOf(a[i]),y=BANNERS.indexOf(a[i-1]);[BANNERS[x],BANNERS[y]]=[BANNERS[y],BANNERS[x]];S.bnI=0;cmRe();},

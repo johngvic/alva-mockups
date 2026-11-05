@@ -70,7 +70,7 @@ function redeDetail(r){
  </header>
  <div class="rise" style="--d:2">${rTabBody(r)}</div>`;
 }
-function rTabBody(r){return ({geral:rGeral,casas:rCasasTab,enc:r=>seBody('rede',r),msg:()=>msgTabHtml('rede'),hist:rHist})[S.rtab](r);}
+function rTabBody(r){return ({geral:rGeral,casas:rCasasTab,enc:r=>seCanSee(r)?seEncounters('rede',r):'<section class="card mempty"><p>Sem acesso aos encontros desta rede.</p><span>Só o supervisor e quem tem Editar ou Admin na rede veem os encontros.</span></section>',msg:()=>msgTabHtml('rede'),hist:rHist})[S.rtab](r);}
 function rGeral(r){
  const ct=rSupCt(r.sup),cs=rCasasOf(r),none='<span class="soft">Não informado</span>';
  return `<div class="pgrid"><div class="col"><section class="card pc"><div class="sh"><h2>Supervisor</h2></div>
