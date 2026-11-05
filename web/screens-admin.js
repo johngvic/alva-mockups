@@ -1,6 +1,6 @@
 /* ================= Administração ================= */
 /* Cuidado deixou de ser um módulo: cada parte tem o seu (17/10/2026) */
-const CUI=['Discipulado','Acompanhamento','Pedidos de oração','Como estou me sentindo'];
+const CUI=['Discipulado','Acompanhamento','Pedidos de oração'];
 const AREAS_P=['Membros','Integração',...CUI,'Comunidade','Kids','Eventos','Conteúdo','Financeiro','Administração'];
 const ACTS=['Ver','Criar','Editar','Excluir'];
 const ROLES={Administrador:['st-rec'],Pastor:['st-ace'],Líder:['st-ace'],Secretaria:['st-int'],Voluntário:['st-sol']};

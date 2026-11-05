@@ -245,12 +245,12 @@ cxEntryDlg=function(cid,t){
   +'<label class="fld"><span class="fl">Data</span><input type="date" name="d" value="'+myTd()+'" max="'+myTd()+'"><span class="err"></span></label></div>'
   +'<label class="fld"><span class="fl">Descrição</span><input name="desc" maxlength="80" autocomplete="off" placeholder="Ex.: Compra de cordas"><span class="err"></span></label>'
   +'<div class="fld"><span class="fl">Categoria</span><div class="cxf-cats" id="cxCats"></div></div>'
-  +(zel?'<div class="fld" id="cxNatW"><span class="fl">Tipo de gasto</span><div class="yn" role="radiogroup"><label><input type="radio" name="nat" value="Material" checked><span>Material</span></label><label><input type="radio" name="nat" value="Mão de obra"><span>Mão de obra</span></label></div></div>':'')
+  +(zel?'<div class="fld" id="cxNatW"><span class="fl">Tipo de gasto</span><div class="yn" role="radiogroup"><label><input type="radio" name="nat" value="Material" checked><span>Material</span></label><label><input type="radio" name="nat" value="Mão de obra"><span>Mão de obra</span></label></div></div><div class="fld" id="cxFornW"><span class="fl">Fornecedor <small>opcional</small></span><span class="selw"><select name="forn"><option value="">Compra direta, sem fornecedor cadastrado</option>'+ZFORN.map(f=>'<option value="'+f.id+'">'+esc(f.n)+'</option>').join('')+'</select>'+ic('updown',14)+'</span></div>':'')
   +'<div class="fld"><span class="fl">Comprovante <small>opcional</small></span><label class="cxf-drop" id="cxDrop"><input type="file" name="file" accept="image/*,application/pdf"><span class="cxf-di">'+ic('upload',18,2)+'</span><span class="cxf-dt"><b>Arraste o arquivo aqui ou <u>escolha no computador</u></b><small>Foto ou PDF da nota, até 10 MB</small></span></label><div class="cxf-file" id="cxFile" hidden></div></div>'
   +'<p class="cxf-warn" id="cxH" hidden>'+ic('alert',14,2)+'<span>Esta saída é maior que o saldo e deixa o caixa negativo.</span></p>'
   +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="cxGo">Lançar</button></div></form>','cxfd');
  const f=$('#cxF'),typ=()=>f.querySelector('[name=t]:checked').value;
- const paint=()=>{const k=typ();if(!CC(k).includes(cat))cat=(zel&&k==='out'&&CC(k).includes(zLastCat(c.ownerId)))?zLastCat(c.ownerId):CC(k)[0];const nw=$('#cxNatW');if(nw)nw.hidden=k==='in';
+ const paint=()=>{const k=typ();if(!CC(k).includes(cat))cat=(zel&&k==='out'&&CC(k).includes(zLastCat(c.ownerId)))?zLastCat(c.ownerId):CC(k)[0];const nw=$('#cxNatW');if(nw)nw.hidden=k==='in';const fw=$('#cxFornW');if(fw)fw.hidden=k==='in';
   $('#cxCats').innerHTML=CC(k).map(x=>'<button type="button" class="chipf '+(x===cat?'on':'')+'" data-cat="'+esc(x)+'">'+esc(x)+'</button>').join('');
   const v=Math.round((+f.elements.v.value||0)*100);$('#cxH').hidden=!(k==='out'&&v>cxBal(c));
   f.dataset.t=k;$('#cxGo').textContent=(k==='in'?'Lançar entrada':'Lançar saída')+(v?' · '+cxMoney(v):'');};
@@ -266,7 +266,7 @@ cxEntryDlg=function(cid,t){
  dz.addEventListener('drop',e=>{const fl=e.dataTransfer&&e.dataTransfer.files[0];if(fl)showFile(fl);});
  f.onsubmit=e=>{e.preventDefault();const q=f.elements,bad=(n,m)=>{const i=q[n],fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;i.focus();};
   const v=+q.v.value;if(!(v>0))return bad('v','Informe um valor maior que zero');if(!q.d.value)return bad('d','Escolha a data');if(!q.desc.value.trim())return bad('desc','Descreva o lançamento');
-  cxAdd(c,typ(),v,q.d.value,q.desc.value.trim(),cat,ME_NAME,Object.assign({file:file?file.name:''},zel&&typ()==='out'?{nat:q.nat?q.nat.value:'Material'}:{}));
+  cxAdd(c,typ(),v,q.d.value,q.desc.value.trim(),cat,ME_NAME,Object.assign({file:file?file.name:''},zel&&typ()==='out'?{nat:q.nat?q.nat.value:'Material',forn:q.forn?q.forn.value:''}:{}));
   closeDlg();bdRe();toast((typ()==='in'?'Entrada':'Saída')+' de '+cxMoney(Math.round(v*100))+' lançada');};};
 
 cxCloseDlg=function(cid){
@@ -549,9 +549,9 @@ lede=function(){return '';};
  Operação:['Agenda','Espaços','Zeladoria','Almoxarifado','Cafeteria','Restaurante','Loja'],
  Gestão:['Secretaria','Financeiro','Comunicação','Relatórios','Administração']};
  const SUB={
- Pessoas:['Integração','Membros'],
+ Pessoas:['Integração','Devocional','Membros'],
  Comunidade:['Casas de Apascentamento','Redes de casa','Ministérios'],
- Cuidado:['Discipulado','Acompanhamento','Pedidos de oração','Como estou me sentindo','Disciplina'],
+ Cuidado:['Discipulado','Acompanhamento','Pedidos de oração','Disciplina'],
  Kids:['Visão geral','Turmas','Salas','Times','Planejamento','Escalas'],
  Conteúdo:['Pregações','Séries','Vídeos','Músicas','Cursos','Jornadas','Material de apoio'],
  Agenda:['Calendário','Cultos','Eventos','Inscrições','Escalas','Apresentações','Batismos','Consagrações','Casamentos'],

@@ -10,7 +10,8 @@ const ZCATS=ZCAT.map(c=>c.n);
 const zCatSync=()=>{ZCATS.length=0;ZCAT.forEach(c=>ZCATS.push(c.n));};
 const zCatCol=n=>(ZCAT.find(c=>c.n===n)||{}).c||'';
 const ZTIPOS=['Manutenção','Melhoria'];
-const ZLOCAIS=['Salão principal','Sala 3','Banheiros','Estacionamento','Anexo','Hall de entrada','Sala de Kids','Cozinha','Jardim'];
+const zLocais=()=>ESPS.filter(e=>e.act).map(e=>e.n);/* o local vem dos Espaços; quem não achar escolhe "Outro local" e digita */
+const ZMAXPROP=5,ZDONEDAYS=180;/* propostas por trabalho; dias que o concluído fica no quadro e nos cartões */
 const ZST=[['pedido','Pedido'],['orcamento','Orçamento'],['aprovacao','Aprovação'],['execucao','Execução'],['concluido','Concluído']];
 const ZSTL={pedido:'Aguardando avaliação',orcamento:'Em orçamento',aprovacao:'Aguardando o Financeiro',execucao:'Em execução',concluido:'Concluído',cancelado:'Cancelado'};
 const ZPILL={pedido:['--st-sol','--st-sol-bg'],orcamento:['--st-ace','--st-ace-bg'],aprovacao:['--st-sol','--st-sol-bg'],execucao:['--st-int','--st-int-bg'],concluido:['--ink-muted','--surface-2'],cancelado:['--st-rec','--st-rec-bg']};
@@ -97,6 +98,9 @@ const zSaldo=j=>cxBal(zCx(j))/100;
 const zOutsOf=j=>cxValid(zCx(j)).filter(e=>e.t==='out'&&!e.xfer);
 const zGastoAno=(y,j)=>(j?[j]:ZJ).reduce((s,x)=>s+zOutsOf(x).filter(e=>e.d.slice(0,4)===String(y)).reduce((a,e)=>a+e.v,0)/100,0);
 const zLate=j=>j.st==='execucao'&&j.fim&&j.fim<NOWD;
+/* Concluído há mais de ZDONEDAYS dias sai do quadro e dos cartões; continua na Lista (filtro Concluído) e nas Análises. */
+const zStale=j=>j.st==='concluido'&&j.hist.length&&(Date.parse(NOWD)-Date.parse(j.hist[j.hist.length-1][0]))/864e5>ZDONEDAYS;
+const zVis=j=>!j.old&&!zStale(j);
 /* A categoria mora no LANÇAMENTO (despesa), não no trabalho: um trabalho pode ter pintura, piso, ar-condicionado, luminária... */
 const zJobCats=j=>[...new Set(zOutsOf(j).map(e=>e.cat||j.cat).filter(Boolean))];
 const zCatTags=j=>{const l=zJobCats(j);return l.slice(0,2).map(n=>`<em class="tag">${esc(n)}</em>`).join('')+(l.length>2?`<em class="tag">+${l.length-2}</em>`:'');};
@@ -118,7 +122,7 @@ Object.assign(S,{zj:null,ztab:'resumo',zview:'quadro',zq:'',zst:'todos',zcat:'to
 
 /* ---------- Visão geral ---------- */
 function zelVis(){
- const cnt=s=>ZJ.filter(j=>j.st===s&&!j.old).length,urg=ZJ.filter(j=>j.st==='pedido'&&j.urg==='Urgente').length,exec=ZJ.filter(j=>j.st==='execucao');
+ const cnt=s=>ZJ.filter(j=>j.st===s&&zVis(j)).length,urg=ZJ.filter(j=>j.st==='pedido'&&j.urg==='Urgente').length,exec=ZJ.filter(j=>j.st==='execucao');
  const late=exec.filter(zLate),wait=ZJ.filter(j=>j.st==='aprovacao'&&!j.apr).length,sal=exec.reduce((a,j)=>a+zSaldo(j),0),g26=zGastoAno(2026);
  const att=[];
  ZJ.forEach(j=>{
@@ -129,6 +133,7 @@ function zelVis(){
   else if(zLate(j))att.push([j,'clock','Execução atrasada',`Era para terminar em ${fmtD(j.fim)} · ${-inDays(j.fim)} dia${-inDays(j.fim)===1?'':'s'} de atraso`,'Abrir']);
   else if(j.st==='execucao'&&zLib(j)&&zSaldo(j)<=zLib(j)*.1)att.push([j,'alert','Saldo do caixa quase esgotado',`Sobram ${zR(zSaldo(j))} de ${zR(zLib(j))} liberados · previsto ${zR(zPrev(j))}`,'Abrir']);
  });
+ const attShow=S.zatt?att:att.slice(0,6),execS=exec.slice().sort((a,b)=>(+!!zLate(b))-(+!!zLate(a))||String(a.fim||'9').localeCompare(String(b.fim||'9'))).slice(0,5),doneL=ZJ.filter(j=>j.st==='concluido'&&zVis(j)),doneS=doneL.slice().sort((a,b)=>String(b.hist[b.hist.length-1][0]).localeCompare(String(a.hist[a.hist.length-1][0]))).slice(0,5);
  return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Visão geral</h1><p class="lede">O que precisa de atenção e como andam as obras</p></div>
   <div class="pact"><button class="btn sec" data-a="nav" data-v="zel-trab">${ic('layers',15)}Ver trabalhos</button><button class="btn pri" data-a="zNew">${ic('plus',15,2.2)}Pedir um trabalho</button></div></header>
  <section class="card kpis4 rise" style="--d:1">
@@ -137,15 +142,15 @@ function zelVis(){
   <div class="k4"><span class="kl">Em execução</span><span class="kv">${exec.length}</span><span class="kd ${late.length?'dn':''}">${late.length?late.length+(late.length>1?' atrasadas':' atrasada'):'nenhuma atrasada'}</span></div>
   <div class="k4"><span class="kl">Saldo nos caixas das obras</span><span class="kv">${zR(sal)}</span><span class="kd">gasto em 2026: ${zR(g26)}</span></div>
  </section>
- <div class="pgrid rise" style="--d:2"><div class="col">
-  <section class="card pc"><div class="sh"><h2>Precisa de você</h2><span class="who">${att.length} ${att.length===1?'item':'itens'}</span></div>
-   ${att.length?`<ul class="zl-att">${att.map(a=>`<li><span class="zl-ai">${ic(a[1],16,2)}</span><span class="zl-at"><b>${esc(a[0].n)}</b><small>${esc(a[2])} · ${esc(a[3])}</small></span><button class="btn sec sm" data-a="zOpen" data-v="${a[0].id}">${a[4]}</button></li>`).join('')}</ul>`:'<div class="mempty"><p>Nada esperando por você.</p><span>Quando chegar um pedido ou faltar algo, aparece aqui.</span></div>'}</section>
- </div><div class="col">
-  <section class="card pc"><div class="sh"><h2>Em execução</h2><span class="who">${exec.length}</span></div>
-   ${exec.length?`<div class="zl-ex">${exec.map(j=>`<button class="zl-xc" data-a="zOpen" data-v="${j.id}"><b>${esc(j.n)}</b><span class="who">${esc(j.local)} · ${esc(j.resp)}</span><span class="zl-xt">${zLate(j)?'<em class="tag warn">Atrasada</em>':'<em class="tag">No prazo</em>'}${j.fim?`<small>previsão ${fmtD(j.fim)}</small>`:''}</span>${zBar(zGasto(j),zLib(j))}<span class="zl-xn"><b>${zR(zGasto(j))}</b> gastos de ${zR(zLib(j))} liberados<small>previsto ${zR(zPrev(j))}</small></span></button>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma obra em execução.</p></div>'}</section>
-  <section class="card pc"><div class="sh"><h2>Concluídos recentemente</h2></div>
-   <ul class="zl-att">${ZJ.filter(j=>j.st==='concluido'&&!j.old).map(j=>`<li><span class="zl-ai ok">${ic('check',16,2.4)}</span><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.tipo)} · gasto ${zR(zGasto(j))}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${j.id}">Ver</button></li>`).join('')||'<li class="who">Nenhum ainda.</li>'}</ul></section>
- </div></div>`;
+  <section class="card pc rise" style="--d:2"><div class="sh"><h2>Precisa de você</h2><span class="who">${att.length} ${att.length===1?'item':'itens'}</span></div>
+   ${att.length?`<ul class="zl-att">${attShow.map(a=>`<li><span class="zl-ai">${ic(a[1],16,2)}</span><span class="zl-at"><b>${esc(a[0].n)}</b><small>${esc(a[2])} · ${esc(a[3])}</small></span><button class="btn sec sm" data-a="zOpen" data-v="${a[0].id}">${a[4]}</button></li>`).join('')}</ul>${att.length>6?`<div class="zl-more"><button class="btn ghost sm" data-a="zAttToggle">${S.zatt?'Mostrar menos':'Ver todos ('+att.length+')'}</button></div>`:''}`:'<div class="mempty"><p>Nada esperando por você.</p><span>Quando chegar um pedido ou faltar algo, aparece aqui.</span></div>'}</section>
+  <div class="pgrid rise" style="--d:3"><div class="col">
+   <section class="card pc"><div class="sh"><h2>Em execução</h2><span class="who">${exec.length}</span></div>
+    ${exec.length?`<ul class="zl-xl">${execS.map(j=>`<li><button class="zl-xr" data-a="zOpen" data-v="${j.id}"><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.local)} · ${esc(j.resp||'A definir')}${j.fim?` · previsão ${fmtD(j.fim)}`:''}</small></span><span class="zl-xm">${zLate(j)?'<em class="tag warn">Atrasada</em>':'<em class="tag">No prazo</em>'}</span><span class="zl-xb">${zBar(zGasto(j),zLib(j))}<small><b>${zR(zGasto(j))}</b> de ${zR(zLib(j))} · previsto ${zR(zPrev(j))}</small></span><span class="tc">${ic('chevR',16)}</span></button></li>`).join('')}</ul>`:'<div class="mempty"><p>Nenhuma obra em execução.</p></div>'}${exec.length>5?`<div class="zl-more"><button class="btn ghost sm" data-a="zGoList" data-v="execucao">Ver todas (${exec.length})</button></div>`:''}</section>
+  </div><div class="col">
+   <section class="card pc"><div class="sh"><h2>Concluídos recentemente</h2><span class="who">${doneL.length}</span></div>
+    <ul class="zl-att">${doneS.map(j=>`<li><span class="zl-ai ok">${ic('check',16,2.4)}</span><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.tipo)} · gasto ${zR(zGasto(j))}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${j.id}">Ver</button></li>`).join('')||'<li class="who">Nenhum ainda.</li>'}</ul>${doneL.length>5?`<div class="zl-more"><button class="btn ghost sm" data-a="zGoList" data-v="concluido">Ver todos (${doneL.length})</button></div>`:''}</section>
+  </div></div>`;
 }
 
 /* ---------- Trabalhos: cartões de status + abas Quadro | Lista ---------- */
@@ -158,7 +163,7 @@ function zCard(j){
 }
 function zelTrab(){
  if(S.zj)return zelJob();
- const act=ZJ.filter(j=>!j.old);
+ const act=ZJ.filter(zVis);
  const cards=ZST.map(s=>{const l=act.filter(j=>j.st===s[0]);return `<div class="k4"><span class="kl">${s[1]}</span><span class="kv">${l.length}</span><span class="kd">${l.length?zR(l.reduce((a,j)=>a+zPrev(j),0))+' previsto':'nenhum'}</span></div>`;}).join('');
  const tabs=`<div class="utabs rise" style="--d:2" role="tablist">${[['quadro','Quadro'],['lista','Lista']].map(t=>`<button role="tab" class="${S.zview===t[0]?'on':''}" aria-selected="${S.zview===t[0]}" data-a="zView" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>`;
  let body;
@@ -169,7 +174,7 @@ function zelTrab(){
   <section class="card kpis4 k5 rise" style="--d:1">${cards}</section>${tabs}${body}`;
 }
 function zRows(){
- const q=norm(S.zq||''),l=ZJ.filter(j=>!j.old&&(S.zst==='todos'?j.st!=='cancelado':j.st===S.zst)&&(!q||norm(j.n+' '+zJobCats(j).join(' ')+' '+j.local).includes(q)));
+ const q=norm(S.zq||''),l=ZJ.filter(j=>(S.zst==='concluido'?j.st==='concluido':S.zst==='todos'?zVis(j)&&j.st!=='cancelado':zVis(j)&&j.st===S.zst)&&(!q||norm(j.n+' '+zJobCats(j).join(' ')+' '+j.local).includes(q)));
  if(!l.length)return '<div class="mempty"><p>Nenhum trabalho encontrado.</p><span>Tente outra busca ou outra etapa.</span></div>';
  return `<div class="trow zt thead"><span>Trabalho</span><span>Categorias</span><span>Situação</span><span>Responsável</span><span>Previsto</span><span>Gasto</span><span></span></div>
  ${l.map(j=>`<div class="trow zt" tabindex="0" data-a="zOpen" data-v="${j.id}"><span class="tn"><span class="zt-n"><b>${esc(j.n)}</b><span>${esc(j.local)} · pedido por ${esc(j.pedBy)}</span></span></span><span>${zJobCats(j).map(esc).join(', ')||'<span class="soft">—</span>'}</span><span>${zPill(j.st)}</span><span>${esc(j.resp||'A definir')}</span><span class="num">${zPrev(j)?zR(zPrev(j)):'—'}</span><span class="num">${zGasto(j)?zR(zGasto(j)):'—'}</span><span class="tc">${ic('chevR',16)}</span></div>`).join('')}
@@ -191,7 +196,7 @@ function zelJob(){
  <header class="card prof rise" style="--d:1">
   <div class="pid"><span class="htile" style="--s:64px;background:var(--tone-salvia);color:var(--tone-salvia-ink)">${ic('wrench',30,1.9)}</span><div class="pn"><h1>${esc(j.n)}</h1><p>${esc(j.tipo)} · ${esc(j.local)}</p><div class="ca-tgs">${zPill(j.st)}${zCatTags(j)}${j.urg==='Urgente'&&j.st!=='concluido'&&j.st!=='cancelado'?'<em class="tag warn">Urgente</em>':''}</div></div></div>
   <div class="pact">${nx?`<button class="btn pri" data-a="${nx[0]}" data-v="${j.id}" ${nx[2]?'':'disabled'}>${nx[1]}</button>`:''}
-   ${j.st!=='concluido'&&j.st!=='cancelado'&&j.st!=='execucao'?`<div style="position:relative"><button class="ibtn" data-a="zMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="zPop" style="right:0;top:calc(100% + 6px)"><button class="pi danger" data-a="zCancel" data-v="${j.id}">${ic('x',16)}Cancelar o trabalho</button></div></div>`:''}</div>
+   ${j.st!=='concluido'&&j.st!=='cancelado'?`<div style="position:relative"><button class="ibtn" data-a="zMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="zPop" style="right:0;top:calc(100% + 6px)">${j.st!=='pedido'?`<button class="pi" data-a="zResp" data-v="${j.id}">${ic('users',16)}Trocar o responsável</button>`:''}${j.st!=='pedido'&&j.st!=='execucao'?'<hr>':''}${j.st!=='execucao'?`<button class="pi danger" data-a="zCancel" data-v="${j.id}">${ic('x',16)}Cancelar o trabalho</button>`:''}</div></div>`:''}</div>
   <div class="ikpi hk"><div><b>${zPrev(j)?zR(zPrev(j)):'—'}</b><span>Previsto</span></div><div><b>${zR(zLib(j))}</b><span>Liberado</span></div><div><b>${zR(zGasto(j))}</b><span>Gasto</span></div><div><b class="${zSaldo(j)<0?'neg':''}">${zR(zSaldo(j))}</b><span>Saldo do caixa</span></div></div>
   <div class="ptabs" role="tablist">${tabs.map(t=>`<button role="tab" class="${S.ztab===t[0]?'on':''}" data-a="zTab" data-v="${t[0]}">${t[1]}${t[0]==='com'&&j.cm.length?`<small>${j.cm.length}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
@@ -224,7 +229,7 @@ function zOrc(j){
  if(!j.exec)mao=`<section class="card pc"><div class="sh"><h2>Mão de obra</h2></div><div class="mempty"><p>Avalie o pedido primeiro.</p><span>Depois de avaliar, você diz se a equipe faz ou se contrata alguém.</span></div></section>`;
  else if(j.exec==='equipe')mao=`<section class="card pc"><div class="sh"><h2>Mão de obra</h2></div><p class="bd-note">${ic('users',13,2)}Feito pela equipe da Zeladoria. Não há custo de mão de obra: o orçamento é só de material.</p></section>`;
  else mao=`<section class="card pc"><div class="sh"><h2>Mão de obra · propostas</h2>${lock?'':`<button class="btn sec sm" data-a="zPropAdd" data-v="${j.id}">${ic('plus',14,2.2)}Nova proposta</button>`}</div>
-  ${j.props.length?`<div class="zl-pps">${j.props.map((p,i)=>`<article class="zl-pp ${p.esc?'esc':''}"><header><b>Proposta ${'ABCDEFG'[i]}</b>${p.esc?'<em class="tag brand">Escolhida</em>':zProp(j)?'<em class="tag">Não escolhida</em>':''}</header>
+  ${j.props.length?`<div class="zl-pps">${j.props.map((p,i)=>`<article class="zl-pp ${p.esc?'esc':''}"><header><b>Proposta ${'ABCDE'[i]}</b>${p.esc?'<em class="tag brand">Escolhida</em>':zProp(j)?'<em class="tag">Não escolhida</em>':''}</header>
    <h3>${esc(zFn(p.forn))}</h3><p class="zl-pv2">${zR2(p.v)}<small>prazo de ${p.prazo} dias</small></p>
    <div class="zl-fls">${p.arq.map(a=>`<span class="zl-fl">${ic('file',12,2)}${esc(a)}</span>`).join('')||'<span class="soft">Sem arquivo</span>'}</div>
    ${lock?'':`<footer>${p.esc?'':`<button class="btn sec sm" data-a="zPropPick" data-v="${j.id}|${p.id}">Escolher esta</button>`}<button class="btn ghost sm" data-a="zPropDel" data-v="${j.id}|${p.id}">Remover</button></footer>`}</article>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma proposta ainda.</p><span>Cadastre as propostas dos fornecedores e escolha uma.</span></div>'}</section>`;
@@ -236,7 +241,10 @@ function zOrc(j){
 /* A aba Caixa é o caixa padrão do Alva (o mesmo dos ministérios e eventos), com o trabalho como dono: saldo, entradas, saídas, busca, lançamentos em tabela única, estorno e comprovante. */
 function zCaixa(j){
  const c=zCx(j);S.cx=c.id;if(!S.cxf)S.cxf='all';
- return cxView(c).replace(/<button class="btn sec sm" data-a="cxBack">[\s\S]*?<\/button>/,'').replace(/<button class="btn sec sm" data-a="cxReopen"[^>]*>[^<]*<\/button>/,'');
+ let h=cxView(c).replace(/<button class="btn sec sm" data-a="cxBack">[\s\S]*?<\/button>/,'').replace(/<button class="btn sec sm" data-a="cxReopen"[^>]*>[^<]*<\/button>/,'');
+ /* O caixa só recebe lançamento durante a Execução: antes disso o dinheiro ainda não foi aprovado nem liberado. */
+ if(j.st==='pedido'||j.st==='orcamento'||j.st==='aprovacao'){h=h.replace(/<button class="btn (?:pri|sec) sm" data-a="cxEntry"[^>]*>[\s\S]*?<\/button>/g,'').replace(/<button class="ibtn sm" data-a="cxRev"[^>]*>[\s\S]*?<\/button>/g,'').replace('Registre a primeira entrada ou saída deste caixa. Dá para anexar o comprovante.','O caixa recebe lançamentos depois que o Financeiro aprova e o trabalho entra em execução.').replace('<div class="cxs">',`<p class="bd-note">${ic('lock',13,2)}Os lançamentos começam na execução, depois da aprovação do Financeiro.</p><div class="cxs">`);}
+ return h;
 }
 function zCom(j){
  return `<section class="card pc"><div class="sh"><h2>Comentários</h2><span class="who">${j.cm.length}</span></div>
@@ -312,8 +320,8 @@ function zelCats(){
  <div class="ax-kg rise" style="--d:2">${U.map(([c,u])=>`<article class="card ax-kc" style="--k:${c.c}"><div class="ax-kch">${kTile(c,30)}<b class="ax-kn">${esc(c.n)}</b>
   <span style="position:relative"><button class="ibtn sm" data-a="zcMenu" data-v="${c.id}" aria-label="Ações">${ic('dots',15)}</button><div class="pop" id="zcPop-${c.id}" style="right:0;top:calc(100% + 6px)"><button class="pi" data-a="zcEdit" data-v="${c.id}">${ic('pen',16)}Editar</button><hr><button class="pi danger" data-a="zcDel" data-v="${c.id}">${ic('x',16)}Excluir</button></div></span></div>
   <div class="ax-km"><span>${u.n} lançamento${u.n===1?'':'s'} · ${u.jobs.length} trabalho${u.jobs.length===1?'':'s'}</span><b>${zR(u.y)} em 2026</b></div>
-  <div class="ax-kit">${u.jobs.length?u.jobs.slice(0,4).map(j=>`<span>${esc(j.n)}</span>`).join('')+(u.jobs.length>4?`<span class="soft">+${u.jobs.length-4}</span>`:''):'<span class="soft">Nenhum trabalho ainda</span>'}</div></article>`).join('')}
-  <button class="cm-badd" data-a="zcNew" style="min-height:150px"><span>${ic('plus',20,2)}</span><b>Nova categoria</b><small>Nome, cor e ícone</small></button></div>`;
+  </article>`).join('')}
+  <button class="cm-badd" data-a="zcNew" style="min-height:96px"><span>${ic('plus',20,2)}</span><b>Nova categoria</b><small>Nome, cor e ícone</small></button></div>`;
 }
 const zcSnap=()=>{S._zcB=ZCAT.map(c=>[c.id,c.n]);};
 const zcRe=()=>{
@@ -336,6 +344,8 @@ function zForm(title,sub,body,submit,onOk,cls='sm'){
  return f;
 }
 const ZA={
+ zAttToggle:()=>{S.zatt=!S.zatt;zRe();},
+ zGoList:v=>{S.zview='lista';S.zst=v;S.zq='';A.nav('zel-trab');},
  zOpen:v=>{S.zj=v;S.ztab='resumo';S.active='zel-trab';render();window.scrollTo({top:0});requestAnimationFrame(tabInd);},
  zBack:()=>{S.zj=null;render();window.scrollTo({top:0});},
  zTab:v=>{S.ztab=v;zRe();requestAnimationFrame(tabInd);},
@@ -347,14 +357,20 @@ const ZA={
   zForm('Pedir um trabalho','Conte o que precisa ser feito. A Zeladoria avalia e responde.',
    `<label class="fld"><span class="fl">O que precisa ser feito?</span><input name="n" maxlength="90" placeholder="Ex.: Trocar a fechadura da sala 2" autocomplete="off"><span class="err"></span></label>
     <label class="fld"><span class="fl">Tipo</span><span class="selw"><select name="tipo">${zSelOpts(ZTIPOS)}</select>${ic('updown',14)}</span><span class="hint">Manutenção conserta ou troca o que já existe. Melhoria traz algo novo ou melhor. A categoria do gasto é escolhida ao lançar cada despesa.</span></label>
-    <div class="fgrid"><label class="fld"><span class="fl">Onde?</span><span class="selw"><select name="local">${zSelOpts(ZLOCAIS)}</select>${ic('updown',14)}</span></label>
+    <div class="fgrid"><label class="fld"><span class="fl">Onde?</span><span class="selw"><select name="local">${zSelOpts(zLocais())}<option value="__outro">Outro local…</option></select>${ic('updown',14)}</span></label>
     <label class="fld"><span class="fl">Urgência</span><span class="selw"><select name="urg"><option>Normal</option><option>Urgente</option></select>${ic('updown',14)}</span></label></div>
+    <label class="fld" id="zLocW" hidden><span class="fl">Qual local?</span><input name="localx" maxlength="60" placeholder="Ex.: Pátio dos fundos" autocomplete="off"><span class="err"></span></label>
     <label class="fld"><span class="fl">Detalhes <small>opcional</small></span><textarea class="ta" name="desc" rows="3" maxlength="500" placeholder="O que está acontecendo?"></textarea></label>
     <label class="fld"><span class="fl">Foto <small>opcional</small></span><input type="file" name="foto" accept="image/*"></label>`,'Enviar pedido',
    (f,bad)=>{const fd=new FormData(f),n=fd.get('n').trim();if(!n)return bad('n','Diga o que precisa ser feito');
-    const j=ZJOB({n,tipo:fd.get('tipo'),local:fd.get('local'),urg:fd.get('urg'),desc:fd.get('desc').trim(),pedBy:ME.n,pedDate:NOWD,hist:[[NOWD,'Pedido feito por '+ME.n,ME.n]]});
+    const outro=fd.get('local')==='__outro',loc=outro?fd.get('localx').trim():fd.get('local');if(outro&&!loc)return bad('localx','Diga qual é o local');
+    const j=ZJOB({n,tipo:fd.get('tipo'),local:loc,urg:fd.get('urg'),desc:fd.get('desc').trim(),pedBy:ME.n,pedDate:NOWD,hist:[[NOWD,'Pedido feito por '+ME.n,ME.n]]});
     ZJ.unshift(j);closeDlg();S.zj=null;if(S.active!=='zel-trab'&&S.active!=='zel-vis')S.active='zel-trab';render();toast('Pedido enviado para a Zeladoria');});
+  const ls=$('#zF [name=local]');ls.addEventListener('change',()=>{$('#zLocW').hidden=ls.value!=='__outro';});
  },
+ zResp:v=>{closePops();const j=zJob(v);
+  zForm('Trocar o responsável',esc(j.n),`<label class="fld"><span class="fl">Novo responsável</span><span class="selw"><select name="resp">${zSelOpts(ZTEAM,j.resp)}</select>${ic('updown',14)}</span><span class="hint">Só quem é da equipe da Zeladoria.</span></label>`,'Trocar',
+   f=>{const r=new FormData(f).get('resp');if(r!==j.resp){j.resp=r;zLog(j,'Responsável: '+r);}closeDlg();zRe();toast('Responsável trocado');});},
  zEval:v=>{const j=zJob(v);
   zForm('Avaliar o pedido',esc(j.n),
    `<div class="fld"><span class="fl">Quem vai fazer?</span><div class="cm-when"><label class="on"><input type="radio" name="exec" value="equipe" checked><span class="htile" style="--s:36px;background:var(--brand-soft);color:var(--brand-text)">${ic('users',17)}</span><span><b>A equipe da Zeladoria</b><small>Orçamento só de material</small></span><i class="cm-rd"></i></label>
@@ -375,7 +391,7 @@ const ZA={
  zMatAdd:v=>{const j=zJob(v);zForm('Adicionar item de material',esc(j.n),`<label class="fld"><span class="fl">Item</span><input name="i" maxlength="80" placeholder="Ex.: Tinta branca 18 L" autocomplete="off"><span class="err"></span></label>${zFieldMoney('v','Valor')}`,'Adicionar',
    (f,bad)=>{const fd=new FormData(f),i=fd.get('i').trim(),val=zNum(fd.get('v'));if(!i)return bad('i','Diga o item');if(!val)return bad('v','Informe o valor');j.mat.push({id:'m'+Date.now(),i,v:val});closeDlg();zRe();toast('Item adicionado');});},
  zMatDel:v=>{const [a,b]=v.split('|'),j=zJob(a);j.mat=j.mat.filter(m=>m.id!==b);zRe();},
- zPropAdd:v=>{const j=zJob(v);zForm('Nova proposta',esc(j.n),`<label class="fld"><span class="fl">Fornecedor</span><span class="selw"><select name="forn">${ZFORN.map(f=>`<option value="${f.id}">${esc(f.n)} · ${esc(f.serv)}</option>`).join('')}</select>${ic('updown',14)}</span><span class="hint">Não achou? Cadastre em Fornecedores.</span></label>
+ zPropAdd:v=>{const j=zJob(v);if(j.props.length>=ZMAXPROP){toast(`Limite de ${ZMAXPROP} propostas por trabalho. Remova uma para incluir outra.`);return;}zForm('Nova proposta',esc(j.n),`<label class="fld"><span class="fl">Fornecedor</span><span class="selw"><select name="forn">${ZFORN.map(f=>`<option value="${f.id}">${esc(f.n)} · ${esc(f.serv)}</option>`).join('')}</select>${ic('updown',14)}</span><span class="hint">Não achou? Cadastre em Fornecedores.</span></label>
    ${zFieldMoney('v','Valor da mão de obra')}<label class="fld"><span class="fl">Prazo, em dias</span><input name="prazo" inputmode="numeric" value="7" autocomplete="off"></label>
    <label class="fld"><span class="fl">Arquivo da proposta <small>PDF ou PPT</small></span><input type="file" name="arq" accept=".pdf,.ppt,.pptx"></label>`,'Salvar proposta',
    (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor');const a=zFile(f);j.props.push({id:'p'+Date.now(),forn:fd.get('forn'),v:val,prazo:+fd.get('prazo')||7,arq:a?[a]:[],esc:false});closeDlg();zRe();toast('Proposta salva');});},

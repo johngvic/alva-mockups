@@ -43,6 +43,8 @@ const ibyId=id=>INTEGS.find(x=>x.id===id);
 const icount=(g,st)=>g.ppl.filter(p=>p.st===st).length;
 const iprog=g=>g.ppl.length?Math.round(icount(g,'integrado')/g.ppl.length*100):0;
 const dBR=d=>{if(!d)return '';const [y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;};
+/* data curta para o Período da lista ("16 out"); o ano só aparece quando não é o ano de hoje */
+const igShort=d=>{if(!d)return '';const [y,m,dd]=d.split('-');return `${+dd} ${MONTHS[+m-1].slice(0,3).toLowerCase()}${y!==NOWD.slice(0,4)?' '+y:''}`;};
 const dLong=d=>{if(!d)return '';const [y,m,dd]=d.split('-');return `${+dd} ${MONTHS[+m-1].slice(0,3)} ${y}`;};
 const pAv=p=>`${pav(p.n,p.tone,'')}`;
 const iPill=g=>g.current?`<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Atual</span>`:`<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Encerrada</span>`;
@@ -92,9 +94,9 @@ function ibar(g,noLeg){const t=g.ppl.length||1,seg=[['integrado',icount(g,'integ
 function irows(){
  const q=norm(S.iq);const list=INTEGS.filter(g=>(S.ifilter==='todas'||(S.ifilter==='ativa')===g.current)&&(!q||norm(g.n).includes(q)));
  if(!list.length)return `<div class="mempty"><p>Nada encontrado.</p><span>Nenhuma integração corresponde a esses filtros.</span></div>`;
- return `<div class="trow ig thead"><span>Nome</span><span>Pedidos</span><span>Membros</span><span>Integrados</span><span>Progresso</span><span>Status</span><span></span></div>
+ return `<div class="trow ig thead"><span>Nome</span><span>Período</span><span>Membros</span><span>Integrados</span><span>Progresso</span><span>Status</span><span></span></div>
  ${list.map(g=>{const p=iprog(g);return `<div class="trow ig" tabindex="0" data-a="openInteg" data-v="${g.id}">
-  <span class="tn"><b>${esc(g.n)}</b></span><span class="idt">${dBR(g.date)} <span class="soft">a ${dBR(g.close)}</span></span>
+  <span class="tn"><b>${esc(g.n)}</b></span><span class="idt">${igShort(g.date)} <span class="soft">a ${igShort(g.close)}</span></span>
   <span class="inum"><b>${g.ppl.length}</b>${g.limit?`<span class="soft">/${g.limit}</span>`:''}<em> membros</em></span><span class="inum"><b>${icount(g,'integrado')}</b><em> integrados</em></span>
   <span class="ipg"><span class="tr"><i style="width:${p}%;${p===100?'background:var(--st-int)':''}"></i></span><b>${p}%</b></span>
   <span class="ts">${iPill(g)}</span><span class="tc">${ic('chevR',16)}</span></div>`;}).join('')}
