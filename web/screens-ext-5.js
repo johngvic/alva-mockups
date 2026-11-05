@@ -546,7 +546,7 @@ lede=function(){return '';};
 /* ---------- menu: ordem pelo fluxo de uso (visão geral primeiro, análises por último) ---------- */
 {const ORD={
  Geral:['Dashboard','Pessoas','Comunidade','Cuidado','Kids','Conteúdo'],
- Operação:['Agenda','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja'],
+ Operação:['Agenda','Espaços','Zeladoria','Almoxarifado','Cafeteria','Restaurante','Loja'],
  Gestão:['Secretaria','Financeiro','Comunicação','Relatórios','Administração']};
  const SUB={
  Pessoas:['Integração','Membros'],
