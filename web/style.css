@@ -6141,3 +6141,4 @@ button.tag.tg{border:0;cursor:pointer;font:inherit}
  .trow.zt>span,.trow.zf>span{grid-area:auto!important;display:flex!important}
  .trow.zt>.tn,.trow.zf>.tn{grid-area:auto!important}.trow.zt .num,.trow.zf .num{justify-content:flex-end;text-align:right}
 }
+.zl-xt{display:flex;align-items:center;gap:8px}.zl-xt small{font:400 12px/1 var(--font-text);color:var(--ink-muted)}.zl-n{font-variant-numeric:tabular-nums;white-space:nowrap}

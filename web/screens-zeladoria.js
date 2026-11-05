@@ -28,14 +28,14 @@ const ZFORN=[
 ].map(f=>({id:'zf'+(++_zfid),n:f[0],serv:f[1],tel:f[2],mail:f[3],doc:''}));
 const zFn=id=>(ZFORN.find(f=>f.id===id)||{}).n||'';
 
-const ZJOB=o=>Object.assign({id:'zj'+(++_zjid),n:'',cat:'',tipo:'Manutenção',local:'',st:'pedido',pedBy:'',pedDate:'2026-09-01',desc:'',urg:'Normal',exec:null,resp:'',mat:[],props:[],apr:null,cx:{in:[],out:[]},hist:[],cm:[],cancel:null,fotos:[]},o);
+const ZJOB=o=>Object.assign({fim:'',id:'zj'+(++_zjid),n:'',cat:'',tipo:'Manutenção',local:'',st:'pedido',pedBy:'',pedDate:'2026-09-01',desc:'',urg:'Normal',exec:null,resp:'',mat:[],props:[],apr:null,cx:{in:[],out:[]},hist:[],cm:[],cancel:null,fotos:[]},o);
 const zIn=(d,v,obs='')=>({id:'zl'+(++_zlid),d,v,obs});
 const zOut=(d,v,nat,desc,forn='',comp='')=>({id:'zl'+(++_zlid),d,v,nat,desc,forn,comp});
 const ZJ=[
  ZJOB({n:'Trocar o ar-condicionado da sala 3',cat:'Ar-condicionado',tipo:'Manutenção',local:'Sala 3',st:'execucao',pedBy:'Ana Costa',pedDate:'2026-08-24',desc:'O aparelho da sala 3 parou de gelar e faz barulho. A sala é usada pelos Kids aos domingos.',urg:'Urgente',exec:'terceiro',resp:'Bruno Carvalho',
   mat:[{id:'m1',i:'Gás e tubulação',v:1100}],
   props:[{id:'p1',forn:'zf1',v:6800,prazo:5,arq:['Proposta-A-FrioTotal.pdf'],esc:false},{id:'p2',forn:'zf2',v:7450,prazo:4,arq:['Proposta-B-ClimaSul.pdf','Catalogo-split.pdf'],esc:false},{id:'p3',forn:'zf3',v:6200,prazo:7,arq:['Proposta-C-RefriMax.pdf'],esc:true}],
-  apr:{by:'Rafael Pereira',d:'2026-09-18',v:7300},
+  apr:{by:'Rafael Pereira',d:'2026-09-18',v:7300},fim:'2026-10-05',
   cx:{in:[zIn('2026-09-20',7300,'Liberado pelo Financeiro')],out:[zOut('2026-09-24',1100,'Material','Gás e tubulação','', 'nota-material-0924.pdf'),zOut('2026-09-29',3100,'Mão de obra','Primeira parcela da instalação','zf3','recibo-refrimax-1.pdf')]},
   hist:[['2026-08-24','Pedido feito por Ana Costa','Ana Costa'],['2026-08-26','Avaliado: será feito por fornecedor','Bruno Carvalho'],['2026-09-10','Proposta C (RefriMax) escolhida','Bruno Carvalho'],['2026-09-18','Aprovado pelo Financeiro: R$ 7.300','Rafael Pereira'],['2026-09-20','Entrada de R$ 7.300 no caixa','Rafael Pereira'],['2026-09-22','Execução iniciada','Bruno Carvalho']]}),
  ZJOB({n:'Pintar o salão principal',cat:'Pintura',tipo:'Melhoria',local:'Salão principal',st:'orcamento',pedBy:'Pr. Marcos Lima',pedDate:'2026-09-12',desc:'A pintura das paredes está desgastada, com manchas perto das janelas. Pensar numa cor mais clara.',exec:'terceiro',resp:'Bruno Carvalho',
@@ -58,12 +58,16 @@ const ZJ=[
  ZJOB({n:'Reforma do telhado do anexo',cat:'Cobertura',tipo:'Melhoria',local:'Anexo',st:'execucao',pedBy:'Pr. Rafael Pereira',pedDate:'2026-07-20',desc:'Goteiras em três pontos do anexo. Trocar as telhas e refazer a calha.',exec:'terceiro',resp:'Bruno Carvalho',
   mat:[{id:'m1',i:'Telhas, calhas e vedação',v:8000}],
   props:[{id:'p1',forn:'zf6',v:42000,prazo:30,arq:['Proposta-CobreTelhas.pdf','Cronograma.pptx'],esc:true}],
-  apr:{by:'Rafael Pereira',d:'2026-08-20',v:50000},
+  apr:{by:'Rafael Pereira',d:'2026-08-20',v:50000},fim:'2026-09-28',
   cx:{in:[zIn('2026-09-05',20000,'Primeira liberação do Financeiro')],out:[zOut('2026-09-08',8000,'Material','Telhas e calhas','', 'nota-telhas.pdf'),zOut('2026-09-22',11500,'Mão de obra','Primeira etapa da obra','zf6','recibo-cobretelhas-1.pdf')]},
   hist:[['2026-07-20','Pedido feito por Pr. Rafael Pereira','Pr. Rafael Pereira'],['2026-07-25','Avaliado: será feito por fornecedor','Bruno Carvalho'],['2026-08-14','Proposta escolhida','Bruno Carvalho'],['2026-08-20','Aprovado pelo Financeiro: R$ 50.000','Rafael Pereira'],['2026-09-05','Entrada de R$ 20.000 no caixa','Rafael Pereira'],['2026-09-08','Execução iniciada','Bruno Carvalho']]}),
  ZJOB({n:'Podar as árvores do jardim',cat:'Jardim',tipo:'Manutenção',local:'Jardim',st:'cancelado',pedBy:'Daniela Rocha',pedDate:'2026-09-02',desc:'Os galhos estão tocando o fio de energia.',cancel:'Um voluntário do ministério fez a poda sem custo.',
   hist:[['2026-09-02','Pedido feito por Daniela Rocha','Daniela Rocha'],['2026-09-04','Cancelado: um voluntário do ministério fez a poda sem custo.','Bruno Carvalho']]}),
 ];
+[['Consertar a bomba d\'água do banheiro','Hidráulica','Manutenção',1250,800,'2026-08-12','Edson Ramos'],['Trocar a fechadura da secretaria','Segurança','Manutenção',420,0,'2026-08-27','Josias Almeida']].forEach(x=>{
+ const o=[];if(x[3])o.push(zOut(x[5],x[3],'Material',x[0]+' (material)','','nota-'+x[5]+'.pdf'));if(x[4])o.push(zOut(x[5],x[4],'Mão de obra',x[0]+' (mão de obra)','zf7','recibo-'+x[5]+'.pdf'));
+ ZJ.push(ZJOB({n:x[0],cat:x[1],tipo:x[2],local:'Anexo',st:'concluido',pedBy:'Pr. Marcos Lima',pedDate:x[5],exec:x[4]?'terceiro':'equipe',resp:x[6],mat:[{id:'m1',i:'Material',v:x[3]}],cx:{in:[zIn(x[5],x[3]+x[4],'Liberado pelo Financeiro')],out:o},hist:[[x[5],'Trabalho concluído',x[6]]]}));
+});
 /* histórico do ano passado, para as Análises (trabalhos concluídos em 2025) */
 [['Trocar o ar-condicionado do salão','Ar-condicionado','Manutenção',1800,3600,'2025-03-12'],['Instalar split na sala de reunião','Ar-condicionado','Instalação',2100,1800,'2025-08-20'],['Pintura externa do templo','Pintura','Melhoria',3700,5000,'2025-05-18'],['Trocar o quadro de luz','Elétrica','Manutenção',1500,600,'2025-04-02'],['Consertar a pia da cozinha','Hidráulica','Manutenção',350,1000,'2025-06-14'],['Trocar a porta de entrada','Portas e portões','Melhoria',2800,0,'2025-09-09'],['Calha da lateral','Cobertura','Manutenção',1200,3000,'2025-02-22'],['Lâmpadas do salão','Iluminação','Manutenção',680,0,'2025-10-05'],['Câmeras de segurança','Segurança','Instalação',3400,0,'2025-11-12'],['Poda e adubação','Jardim','Manutenção',300,600,'2025-07-01']].forEach(x=>{
  const o=[];if(x[3])o.push(zOut(x[5],x[3],'Material',x[0]+' (material)'));if(x[4])o.push(zOut(x[5],x[4],'Mão de obra',x[0]+' (mão de obra)'));
@@ -76,13 +80,23 @@ const zProp=j=>j.props.find(p=>p.esc);
 const zPrevMat=j=>zSum(j.mat);
 const zPrevMao=j=>j.exec==='terceiro'&&zProp(j)?zProp(j).v:0;
 const zPrev=j=>zPrevMat(j)+zPrevMao(j);
-const zLib=j=>zSum(j.cx.in);
-const zGasto=j=>zSum(j.cx.out);
-const zSaldo=j=>zLib(j)-zGasto(j);
-const zGastoAno=(y,j)=>(j?[j]:ZJ).reduce((s,x)=>s+zSum(x.cx.out.filter(o=>o.d.slice(0,4)===String(y))),0);
+/* O caixa do trabalho é o caixa padrão do Alva (CAIXAS, o mesmo dos ministérios e eventos), com o trabalho como dono. */
+const zCx=j=>{let x=CAIXAS.find(c=>c.ownerType==='zel'&&c.ownerId===j.id);
+ if(!x){x=cxNew('zel',j.id,'Caixa do trabalho',{main:true});
+  (j.cx.in||[]).forEach(e=>cxAdd(x,'in',e.v,e.d,e.obs||'Liberado pelo Financeiro','Aporte da igreja','Rafael Pereira'));
+  (j.cx.out||[]).forEach(o=>cxAdd(x,'out',o.v,o.d,o.desc,o.cat||j.cat,'Bruno Carvalho',{file:o.comp||'',nat:o.nat,forn:o.forn||''}));
+  if(j.st==='concluido'||j.st==='cancelado'){x.status='encerrado';x.closedAt=j.hist.length?j.hist[j.hist.length-1][0]:NOWD;}}
+ return x;};
+const zLib=j=>cxIn(zCx(j))/100;
+const zGasto=j=>cxOut(zCx(j))/100;
+const zSaldo=j=>cxBal(zCx(j))/100;
+const zOutsOf=j=>cxValid(zCx(j)).filter(e=>e.t==='out'&&!e.xfer);
+const zGastoAno=(y,j)=>(j?[j]:ZJ).reduce((s,x)=>s+zOutsOf(x).filter(e=>e.d.slice(0,4)===String(y)).reduce((a,e)=>a+e.v,0)/100,0);
+const zLate=j=>j.st==='execucao'&&j.fim&&j.fim<NOWD;
 const zJob=id=>ZJ.find(j=>j.id===id);
 const zQuem=j=>j.exec==='terceiro'?'Fornecedor':j.exec==='equipe'?'Equipe da Zeladoria':'A definir';
 const zBar=(v,t)=>`<span class="bd-bar"><i style="width:${t>0?Math.min(100,Math.round(v/t*100)):0}%"></i></span>`;
+ZJ.forEach(j=>zCx(j));
 Object.assign(S,{zj:null,ztab:'resumo',zview:'quadro',zq:'',zst:'todos',zcat:'todas',zano:'2026',zfq:''});
 
 /* ---------- menu e permissões ---------- */
@@ -96,34 +110,31 @@ Object.assign(S,{zj:null,ztab:'resumo',zview:'quadro',zq:'',zst:'todos',zcat:'to
 
 /* ---------- Visão geral ---------- */
 function zelVis(){
- const cnt=s=>ZJ.filter(j=>j.st===s).length,urg=ZJ.filter(j=>j.st==='pedido'&&j.urg==='Urgente').length,exec=ZJ.filter(j=>j.st==='execucao');
- const wait=ZJ.filter(j=>j.st==='aprovacao'&&!j.apr).length,sal=exec.reduce((a,j)=>a+zSaldo(j),0),g26=zGastoAno(2026),g25=zGastoAno(2025);
+ const cnt=s=>ZJ.filter(j=>j.st===s&&!j.old).length,urg=ZJ.filter(j=>j.st==='pedido'&&j.urg==='Urgente').length,exec=ZJ.filter(j=>j.st==='execucao');
+ const late=exec.filter(zLate),wait=ZJ.filter(j=>j.st==='aprovacao'&&!j.apr).length,sal=exec.reduce((a,j)=>a+zSaldo(j),0),g26=zGastoAno(2026);
  const att=[];
  ZJ.forEach(j=>{
   if(j.st==='pedido')att.push([j,'bell',`Pedido novo de ${j.pedBy}`,j.urg==='Urgente'?'Urgente · avaliar o quanto antes':'Avaliar se a equipe faz ou se precisa de fornecedor','Avaliar']);
   else if(j.st==='orcamento'&&j.exec==='terceiro'&&!zProp(j))att.push([j,'file','Falta escolher a proposta',`${j.props.length} proposta${j.props.length===1?'':'s'} recebida${j.props.length===1?'':'s'}`,'Escolher']);
   else if(j.st==='orcamento'&&j.exec==='equipe'&&!j.mat.length)att.push([j,'file','Falta o orçamento do material','A equipe vai fazer; só falta listar o material','Orçar']);
   else if(j.st==='aprovacao'&&!j.apr)att.push([j,'wallet','Aguardando o Financeiro',`Orçamento de ${zR(zPrev(j))} esperando aprovação`,'Abrir']);
+  else if(zLate(j))att.push([j,'clock','Execução atrasada',`Era para terminar em ${fmtD(j.fim)} · ${-inDays(j.fim)} dia${-inDays(j.fim)===1?'':'s'} de atraso`,'Abrir']);
   else if(j.st==='execucao'&&zLib(j)&&zSaldo(j)<=zLib(j)*.1)att.push([j,'alert','Saldo do caixa quase esgotado',`Sobram ${zR(zSaldo(j))} de ${zR(zLib(j))} liberados · previsto ${zR(zPrev(j))}`,'Abrir']);
  });
- const cats={};ZJ.forEach(j=>{const v=zGastoAno(2026,j);if(v)cats[j.cat]=(cats[j.cat]||0)+v;});
- const top=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5),mx=top.length?top[0][1]:1;
- return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Visão geral</h1><p class="lede">Como estão os pedidos e as obras da igreja</p></div>
+ return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Visão geral</h1><p class="lede">O que precisa de atenção e como andam as obras</p></div>
   <div class="pact"><button class="btn sec" data-a="nav" data-v="zel-trab">${ic('layers',15)}Ver trabalhos</button><button class="btn pri" data-a="zNew">${ic('plus',15,2.2)}Pedir um trabalho</button></div></header>
  <section class="card kpis4 rise" style="--d:1">
   <div class="k4"><span class="kl">Pedidos a avaliar</span><span class="kv">${cnt('pedido')}</span><span class="kd ${urg?'dn':''}">${urg?urg+' urgente'+(urg>1?'s':''):'nenhum urgente'}</span></div>
   <div class="k4"><span class="kl">Em orçamento ou aprovação</span><span class="kv">${cnt('orcamento')+cnt('aprovacao')}</span><span class="kd">${wait} aguardando o Financeiro</span></div>
-  <div class="k4"><span class="kl">Em execução</span><span class="kv">${exec.length}</span><span class="kd">${zR(sal)} de saldo nos caixas</span></div>
-  <div class="k4"><span class="kl">Gasto em 2026</span><span class="kv">${zR(g26)}</span><span class="kd">em 2025: ${zR(g25)}</span></div>
+  <div class="k4"><span class="kl">Em execução</span><span class="kv">${exec.length}</span><span class="kd ${late.length?'dn':''}">${late.length?late.length+(late.length>1?' atrasadas':' atrasada'):'nenhuma atrasada'}</span></div>
+  <div class="k4"><span class="kl">Saldo nos caixas das obras</span><span class="kv">${zR(sal)}</span><span class="kd">gasto em 2026: ${zR(g26)}</span></div>
  </section>
  <div class="pgrid rise" style="--d:2"><div class="col">
   <section class="card pc"><div class="sh"><h2>Precisa de você</h2><span class="who">${att.length} ${att.length===1?'item':'itens'}</span></div>
    ${att.length?`<ul class="zl-att">${att.map(a=>`<li><span class="zl-ai">${ic(a[1],16,2)}</span><span class="zl-at"><b>${esc(a[0].n)}</b><small>${esc(a[2])} · ${esc(a[3])}</small></span><button class="btn sec sm" data-a="zOpen" data-v="${a[0].id}">${a[4]}</button></li>`).join('')}</ul>`:'<div class="mempty"><p>Nada esperando por você.</p><span>Quando chegar um pedido ou faltar algo, aparece aqui.</span></div>'}</section>
-  <section class="card pc"><div class="sh"><h2>Em execução</h2><span class="who">${exec.length}</span></div>
-   ${exec.length?`<div class="zl-ex">${exec.map(j=>`<button class="zl-xc" data-a="zOpen" data-v="${j.id}"><b>${esc(j.n)}</b><span class="who">${esc(j.cat)} · ${esc(j.local)} · ${esc(j.resp)}</span>${zBar(zGasto(j),zLib(j))}<span class="zl-xn"><b>${zR(zGasto(j))}</b> gastos de ${zR(zLib(j))} liberados<small>previsto ${zR(zPrev(j))}</small></span></button>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma obra em execução.</p></div>'}</section>
  </div><div class="col">
-  <section class="card pc"><div class="sh"><h2>Gasto por categoria em 2026</h2><button class="btn sec sm" data-a="nav" data-v="zel-ana">Análises</button></div>
-   ${top.length?`<ul class="zl-cb">${top.map(c=>`<li><span>${esc(c[0])}</span><span class="bd-bar"><i style="width:${Math.round(c[1]/mx*100)}%"></i></span><b>${zR(c[1])}</b></li>`).join('')}</ul>`:'<div class="mempty"><p>Ainda não há gastos neste ano.</p></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Em execução</h2><span class="who">${exec.length}</span></div>
+   ${exec.length?`<div class="zl-ex">${exec.map(j=>`<button class="zl-xc" data-a="zOpen" data-v="${j.id}"><b>${esc(j.n)}</b><span class="who">${esc(j.local)} · ${esc(j.resp)}</span><span class="zl-xt">${zLate(j)?'<em class="tag warn">Atrasada</em>':'<em class="tag">No prazo</em>'}${j.fim?`<small>previsão ${fmtD(j.fim)}</small>`:''}</span>${zBar(zGasto(j),zLib(j))}<span class="zl-xn"><b>${zR(zGasto(j))}</b> gastos de ${zR(zLib(j))} liberados<small>previsto ${zR(zPrev(j))}</small></span></button>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma obra em execução.</p></div>'}</section>
   <section class="card pc"><div class="sh"><h2>Concluídos recentemente</h2></div>
    <ul class="zl-att">${ZJ.filter(j=>j.st==='concluido'&&!j.old).map(j=>`<li><span class="zl-ai ok">${ic('check',16,2.4)}</span><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.cat)} · gasto ${zR(zGasto(j))}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${j.id}">Ver</button></li>`).join('')||'<li class="who">Nenhum ainda.</li>'}</ul></section>
  </div></div>`;
@@ -133,7 +144,7 @@ function zelVis(){
 function zCard(j){
  const urg=j.urg==='Urgente',cx=j.st==='execucao'||j.st==='concluido';
  return `<div class="bd-t" tabindex="0" data-a="zOpen" data-v="${j.id}"><b>${esc(j.n)}</b>
-  <div class="bd-m"><em class="tag">${esc(j.cat)}</em>${urg?'<em class="tag warn">Urgente</em>':''}</div>
+  <div class="bd-m"><em class="tag">${esc(j.cat)}</em>${urg?'<em class="tag warn">Urgente</em>':''}${zLate(j)?'<em class="tag warn">Atrasada</em>':''}</div>
   <div class="bd-m"><span class="bd-mn">${ic('pin',11,2)}${esc(j.local)}</span>${j.resp?`<span class="bd-who">${pav(j.resp,'ceu','')}<i>${esc(j.resp.split(' ')[0])}</i></span>`:`<span class="bd-who"><i>${esc(j.pedBy)}</i></span>`}</div>
   ${cx&&zLib(j)?`<div class="zl-cm">${zBar(zGasto(j),zLib(j))}<small>${zR(zGasto(j))} de ${zR(zLib(j))}</small></div>`:zPrev(j)?`<small class="zl-pv">Previsto ${zR(zPrev(j))}</small>`:''}</div>`;
 }
@@ -187,7 +198,7 @@ function zResumo(j){
    <dl class="kv grid2"><div><dt>Pedido por</dt><dd>${esc(j.pedBy)}</dd></div><div><dt>Em</dt><dd>${fmtD(j.pedDate)}</dd></div><div><dt>Local</dt><dd>${esc(j.local)}</dd></div><div><dt>Tipo</dt><dd>${esc(j.tipo)}</dd></div></dl></section>
  </div><div class="col">
   <section class="card pc"><div class="sh"><h2>Quem faz</h2></div>
-   <dl class="kv grid2"><div><dt>Execução</dt><dd>${j.exec?zQuem(j):'<span class="soft">Ainda não avaliado</span>'}</dd></div><div><dt>Responsável</dt><dd>${j.resp?esc(j.resp):'<span class="soft">A definir</span>'}</dd></div>${j.exec==='terceiro'&&zProp(j)?`<div><dt>Fornecedor escolhido</dt><dd>${esc(zFn(zProp(j).forn))}</dd></div><div><dt>Prazo</dt><dd>${zProp(j).prazo} dias</dd></div>`:''}</dl></section>
+   <dl class="kv grid2"><div><dt>Execução</dt><dd>${j.exec?zQuem(j):'<span class="soft">Ainda não avaliado</span>'}</dd></div><div><dt>Responsável</dt><dd>${j.resp?esc(j.resp):'<span class="soft">A definir</span>'}</dd></div>${j.fim?`<div><dt>Previsão de término</dt><dd>${fmtD(j.fim)}${zLate(j)?' <em class="tag warn">Atrasada</em>':''}</dd></div>`:''}${j.exec==='terceiro'&&zProp(j)?`<div><dt>Fornecedor escolhido</dt><dd>${esc(zFn(zProp(j).forn))}</dd></div><div><dt>Prazo</dt><dd>${zProp(j).prazo} dias</dd></div>`:''}</dl></section>
   <section class="card pc"><div class="sh"><h2>Dinheiro</h2></div>
    <div class="zl-ln"><span>Previsto (material + mão de obra)</span><b>${zPrev(j)?zR(zPrev(j)):'—'}</b></div>
    <div class="zl-ln"><span>Liberado pela igreja</span><b>${zR(zLib(j))}</b></div>
@@ -214,17 +225,10 @@ function zOrc(j){
  const apr=`<section class="card pc"><div class="sh"><h2>Aprovação do Financeiro</h2></div>${j.apr?`<p class="bd-note ok">${ic('circleCheck',13,2)}Aprovado por ${esc(j.apr.by)} em ${fmtD(j.apr.d)} · valor aprovado ${zR(j.apr.v)}</p>`:j.st==='aprovacao'?`<p class="bd-note">${ic('clock',13,2)}Aguardando a aprovação do Financeiro. Quando aprovarem, registre aqui.</p>`:`<p class="who">Depois de enviar o orçamento, o Financeiro aprova e a aprovação fica registrada aqui.</p>`}</section>`;
  return `<div class="col">${mat}${mao}<div class="pgrid"><div class="col">${tot}</div><div class="col">${apr}</div></div></div>`;
 }
+/* A aba Caixa é o caixa padrão do Alva (o mesmo dos ministérios e eventos), com o trabalho como dono: saldo, entradas, saídas, busca, lançamentos em tabela única, estorno e comprovante. */
 function zCaixa(j){
- const can=j.st==='execucao'||j.st==='concluido'&&false;
- const ins=`<section class="card pc"><div class="sh"><h2>Entradas · dinheiro liberado</h2>${j.st==='execucao'||j.cx.in.length?`<button class="btn sec sm" data-a="zIn" data-v="${j.id}">${ic('plus',14,2.2)}Registrar entrada</button>`:''}</div>
-  ${j.cx.in.length?`<ul class="zl-lines">${j.cx.in.map(e=>`<li><span><b>${fmtD(e.d)}</b> ${esc(e.obs||'Entrada')}</span><b class="up">+ ${zR2(e.v)}</b></li>`).join('')}</ul>`:'<div class="mempty"><p>Nenhum dinheiro liberado ainda.</p><span>Quando o Financeiro liberar um valor, registre a entrada. A igreja pode liberar aos poucos.</span></div>'}</section>`;
- const outs=`<section class="card pc"><div class="sh"><h2>Despesas</h2>${j.st==='execucao'?`<button class="btn pri sm" data-a="zOut" data-v="${j.id}">${ic('plus',14,2.2)}Lançar despesa</button>`:''}</div>
-  ${zLib(j)&&zSaldo(j)<=0?`<p class="bd-note warn">${ic('alert',13,2)}O saldo acabou. Espere a igreja liberar mais dinheiro antes de gastar.</p>`:''}
-  ${j.cx.out.length?`<ul class="zl-lines">${j.cx.out.slice().sort((a,b)=>a.d<b.d?1:-1).map(o=>`<li><span><b>${fmtD(o.d)}</b> ${esc(o.desc)}<small>${o.nat}${o.forn?' · '+esc(zFn(o.forn)):''}${o.comp?` · <span class="zl-fl">${ic('file',12,2)}${esc(o.comp)}</span>`:' · sem comprovante'}</small></span><b>− ${zR2(o.v)}</b></li>`).join('')}</ul>
-   <div class="zl-ln"><span>Material</span><b>${zR2(zSum(j.cx.out.filter(o=>o.nat==='Material')))}</b></div><div class="zl-ln"><span>Mão de obra</span><b>${zR2(zSum(j.cx.out.filter(o=>o.nat==='Mão de obra')))}</b></div><div class="zl-ln tot"><span>Total gasto</span><b>${zR2(zGasto(j))}</b></div>`:'<div class="mempty"><p>Nenhuma despesa lançada.</p><span>Cada compra ou pagamento entra aqui, com o comprovante.</span></div>'}</section>`;
- return `<div class="pgrid"><div class="col">${outs}</div><div class="col"><section class="card pc"><div class="sh"><h2>Saldo</h2></div>
-  <div class="zl-ln"><span>Liberado</span><b>${zR2(zLib(j))}</b></div><div class="zl-ln"><span>Gasto</span><b>${zR2(zGasto(j))}</b></div><div class="zl-ln tot"><span>Saldo do caixa</span><b class="${zSaldo(j)<0?'neg':''}">${zR2(zSaldo(j))}</b></div>
-  ${zLib(j)?zBar(zGasto(j),zLib(j)):''}<p class="who" style="margin:10px 0 0">Previsto para a obra: <b>${zR2(zPrev(j))}</b>${zPrev(j)>zLib(j)?` · falta liberar ${zR2(zPrev(j)-zLib(j))}`:''}</p></section>${ins}</div></div>`;
+ const c=zCx(j);S.cx=c.id;if(!S.cxf)S.cxf='all';
+ return cxView(c).replace(/<button class="btn sec sm" data-a="cxBack">[\s\S]*?<\/button>/,'').replace(/<button class="btn sec sm" data-a="cxReopen"[^>]*>[^<]*<\/button>/,'');
 }
 function zCom(j){
  return `<section class="card pc"><div class="sh"><h2>Comentários</h2><span class="who">${j.cm.length}</span></div>
@@ -245,7 +249,7 @@ function zelForn(){
 function zFornRows(){
  const q=norm(S.zfq||''),l=ZFORN.filter(f=>!q||norm(f.n+' '+f.serv).includes(q));
  if(!l.length)return '<div class="mempty"><p>Nenhum fornecedor encontrado.</p></div>';
- const ws=f=>ZJ.filter(j=>j.props.some(p=>p.forn===f.id&&p.esc)||j.cx.out.some(o=>o.forn===f.id)),pago=f=>ZJ.reduce((a,j)=>a+zSum(j.cx.out.filter(o=>o.forn===f.id&&o.d.slice(0,4)==='2026')),0);
+ const ws=f=>ZJ.filter(j=>j.props.some(p=>p.forn===f.id&&p.esc)||zOutsOf(j).some(e=>e.forn===f.id)),pago=f=>ZJ.reduce((a,j)=>a+zOutsOf(j).filter(e=>e.forn===f.id&&e.d.slice(0,4)==='2026').reduce((s2,e)=>s2+e.v,0)/100,0);
  return `<div class="trow zf thead"><span>Fornecedor</span><span>Serviço</span><span>Contato</span><span>Trabalhos</span><span>Pago em 2026</span><span></span></div>
  ${l.map(f=>`<div class="trow zf" tabindex="0" data-a="zFornEdit" data-v="${f.id}"><span class="tn"><span class="htile" style="--s:34px;background:var(--tone-salvia);color:var(--tone-salvia-ink)">${ic('building',16,1.9)}</span><span class="zt-n"><b>${esc(f.n)}</b><span>${esc(f.mail||'sem e-mail')}</span></span></span><span>${esc(f.serv)}</span><span>${esc(f.tel||'—')}</span><span class="num">${ws(f).length}</span><span class="num">${pago(f)?zR(pago(f)):'—'}</span><span class="tc">${ic('chevR',16)}</span></div>`).join('')}
  <div class="tfoot"><span>${l.length} ${l.length===1?'fornecedor':'fornecedores'}</span></div>`;
@@ -253,28 +257,37 @@ function zFornRows(){
 
 /* ---------- Análises ---------- */
 function zelAna(){
- const y=+S.zano,py=y-1,rows={};
- ZJ.forEach(j=>j.cx.out.forEach(o=>{const oy=+o.d.slice(0,4);if(oy!==y&&oy!==py)return;const r=rows[j.cat]=rows[j.cat]||{cat:j.cat,mat:0,mao:0,prev:0,n:new Set()};if(oy===y){if(o.nat==='Material')r.mat+=o.v;else r.mao+=o.v;r.n.add(j.id);}else r.prev+=o.v;}));
- const l=Object.values(rows).map(r=>Object.assign(r,{tot:r.mat+r.mao})).filter(r=>r.tot||r.prev).sort((a,b)=>b.tot-a.tot),tot=l.reduce((a,r)=>a+r.tot,0),mat=l.reduce((a,r)=>a+r.mat,0),mao=l.reduce((a,r)=>a+r.mao,0),prevT=l.reduce((a,r)=>a+r.prev,0),mx=Math.max(1,...l.map(r=>Math.max(r.tot,r.prev)));
- const tipo={};ZJ.forEach(j=>{const v=zGastoAno(y,j);if(v)tipo[j.tipo]=(tipo[j.tipo]||0)+v;});
- const nT=new Set(l.flatMap(r=>[...r.n])).size;
- return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Análises</h1><p class="lede">Quanto a igreja gasta com cada tipo de obra, por ano</p></div>
-  <div class="pact"><div class="chips">${['2026','2025'].map(a=>`<button class="chipf ${S.zano===a?'on':''}" data-a="zAno" data-v="${a}">${a}</button>`).join('')}</div></div></header>
- <section class="card kpis4 k3 rise" style="--d:1">
-  <div class="k4"><span class="kl">Gasto em ${y}</span><span class="kv">${zR(tot)}</span><span class="kd ${tot>prevT?'dn':'up'}">${prevT?(tot>=prevT?'+':'−')+Math.abs(Math.round((tot-prevT)/prevT*100))+'% sobre '+py:'sem ano anterior'}</span></div>
-  <div class="k4"><span class="kl">Trabalhos com gasto</span><span class="kv">${nT}</span><span class="kd">${l.length} categorias</span></div>
-  <div class="k4"><span class="kl">Maior categoria</span><span class="kv zl-kvt">${l[0]?esc(l[0].cat):'—'}</span><span class="kd">${l[0]?zR(l[0].tot):''}</span></div>
+ const per=S.relM||RELN,isY=per[0]==='Y',lab=isY?'Ano de '+per.slice(1):monthName(per),pp=isY?'Y'+(+per.slice(1)-1):ymAdd(per,-1),plab=isY?pp.slice(1):monthName(pp);
+ const inP=(d,p)=>p[0]==='Y'?d.slice(0,4)===p.slice(1):d.slice(0,7)===p;
+ const outs=p=>{const a=[];ZJ.forEach(j=>zOutsOf(j).forEach(e=>{if(inP(e.d,p))a.push({j,e,v:e.v/100,cat:e.cat||j.cat,nat:e.nat||'Material'});}));return a;};
+ const cur=outs(per),prv=outs(pp),sum=a=>a.reduce((s,x)=>s+x.v,0),tot=sum(cur),ptot=sum(prv);
+ const grp=(a,k)=>{const m={};a.forEach(x=>{const key=k(x);m[key]=(m[key]||0)+x.v;});return m;};
+ const byCat=grp(cur,x=>x.cat),pCat=grp(prv,x=>x.cat),cats=Object.keys(Object.assign({},byCat,pCat)).sort((a,b)=>(byCat[b]||0)-(byCat[a]||0)),mxC=Math.max(1,...cats.map(c=>Math.max(byCat[c]||0,pCat[c]||0)));
+ const byTipo=grp(cur,x=>x.j.tipo),pTipo=grp(prv,x=>x.j.tipo),mxT=Math.max(1,...ZTIPOS.map(t=>Math.max(byTipo[t]||0,pTipo[t]||0)));
+ const mat=sum(cur.filter(x=>x.nat==='Material')),mao=sum(cur.filter(x=>x.nat==='Mão de obra'));
+ const byForn=grp(cur.filter(x=>x.e.forn),x=>zFn(x.e.forn)),forns=Object.entries(byForn).sort((a,b)=>b[1]-a[1]),direto=sum(cur.filter(x=>!x.e.forn));
+ const byJob={};cur.forEach(x=>{byJob[x.j.id]=(byJob[x.j.id]||0)+x.v;});const jobs=Object.entries(byJob).sort((a,b)=>b[1]-a[1]).slice(0,6);
+ const semComp=cur.filter(x=>!x.e.file),delta=ptot?Math.round((tot-ptot)/ptot*100):null,nJ=Object.keys(byJob).length;
+ const rowC=(label,v,pv,mx)=>`<li><div class="zl-ah"><b>${esc(label)}</b><span>${zR(v)}<small>${pv?zR(pv)+' em '+plab:'sem gasto em '+plab}</small></span></div><span class="bd-bar"><i style="width:${Math.round(v/mx*100)}%"></i></span><span class="bd-bar zl-prev"><i style="width:${Math.round(pv/mx*100)}%"></i></span></li>`;
+ return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Análises</h1><p class="lede">Quanto a igreja gasta com as obras, e em quê</p></div></header>
+ ${fMes()}
+ <section class="card kpis4 rise" style="--d:1">
+  <div class="k4"><span class="kl">Gasto em ${lab.toLowerCase()}</span><span class="kv">${zR(tot)}</span><span class="kd ${delta>0?'dn':'up'}">${delta==null?'sem '+plab+' para comparar':(delta>=0?'+':'−')+Math.abs(delta)+'% sobre '+plab}</span></div>
+  <div class="k4"><span class="kl">Trabalhos com gasto</span><span class="kv">${nJ}</span><span class="kd">${cur.length} lançamento${cur.length===1?'':'s'}</span></div>
+  <div class="k4"><span class="kl">Maior categoria</span><span class="kv zl-kvt">${cats.length&&byCat[cats[0]]?esc(cats[0]):'—'}</span><span class="kd">${cats.length&&byCat[cats[0]]?zR(byCat[cats[0]]):''}</span></div>
+  <div class="k4"><span class="kl">Sem comprovante</span><span class="kv ${semComp.length?'dn':''}">${semComp.length}</span><span class="kd">${semComp.length?zR(sum(semComp))+' sem nota ou recibo':'tudo com comprovante'}</span></div>
  </section>
  <div class="pgrid rise" style="--d:2"><div class="col">
-  <section class="card pc"><div class="sh"><h2>Gasto por categoria</h2><span class="who">${y} × ${py}</span></div>
-   ${l.length?`<ul class="zl-an">${l.map(r=>`<li><div class="zl-ah"><b>${esc(r.cat)}</b><span>${zR(r.tot)}<small>${r.prev?(r.tot>=r.prev?'↑':'↓')+' '+zR(r.prev)+' em '+py:'sem gasto em '+py}</small></span></div>
-    <span class="bd-bar"><i style="width:${Math.round(r.tot/mx*100)}%"></i></span><span class="bd-bar zl-prev"><i style="width:${Math.round(r.prev/mx*100)}%"></i></span>
-    <small class="who">Material ${zR(r.mat)} · Mão de obra ${zR(r.mao)} · ${r.n.size} ${r.n.size===1?'trabalho':'trabalhos'}</small></li>`).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste ano.</p></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Por categoria</h2><span class="who">${lab} × ${plab}</span></div>${cats.length&&tot?`<ul class="zl-an">${cats.map(c=>rowC(c,byCat[c]||0,pCat[c]||0,mxC)).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Por tipo de trabalho</h2><span class="who">${lab} × ${plab}</span></div>${tot?`<ul class="zl-an">${ZTIPOS.map(t=>rowC(t,byTipo[t]||0,pTipo[t]||0,mxT)).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Por fornecedor</h2></div>${forns.length||direto?`<ul class="zl-lines">${forns.map(f=>`<li><span>${esc(f[0])}</span><b>${zR(f[1])}</b></li>`).join('')}${direto?`<li><span>Compras diretas, sem fornecedor cadastrado</span><b>${zR(direto)}</b></li>`:''}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
  </div><div class="col">
   <section class="card pc"><div class="sh"><h2>Material × mão de obra</h2></div>
    <div class="zl-ln"><span>Material</span><b>${zR(mat)}</b></div><div class="zl-ln"><span>Mão de obra</span><b>${zR(mao)}</b></div>${zBar(mat,mat+mao)}</section>
-  <section class="card pc"><div class="sh"><h2>Por tipo de trabalho</h2></div>
-   ${Object.keys(tipo).length?Object.entries(tipo).map(t=>`<div class="zl-ln"><span>${t[0]}</span><b>${zR(t[1])}</b></div>`).join(''):'<p class="who">Sem gastos neste ano.</p>'}</section>
+  <section class="card pc"><div class="sh"><h2>Para conferir com o Financeiro</h2><span class="who">${lab}</span></div>
+   <div class="zl-ln"><span>Saídas lançadas</span><b>${zR(tot)}</b></div><div class="zl-ln"><span>Lançamentos</span><b>${cur.length}</b></div><div class="zl-ln"><span>Com comprovante</span><b>${cur.length-semComp.length}</b></div><div class="zl-ln tot"><span>Sem comprovante</span><b class="${semComp.length?'neg':''}">${semComp.length}</b></div>
+   ${semComp.length?`<ul class="zl-att" style="margin-top:12px">${semComp.slice(0,5).map(x=>`<li><span class="zl-ai">${ic('alert',16,2)}</span><span class="zl-at"><b>${esc(x.e.desc)}</b><small>${esc(x.j.n)} · ${fmtD(x.e.d)} · ${zR2(x.v)}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${x.j.id}">Abrir</button></li>`).join('')}</ul>`:''}</section>
+  <section class="card pc"><div class="sh"><h2>Maiores trabalhos</h2><span class="who">${lab}</span></div>${jobs.length?`<ul class="zl-att">${jobs.map(([id,v])=>{const j=zJob(id);return `<li><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.cat)} · previsto ${zPrev(j)?zR(zPrev(j)):'—'}</small></span><b class="zl-n">${zR(v)}</b></li>`;}).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
  </div></div>`;
 }
 
@@ -323,12 +336,12 @@ const ZA={
  zApprove:v=>{const j=zJob(v);
   zForm('Aprovação do Financeiro',esc(j.n),
    `<label class="fld"><span class="fl">Quem aprovou?</span><span class="selw"><select name="by">${zSelOpts(ZAPROV)}</select>${ic('updown',14)}</span></label>
-    ${zFieldMoney('v','Valor aprovado',String(zPrev(j)).replace('.',','))}<label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${NOWD}" max="${NOWD}"></label>`,'Registrar aprovação',
-   (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor aprovado');j.apr={by:fd.get('by'),d:fd.get('d'),v:val};j.st='execucao';zLog(j,'Aprovado pelo Financeiro: '+zR(val),fd.get('by'));closeDlg();zRe();toast('Aprovação registrada. O trabalho está em execução');});},
- zFinish:v=>{const j=zJob(v);confirmDel({title:'Concluir este trabalho?',body:`Gasto até agora: ${zR(zGasto(j))} de ${zR(zLib(j))} liberados. Depois de concluído, o caixa não recebe mais lançamentos.`,label:'Concluir',onConfirm:()=>{j.st='concluido';zLog(j,'Trabalho concluído');zRe();toast('Trabalho concluído');}});},
+    ${zFieldMoney('v','Valor aprovado',String(zPrev(j)).replace('.',','))}<label class="fld"><span class="fl">Data da aprovação</span><input type="date" name="d" value="${NOWD}" max="${NOWD}"></label><label class="fld"><span class="fl">Previsão de término</span><input type="date" name="fim" value="${addDays((zProp(j)?zProp(j).prazo:7)+0)}" min="${NOWD}"><span class="hint">Já vem do prazo da proposta. Dá para ajustar.</span></label>`,'Registrar aprovação',
+   (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor aprovado');j.apr={by:fd.get('by'),d:fd.get('d'),v:val};j.fim=fd.get('fim')||'';j.st='execucao';zLog(j,'Aprovado pelo Financeiro: '+zR(val),fd.get('by'));closeDlg();zRe();toast('Aprovação registrada. O trabalho está em execução');});},
+ zFinish:v=>{const j=zJob(v);confirmDel({title:'Concluir este trabalho?',body:`Gasto até agora: ${zR(zGasto(j))} de ${zR(zLib(j))} liberados. Depois de concluído, o caixa não recebe mais lançamentos.`,label:'Concluir',onConfirm:()=>{j.st='concluido';const x=zCx(j);x.status='encerrado';x.closedAt=NOWD;zLog(j,'Trabalho concluído');zRe();toast('Trabalho concluído');}});},
  zCancel:v=>{closePops();const j=zJob(v);
   zForm('Cancelar este trabalho?',esc(j.n),`<label class="fld"><span class="fl">Por que cancelar?</span><textarea class="ta" name="why" rows="3" maxlength="300" placeholder="Escreva o motivo"></textarea><span class="err"></span></label>`,'Cancelar o trabalho',
-   (f,bad)=>{const why=new FormData(f).get('why').trim();if(!why)return bad('why','Escreva o motivo');j.st='cancelado';j.cancel=why;zLog(j,'Cancelado: '+why);closeDlg();zRe();toast('Trabalho cancelado');});},
+   (f,bad)=>{const why=new FormData(f).get('why').trim();if(!why)return bad('why','Escreva o motivo');j.st='cancelado';j.cancel=why;const x=zCx(j);x.status='encerrado';x.closedAt=NOWD;zLog(j,'Cancelado: '+why);closeDlg();zRe();toast('Trabalho cancelado');});},
  zMatAdd:v=>{const j=zJob(v);zForm('Adicionar item de material',esc(j.n),`<label class="fld"><span class="fl">Item</span><input name="i" maxlength="80" placeholder="Ex.: Tinta branca 18 L" autocomplete="off"><span class="err"></span></label>${zFieldMoney('v','Valor')}`,'Adicionar',
    (f,bad)=>{const fd=new FormData(f),i=fd.get('i').trim(),val=zNum(fd.get('v'));if(!i)return bad('i','Diga o item');if(!val)return bad('v','Informe o valor');j.mat.push({id:'m'+Date.now(),i,v:val});closeDlg();zRe();toast('Item adicionado');});},
  zMatDel:v=>{const [a,b]=v.split('|'),j=zJob(a);j.mat=j.mat.filter(m=>m.id!==b);zRe();},
@@ -338,13 +351,6 @@ const ZA={
    (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor');const a=zFile(f);j.props.push({id:'p'+Date.now(),forn:fd.get('forn'),v:val,prazo:+fd.get('prazo')||7,arq:a?[a]:[],esc:false});closeDlg();zRe();toast('Proposta salva');});},
  zPropPick:v=>{const [a,b]=v.split('|'),j=zJob(a);j.props.forEach(p=>p.esc=p.id===b);const p=j.props.find(x=>x.id===b);zLog(j,'Proposta escolhida: '+zFn(p.forn));zRe();toast('Proposta escolhida');},
  zPropDel:v=>{const [a,b]=v.split('|'),j=zJob(a);j.props=j.props.filter(p=>p.id!==b);zRe();},
- zIn:v=>{const j=zJob(v);zForm('Registrar entrada no caixa',esc(j.n)+'. Dinheiro que a igreja liberou para esta obra.',`${zFieldMoney('v','Valor liberado')}<label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${NOWD}" max="${NOWD}"></label><label class="fld"><span class="fl">Observação <small>opcional</small></span><input name="obs" maxlength="80" placeholder="Ex.: Segunda liberação do Financeiro" autocomplete="off"></label>`,'Registrar entrada',
-   (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor');j.cx.in.push(zIn(fd.get('d'),val,fd.get('obs').trim()||'Liberado pelo Financeiro'));zLog(j,'Entrada de '+zR(val)+' no caixa');closeDlg();zRe();toast('Entrada registrada');});},
- zOut:v=>{const j=zJob(v);zForm('Lançar despesa',esc(j.n)+'. Saldo do caixa: '+zR(zSaldo(j))+'.',`${zFieldMoney('v','Valor')}<div class="fgrid"><label class="fld"><span class="fl">Tipo de gasto</span><span class="selw"><select name="nat"><option>Material</option><option>Mão de obra</option></select>${ic('updown',14)}</span></label><label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${NOWD}" max="${NOWD}"></label></div>
-   <label class="fld"><span class="fl">O que foi?</span><input name="desc" maxlength="80" placeholder="Ex.: Compra de cimento" autocomplete="off"><span class="err"></span></label>
-   <label class="fld"><span class="fl">Fornecedor <small>opcional</small></span><span class="selw"><select name="forn"><option value="">Nenhum</option>${ZFORN.map(f=>`<option value="${f.id}">${esc(f.n)}</option>`).join('')}</select>${ic('updown',14)}</span></label>
-   <label class="fld"><span class="fl">Comprovante <small>nota, recibo ou foto</small></span><input type="file" name="comp" accept=".pdf,image/*"></label>`,'Lançar despesa',
-   (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v')),desc=fd.get('desc').trim();if(!val)return bad('v','Informe o valor');if(!desc)return bad('desc','Diga o que foi');j.cx.out.push(zOut(fd.get('d'),val,fd.get('nat'),desc,fd.get('forn'),zFile(f)));zLog(j,'Despesa de '+zR(val)+': '+desc);closeDlg();zRe();toast('Despesa lançada');});},
  zFornNew:()=>zFornForm(null),zFornEdit:v=>zFornForm(ZFORN.find(f=>f.id===v)),
 };
 function zFornForm(f){
@@ -360,7 +366,7 @@ Object.assign(A,ZA);
 
 /* ---------- páginas, comentários e buscas ---------- */
 {const _ph=placeholder;placeholder=id=>({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-ana':zelAna})[id]?({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-ana':zelAna})[id]():_ph(id);}
-{const _nav=A.nav;A.nav=v=>{S.zj=null;_nav(v);};}
+{const _nav=A.nav;A.nav=v=>{S.zj=null;if(v!=='zel-ana'&&String(S.relM)[0]==='Y')S.relM=RELN;_nav(v);};}
 {const _r=render;render=function(){_r.apply(this,arguments);
  if(S.active==='zel-trab'&&S.zj)requestAnimationFrame(tabInd);
  const q=$('#zq');if(q&&!q._z){q._z=1;q.addEventListener('input',e=>{S.zq=e.target.value;$('#zrows').innerHTML=zRows();});}

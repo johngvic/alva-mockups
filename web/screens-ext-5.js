@@ -238,19 +238,20 @@ myTasksAct=function(){const all=myTasks(),u=myUrgent(),late=u.filter(x=>x.late).
  h=h.replace(/<div class="row2" style="justify-content:center"><button class="btn sec sm" data-a="cxEntry" data-v="([^"|]+)\|out">[\s\S]*?<\/button><button class="btn pri sm" data-a="cxEntry"[\s\S]*?<\/button><\/div>/,'<button class="btn pri sm" data-a="cxEntry" data-v="$1|in" style="margin-top:6px">'+ic('plus',14,2.2)+'Registrar o primeiro lançamento</button>');
  return h;};}
 cxEntryDlg=function(cid,t){
- const c=CAIXAS.find(x=>x.id===cid);if(!c||c.status==='encerrado')return;let file=null,cat='';
+ const c=CAIXAS.find(x=>x.id===cid);if(!c||c.status==='encerrado')return;let file=null,cat='';const zel=c.ownerType==='zel',CC=k=>zel?(k==='in'?['Aporte da igreja','Outros']:ZCATS):CX_CATS[k];
  openDlg(dlgHead('Novo lançamento',esc(c.name)+' · saldo atual '+cxMoney(cxBal(c)))+'<form id="cxF" class="cxf" novalidate>'
   +'<div class="cxf-ty" role="radiogroup" aria-label="Tipo"><label class="in"><input type="radio" name="t" value="in"'+(t!=='out'?' checked':'')+'><span class="cxf-ti">'+ic('arrowDn',16,2.2)+'</span><span><b>Entrada</b><small>Oferta, inscrição, venda</small></span></label><label class="out"><input type="radio" name="t" value="out"'+(t==='out'?' checked':'')+'><span class="cxf-ti">'+ic('arrowUp',16,2.2)+'</span><span><b>Saída</b><small>Compra, serviço, despesa</small></span></label></div>'
   +'<div class="cxf-g"><label class="fld"><span class="fl">Valor</span><span class="cxf-v"><em>R$</em><input name="v" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></span><span class="err"></span></label>'
   +'<label class="fld"><span class="fl">Data</span><input type="date" name="d" value="'+myTd()+'" max="'+myTd()+'"><span class="err"></span></label></div>'
   +'<label class="fld"><span class="fl">Descrição</span><input name="desc" maxlength="80" autocomplete="off" placeholder="Ex.: Compra de cordas"><span class="err"></span></label>'
   +'<div class="fld"><span class="fl">Categoria</span><div class="cxf-cats" id="cxCats"></div></div>'
+  +(zel?'<div class="fld" id="cxNatW"><span class="fl">Tipo de gasto</span><div class="yn" role="radiogroup"><label><input type="radio" name="nat" value="Material" checked><span>Material</span></label><label><input type="radio" name="nat" value="Mão de obra"><span>Mão de obra</span></label></div></div>':'')
   +'<div class="fld"><span class="fl">Comprovante <small>opcional</small></span><label class="cxf-drop" id="cxDrop"><input type="file" name="file" accept="image/*,application/pdf"><span class="cxf-di">'+ic('upload',18,2)+'</span><span class="cxf-dt"><b>Arraste o arquivo aqui ou <u>escolha no computador</u></b><small>Foto ou PDF da nota, até 10 MB</small></span></label><div class="cxf-file" id="cxFile" hidden></div></div>'
   +'<p class="cxf-warn" id="cxH" hidden>'+ic('alert',14,2)+'<span>Esta saída é maior que o saldo e deixa o caixa negativo.</span></p>'
   +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="cxGo">Lançar</button></div></form>','cxfd');
  const f=$('#cxF'),typ=()=>f.querySelector('[name=t]:checked').value;
- const paint=()=>{const k=typ();if(!CX_CATS[k].includes(cat))cat=CX_CATS[k][0];
-  $('#cxCats').innerHTML=CX_CATS[k].map(x=>'<button type="button" class="chipf '+(x===cat?'on':'')+'" data-cat="'+esc(x)+'">'+esc(x)+'</button>').join('');
+ const paint=()=>{const k=typ();if(!CC(k).includes(cat))cat=(zel&&k==='out'&&zJob(c.ownerId)&&CC(k).includes(zJob(c.ownerId).cat))?zJob(c.ownerId).cat:CC(k)[0];const nw=$('#cxNatW');if(nw)nw.hidden=k==='in';
+  $('#cxCats').innerHTML=CC(k).map(x=>'<button type="button" class="chipf '+(x===cat?'on':'')+'" data-cat="'+esc(x)+'">'+esc(x)+'</button>').join('');
   const v=Math.round((+f.elements.v.value||0)*100);$('#cxH').hidden=!(k==='out'&&v>cxBal(c));
   f.dataset.t=k;$('#cxGo').textContent=(k==='in'?'Lançar entrada':'Lançar saída')+(v?' · '+cxMoney(v):'');};
  const showFile=fl=>{file=fl;const b=$('#cxFile'),d=$('#cxDrop');if(!fl){b.hidden=true;d.hidden=false;f.elements.file.value='';return;}
@@ -265,7 +266,7 @@ cxEntryDlg=function(cid,t){
  dz.addEventListener('drop',e=>{const fl=e.dataTransfer&&e.dataTransfer.files[0];if(fl)showFile(fl);});
  f.onsubmit=e=>{e.preventDefault();const q=f.elements,bad=(n,m)=>{const i=q[n],fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;i.focus();};
   const v=+q.v.value;if(!(v>0))return bad('v','Informe um valor maior que zero');if(!q.d.value)return bad('d','Escolha a data');if(!q.desc.value.trim())return bad('desc','Descreva o lançamento');
-  cxAdd(c,typ(),v,q.d.value,q.desc.value.trim(),cat,ME_NAME,{file:file?file.name:''});
+  cxAdd(c,typ(),v,q.d.value,q.desc.value.trim(),cat,ME_NAME,Object.assign({file:file?file.name:''},zel&&typ()==='out'?{nat:q.nat?q.nat.value:'Material'}:{}));
   closeDlg();bdRe();toast((typ()==='in'?'Entrada':'Saída')+' de '+cxMoney(Math.round(v*100))+' lançada');};};
 
 cxCloseDlg=function(cid){
