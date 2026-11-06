@@ -27,7 +27,7 @@
 
   /* ---------- logo e sol (geometria do design system) ---------- */
   const RAYS = [[11.16,20.83,5.93,19.13],[16.06,14.08,12.83,9.63],[24,11.5,24,6],[31.94,14.08,35.17,9.63],[36.84,20.83,42.07,19.13]];
-  const sunInner = () => `<g stroke-width="2.6" stroke-linecap="round">${RAYS.map((r,i)=>`<line class="ray" style="--i:${i}" x1="${r[0]}" y1="${r[1]}" x2="${r[2]}" y2="${r[3]}"/>`).join('')}</g><g clip-path="url(#sgc)"><circle class="disc" cx="24" cy="25" r="10" fill="url(#sg)"/></g><line class="horizon" x1="5" y1="28.5" x2="43" y2="28.5" stroke-width="2.6" stroke-linecap="round"/>`;
+  const sunInner = () => `<g stroke-width="2.6" stroke-linecap="round">${RAYS.map((r,i)=>`<line class="ray" style="--i:${i}" x1="${r[0]}" y1="${r[1]}" x2="${r[2]}" y2="${r[3]}"/>`).join('')}</g><g clip-path="url(#sgc)"><circle class="disc" cx="24" cy="25" r="10" fill="url(#sg)"/></g><line class="horizon" style="stroke:var(--sun-ray)" x1="5" y1="28.5" x2="43" y2="28.5" stroke-width="2.6" stroke-linecap="round"/>`;
   document.querySelectorAll('[data-sun]').forEach(s => s.innerHTML = sunInner());
   document.querySelectorAll('[data-logo]').forEach(el => {
     const h = +el.dataset.logo;

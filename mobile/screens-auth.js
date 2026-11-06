@@ -13,14 +13,14 @@ const mobileTermsAccepted=()=>$$('#sTerms [data-required="true"]').every(b=>b.ge
 V.welcome=()=>({sb:'var(--ink)',amb:'welcome',html:`<div class="wel">
   <header class="wel-brand">
    <h1 class="wel-logo" aria-label="alva"><span class="lw">alva</span></h1>
-   <p class="wel-line" aria-label="Sua comunidade, ao alcance de cada momento.">${'Sua comunidade,|ao alcance de|<em>cada momento</em>.'.split('|').map((w,i)=>`<span class="wl" style="--w:${i}">${w}</span>`).join(' ')}</p>
+   <p class="wel-line" aria-label="Sua comunidade, ao alcance de cada momento.">${'Sua comunidade|ao alcance de <em>cada momento</em>'.split('|').map((w,i)=>`<span class="wl" style="--w:${i}">${w}</span>`).join('')}</p>
   </header>
   <div class="wel-actions">
    <button class="wbtn glow" data-a="go" data-v="login"><span class="wb-in">${ic('key',19,2)}Entrar com senha</span></button>
    <button class="wbtn sec" data-a="go" data-v="codeEmail"><span class="wb-in">${ic('mail',19,2)}Entrar com código por e-mail</span></button>
    <button class="wbtn sec" data-a="startSignup"><span class="wb-in">${ic('userplus',19,2)}Criar conta</span></button>
   </div>
-  <p class="wel-legal"><button class="link" data-a="identityDocuments">Consultar termos e privacidade</button></p>
+  <p class="wel-legal"><button class="link" data-a="identityDocuments">Termos e privacidade</button></p>
  </div>`});
 V.terms=()=>({sb:'var(--ink)',html:flow({pct:90,body:`${head('','Aceitar termos','Há uma nova versão dos documentos. Confira antes de continuar.')}${mobileTermsList()}<p class="callout" id="identityRefusal" hidden>Sem aceitar os obrigatórios, o acesso permanece bloqueado. Reveja sua escolha ou saia.</p>`,dock:`<button class="btn primary block" id="identityAccept" data-a="identityAccept" disabled>Aceitar e continuar</button><button class="tlink" data-a="identityRefuse">Recusar obrigatórios</button><button class="tlink" data-a="identityExit">Sair</button>`})});
 V.login=()=>({sb:'var(--ink)',html:flow({pct:50,form:'login',

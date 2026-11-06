@@ -33,7 +33,7 @@ function nsScene(){const SX=195,SY=560,stars=Array.from({length:16},(_,i)=>{cons
   <path class="ns-hill h3" d="${nsHill(728,22,7.7)}" fill="url(#nsH3)" fill-opacity=".42" filter="url(#nsB3)"/></svg>`;}
 function showSplash(fast){const ph=$('#phone');if(!ph)return;const old=$('#splash');if(old)old.remove();clearTimeout(window._spT1);clearTimeout(window._spT2);clearTimeout(window._spT3);
  const d=document.createElement('div');d.id='splash';d.className='nsplash'+(fast?' fast':'');
- d.innerHTML=`${nsScene()}<div class="ns-mark"><span class="ns-aura"></span><span class="ns-ring"></span><span class="ns-ring r2"></span>${splashSVG()}</div><span class="ns-bloom"></span>`;
+ d.innerHTML=`${nsScene()}<div class="ns-mark"><span class="ns-aura"></span>${splashSVG()}</div><span class="ns-bloom"></span>`;
  ph.appendChild(d);ph.classList.add('sp-on');
  window._spT1=setTimeout(()=>{d.classList.add('ns-out');ph.classList.remove('sp-on');ph.classList.add('sp-reveal');},fast?1100:3000);
  window._spT2=setTimeout(()=>d.classList.add('sp-fade'),fast?1500:3500);
