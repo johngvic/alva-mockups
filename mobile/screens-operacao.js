@@ -1,0 +1,58 @@
+/* =========================================================
+   AGENDA E OPERAÇÃO · Agenda, Espaços, Zeladoria e Almoxarifado
+   Mesmo motor de lista compacta e ficha das Pessoas (screens-pessoas.js).
+   ========================================================= */
+LS_READY.push('agenda','espacos','zeladoria','almox');
+const R=(p,a,f)=>a.map((x,i)=>({id:p+i,...f(x,i)}));
+const SC={ag:['info','Agendado'],ok:['ok','Realizado']};
+Object.assign(LSD,{
+ agenda:{
+  'Eventos':{noun:'eventos',add:'Novo evento',fields:[['n','Nome do evento','Ex.: Conferência Anual'],['s','Data e local','Ex.: 18 a 20 out · Templo']],ST:{ab:['info','Inscrições abertas'],br:['warning','Em breve'],ok:['ok','Realizado']},acts:[['Abrir inscrições','ab',['br']],['Marcar como realizado','ok',['ab']]],
+   rows:R('ae',[['Conferência Anual 2026','18 a 20 out · Templo','ab',84,120],['Conferência de Missões','Sáb, 7 nov · Auditório','ab',31,60],['Retiro de Jovens 2026','14 a 16 nov · Chácara','br',0,60],['Noite de Oração','Qua, 30 set · Templo','ok',0,0]],([n,s,st,i,c])=>({n,s,st,d:[['Quando',s],['Inscritos',c?i+' de '+c:'Sem inscrição'],['Responsável','Ministério de Eventos']]}))},
+  'Cultos':{noun:'cultos',add:'Novo culto',fields:[['n','Culto','Ex.: Culto de Celebração'],['s','Dia e horário','Ex.: Dom · 18h30']],ST:SC,acts:[['Marcar como realizado','ok',['ag']]],
+   rows:R('ac',[['Culto de Celebração','Dom, 4 out · 18h30','ag'],['Culto de Celebração','Dom, 4 out · 10h','ag'],['Culto de Jovens','Sáb, 3 out · 19h30','ag'],['Culto de Domingo','Dom, 27 set · 18h30','ok']],([n,s,st])=>({n,s,st,d:[['Quando',s],['Local','Templo'],['Pregador','Pr. Rafael Pereira']]}))},
+  'Apresentações':{noun:'pedidos',add:'Nova apresentação',av:1,fields:[['n','Criança','Ex.: Helena Pereira'],['s','Família','Ex.: Rafael e Camila Pereira']],ST:{pe:['warning','Pendente'],ap:['info','Aprovada'],ok:['ok','Realizada']},acts:[['Aprovar pedido','ap',['pe']],['Marcar como realizada','ok',['ap']]],
+   rows:R('aa',[['Helena Pereira','Rafael e Camila Pereira','pe'],['Miguel Souza','Gabriel e Isabela Souza','ap'],['Laura Dias','Henrique e Larissa Dias','pe'],['Davi Costa','Ana e Paulo Costa','ok']],([n,s,st])=>({n,s,st,d:[['Família',s],['Data prevista','Dom, 18 out']]}))},
+  'Batismos':{noun:'inscritos',add:'Novo inscrito',av:1,fields:[['n','Nome','Ex.: Carlos Mendes'],['s','Observação','Ex.: Concluiu a classe de batismo']],ST:{pe:['warning','Pendente'],ap:['ok','Aprovado'],re:['danger','Recusado']},acts:[['Aprovar participação','ap',['pe','re']],['Recusar','re',['pe']]],
+   rows:R('ab',[['Carlos Mendes','Concluiu a classe de batismo','pe'],['Luana Souza','Concluiu a classe de batismo','ap'],['Paulo Alves','Falta uma aula da classe','pe'],['Renata Dias','Concluiu a classe de batismo','ap']],([n,s,st])=>({n,s,st,d:[['Turma','Batismo nas Águas · 25 out'],['Observação',s]]}))},
+  'Consagrações':{noun:'consagrações',add:'Nova consagração',fields:[['n','Nome','Ex.: Marcos Lima'],['s','Tipo','Ex.: Diaconato']],ST:{ag:['info','Agendada'],ok:['ok','Realizada']},acts:[['Marcar como realizada','ok',['ag']]],
+   rows:R('ak',[['Ana Costa','Diaconato · Dom, 25 out','ag'],['Marcos Lima','Pastoreio · 13 set','ok']],([n,s,st])=>({n,s,st,d:[['Tipo',s],['Responsável','Pr. Rafael Pereira']]}))},
+  'Casamentos':{noun:'casamentos',add:'Novo casamento',fields:[['n','Casal','Ex.: João e Maria'],['s','Data e local','Ex.: Sáb, 14 nov · Templo']],ST:SC,acts:[['Marcar como realizado','ok',['ag']]],
+   rows:R('am',[['Tiago e Vera Campos','Sáb, 14 nov · 16h · Templo','ag'],['Bruno e Clara Nunes','Sáb, 12 dez · 17h · Templo','ag'],['Diego e Elisa Faria','Sáb, 5 set · 16h · Templo','ok']],([n,s,st])=>({n,s,st,d:[['Data e local',s],['Celebrante','Pr. Marcos Lima']]}))},
+  'Integrações':{noun:'encontros',add:'Novo encontro',fields:[['n','Encontro','Ex.: Café de boas-vindas'],['s','Data e horário','Ex.: Dom, 11 out · 9h']],ST:SC,acts:[['Marcar como realizado','ok',['ag']]],
+   rows:R('ai',[['Café de boas-vindas','Dom, 11 out · 9h','ag'],['Café de boas-vindas','Dom, 18 out · 9h','ag'],['Café de boas-vindas','Dom, 27 set · 9h','ok']],([n,s,st])=>({n,s,st,d:[['Quando',s],['Local','Cafeteria'],['Convidados','12 visitantes']]}))},
+  'Calendário':{noun:'compromissos',add:'Novo compromisso',fields:[['n','Compromisso','Ex.: Reunião de líderes'],['s','Horário e local','Ex.: 20h · Sala 2']],ST:{ev:['info','Evento'],cu:['ok','Culto'],re:['warning','Reunião']},acts:[],
+   rows:[['Qua, 30 set',[['Casa Jardins','19h30','ev'],['Noite de Oração','20h','ev']]],['Qui, 1 out',[['Treinamento de líderes','20h','re']]],['Sáb, 3 out',[['Culto de Jovens','19h30','cu']]],['Dom, 4 out',[['Culto de Celebração','10h','cu'],['Culto de Celebração','18h30','cu']]]].flatMap(([g,l],gi)=>l.map(([n,h,st],i)=>({id:'acl'+gi+i,g,n,s:h,st,d:[['Data',g],['Horário',h]]})))},
+  'Escalas':{noun:'escalas',add:'Nova escala',av:1,fields:[['n','Voluntário','Ex.: Ana Costa'],['s','Ministério e função','Ex.: Louvor · Vocal']],ST:{pe:['warning','Pendente'],co:['ok','Confirmada'],re:['danger','Recusada']},acts:[['Confirmar','co',['pe','re']],['Marcar como recusada','re',['pe']]],
+   rows:R('ae2',[['Ana Costa','Louvor · Vocal','pe'],['Bruno Reis','Recepção · Recepcionista','co'],['Clara Nunes','Infantil · Monitora','pe'],['Diego Faria','Louvor · Bateria','re'],['Elisa Moura','Recepção · Apoio','co']],([n,s,st])=>({n,s,st,d:[['Dia','Dom, 4 out · 18h30'],['Função',s]]}))},
+  'Inscrições':{noun:'inscrições',add:'Nova inscrição',av:1,fields:[['n','Pessoa','Ex.: Carlos Mendes'],['s','Evento','Ex.: Conferência Anual 2026']],ST:{pe:['warning','Pendente'],ap:['ok','Aprovada'],ca:['off','Cancelada']},acts:[['Aprovar','ap',['pe']],['Cancelar inscrição','ca',['pe','ap']]],
+   rows:R('ain',[['Carlos Mendes','Conferência Anual 2026','pe'],['Luana Souza','Conferência Anual 2026','ap'],['Paulo Alves','Retiro de Jovens 2026','pe'],['Renata Dias','Conferência de Missões','ap'],['Tiago Lima','Conferência de Missões','ca']],([n,s,st])=>({n,s,st,d:[['Evento',s],['Valor',st==='ap'?'Pago':'A pagar']]}))}
+ },
+ espacos:{
+  'Salas':{noun:'salas',add:'Nova sala',fields:[['n','Nome da sala','Ex.: Sala 3'],['s','Capacidade','Ex.: 30 pessoas']],ST:{li:['ok','Disponível'],ma:['warning','Em manutenção']},acts:[['Colocar em manutenção','ma',['li']],['Liberar sala','li',['ma']]],
+   rows:R('es',[['Templo','800 pessoas','li'],['Auditório','200 pessoas','li'],['Sala 1','30 pessoas','li'],['Sala 2','30 pessoas','ma'],['Sala 3','24 pessoas','li']],([n,s,st])=>({n,s,st,d:[['Capacidade',s],['Recursos','Projetor e som']]}))},
+  'Reservas':{noun:'reservas',add:'Nova reserva',fields:[['n','Espaço','Ex.: Sala 3'],['s','Quem e quando','Ex.: Casa Jardins · Qua, 19h']],ST:{pe:['warning','Pendente'],ap:['ok','Aprovada'],re:['danger','Recusada']},acts:[['Aprovar reserva','ap',['pe','re']],['Recusar','re',['pe']]],
+   rows:R('er',[['Sala 3','Casa Jardins · Qua, 30 set · 19h30','ap'],['Auditório','Ensaio do Louvor · Sex, 2 out · 20h','pe'],['Sala 1','Classe de batismo · Dom, 4 out · 9h','ap'],['Templo','Casamento de Tiago e Vera · Sáb, 14 nov','pe']],([n,s,st])=>({n,s,st,d:[['Espaço',n],['Solicitação',s]]}))}
+ },
+ zeladoria:{
+  'Chamados':{noun:'chamados',add:'Novo chamado',fields:[['n','O que precisa de reparo','Ex.: Lâmpada queimada'],['s','Onde','Ex.: Térreo · Sala 2']],ST:{ab:['warning','Aberto'],an:['info','Em andamento'],rs:['ok','Resolvido']},acts:[['Assumir chamado','an',['ab']],['Marcar como resolvido','rs',['ab','an']]],
+   rows:R('zc',[['Lâmpada queimada','Corredor · Térreo','ab'],['Cadeira quebrada','Auditório','an'],['Torneira pingando','Banheiro feminino','ab'],['Jardim precisa de poda','Entrada','rs']],([n,s,st])=>({n,s,st,d:[['Onde',s],['Aberto por','Equipe de Recepção']]}))},
+  'Rotinas':{noun:'rotinas',add:'Nova rotina',fields:[['n','Rotina','Ex.: Limpeza do templo'],['s','Frequência','Ex.: Todo sábado · 9h']],ST:{at:['ok','Ativa'],pa:['off','Pausada']},acts:[['Pausar','pa',['at']],['Retomar','at',['pa']]],
+   rows:R('zr',[['Limpeza do templo','Todo sábado · 9h','at'],['Regar o jardim','Terça e sexta','at'],['Conferir extintores','Todo dia 1º do mês','at']],([n,s,st])=>({n,s,st,d:[['Frequência',s],['Responsável','Ministério de Zeladoria']]}))}
+ },
+ almox:{
+  'Visão geral':{custom:()=>{const it=LSD.almox['Itens'].rows,em=LSD.almox['Empréstimos'].rows,at=em.filter(r=>r.st==='at'),dv=LSD.almox['Devoluções'].rows.filter(r=>r.st==='pa');
+   return `<div class="vk"><div><b>${it.length}</b><span>Itens</span></div><div><b>${em.filter(r=>r.st!=='de').length}</b><span>Emprestados</span></div><div><b>${at.length}</b><span>Atrasados</span></div></div>
+   <section class="stack g3"><p class="eb2">Precisam de atenção</p>${at.length+dv.length?`<div class="vl">${[...at,...dv].map(r=>`<div class="vr"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(r.n)}</span><span class="vs">${esc(r.s)}</span></span>${vsTag(r.st==='at'?'danger':'warning',r.st==='at'?'Atrasado':'A confirmar')}</div>`).join('')}</div>`:vsEmpty('Tudo em dia','Nenhum atraso ou devolução pendente.')}</section>`;}},
+  'Itens':{noun:'itens',add:'Novo item',fields:[['n','Nome do item','Ex.: Projetor portátil'],['s','Categoria e local','Ex.: Equipamentos · Armário 2']],ST:{di:['ok','Disponível'],em:['info','Emprestado'],ba:['off','Baixado']},acts:[['Dar baixa','ba',['di']],['Reativar','di',['ba']]],
+   rows:R('xi',[['Projetor portátil','Equipamentos · Armário 2','em'],['Caixa de som','Equipamentos · Armário 2','di'],['Microfone sem fio','Equipamentos · Sala de som','di'],['Mesa dobrável','Mobiliário · Depósito','di'],['Cadeiras (lote de 20)','Mobiliário · Depósito','em'],['Extensão 10 m','Elétrica · Armário 1','ba']],([n,s,st])=>({n,s,st,d:[['Categoria',s.split(' · ')[0]],['Local',s.split(' · ')[1]]]}))},
+  'Categorias':{noun:'categorias',add:'Nova categoria',fields:[['n','Nome','Ex.: Equipamentos'],['s','Descrição','Ex.: Som, imagem e eletrônicos']],ST:{at:['ok','Ativa']},acts:[],
+   rows:R('xc',[['Equipamentos','Som, imagem e eletrônicos'],['Mobiliário','Mesas, cadeiras e estantes'],['Elétrica','Extensões e adaptadores']],([n,s])=>({n,s,st:'at',d:[['Descrição',s]]}))},
+  'Empréstimos':{noun:'empréstimos',add:'Novo empréstimo',av:1,fields:[['n','Pessoa','Ex.: Davi Melo'],['s','Item e prazo','Ex.: Projetor · devolver sex, 2 out']],ST:{an:['info','Em andamento'],at:['danger','Atrasado'],de:['ok','Devolvido']},acts:[['Registrar devolução','de',['an','at']]],
+   rows:R('xe',[['Davi Melo','Projetor portátil · devolver sex, 2 out','an'],['Ana Costa','Cadeiras (lote de 20) · devolver qua, 23 set','at'],['Marcos Lima','Caixa de som · devolvido em 20 set','de']],([n,s,st])=>({n,s,st,d:[['Item e prazo',s]]}))},
+  'Devoluções':{noun:'devoluções',add:'Nova devolução',av:1,fields:[['n','Pessoa','Ex.: Marcos Lima'],['s','Item','Ex.: Caixa de som']],ST:{pa:['warning','A confirmar'],de:['ok','Confirmada']},acts:[['Confirmar devolução','de',['pa']]],
+   rows:R('xd',[['Roberto Alves','Microfone sem fio · entregue hoje','pa'],['Marcos Lima','Caixa de som · 20 set','de'],['Juliana Reis','Mesa dobrável · 12 set','de']],([n,s,st])=>({n,s,st,d:[['Item',s]]}))},
+  'Movimentações':{noun:'movimentações',add:'Nova movimentação',fields:[['n','Item','Ex.: Extensão 10 m'],['s','Motivo','Ex.: Compra, perda, doação']],ST:{en:['ok','Entrada'],sa:['info','Saída'],aj:['off','Ajuste']},acts:[],
+   rows:R('xm',[['Caixa de som','Entrada · compra · 12 set','en'],['Projetor portátil','Saída · empréstimo · 25 set','sa'],['Extensão 10 m','Ajuste · baixa por defeito · 27 set','aj'],['Cadeiras (lote de 20)','Saída · empréstimo · 16 set','sa']],([n,s,st])=>({n,s,st,d:[['Detalhe',s]]}))}
+ }
+});
