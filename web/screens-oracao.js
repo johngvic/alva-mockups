@@ -84,7 +84,7 @@ const CA={
   toast(`${p.n.split(' ')[0]} vai saber que você está orando`);updPrayKpi();},
  pAnswer:v=>{closePops();const p=PRAYERS.find(x=>x.id===v);p.st='respondido';render();toast('Pedido marcado como respondido',()=>{p.st='ativo';render();});},
  pReopen:v=>{closePops();const p=PRAYERS.find(x=>x.id===v);p.st='ativo';render();toast('Pedido reaberto');},
- pDel:v=>{closePops();const p=PRAYERS.find(x=>x.id===v);confirmDel({title:'Excluir este pedido de oração?',body:`O pedido de ${p.n.split(' ')[0]} sai do app para todos. As ${p.count} pessoas que estavam orando deixam de vê-lo.`,label:'Excluir pedido',onConfirm:()=>{PRAYERS.splice(PRAYERS.indexOf(p),1);render();toast('Pedido excluído');}});},
+ pDel:v=>{closePops();const p=PRAYERS.find(x=>x.id===v);confirmDel({title:'Excluir este pedido de oração?',body:`O pedido de ${p.n.split(' ')[0]} sai das listas e de quem está orando (${p.count} pessoas). O autor não é avisado e o texto é apagado depois, pela retenção.`,label:'Excluir',onConfirm:()=>{PRAYERS.splice(PRAYERS.indexOf(p),1);render();toast('Pedido excluído');}});},
 };
 function updPrayKpi(){const y=window.scrollY;const act=PRAYERS.filter(p=>p.st==='ativo');const k=$$('.kpis4 .k4');if(!k.length)return;
  k[1].querySelector('.kv').textContent=act.reduce((a,p)=>a+p.count,0);const mine=act.filter(p=>p.mine).length;k[2].querySelector('.kv').innerHTML=`${mine}<small class="kof"> de ${act.length}</small>`;k[2].querySelector('.kmeter i').style.width=Math.round(mine/act.length*100)+'%';window.scrollTo(0,y);}

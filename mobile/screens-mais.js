@@ -190,7 +190,7 @@ V.oracao=()=>sub('Pedidos de oração','A equipe de intercessão ora por cada pe
    <div class="list"><div class="item" style="cursor:default"><span class="grow stack" style="gap:2px"><span class="it-title">Manter anônimo</span><span class="it-sub">Só quem administra os pedidos vê seu nome</span></span><button type="button" class="switch" role="switch" aria-checked="false" id="prAnon" aria-label="Manter anônimo" data-a="sw"></button></div></div>
    <button class="btn primary block" type="submit">Enviar pedido</button>
   </form>
-  <section class="stack g3"><p class="eb2">Meus pedidos</p><div class="list">${S.prayers.map(p=>`<div class="item" style="cursor:default;align-items:flex-start;padding-block:14px;flex-direction:column;gap:6px"><span class="it-title" style="font-weight:500">${esc(p.t)}</span><span class="row between" style="width:100%;gap:8px"><span class="foot">${p.d}${p.anon?' · anônimo':''}</span>${p.st==='orado'?status('success','Orado'):p.st==='respondido'?status('info','Respondido'):status('warning','Aguardando')}</span>${p.st==='orado'?`<span class="foot">${p.by} orou por você em ${p.at}.</span><button class="link" data-a="answered" data-v="${p.id}" style="font-size:14px">Deus respondeu? Conte pra gente</button>`:''}</div>`).join('')}</div></section>`);
+  <section class="stack g3"><p class="eb2">Meus pedidos</p><div class="list">${S.prayers.map(p=>`<div class="item" style="cursor:default;align-items:flex-start;padding-block:14px;flex-direction:column;gap:6px"><span class="it-title" style="font-weight:500">${esc(p.t)}</span><span class="row between" style="width:100%;gap:8px"><span class="foot">${p.d}${p.anon?' · anônimo':''}</span>${p.st==='orado'?status('success','Orado'):p.st==='respondido'?status('info','Respondido'):status('warning','Aguardando')}</span>${p.st==='orado'?`<span class="foot">${p.by} orou por você em ${p.at}.</span><button class="link" data-a="answered" data-v="${p.id}" style="font-size:14px">Deus respondeu? Conte pra gente</button>`:''}<button class="link" data-a="prDel" data-v="${p.id}" style="font-size:14px">Excluir pedido</button></div>`).join('')}</div></section>`);
 
 /* 10. Secretaria */
 V.secretaria=()=>sub('Fale com a secretaria','Atendimento de segunda a sexta, das 9h às 18h.',`
@@ -305,6 +305,7 @@ Object.assign(A,{
  tkToggle:v=>{S.tkOpen=S.tkOpen===v?null:v;softRender();},
  minToggle:v=>{S.minOpen=S.minOpen===v?null:v;softRender();},
  minAgenda:()=>{S.ag.tab='Escalas';A.tab('agenda');},
+ prDel:v=>{const p=S.prayers.find(x=>x.id===v);vsConfirm('Excluir este pedido?','O pedido sai da sua lista e de quem está orando.','Excluir',()=>{S.prayers.splice(S.prayers.indexOf(p),1);closeSheet();softRender();toast('success','Pedido excluído','');});},
  answered:(v)=>{const p=S.prayers.find(x=>x.id===v);p.st='respondido';softRender();toast('success','Que alegria!','Vamos agradecer junto com você no próximo culto.');},
  social:v=>toast('info','Abrindo '+v,'No app real, abre o perfil da igreja no '+v+'.'),
  whatsSec:()=>toast('info','Abrindo o WhatsApp','Conversa com a secretaria da '+S.church.name+'.'),

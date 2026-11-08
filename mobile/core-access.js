@@ -38,6 +38,7 @@ const GPEND={pessoas:[['Pedidos de integração',3],['Cadastros a revisar',2]],c
 const APPSEC={
  'pessoas|Membros':{noAdd:1,ro:1,acts:[]},
  'cuidado|Discipulado':{noAdd:1},
+ 'cuidado|Pedidos de oração':{noAdd:1,canEdit:()=>false,delBody:'O pedido sai das listas e de quem está orando. O autor não é avisado e o texto é apagado depois, pela retenção.'},
  'comunidade|Casas de Apascentamento':{noAdd:1,ro:1},'comunidade|Ministérios':{noAdd:1,ro:1},
  'kids|Salas':{noAdd:1,ro:1},'kids|Escalas':{noAdd:1},
  'conteudo|Pregações':{noAdd:1,ro:1},'conteudo|Vídeos':{noAdd:1,ro:1},'conteudo|Músicas':{noAdd:1,ro:1},'conteudo|Séries':{noAdd:1,ro:1},'conteudo|Jornadas':{noAdd:1,ro:1},'conteudo|Cursos':{noAdd:1,ro:1},'conteudo|Material de apoio':{noAdd:1,ro:1},

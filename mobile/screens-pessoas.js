@@ -26,7 +26,7 @@ const LSD={
    ST:{ur:['danger','Urgente'],nm:['info','Em andamento'],en:['ok','Encerrado']},acts:[['Assumir acompanhamento','nm',['ur']],['Encerrar caso','en',['ur','nm']]],
    rows:[...URG.map(u=>({id:'ca'+u.id,n:u.who,s:u.kind+' · '+u.txt,st:'ur',d:[['Tipo',u.kind],['Aberto em',u.d],['Responsável',u.resp],['Resumo',u.txt]]})),{id:'ca9',n:'Sérgio Matos',s:'Conversa pastoral sobre o casamento',st:'nm',d:[['Tipo','Aconselhamento'],['Aberto em','02/09/2026'],['Responsável','Pr. Marcos Lima']]},{id:'ca10',n:'Rita Gomes',s:'Visita após o nascimento do filho',st:'en',d:[['Tipo','Visita'],['Encerrado em','20/09/2026'],['Responsável','Diac. Ana Costa']]}]},
   'Pedidos de oração':{noun:'pedidos',add:'Novo pedido',fields:[['n','Quem pede','Ex.: Pedro Almeida'],['s','Pedido','Ex.: Pela família']],
-   ST:{ag:['warning','Aguardando'],or:['ok','Orado']},acts:[['Marcar como orado','or',['ag']]],
+   ST:{ag:['warning','Aguardando'],or:['ok','Orando']},acts:[['Estou orando','or',['ag']]],
    rows:[['Pedro Almeida','Pela família depois de perder o emprego','ag'],['Joana Ribeiro','Recuperação depois da cirurgia','ag'],['Marcos Lima','Viagem missionária da equipe','or'],['Camila Pereira','Sabedoria numa decisão no trabalho','ag'],['Davi Melo','Pela mãe, que está internada','or']].map(([n,s,st],i)=>({id:'po'+i,n,s,st,d:[['Recebido em',(15+i)+'/09/2026'],['Visibilidade',i%2?'Só a intercessão':'Toda a liderança'],['Pedido',s]]}))}
  },
  comunidade:{
@@ -79,6 +79,6 @@ function lsForm(id){const c=lsCfg(),r=id?lsRow(id):null;if(c.form)return rfForm(
 Object.assign(A,{
  lsF:v=>{S.ls.f=v;softRender();},lsOpen:id=>lsSheet(id),lsNew:()=>lsForm(),lsEdit:id=>lsForm(id),
  lsAct:v=>{const [id,to]=v.split('|'),r=lsRow(id),c=lsCfg();r.st=to;closeSheet();softRender();toast('success',c.ST[to][1],r.n);},
- lsDel:id=>{const r=lsRow(id),c=lsCfg();vsConfirm('Excluir “'+esc(r.n)+'”?','Isso remove o registro da lista e não pode ser desfeito.','Excluir',()=>{c.rows.splice(c.rows.indexOf(r),1);closeSheet();softRender();toast('success','Excluído',r.n);});}
+ lsDel:id=>{const r=lsRow(id),c=lsCfg();vsConfirm('Excluir “'+esc(r.n)+'”?',c.delBody||'Isso remove o registro da lista e não pode ser desfeito.','Excluir',()=>{c.rows.splice(c.rows.indexOf(r),1);closeSheet();softRender();toast('success','Excluído',r.n);});}
 });
 phone.addEventListener('input',e=>{if(e.target.id!=='lsQ')return;S.ls.q=e.target.value;const l=$('#lsList');if(l)l.innerHTML=lsRows(lsCfg());});
