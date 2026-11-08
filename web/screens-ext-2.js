@@ -50,7 +50,7 @@ function nxHouseEncounters(c){
   +nxEncList('Agendados',sched.map(m=>item(m,'sched')))+nxEncList('Realizados',done.map(m=>item(m,'done')))+nxEncList('Cancelados',canc.map(m=>item(m,'canc')))+'</section>';
 }
 hEnc=nxHouseEncounters;hGeral=nxOldHGeral;
-Object.assign(A,{nxHouseRegNew:()=>{const c=hById(S.casa),t=TODAY.toISOString().slice(0,10);openDlg(dlgHead('Registrar encontro',esc(c.n)+'. Para um encontro que já aconteceu e não foi agendado.')+'<form id="nxHrF" class="fgrid one" novalidate><label class="fld"><span class="fl">Data</span><input type="date" name="d" value="'+t+'" max="'+t+'"><span class="err"></span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Registrar e fazer chamada</button></div></form>');const f=$('#nxHrF');f.onsubmit=e=>{e.preventDefault();const v=f.elements.d.value;if(!v)return;if(c.meets.some(m=>m.d===v&&!m.cancelled)){toast('Já existe um encontro nessa data');return;}const m={id:c.id+'e'+Date.now(),d:v,desc:'',mat:'',pres:{},why:{},done:false};c.meets.unshift(m);c.total++;closeDlg();S.ctab='enc';S.chamada=m.id;render();};}});
+Object.assign(A,{nxHouseRegNew:()=>{S.ctab='enc';S.chamada='new';S.chNew=null;render();window.scrollTo({top:0});}});
 /* Acompanhamento pastoral: mesmo padrão */
 careMeetings=function(c){
  careInit(c);
@@ -160,6 +160,26 @@ multiList=function(){
   +(multi?'':'<p class="who rise" style="--d:3;margin:0 0 12px">As igrejas ainda não estão agrupadas. Crie '+L.um+' '+L.lo+' para separá-las por região; o nível passa a aparecer assim que houver mais de '+L.um+'.</p>')
   +'<div class="rgrid2 rise" style="--d:3">'+(multi?NETS.map(netCard).join(''):single())+'</div>';
 };
+/* ---- Assinatura da organização: aba dentro de Multi-igreja/Organização (TEN-P-27; o Kalamos gerencia, o Alva só mostra e obedece). Dados de exemplo; os valores dos planos ainda não foram definidos. ---- */
+const OSUB={st:'Active',plan:'Plano Comunidade',ciclo:'Mensal',num:'ASS-0042',fim:'2026-11-23',pagarAte:'2026-11-23'};
+const OSUB_ST={Trial:['Em teste','var(--st-sol)','var(--st-sol-bg)'],Active:['Ativa','var(--st-int)','var(--st-int-bg)'],PastDue:['Em atraso','var(--st-sol)','var(--st-sol-bg)'],Suspended:['Suspensa','var(--st-rec)','var(--st-rec-bg)'],Canceled:['Cancelada','var(--ink-muted)','var(--surface-2)']};
+const osubNotice=()=>({Active:'',Trial:'Teste até 23/11.',PastDue:'Pagamento pendente. Regularize até 23/11 para não perder o acesso.',Suspended:'Acesso limitado por falta de pagamento: o Alva está só em leitura. Regularize para liberar tudo de novo.',Canceled:'Assinatura cancelada. Os dados seguem disponíveis para consulta e exportação.'})[OSUB.st];
+const osubLimits=()=>[['Igrejas',IGREJAS.length,5,''],['Membros ativos',typeof MEMBERS!=='undefined'?MEMBERS.length:0,300,''],['Usuários com acesso',USERS.length,40,''],['Armazenamento',12,50,' GB']];
+function orgAssinatura(){const s=OSUB_ST[OSUB.st],n=osubNotice(),ro=OSUB.st==='Suspended'||OSUB.st==='Canceled';
+ return '<section class="card pc rise" style="--d:3"><div class="sh"><div><h2>Assinatura</h2><p class="who" style="margin:4px 0 0">'+esc(OSUB.plan)+' · ciclo '+OSUB.ciclo.toLowerCase()+' · assinatura '+OSUB.num+'</p></div><span class="stp" style="--c:'+s[1]+';--b:'+s[2]+'"><i></i>'+s[0]+'</span></div>'
+  +(n?'<p class="'+(ro?'cxv-w':'cxv-p')+'" style="margin:0 0 14px">'+ic(ro?'alert':'clock',14,2)+'<span>'+n+'</span></p>':'')
+  +'<dl class="kv grid2" style="margin:0 0 14px"><div><dt>'+(OSUB.st==='Trial'?'Fim do teste':'Período atual até')+'</dt><dd>'+fmtD(OSUB.fim)+'</dd></div><div><dt>Próxima cobrança</dt><dd>'+(OSUB.st==='Canceled'?'—':fmtD(OSUB.pagarAte))+'</dd></div></dl>'
+  +'<p class="fl" style="margin:0 0 8px">Uso do plano</p><div class="osub-l">'+osubLimits().map(l=>{const p=Math.min(100,Math.round(l[1]/l[2]*100));return '<div class="osub-r"><span>'+l[0]+'</span><div class="osub-b"><i style="width:'+p+'%"></i></div><b>'+l[1]+l[3]+' de '+l[2]+l[3]+'</b></div>';}).join('')+'</div>'
+  +'<p class="who" style="margin:12px 0 0">Os limites acima são exemplo: os planos ainda não foram definidos. Chegou ao limite, o Alva recusa criar mais e mostra a frase; nada é apagado.</p>'
+  +'<div class="dfoot" style="margin-top:14px"><span class="who" style="margin-right:auto">Só neste protótipo: <button type="button" class="lnk" data-a="osubSt" data-v="Active">Ativa</button> · <button type="button" class="lnk" data-a="osubSt" data-v="PastDue">Em atraso</button> · <button type="button" class="lnk" data-a="osubSt" data-v="Suspended">Suspensa</button></span><button class="btn pri" data-a="osubPay">'+ic('wallet',15,2.2)+'Abrir pagamento</button></div></section>';}
+{const _ml=multiList;multiList=function(){const h=_ml.apply(this,arguments);if(S.seK==='net')return h;
+ const i=h.indexOf('<div class="rgrid2 rise"');if(i<0)return h;const tab=S.orgTab||'igr';
+ const tabs='<div class="utabs rise" style="--d:2" role="tablist">'+[['igr','Igrejas e '+NL().plo],['ass','Assinatura']].map(t=>'<button role="tab" class="'+(tab===t[0]?'on':'')+'" aria-selected="'+(tab===t[0])+'" data-a="orgTab" data-v="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>';
+ if(tab==='ass')return h.slice(0,i).replace(/<p class="who rise" style="--d:3;margin:0 0 12px">[\s\S]*?<\/p>/,'')+tabs+orgAssinatura();
+ return h.slice(0,i)+tabs+h.slice(i);};}
+A.orgTab=v=>{S.orgTab=v;admRe();window.scrollTo({top:0});};
+A.osubSt=v=>{OSUB.st=v;admRe();toast('Situação de exemplo: '+OSUB_ST[v][0].toLowerCase());};
+A.osubPay=()=>toast('Abre o portal de pagamento do provedor, com a marca da organização (simulado)');
 const nxTone=n=>TONES[NETS.indexOf(n)%6];
 NETS.forEach(n=>{n.tone=nxTone(n);});
 const nxNameDlg=(title,sub,val,ph,onOk)=>{openDlg(dlgHead(title,sub)+'<form class="fgrid one" id="nnF" novalidate><label class="fld"><span class="fl">Nome</span><input name="v" value="'+esc(val)+'" placeholder="'+ph+'" maxlength="40" autocomplete="off"><span class="err"></span></label><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit">Salvar</button></div></form>','sm');const f=$('#nnF'),i=f.elements.v;setTimeout(()=>i.select(),80);i.addEventListener('input',()=>i.closest('.fld').classList.remove('bad'));f.onsubmit=e=>{e.preventDefault();const x=i.value.trim(),r=onOk(x);if(r){i.closest('.fld').classList.add('bad');i.nextElementSibling.textContent=r;i.focus();}};};

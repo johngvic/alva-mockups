@@ -39,15 +39,37 @@ const encPost=h=>h.replace(/presença (\d+)\/(\d+)/g,(_,x,y)=>'<span class="epr"
  const _c=careMeetings;careMeetings=function(){return encPost(_c.apply(this,arguments));};
  const _d=dEnc;dEnc=function(){return encPost(_d.apply(this,arguments));};
  const _s=seEncounters;seEncounters=function(){return encPost(_s.apply(this,arguments));};}
+/* itens do encontro (HND-92): todo encontro aceita itens da biblioteca, no formato do bloco de escala; m.mat/m.mref seguem como resumo para as listas */
+const MT_K2R={musica:'song',pregacao:'sermon',video:'video',material:'material'},MT_R2K={song:'musica',sermon:'pregacao',video:'video',material:'material'};
+function meetItems(m){if(!m.items){m.items=[];if(m.mat){const [r,id]=(m.mref||'').split('|'),k=MT_R2K[r];m.items.push(k?{t:m.mat,d:'',k,ref:id}:{t:m.mat,d:'',k:'outro'});}}return m.items;}
+function meetItSync(m){const it=m.items||[],f=it.find(i=>MT_K2R[i.k]&&i.ref);m.mat=it.map(i=>i.t).join(' · ');m.mref=f?MT_K2R[f.k]+'|'+f.ref:'';}
+function meetItHas(m,ref){const [r,id]=ref.split('|');return meetItems(m).some(i=>MT_K2R[i.k]===r&&i.ref===id);}
+function meetItSec(o){const m=o.mt;if(!m)return '';const it=meetItems(m),ed=o.state==='sched';if(!it.length&&!ed)return '';
+ return '<section class="mv-b mv-its"><div class="mv-bh"><h3>Itens do encontro</h3>'+(it.length?'<span class="who">'+it.length+(it.length===1?' item':' itens')+'</span>':'')+'</div>'
+  +(it.length?'<ul class="mv-il">'+it.map((i,n)=>'<li><span class="cti ec-k '+i.k+'">'+ic(ECT[i.k][2],14)+'</span><span class="dkt"><b>'+esc(i.t)+'</b><span>'+esc(ECT[i.k][0]+(i.d?' · '+i.d:''))+'</span></span>'+(ed?'<button type="button" class="ibtn sm" data-a="meetItDel" data-v="'+n+'" aria-label="Tirar '+esc(i.t)+'">'+ic('x',13)+'</button>':'')+'</li>').join('')+'</ul>':'<p class="who">Nenhum item ainda. Os participantes veem os itens na Agenda do app.</p>')
+  +(ed?'<button type="button" class="btn sec sm mv-add" data-a="meetItAdd">'+ic('plus',13,2.2)+'Adicionar conteúdo</button>':'')+'</section>';}
+/* ---- Itens do encontro: UM componente para todo encontro (Casas, Ministério, Discipulado, Acompanhamento, rede) ---- */
+/* a seção (lista + Adicionar conteúdo) entra em qualquer janela ou página de encontro; o seletor abre POR CIMA, sem fechar o formulário, e só a seção é atualizada */
+let _mtStg=null;
+function mtStart(src){_mtStg=src||{items:[],mat:'',mref:''};window._meetO={mt:_mtStg,state:'sched'};return _mtStg;}
+const mtField=()=>'<div class="fld wide mt-fld">'+meetItSec(window._meetO)+'</div>';
+/* leva os itens escolhidos para o encontro que acabou de ser criado (o encontro que já existia guarda os dele) */
+function mtFinish(t,src){const s=src||_mtStg;if(!s||!t||s===t)return;if(s.items)t.items=s.items.map(i=>({...i}));t.mat=s.mat||'';t.mref=s.mref||'';_mtStg=null;}
+function openDlgTop(html,cls=''){const d=document.createElement('div');d.className='dlgw dlgtop';d.innerHTML=`<div class="dlg ${cls}" role="dialog" aria-modal="true">${html.split('data-a="closeDlg"').join('data-a="closeTop"')}</div>`;document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add('open'));d.addEventListener('click',e=>{if(e.target===d)closeDlgTop();});setTimeout(()=>d.querySelector('input,button.pri')?.focus(),60);return d;}
+function closeDlgTop(){const L=$$('.dlgw');const d=L[L.length-1];if(!d)return;d.classList.remove('open');setTimeout(()=>d.remove(),240);}
+function meetItBack(){closeDlgTop();}
+function meetItRefresh(){const o=window._meetO;if(!o)return;$$('.mv-its').forEach(s=>{const h=meetItSec(o);if(h)s.outerHTML=h;else s.remove();});}
+Object.assign(A,{meetItAdd:()=>A.esAddC('mt'),meetItBack,closeTop:()=>closeDlgTop(),
+ meetItDel:v=>{const m=window._meetO.mt,it=meetItems(m),i=+v,c=it[i];if(!c)return;it.splice(i,1);meetItSync(m);meetItRefresh();toast(c.t+' removido',()=>{it.splice(i,0,c);meetItSync(m);meetItRefresh();});}});
 function meetView(o){
  const fact=(i,t)=>t?'<span class="mv-f">'+ic(i,14,1.9)+esc(t)+'</span>':'';
  const pp=o.people,ny=pp?pp.yes.length:0,nt=pp?ny+pp.no.length:0,pct=nt?Math.round(ny/nt*100):0;
  const chip=p=>'<span class="mv-p">'+avN(p.n)+'<span><b>'+esc(p.n)+'</b>'+(p.why?'<small>'+esc(p.why)+'</small>':'')+'</span></span>';
- const blocks=(o.blocks||[]).filter(b=>b[1]).map(b=>'<section class="mv-b"><h3>'+b[0]+'</h3><p>'+esc(b[1])+'</p></section>').join('');
- openDlg(dlgHead(o.title,o.sub)+'<div class="mv">'
+ const blocks=(o.blocks||[]).filter(b=>b[1]&&!(o.mt&&b[0]==='Material de apoio')).map(b=>'<section class="mv-b"><h3>'+b[0]+'</h3><p>'+esc(b[1])+'</p></section>').join('');
+ window._meetO=o;openDlg(dlgHead(o.title,o.sub)+'<div class="mv">'
   +'<div class="mv-sum'+(o.state?' '+o.state:'')+'"><span class="mv-d"><b>'+fmtD(o.d).split(' ')[0]+'</b><span>'+fmtD(o.d).split(' ')[1]+'</span></span><div class="mv-fs"><b class="mv-st">'+o.stateL+'</b><div class="mv-fl">'+fact('calendar',wd(o.d))+fact('clock',o.time)+fact(o.mode==='Remoto'?'video':'pin',[o.mode,o.where].filter(Boolean).join(' · '))+'</div></div>'
   +(pp&&nt&&!pp.yesL?'<div class="mv-ring" style="--p:'+pct+'"><span><b>'+ny+'</b><small>de '+nt+'</small></span></div>':'')+'</div>'
-  +blocks+(o.extra||'')
+  +blocks+meetItSec(o)+(o.extra||'')
   +(o.note?'<section class="mv-b mv-note"><h3>'+ic('lock',13,2)+'Anotação pessoal <small>só você vê</small></h3><p>'+esc(o.note)+'</p></section>':'')
   +(pp?'<section class="mv-b"><div class="mv-bh"><h3>'+(pp.label||'Chamada')+'</h3>'+(pp.no.length||pp.showPct?'<span class="who">'+ny+' de '+nt+' presentes · '+pct+'%</span>':'')+'</div>'
    +'<div class="mv-cols'+(pp.no.length?'':' one')+'"><div><p class="eh">'+(pp.yesL||'Presentes')+'<small>'+ny+'</small></p><div class="mv-pl">'+(pp.yes.map(chip).join('')||'<span class="who">Ninguém</span>')+'</div></div>'
@@ -55,22 +77,22 @@ function meetView(o){
   +(o.log&&o.log.length?'<section class="mv-b"><h3>Registros do encontro</h3><ol class="mini-tl">'+o.log.map(e=>'<li><b>'+esc(e.t)+'</b><span>'+fmtD(e.d)+' · '+esc(e.by)+'</span></li>').join('')+'</ol></section>':'')
   +'</div><div class="dfoot">'+(o.edit||'')+'<button class="btn sec" data-a="closeDlg">Fechar</button>'+(o.primary||'')+'</div>','lg mvd');}
 hViewMeet=function(id){const c=hById(S.casa),m=c.meets.find(x=>x.id===id);if(!m)return;
- meetView({title:'Encontro realizado',sub:esc(c.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start,m.end),mode:m.mode,where:m.mode==='Presencial'?m.where:'',
+ meetView({mt:m,title:'Encontro realizado',sub:esc(c.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start,m.end),mode:m.mode,where:m.mode==='Presencial'?m.where:'',
   blocks:[['O que foi tratado',m.desc],['Material de apoio',m.mat]],
   people:{yes:c.ppl.filter(p=>m.pres&&m.pres[p.id]).map(p=>({n:p.n})),no:c.ppl.filter(p=>!(m.pres&&m.pres[p.id])).map(p=>({n:p.n,why:(m.why||{})[p.id]||'Sem motivo informado'}))},
   log:m.entries||[{d:m.d,t:'Encontro realizado e chamada registrada',by:c.leader}],
   edit:'<button class="btn sec" data-a="hEditMeet" data-v="'+m.id+'" style="margin-right:auto">'+ic('pen',14)+'Editar registro e chamada</button>'});};
 dViewMeet=function(id){const d=dById(S.disc),m=d.meets.find(x=>x.id===id);if(!m)return;
- meetView({title:'Encontro realizado',sub:esc(d.n),d:m.d,state:'done',stateL:'Realizado',time:(m.time||'').replace(':00','h'),mode:m.mode,
+ meetView({mt:m,title:'Encontro realizado',sub:esc(d.n),d:m.d,state:'done',stateL:'Realizado',time:(m.time||'').replace(':00','h'),mode:m.mode,
   blocks:[['Conteúdo tratado',m.content],['Material de apoio',m.mat]],note:m.note,
   people:{label:'Participantes',yesL:'Participaram',yes:(m.parts||partsOf(d)).map(n=>({n})),no:[]}});};
 careMeet=function(id){const c=cById(S.case);careInit(c);const m=[...c.meets,...c.sched,...c.cancelled].find(x=>x.rid===id);if(!m)return;const done=c.meets.includes(m),cancel=c.cancelled.includes(m);
- meetView({title:cancel?'Encontro cancelado':done?'Encontro realizado':'Encontro agendado',sub:esc(c.n),d:m.d,state:cancel?'cancel':done?'done':'sched',stateL:cancel?'Cancelado':done?'Realizado':'Agendado · '+nxEncWhen(m.d),
+ meetView({mt:m,title:cancel?'Encontro cancelado':done?'Encontro realizado':'Encontro agendado',sub:esc(c.n),d:m.d,state:cancel?'cancel':done?'done':'sched',stateL:cancel?'Cancelado':done?'Realizado':'Agendado · '+nxEncWhen(m.d),
   time:nxEncTime(done?m.time:m.t),mode:m.mode||'Pastoral',where:m.where,
   blocks:done?[['Conteúdo tratado',m.t],['Resultado e próximos passos',m.result],['Material de apoio',m.mat]]:[['Situação',cancel?'Este encontro foi cancelado.':'Ainda não aconteceu. Ao concluir, registre o que foi tratado e os próximos passos.']]});};
 Object.assign(A,{hViewMeet,dViewMeet,careMeet,
  seView:v=>{const {k,o,m}=SE_PARSE(v),leaders=seLeaders(k,o);
-  meetView({title:'Encontro realizado',sub:esc(o.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',
+  meetView({mt:m,title:'Encontro realizado',sub:esc(o.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',
    blocks:[['O que foi tratado',m.notes]],people:{label:'Líderes',yes:leaders.filter(n=>m.pres&&m.pres[n]).map(n=>({n})),no:leaders.filter(n=>!(m.pres&&m.pres[n])).map(n=>({n}))}});}});
 
 /* ---------- Convites e respostas ---------- */
@@ -157,24 +179,24 @@ seForm=function(k,oid,mid,rn){
   $('#seExtra').appendChild(l);i.value='';l.querySelector('input').dispatchEvent(new Event('change',{bubbles:true}));};
  }};
 seCallDlg=function(k,oid,mid){
- const o=SE_O(k,oid),m=mid&&o.meets.find(x=>x.id===mid),list=m?seInv(k,o,m):sePool(k,o),t=TODAY.toISOString().slice(0,10);
+ const o=SE_O(k,oid),m=mid&&o.meets.find(x=>x.id===mid),list=m?seInv(k,o,m):sePool(k,o),t=TODAY.toISOString().slice(0,10);mtStart(m||null);
  openDlg(dlgHead('Registrar encontro',esc(o.n)+(m?' · '+fmtD(m.d):'. Para um encontro que já aconteceu e não foi agendado.'))+'<form id="seC" class="fgrid one" novalidate>'
   +(m?'':'<label class="fld"><span class="fl">Data</span><input type="date" name="d" value="'+t+'" max="'+t+'"><span class="err"></span></label><label class="fld"><span class="fl">Pauta <small>opcional</small></span><input name="topic" maxlength="80"></label>')
   +'<div class="fld"><span class="fl">'+(m?'Chamada dos convocados':'Quem participou')+'</span><div class="cpick">'+(list.length?list.map(p=>'<label><input type="checkbox" name="p" value="'+esc(p.n)+'"'+(m&&(m.pres?m.pres[p.n]:p.r==='sim')?' checked':'')+'>'+avN(p.n)+'<span><b>'+esc(p.n)+'</b><small>'+esc((p.from||'')+(m?' · '+RS_L[p.r||'']:''))+'</small></span><i class="cb">'+ic('check',12,2.8)+'</i></label>').join(''):'<p class="who">Ninguém disponível nesta rede.</p>')+'</div>'+(m?'<span class="hint">Quem aceitou já vem marcado. A presença é o que conta no histórico.</span>':'')+'</div>'
-  +'<label class="fld"><span class="fl">O que foi tratado <small>opcional</small></span><textarea class="ta" name="notes" rows="3" maxlength="500" placeholder="Resumo do encontro">'+esc(m?m.notes:'')+'</textarea></label>'
+  +'<label class="fld"><span class="fl">O que foi tratado <small>opcional</small></span><textarea class="ta" name="notes" rows="3" maxlength="500" placeholder="Resumo do encontro">'+esc(m?m.notes:'')+'</textarea></label>'+mtField()
   +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Salvar encontro</button></div></form>');
  const f=$('#seC');f.onsubmit=e=>{e.preventDefault();const pres={};list.forEach(p=>{pres[p.n]=false;});$$('[name=p]:checked',f).forEach(i=>{pres[i.value]=true;});const notes=f.elements.notes.value.trim();
-  if(m){m.done=true;m.pres=pres;m.notes=notes;}else{const d=f.elements.d.value;if(!d){const fl=f.elements.d.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Escolha a data';return;}const x=seM(0,'','',{});x.d=d;x.done=true;x.pres=pres;x.notes=notes;x.topic=f.elements.topic.value.trim();x.inv=list.filter(p=>pres[p.n]).map(p=>({...p,r:'sim',why:''}));o.meets.push(x);}
+  if(m){m.done=true;m.pres=pres;m.notes=notes;}else{const d=f.elements.d.value;if(!d){const fl=f.elements.d.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Escolha a data';return;}const x=seM(0,'','',{});x.d=d;x.done=true;x.pres=pres;x.notes=notes;x.topic=f.elements.topic.value.trim();x.inv=list.filter(p=>pres[p.n]).map(p=>({...p,r:'sim',why:''}));mtFinish(x);o.meets.push(x);}
   closeDlg();admRe();toast('Encontro registrado');};};
 Object.assign(A,{
  seInvView:v=>{const {k,o,m}=SE_PARSE(v),inv=seInv(k,o,m),key=v;
-  meetView({title:'Encontro agendado',sub:esc(o.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.topic]],
+  meetView({mt:m,title:'Encontro agendado',sub:esc(o.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.topic]],
    extra:rsBlock(inv.map(x=>({...x,sub:x.from})),{title:'Convocados',note:(k==='min'?'Visível a quem tem Editar ou Admin neste ministério.':'Visível ao supervisor e a quem tem Editar ou Admin nesta rede.')+' O convite chega na Agenda do app de cada convocado.'}),
-   edit:'<button class="btn sec" data-a="seSchedFromView" data-v="'+key+'" style="margin-right:auto">'+ic('users',14)+'Editar convocados</button>'+(rsCount(inv).pe?'<button class="btn sec" data-a="seNudge" data-v="'+key+'">'+ic('bell',14)+'Lembrar quem não respondeu</button>':'')});},
+   edit:'<button class="btn sec" data-a="seSchedFromView" data-v="'+key+'" style="margin-right:auto">'+ic('users',14)+'Editar convocados</button>'});},
  seSchedFromView:v=>{closeDlg();setTimeout(()=>A.seSched(v),60);},
  seNudge:v=>{const {k,o,m}=SE_PARSE(v),n=rsCount(seInv(k,o,m)).pe;toast('Lembrete enviado para '+n+' pessoa'+(n>1?'s':''));},
  seView:v=>{const {k,o,m}=SE_PARSE(v),inv=seInv(k,o,m);
-  meetView({title:'Encontro realizado',sub:esc(o.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.topic],['O que foi tratado',m.notes]],
+  meetView({mt:m,title:'Encontro realizado',sub:esc(o.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.topic],['O que foi tratado',m.notes]],
    people:{label:'Chamada',yes:inv.filter(x=>m.pres&&m.pres[x.n]).map(x=>({n:x.n})),no:inv.filter(x=>!(m.pres&&m.pres[x.n])).map(x=>({n:x.n,why:x.r==='nao'?'Recusou o convite'+(x.why?' · '+x.why:''):''}))}});}});
 /* --- casas --- */
 const H_SEED_R=['sim','sim','sim','','nao','sim','','sim','sim','','sim','nao','sim','','sim','sim','','sim'];
@@ -183,7 +205,7 @@ function hRsvp(c,m){if(!m.rsvp){m.rsvp={};c.ppl.forEach((p,i)=>{const r=m.done?(
  return h.replace(/<li class="sched">([\s\S]*?)<\/li>/g,(li,body)=>{const id=(body.match(/data-a="nxHouseRegister" data-v="([^"]+)"/)||[])[1];const m=id&&c.meets.find(x=>x.id===id);if(!m)return li;
   return li.replace(/(<div class="et"><div>)<b>([^<]*)<\/b>/,(m,a,t)=>a+'<b><button class="lnk record-title" data-a="hInvView" data-v="'+id+'">'+t+'</button></b>').replace('</span></div><div class="ea">','</span>'+rsSum(hRsvp(c,m),'hInvView',id)+'</div><div class="ea">');});};}
 hViewMeet=function(id){const c=hById(S.casa),m=c.meets.find(x=>x.id===id);if(!m)return;const rs=hRsvp(c,m);
- meetView({title:'Encontro realizado',sub:esc(c.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start,m.end),mode:m.mode,where:m.mode==='Presencial'?m.where:'',
+ meetView({mt:m,title:'Encontro realizado',sub:esc(c.n),d:m.d,state:'done',stateL:'Realizado',time:nxEncTime(m.start,m.end),mode:m.mode,where:m.mode==='Presencial'?m.where:'',
   blocks:[['O que foi tratado',m.desc],['Material de apoio',m.mat]],
   people:{yes:c.ppl.filter(p=>m.pres&&m.pres[p.id]).map(p=>({n:p.n})),no:c.ppl.filter(p=>!(m.pres&&m.pres[p.id])).map(p=>({n:p.n,why:(m.why||{})[p.id]||'Sem motivo informado'}))},
   extra:'',log:m.entries||[{d:m.d,t:'Encontro realizado e chamada registrada',by:c.leader}],
@@ -191,7 +213,7 @@ hViewMeet=function(id){const c=hById(S.casa),m=c.meets.find(x=>x.id===id);if(!m)
  const ch=$$('.mvd .mv-b').find(x=>/Chamada/.test(x.textContent));if(ch)ch.insertAdjacentHTML('afterend',rsBlock(rs,{title:'Respostas ao convite pelo app',note:'Resposta antes do encontro. A presença vem da chamada, não do convite.'}));};
 Object.assign(A,{hViewMeet,
  hInvView:id=>{const c=hById(S.casa),m=c.meets.find(x=>x.id===id);if(!m)return;
-  meetView({title:'Encontro agendado',sub:esc(c.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.start,m.end),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.desc],['Material de apoio',m.mat]],
+  meetView({mt:m,title:'Encontro agendado',sub:esc(c.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.start,m.end),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.desc],['Material de apoio',m.mat]],
    extra:rsBlock(hRsvp(c,m),{note:'Os participantes respondem na Agenda do app e recebem lembrete 1 dia antes. A presença é registrada depois, na chamada.'}),
    edit:'<button class="btn sec" data-a="hInvEdit" data-v="'+id+'" style="margin-right:auto">'+ic('pen',14)+'Editar encontro</button>',primary:'<button class="btn pri" data-a="hInvReg" data-v="'+id+'">Fazer chamada</button>'});},
  hInvEdit:id=>{closeDlg();setTimeout(()=>A.nxHouseSchedule(id),60);},
@@ -241,7 +263,7 @@ const rsOneBlock=(m,name,sub)=>{const x=rsOne(m);
  return '<section class="mv-b"><div class="mv-bh"><h3>Resposta ao convite</h3></div><div class="rs1">'+avN(name)+'<span class="dkt"><b>'+esc(name)+'</b><small>'+esc(sub)+'</small></span><span class="rs1-st '+rsOneCls(x.r)+'">'+RS1_L[x.r]+'</span></div>'
   +(x.r==='nao'?'<p class="rs1-why"><b>Motivo:</b> '+esc(x.why||'Sem motivo informado')+'</p>':'')
   +'<p class="rs-note">'+ic('info',13,2)+'A pessoa responde na Agenda do app e recebe um lembrete antes do encontro. A presença é registrada depois, ao concluir o encontro.</p></section>';};
-const rsOneNudge=(m,name)=>!rsOne(m).r?'<button class="btn sec" data-a="rsOneNudge" data-v="'+esc(name)+'" style="margin-right:auto">'+ic('bell',14)+'Lembrar '+esc(name.split(' ')[0])+'</button>':'';
+const rsOneNudge=()=>'';
 const rsOneInject=(h,find)=>h.replace(/<li class="sched">([\s\S]*?)<\/li>/g,(li,body)=>{const f=find(body);if(!f)return li;
  return li.replace(/(<div class="et"><div>)<b>([^<]*)<\/b>/,(m,a,t)=>a+'<b><button class="lnk record-title" data-a="'+f.act+'" data-v="'+f.key+'">'+t+'</button></b>')
   .replace(/(<span class="who">[^<]*<\/span>)(<\/div>\s*<div class="ea">)/,(m,a,b)=>a+rsOneChip(f.m,f.act,f.key)+b);});
@@ -251,11 +273,11 @@ const rsOneInject=(h,find)=>h.replace(/<li class="sched">([\s\S]*?)<\/li>/g,(li,
  return qdRenewFor([...(c.sched||[]),...c.meets],{act:'cRenew',title:()=>'Encontro de acompanhamento'})+rsOneInject(h,body=>{const k=(body.match(/data-a="cDone" data-v="([^"]+)"/)||[])[1],i=k&&+k.split('|')[1],m=k&&c.sched[i];return m?{m,act:'careInvView',key:k}:null;});};}
 Object.assign(A,{
  dInvView:id=>{const d=dById(S.disc),m=d.meets.find(x=>x.id===id);if(!m)return;
-  meetView({title:'Encontro agendado',sub:esc(d.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:(m.time||'').replace(':00','h'),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.content],['Material de apoio',m.mat]],
+  meetView({mt:m,title:'Encontro agendado',sub:esc(d.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:(m.time||'').replace(':00','h'),mode:m.mode,where:m.mode==='Presencial'?m.where:'',blocks:[['Pauta',m.content],['Material de apoio',m.mat]],
    extra:rsOneBlock(m,d.n,d.role||'Discipulado'),edit:rsOneNudge(m,d.n),primary:'<button class="btn pri" data-a="dInvDone" data-v="'+id+'">Concluir encontro</button>'});},
  dInvDone:id=>{closeDlg();setTimeout(()=>A.dConclude(id),60);},
  careInvView:k=>{const [cid,i]=k.split('|'),c=cById(cid),m=c&&c.sched[+i];if(!m)return;
-  meetView({title:'Encontro agendado',sub:esc(c.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.t),mode:m.mode||'Pastoral',where:m.where,blocks:[['Situação','Ainda não aconteceu. Ao concluir, registre o que foi tratado e os próximos passos.']],
+  meetView({mt:m,title:'Encontro agendado',sub:esc(c.n),d:m.d,state:'sched',stateL:'Agendado · '+nxEncWhen(m.d),time:nxEncTime(m.t),mode:m.mode||'Pastoral',where:m.where,blocks:[['Situação','Ainda não aconteceu. Ao concluir, registre o que foi tratado e os próximos passos.']],
    extra:rsOneBlock(m,c.n,'Acompanhamento pastoral'),edit:rsOneNudge(m,c.n),primary:'<button class="btn pri" data-a="careInvDone" data-v="'+k+'">Concluir encontro</button>'});},
  careInvDone:k=>{closeDlg();setTimeout(()=>A.cDone(k),60);},
  rsOneNudge:v=>toast('Lembrete enviado para '+v.split(' ')[0])});
@@ -264,39 +286,126 @@ Object.assign(A,{
 let _cxid=0,_cxe=0;
 const CAIXAS=[];
 const cxMoney=c=>R$(c/100);
-const cxValid=x=>x.entries.filter(e=>!e.rev&&!e.est);
+const cxAll=x=>x.entries.concat(cxAuto(x));
+const cxValid=x=>cxAll(x).filter(e=>!e.rev&&!e.est);
 const cxIn=x=>cxValid(x).filter(e=>e.t==='in'&&!e.xfer).reduce((a,e)=>a+e.v,0);
 const cxOut=x=>cxValid(x).filter(e=>e.t==='out'&&!e.xfer).reduce((a,e)=>a+e.v,0);
 const cxXf=x=>cxValid(x).filter(e=>e.xfer).reduce((a,e)=>a+(e.t==='in'?e.v:-e.v),0);
-const cxBal=x=>cxIn(x)-cxOut(x)+cxXf(x);
-const cxXfer=(from,to,v,d,by)=>{const k=to.main?'Repasse':from.main?'Aporte':'Transferência';cxAdd(from,'out',v,d,k+' para '+to.name,k,by,{xfer:true});cxAdd(to,'in',v,d,k+(from.main?' do ':' de ')+from.name,k,by,{xfer:true});};
+const cxBal=x=>cxIn(x)-cxOut(x)+cxXf(x)+(x.ini?x.ini.v:0);
+const cxXfer=(from,to,v,d,by)=>{const k=to.main?'Repasse':from.main?'Aporte':'Transferência';cxAdd(from,'out',v,d,k+' para '+(from.ownerId===to.ownerId?to.name:cxOwnerName(to)),k,by,{xfer:true});cxAdd(to,'in',v,d,k+(from.main?' do ':' de ')+(from.ownerId===to.ownerId?from.name:cxOwnerName(from)),k,by,{xfer:true});};
 const cxOwnerName=x=>x.ownerType==='zel'?((zJob(x.ownerId)||{}).n||'Trabalho'):x.ownerType==='min'?'Ministério de '+((mnById(x.ownerId)||{}).n||'—'):((eById(x.ownerId)||{}).t||'Evento');
 const cxOwnerKind=x=>x.ownerType==='zel'?'Trabalho':x.ownerType==='min'?'Ministério':((eById(x.ownerId)||{}).kind==='culto'?'Culto':'Evento');
 const cxNew=(type,id,name,o={})=>{const x={id:'cx'+(++_cxid),ownerType:type,ownerId:id,name,main:!!o.main,status:o.status||'aberto',closedAt:o.closedAt||'',entries:[]};CAIXAS.push(x);return x;};
 const cxAdd=(x,t,v,d,desc,cat,by,o={})=>{x.entries.push(Object.assign({id:'ce'+(++_cxe),t,v:Math.round(v*100),d,desc,cat,by:by||'Rafael Pereira'},o));return x;};
-const cxOwn=(type,id)=>{if(!CAIXAS.some(x=>x.ownerType===type&&x.ownerId===id&&x.main))cxNew(type,id,'Caixa principal',{main:true});
- return CAIXAS.filter(x=>x.ownerType===type&&x.ownerId===id).sort((a,b)=>(b.main-a.main)||((a.status==='encerrado')-(b.status==='encerrado'))||a.id.localeCompare(b.id,undefined,{numeric:true}));};
+const cxOwn=(type,id)=>{ return CAIXAS.filter(x=>x.ownerType===type&&x.ownerId===id).sort((a,b)=>(b.main-a.main)||((a.status==='encerrado')-(b.status==='encerrado'))||a.id.localeCompare(b.id,undefined,{numeric:true}));};
 const cxCount=(type,id)=>cxOwn(type,id).length;
 const cxPill=x=>x.status==='encerrado'?'<span class="stp" style="--c:var(--ink-muted);--b:var(--surface-2)"><i></i>Encerrado</span>':x.main?'<span class="stp" style="--c:var(--brand-text);--b:var(--brand-soft)"><i></i>Principal</span>':'<span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Aberto</span>';
-const CX_CATS={in:['Oferta ou doação','Inscrição','Venda','Aporte da igreja','Outros'],out:['Material','Alimentação','Transporte','Hospedagem','Serviços','Devolução à igreja','Outros']};
+const CX_CATS={in:['Venda','Inscrição','Repasse da igreja','Outros'],inp:['Inscrição','Venda','Outros'],out:['Material','Alimentação','Transporte','Hospedagem','Serviços','Devolução à igreja','Outros']};
+/* ---- Fundo permanente (ministério) × fundo de projeto (evento, obra); verba (averbação); conferência do Financeiro (06/11/2026) ---- */
+let _cxv=0;
+const cxKind=x=>x.ownerType==='min'?'perm':'proj';
+const cxVerbas=x=>x.verbas||(x.verbas=[]);
+const cxMainOf=x=>CAIXAS.find(y=>y.ownerType===x.ownerType&&y.ownerId===x.ownerId&&y.main)||x;
+const cxVerbaOk=x=>cxVerbas(cxMainOf(x)).filter(v=>v.st==='aprovada').reduce((a,v)=>a+v.v,0);
+const cxVerbaAdd=(x,v,d,by,st,why)=>{const s=st||'aprovada',o={id:'vb'+(++_cxv),v:Math.round(v*100),d,by,st:s,why:why||'',appr:s==='aprovada'?'Rafael Pereira':''};cxVerbas(x).push(o);return o;};
+const cxUnitAll=x=>CAIXAS.filter(y=>y.ownerType===x.ownerType&&y.ownerId===x.ownerId);
+const cxUnitBal=x=>cxUnitAll(x).reduce((a,y)=>a+cxBal(y),0);
+/* Adiantamento e limite (07/11/2026): verba = autorização; adiantamento = dinheiro real que sai da igreja para o responsável e reserva a verba até a prestação de contas */
+const cxPar=k=>{const p=typeof SPAR!=='undefined'&&SPAR.find(y=>y.k===k);return p?p.val:null;};
+const cxAdvs=x=>{const m=cxMainOf(x);return m.advs||(m.advs=[]);};
+const cxGastoCx=x=>cxUnitAll(x).reduce((a,y)=>a+cxValid(y).filter(e=>e.t==='out'&&!e.xfer&&e.pay!=='bolso').reduce((q,e)=>q+e.v,0),0);
+const cxAdvRec=x=>cxAdvs(x).reduce((a,v)=>a+v.v,0);
+const cxAdvRet=x=>cxAdvs(x).filter(v=>v.st==='prestado').reduce((a,v)=>a+v.v-v.used,0);
+const cxAdvOpen=x=>{const L=cxAdvs(x),usedC=L.filter(v=>v.st==='prestado').reduce((a,v)=>a+v.used,0),open=L.filter(v=>v.st==='aberto').reduce((a,v)=>a+v.v,0);return Math.max(0,open-Math.max(0,cxGastoCx(x)-usedC));};
+const cxAdvLate=x=>cxAdvOpen(x)>0&&cxAdvs(x).some(v=>v.st==='aberto'&&v.due&&v.due<NOWD);
+const cxRecLibera=x=>cxPar(x.ownerType==='zel'?'cashboxes.limit.worksReceiptsRelease':'cashboxes.limit.eventReceiptsRelease')==='on';
+const cxCash=x=>cxAdvRec(x)-cxAdvRet(x)+cxUnitAll(x).reduce((a,y)=>a+cxIn(y),0)-cxGastoCx(x);
+const cxLimit=x=>{const all=cxUnitAll(x),rec=all.reduce((a,y)=>a+cxIn(y),0),des=all.reduce((a,y)=>a+cxOut(y),0);return cxVerbaOk(x)-des-cxAdvOpen(x)+(cxRecLibera(x)?rec:0);};
+const cxDisp=x=>cxKind(x)==='perm'?cxUnitBal(x)+cxVerbaOk(x):cxLimit(x);
+/* quanto uma saída nova consome do limite: a parte paga com o caixa e coberta por adiantamento em aberto não consome de novo */
+const cxNeed=(x,v,pay)=>v-(pay==='bolso'?0:Math.min(v,cxAdvOpen(x)));
+const cxOverMode=()=>cxPar('cashboxes.limit.overMode')||'block';
+const cxLimited=x=>cxKind(x)==='proj'&&cxVerbaOk(x)>0;
+const CXSTL={out:{conferir:['clock','A conferir','duplicado'],pend:['alert','Com pendência','msv'],ok:['check','Conferida','existe'],areemb:['clock','A reembolsar','duplicado'],reemb:['check','Reembolsada','existe']},in:{conferir:['clock','A conferir','duplicado'],conc:['link','Conciliada','baixa'],banco:['check','Recebida no banco','existe'],reemb:['clock','Reembolso solicitado','msv']}};
+const cxStat=e=>{let s=e.st||'';if(!s||e.xfer||e.est)return '';if(s==='areemb'&&e.cpid&&typeof PAGAR!=='undefined'){const p=PAGAR.find(x=>x.id===e.cpid);if(p&&p.paid)s='reemb';}return s;};
+const cxChip=e=>{const s=cxStat(e),m=s&&CXSTL[e.t]&&CXSTL[e.t][s];return m?'<span class="im-st '+m[2]+'">'+ic(m[0],12,2.4)+(s==='banco'&&e.fm==='Dinheiro'?'Depositada no banco':m[1])+'</span>':'';};
+/* lançamento sem status (já conferido na origem) mostra o mesmo selo dos demais: despesa Conferida, receita Recebida no banco */
+const cxChipD=e=>cxChip(e)||((e.xfer||e.est||e.rev)?'':cxChip({...e,st:e.t==='out'?'ok':'banco'}));
+/* cada inscrição paga online entra sozinha no caixa principal do evento, uma linha por pagamento */
+function cxAuto(x){if(x.ownerType!=='evt'||!x.main||typeof fqPays!=='function'||typeof fqStat!=='function')return [];
+ const ev=eById(x.ownerId);if(!ev)return [];
+ return fqPays().filter(p=>p.tipo==='Inscrição'&&p.caixa===ev.t).flatMap(p=>{const s0=fqStat(p).st,c=Math.round(p.total*100),rf=p.rf,b={id:'auto-'+p.id,t:'in',d:p.date,cat:'Inscrição',by:'Asaas',auto:true,fm:'Online',st:s0==='maq'?'conc':s0},d='Inscrição · '+p.quem;
+  if(rf&&rf.s==='done'&&rf.pct>=100)return [{...b,v:c,desc:d,rev:true},{id:b.id+'-r',t:'out',v:c,d:rf.d,desc:'Reembolso: '+d,cat:'Estorno',by:'Asaas',auto:true,est:true}];
+  if(rf&&rf.s==='done')return [{...b,v:Math.round(c*(100-rf.pct)/100),desc:d+' (reembolso de '+rf.pct+'%)'}];
+  if(rf&&rf.s==='req')return [{...b,v:c,desc:d,st:'reemb'}];
+  return [{...b,v:c,desc:d}];});}
+function cxPayPaint(f,c,k){const a=f.querySelector('#cxPayW'),b=f.querySelector('#cxFmW'),h=f.querySelector('#cxPH');if(a)a.hidden=k==='in';if(b)b.hidden=k==='out';
+ if(h){const pay=f.querySelector('[name=pay]:checked'),fm=f.querySelector('[name=fm]:checked');h.textContent=k==='out'?(pay&&pay.value==='bolso'?'Depois que o financeiro conferir a nota, o valor vira um reembolso a pagar a você.':'Sai do dinheiro do caixa. O financeiro confere a nota depois.'):(fm&&fm.value==='Dinheiro'?'O dinheiro fica com você até ser depositado. O financeiro confirma o recebimento.':'Entra como “a conferir” e é conciliada com o extrato da maquininha ou do banco.');}}
+function cxFundoPanel(c){const kind=cxKind(c),closed=c.status==='encerrado';
+ if(kind==='perm'&&c.main){const all=cxUnitAll(c),ini=c.ini?c.ini.v:0,rec=all.reduce((a,x)=>a+cxIn(x),0),des=all.reduce((a,x)=>a+cxOut(x),0),bal=ini+rec-des,n=all.reduce((a,x)=>a+cxValid(x).filter(e=>['conferir','pend'].includes(cxStat(e))).length,0),closed2=c.status==='encerrado';
+  return '<section class="cxv"><div class="cxv-h"><div><b>Fundo permanente</b><span>Dinheiro do ministério: saldo inicial + o que ele arrecada − o que gasta. Lance com a nota e o financeiro confere depois. Doação e oferta com destino vão por campanha.</span></div>'+(closed2?'':'<button class="btn sec sm" data-a="cxIni" data-v="'+c.id+'">'+ic('pen',13,2)+(c.ini?'Editar saldo inicial':'Informar saldo inicial')+'</button>')+'</div>'
+  +'<div class="cxv-g"><div><small>Saldo inicial</small><b>'+cxMoney(ini)+'</b><em>'+(!c.ini?'não informado':c.ini.st==='confirmado'?'confirmado pelo financeiro':'a confirmar pelo financeiro')+'</em></div><div><small>Receitas</small><b class="cx-in">'+cxMoney(rec)+'</b><em>vendas, rifas, repasses</em></div><div><small>Despesas</small><b class="cx-out">'+cxMoney(des)+'</b><em>todos os caixas</em></div><div class="'+(bal<0?'neg':'')+'"><small>Saldo</small><b>'+cxMoney(bal)+'</b><em>saldo inicial + receitas − despesas</em></div></div>'
+  +(n?'<p class="cxv-p">'+ic('clock',13,2)+'<span><b>'+n+'</b> lançamento'+(n===1?'':'s')+' aguardando a conferência do financeiro</span></p>':'')+(bal<0?'<p class="cxv-w">'+ic('alert',14,2)+'<span>O ministério gastou '+cxMoney(-bal)+' além do que tem. O financeiro vê o alerta.</span></p>':'')+'</section>';}
+ if(!c.main){const bal=cxBal(c),nin=cxValid(c).filter(e=>e.t==='in'&&!e.xfer).length,nout=cxValid(c).filter(e=>e.t==='out'&&!e.xfer).length,xf=cxXf(c);
+  return '<section class="cxv"><div class="cxv-h"><div><b>Subcaixa do '+(kind==='perm'?'ministério':'projeto')+'</b><span>Divide o dinheiro dentro da unidade. O financeiro enxerga só o caixa principal.</span></div></div>'
+  +'<div class="cxv-g"><div class="'+(bal<0?'neg':'')+'"><small>Saldo do caixa</small><b>'+cxMoney(bal)+'</b><em>'+(bal<0?'saiu mais do que entrou':'disponível nesta subcaixa')+'</em></div><div><small>Entradas</small><b class="cx-in">'+cxMoney(cxIn(c))+'</b><em>'+nin+' lançamento'+(nin===1?'':'s')+'</em></div><div><small>Saídas</small><b class="cx-out">'+cxMoney(cxOut(c))+'</b><em>'+nout+' lançamento'+(nout===1?'':'s')+'</em></div><div><small>Aportes e repasses</small><b class="cx-xf">'+(xf>0?'+':'')+cxMoney(xf)+'</b><em>recebido do principal, menos o devolvido</em></div></div></section>';}
+ const all=cxUnitAll(c),V=cxVerbaOk(c),rec=all.reduce((a,x)=>a+cxIn(x),0),des=all.reduce((a,x)=>a+cxOut(x),0),bal=rec-des,disp=cxLimit(c),adv=cxAdvOpen(c),cash=cxCash(c),late=cxAdvLate(c),ped=cxVerbas(c).filter(v=>v.st==='pedida');
+ return '<section class="cxv"><div class="cxv-h"><div><b>Fundo de projeto</b><span>Verba aprovada pela igreja + o que o próprio projeto arrecada. A verba só cobre o que a receita não cobrir.</span></div>'+(closed?'':'<button class="btn sec sm" data-a="cxVerbaAsk" data-v="'+c.id+'">'+ic('plus',13,2.2)+(V?'Pedir reforço de verba':'Pedir verba')+'</button>')+'</div>'
+  +'<p class="cxv-gl">O que foi autorizado</p><div class="cxv-g"><div><small>Verba aprovada</small><b>'+cxMoney(V)+'</b><em>autorizada, não é dinheiro</em></div><div><small>Receitas</small><b class="cx-in">'+cxMoney(rec)+'</b><em>inscrições, vendas</em></div><div><small>Gasto</small><b class="cx-out">'+cxMoney(des)+'</b><em>todos os caixas</em></div><div class="cxv-lim'+(disp<0?' neg':'')+'"><small>Limite restante</small><b>'+cxMoney(disp)+'</b><em>'+(cxRecLibera(c)?'verba + receitas − gasto':'verba − gasto')+(adv?' − adiantamento':'')+'</em></div></div>'
+  +'<p class="cxv-gl">O dinheiro de verdade</p><div class="cxv-g cxv-g2"><div><small>Dinheiro no caixa</small><b>'+cxMoney(cash)+'</b><em>o que está com o responsável</em></div><div class="'+(late?'neg':adv?'cxv-adv':'')+'"><small>Adiantamento em aberto</small><b>'+cxMoney(adv)+'</b><em>'+(late?'vencido, falta prestar contas':adv?'falta prestar contas':'nenhum pendente')+'</em></div></div>'
+  +ped.map(v=>'<p class="cxv-p">'+ic('clock',13,2)+'<span>Pedido de <b>'+cxMoney(v.v)+'</b> aguardando o financeiro'+(v.why?' · '+esc(v.why):'')+'</span></p>').join('')
+  +(disp<0?'<p class="cxv-w">'+ic('alert',14,2)+'<span>Gasto acima do limite em '+cxMoney(-disp)+'. Peça reforço de verba; o financeiro vê o alerta.</span></p>':'')+'</section>';}
+function cxIniDlg(cid){const c=CAIXAS.find(x=>x.id===cid);if(!c)return;
+ openDlg(dlgHead('Saldo inicial do ministério',esc(cxOwnerName(c))+' · quanto o ministério tinha quando começou a usar o Alva')+'<form id="cxIn" class="fgrid one" novalidate><label class="fld"><span class="fl">Valor (R$)</span><input name="v" type="number" min="0" step="0.01" inputmode="decimal" value="'+(c.ini?(c.ini.v/100):'')+'" placeholder="0,00"><span class="err"></span></label><p class="who" style="margin:0">É o dinheiro que já era do ministério, esteja na conta da igreja ou com o líder. O financeiro confirma esse valor.</p><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Salvar</button></div></form>','sm');
+ const f=$('#cxIn');f.onsubmit=e=>{e.preventDefault();const v=+f.elements.v.value;if(!(v>=0)||f.elements.v.value===''){const fl=f.elements.v.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Informe o valor';return;}c.ini={v:Math.round(v*100),d:myTd(),st:'declarado',by:ME_NAME};closeDlg();bdRe();toast('Saldo inicial de '+cxMoney(c.ini.v)+' enviado para o financeiro confirmar');};}
+function cxVerbaAskDlg(cid){const c=CAIXAS.find(x=>x.id===cid);if(!c)return;
+ openDlg(dlgHead('Pedir verba',esc(cxOwnerName(c))+' · o financeiro aprova e a verba aparece aqui')+'<form id="cxVa" class="fgrid one" novalidate><label class="fld"><span class="fl">Quanto você precisa (R$)</span><input name="v" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"><span class="err"></span></label><label class="fld"><span class="fl">Para quê <small>opcional</small></span><input name="why" maxlength="120" autocomplete="off" placeholder="Ex.: sinal da chácara e alimentação"></label><p class="who" style="margin:0">Verba não é dinheiro que se mexe: é a autorização para gastar até esse valor. Quem aprova é o financeiro.</p><div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">Enviar pedido</button></div></form>','sm');
+ const f=$('#cxVa');f.onsubmit=e=>{e.preventDefault();const v=+f.elements.v.value;if(!(v>0)){const fl=f.elements.v.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent='Informe um valor maior que zero';return;}
+  const o=cxVerbaAdd(c,v,myTd(),ME_NAME,'pedida',f.elements.why.value.trim());o.ap=1;
+  if(typeof APROVS!=='undefined')APROVS.push(AP('verba','Verba · '+cxOwnerName(c),v,myTd(),ME_NAME,{cxid:c.id,vid:o.id,why:o.why}));
+  closeDlg();bdRe();toast('Pedido de verba de '+cxMoney(o.v)+' enviado ao financeiro');};}
+/* Encerramento do caixa principal de um projeto: o líder PEDE, o Financeiro aprova em Aprovações e só então o caixa fecha (06/11/2026) */
+function cxEncDestName(c,dest){if(dest==='church')return 'a igreja';const to=CAIXAS.find(x=>x.id===String(dest).slice(3));return to?(to.ownerId===c.ownerId?to.name:cxOwnerName(to)):'—';}
+function cxEncAsk(c,dest,bal){c.closeReq={dest,bal,by:ME_NAME,d:myTd()};
+ if(typeof APROVS!=='undefined')APROVS.push(AP('enc','Encerramento · '+cxOwnerName(c),bal/100,myTd(),ME_NAME,{cxid:c.id,dest,why:(bal>0?'Sobra '+cxMoney(bal)+' para '+cxEncDestName(c,dest):'Sem sobra a destinar')+(cxVerbaOk(c)?' · a verba não usada expira':'')}));}
+/* dá baixa no adiantamento: o que foi gasto com o caixa é a prestação de contas; o resto volta para a igreja primeiro */
+function cxAdvSettle(c,v){const usedC=cxAdvs(c).filter(y=>y.st==='prestado').reduce((a,y)=>a+y.used,0),free=Math.max(0,cxGastoCx(c)-usedC);v.used=Math.min(v.v,free);v.st='prestado';v.at=myTd();return v.v-v.used;}
+function cxEncApprove(a){const c=CAIXAS.find(x=>x.id===a.cxid);if(!c)return;cxAdvs(c).filter(v=>v.st==='aberto').forEach(v=>cxAdvSettle(c,v));const t=myTd(),bal=cxBal(c),dest=a.dest||'';
+ if(bal>0){if(String(dest).startsWith('to:')){const to=CAIXAS.find(x=>x.id===dest.slice(3));if(to)cxXfer(c,to,bal/100,t,'Financeiro');}else if(dest==='church')cxAdd(c,'out',bal/100,t,'Repasse à igreja no encerramento','Repasse','Financeiro');}
+ cxVerbas(c).forEach(v=>{if(v.st==='aprovada')v.st='expirada';});c.status='encerrado';c.closedAt=t;c.closeReq=null;}
+function cxEncReject(a,why){const c=CAIXAS.find(x=>x.id===a.cxid);if(c){c.closeReq=null;c.closeNote=why||'';}}
+function cxEncBanner(c){if(c.closeReq)return '<p class="cxv-p" style="margin:0 0 12px">'+ic('clock',13,2)+'<span><b>Encerramento aguardando o Financeiro.</b> Destino: '+esc(cxEncDestName(c,c.closeReq.dest))+(c.closeReq.bal>0?' · sobra '+cxMoney(c.closeReq.bal):'')+'. O caixa não recebe lançamentos novos até a decisão.</span></p>';
+ if(c.closeNote)return '<p class="cxv-w" style="margin:0 0 12px">'+ic('alert',14,2)+'<span><b>O Financeiro recusou o encerramento:</b> '+esc(c.closeNote)+'</span></p>';return '';}
+function cxMinDest(c){if(c.ownerType!=='evt')return null;const ev=eById(c.ownerId),m=ev&&MINIS.find(x=>x.n===ev.min);return m?cxOwn('min',m.id).find(x=>x.main):null;}
+/* Caixas dos eventos de um ministério, vistos no caixa do ministério (06/11/2026) */
+function cxEvSection(type,id){if(type!=='min')return '';const m=mnById(id);if(!m)return '';
+ const L=CAIXAS.filter(x=>x.ownerType==='evt'&&x.main&&(eById(x.ownerId)||{}).min===m.n).sort((a,b)=>((a.status==='encerrado')-(b.status==='encerrado'))||a.id.localeCompare(b.id,undefined,{numeric:true}));
+ if(!L.length)return '';
+ const card=x=>{const ev=eById(x.ownerId),all=cxUnitAll(x),V=cxVerbaOk(x),rec=all.reduce((a,y)=>a+cxIn(y),0),des=all.reduce((a,y)=>a+cxOut(y),0),disp=cxDisp(x),closed=x.status==='encerrado';
+  return '<article class="card bd-c cx-c" tabindex="0" data-a="cxEvGo" data-v="'+ev.id+'"><div class="bd-ct"><b>'+esc(ev.t)+'</b><span class="stp" style="--c:'+(closed?'var(--ink-muted)':'var(--st-int)')+';--b:'+(closed?'var(--surface-2)':'var(--st-int-bg)')+'"><i></i>'+(closed?'Encerrado':'Aberto')+'</span></div><span class="cx-bal'+(disp<0?' neg':'')+'">'+cxMoney(disp)+'</span><span class="who">Limite restante · verba aprovada '+cxMoney(V)+'</span><span class="who">Receitas <b class="cx-in">'+cxMoney(rec)+'</b> · Despesas <b class="cx-out">'+cxMoney(des)+'</b></span><span class="who">'+(ev.d?dBR(ev.d):(ev.prev||'Sem data'))+' · '+(ev.kind==='culto'?'Culto':ev.type||'Evento')+'</span></article>';};
+ return '<section class="card pc" style="margin-top:16px"><div class="sh"><div><h2>Caixas dos eventos deste ministério</h2><p class="who" style="margin:4px 0 0">Eventos ligados a este ministério. Clique para acompanhar o caixa de cada um. Os lançamentos são feitos no próprio evento.</p></div></div><div class="bd-g">'+L.map(card).join('')+'</div></section>';}
+/* sem caixa ainda: aba vazia com "Criar caixa"; o primeiro caixa criado é o principal e não se exclui (06/11/2026) */
+function cxEmpty(type,id){const ev=type==='evt'?eById(id):null,que=type==='min'?'Este ministério':'Este '+(ev&&ev.kind==='culto'?'culto':'evento');
+ return '<section class="card pc"><div class="sh"><div><h2>Caixas</h2></div></div><p class="bd-note">'+ic('lock',13,2)+'Área restrita da web. Os caixas não aparecem no app.</p><div class="soft-empty"><p>'+que+' ainda não tem caixa.</p><span class="who">Crie o primeiro: ele será o <b>caixa principal</b>, que não pode ser excluído. Depois você pode abrir outros para separar o dinheiro.</span><button class="btn pri sm" style="margin-top:12px" data-a="cxNewDlg" data-v="'+type+'|'+id+'">'+ic('plus',14,2.2)+'Criar caixa</button></div></section>';}
 function cxTab(type,id){
  const all=cxOwn(type,id),multi=true;
+ if(!all.length)return cxEmpty(type,id);
  const c=S.cx&&all.find(x=>x.id===S.cx);if(c)return cxView(c);S.cx=null;
  const v=multi&&S.cxv==='encerrado'?'encerrado':'aberto',list=multi?all.filter(x=>(x.status==='encerrado')===(v==='encerrado')):all;
  const nOpen=all.filter(x=>x.status!=='encerrado').length,nClosed=all.length-nOpen;
  const card=x=>'<article class="card bd-c cx-c" tabindex="0" data-a="cxOpen" data-v="'+x.id+'"><div class="bd-ct"><b>'+esc(x.name)+'</b>'+cxPill(x)+'</div><span class="cx-bal'+(cxBal(x)<0?' neg':'')+'">'+cxMoney(cxBal(x))+'</span><span class="who">Entradas <b class="cx-in">'+cxMoney(cxIn(x))+'</b> · Saídas <b class="cx-out">'+cxMoney(cxOut(x))+'</b></span><span class="who">'+cxValid(x).length+' lançamento'+(cxValid(x).length===1?'':'s')+(x.status==='encerrado'&&x.closedAt?' · encerrado em '+dBR(x.closedAt):'')+'</span></article>';
- return '<section class="card pc"><div class="sh"><div><h2>'+(multi?'Caixas':'Caixa')+'</h2><p class="who" style="margin:4px 0 0">'+(multi?'Controle o dinheiro do ministério. Há sempre o caixa principal; abra outros para separar o dinheiro de um retiro ou de uma campanha e encerre quando acabar.':'O dinheiro deste '+((eById(id)||{}).kind==='culto'?'culto':'evento')+'. Há sempre o caixa principal; abra outros para cada frente, como comida, recepção ou equipamento, e passe dinheiro entre eles.')+'</p></div>'+(multi?'<button class="btn pri sm" data-a="cxNewDlg" data-v="'+type+'|'+id+'">'+ic('plus',14,2.2)+'Novo caixa</button>':'')+'</div>'
+ return '<section class="card pc"><div class="sh"><div><h2>'+(multi?'Caixas':'Caixa')+'</h2><p class="who" style="margin:4px 0 0">'+(multi?'Controle o dinheiro do ministério. O primeiro caixa criado é o principal e não se exclui; abra outros para separar o dinheiro de um retiro ou de uma campanha e encerre quando acabar.':'O dinheiro deste '+((eById(id)||{}).kind==='culto'?'culto':'evento')+'. O primeiro caixa criado é o principal e não se exclui; abra outros para cada frente, como comida, recepção ou equipamento, e passe dinheiro entre eles.')+'</p></div>'+(multi?'<button class="btn pri sm" data-a="cxNewDlg" data-v="'+type+'|'+id+'">'+ic('plus',14,2.2)+'Novo caixa</button>':'')+'</div>'
   +'<p class="bd-note">'+ic('lock',13,2)+'Área restrita da web. Os caixas não aparecem no app.</p>'
   +(multi?'<div class="bd-seg"><div class="segc" role="group" aria-label="Situação dos caixas"><button data-a="cxV" data-v="aberto" aria-pressed="'+(v==='aberto')+'">Abertos<small>'+nOpen+'</small></button><button data-a="cxV" data-v="encerrado" aria-pressed="'+(v==='encerrado')+'">Encerrados<small>'+nClosed+'</small></button></div></div>':'')
-  +(list.length?'<div class="bd-g">'+list.map(card).join('')+'</div>':'<div class="soft-empty"><p>Nenhum caixa encerrado.</p><span class="who">Os caixas encerrados ficam aqui, só para consulta, e podem ser reabertos.</span></div>')+'</section>';
+  +(list.length?'<div class="bd-g">'+list.map(card).join('')+'</div>':'<div class="soft-empty"><p>Nenhum caixa encerrado.</p><span class="who">Os caixas encerrados ficam aqui, só para consulta, e podem ser reabertos.</span></div>')+'</section>'+cxEvSection(type,id);
 }
 function cxRows(c){
- const q=norm(S.cxq||''),f=S.cxf||'all',closed=c.status==='encerrado';
- const l=c.entries.filter(e=>(f==='all'||e.t===f)&&(!q||norm(e.desc+' '+e.cat+' '+e.by).includes(q))).slice().sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id,undefined,{numeric:true}));
+ const q=norm(S.cxq||''),f=S.cxf||'all',closed=c.status==='encerrado',lim=S.cxN||30;
+ const l=cxAll(c).filter(e=>(f==='all'||e.t===f)&&(!q||norm(e.desc+' '+e.cat+' '+e.by).includes(q))).slice().sort((a,b)=>b.d.localeCompare(a.d)||b.id.localeCompare(a.id,undefined,{numeric:true}));
  if(!l.length)return '<div class="soft-empty" style="padding:28px 16px"><p>'+(c.entries.length?'Nenhum lançamento corresponde ao filtro.':'Nenhum lançamento ainda.')+'</p>'+(c.entries.length||closed?'':'<span class="who">Registre a primeira entrada ou saída deste caixa.</span>')+'</div>';
- return '<div class="trow cx-r thead"><span>Lançamento</span><span>Categoria</span><span>Registrado por</span><span>Valor</span><span></span></div>'+l.map(e=>{
+ return '<div class="trow cx-r thead"><span>Lançamento</span><span>Categoria</span><span>Registrado por</span><span>Situação</span><span>Valor</span><span></span></div>'+l.slice(0,lim).map(e=>{
   const [y,m,d]=e.d.split('-'),sign=e.t==='in'?1:-1;
-  return '<div class="trow cx-r'+(e.rev?' rev':'')+(e.est?' est':'')+'"><span class="tn"><span class="fd-dt"><b>'+(+d)+'</b><small>'+MONTHS[+m-1].slice(0,3)+'</small></span><span class="hn"><b>'+esc(e.desc)+'</b><span>'+dBR(e.d)+(e.file?' · '+ic('file',11,2)+' '+esc(e.file):'')+(e.rev?' · <em>estornado</em>':'')+'</span></span></span><span class="te">'+(e.xfer?ic('arrowRL',12,2)+' ':'')+esc(e.cat)+(e.nat?' · '+esc(e.nat):'')+(e.forn&&typeof zFn==='function'?' · '+esc(zFn(e.forn)):'')+'</span><span class="tpb">'+esc(e.by)+'</span><span class="ts cx-v '+(e.xfer?'xf':e.t)+'">'+(e.t==='in'?'+':'−')+cxMoney(e.v).replace('−','')+'</span><span class="cx-act">'+(!closed&&!e.rev&&!e.est&&!e.xfer?'<button class="ibtn sm" data-a="cxRev" data-v="'+c.id+'|'+e.id+'" aria-label="Estornar lançamento" title="Estornar lançamento">'+ic('undo',14)+'</button>':'')+'</span></div>';}).join('');}
+  return '<div class="trow cx-r'+(e.rev?' rev':'')+(e.est?' est':'')+'"><span class="tn"><span class="fd-dt"><b>'+(+d)+'</b><small>'+MONTHS[+m-1].slice(0,3)+'</small></span><span class="hn"><b>'+esc(e.desc)+'</b><span>'+dBR(e.d)+(e.pay==='bolso'?' · do bolso':'')+(e.file?' · '+ic('file',11,2)+' '+esc(e.file):'')+(e.rev?' · <em>estornado</em>':'')+'</span></span></span><span class="te">'+(e.xfer?ic('arrowRL',12,2)+' ':'')+esc(e.cat)+(e.nat?' · '+esc(e.nat):'')+(e.forn&&typeof zFn==='function'?' · '+esc(zFn(e.forn)):'')+'</span><span class="cx-by">'+esc(e.by)+'</span><span class="cx-st">'+(cxChipD(e)||'<span class="soft">—</span>')+'</span><span class="ts cx-v '+(e.xfer?'xf':e.t)+'">'+(e.t==='in'?'+':'−')+cxMoney(e.v).replace('−','')+'</span><span class="cx-act">'+(!closed&&!e.rev&&!e.est&&!e.xfer&&!e.auto?'<button class="ibtn sm" data-a="cxRev" data-v="'+c.id+'|'+e.id+'" aria-label="Estornar lançamento" title="Estornar lançamento">'+ic('undo',14)+'</button>':'')+'</span></div>';}).join('')+'<p class="who" style="text-align:center;margin:12px 0 0">Mostrando '+Math.min(lim,l.length)+' de '+l.length+'</p>'+(l.length>lim?'<p style="text-align:center;margin:10px 0 14px"><button class="btn sec" data-a="cxMais">Ver mais lançamentos <small>('+(l.length-lim)+')</small></button></p>':'');}
 function cxView(c){
  const closed=c.status==='encerrado',bal=cxBal(c),all=c.entries,others=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado'),canXfer=!closed&&(c.main?others.some(x=>!x.main):true);
  const chip=(v,l,n)=>'<button class="chipf '+((S.cxf||'all')===v?'on':'')+'" data-a="cxF" data-v="'+v+'">'+l+'<small>'+n+'</small></button>';
@@ -331,7 +440,7 @@ function cxEntryDlg(cid,t){
 }
 function cxXferDlg(cid){
  const c=CAIXAS.find(x=>x.id===cid);if(!c||c.status==='encerrado')return;
- const all=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado'),dests=c.main?all.filter(x=>!x.main):all.filter(x=>x.main),bal=cxBal(c);
+ const all=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado'),dests=c.main?all.filter(x=>!x.main):all.filter(x=>x.main),bal=cxKind(c)==='proj'&&c.main?Math.max(0,cxCash(c)):cxBal(c);
  if(!dests.length){toast('Crie outro caixa para passar dinheiro entre eles');return;}
  openDlg(dlgHead(c.main?'Enviar a um caixa':'Devolver ao caixa principal',(c.main?'Aporte do ':'Repasse de ')+esc(c.name)+' · saldo '+cxMoney(bal))+'<form id="cxX" class="fgrid one" novalidate>'
   +'<label class="fld"><span class="fl">'+(c.main?'Para qual caixa?':'Devolver para')+'</span><span class="selw"><select name="to"'+(c.main?'':' disabled')+'>'+dests.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+(c.main?ic('updown',14):'')+'</span></label>'
@@ -353,53 +462,139 @@ function cxCloseDlg(cid){
   c.status='encerrado';c.closedAt=t;closeDlg();S.cxv='encerrado';bdRe();toast('Caixa encerrado');};
 }
 Object.assign(A,{
- cxOpen:v=>{S.cx=v;S.cxf='all';S.cxq='';bdRe();},cxBack:()=>{S.cx=null;bdRe();},cxV:v=>{S.cxv=v;bdRe();},cxF:v=>{S.cxf=v;bdRe();},
+ cxOpen:v=>{S.cx=v;S.cxf='all';S.cxq='';S.cxN=30;bdRe();},cxBack:()=>{S.cx=null;bdRe();},cxV:v=>{S.cxv=v;bdRe();},cxF:v=>{S.cxf=v;S.cxN=30;bdRe();},
  cxMenu:v=>{const p=$('#cxPop-'+v);closePops(p);p.classList.toggle('open');},
  cxEntry:v=>{const [id,t]=v.split('|');cxEntryDlg(id,t);},
- cxClose:v=>cxCloseDlg(v),cxXfer:v=>cxXferDlg(v),
+ cxMais:()=>{S.cxN=(S.cxN||30)+30;bdRe();},cxClose:v=>cxCloseDlg(v),cxXfer:v=>cxXferDlg(v),cxVerbaAsk:v=>cxVerbaAskDlg(v),cxIni:v=>cxIniDlg(v),cxEvGo:v=>{A.evOpen(v);S.etab='cx';render();},
  cxReopen:v=>{const c=CAIXAS.find(x=>x.id===v);c.status='aberto';c.closedAt='';S.cxv='aberto';bdRe();toast('Caixa reaberto');},
- cxNewDlg:v=>{const [type,id]=v.split('|');nxNameDlg('Novo caixa','Um caixa separado, por exemplo para um retiro ou uma campanha.','','Ex.: Retiro de jovens 2027',x=>{if(!x)return 'Dê um nome';const n=cxNew(type,id,x);S.cx=n.id;S.cxv='aberto';S.cxf='all';S.cxq='';closeDlg();bdRe();toast('Caixa criado');});},
+ cxNewDlg:v=>{const [type,id]=v.split('|'),first=!CAIXAS.some(c=>c.ownerType===type&&c.ownerId===id);nxNameDlg(first?'Criar o caixa principal':'Novo caixa',first?'O primeiro caixa é o principal: ele não pode ser excluído. Depois você abre outros para separar o dinheiro.':'Um caixa separado, por exemplo para um retiro ou uma campanha.',first?'Caixa principal':'',first?'Nome do caixa':'Ex.: Retiro de jovens 2027',x=>{if(!x)return 'Dê um nome';const n=cxNew(type,id,x,{main:first});S.cx=n.id;S.cxv='aberto';S.cxf='all';S.cxq='';closeDlg();bdRe();toast('Caixa criado');});},
  cxRen:v=>{closePops();const c=CAIXAS.find(x=>x.id===v);nxNameDlg('Renomear caixa','',c.name,'Nome do caixa',x=>{if(!x)return 'Dê um nome';c.name=x;closeDlg();bdRe();toast('Caixa renomeado');});},
  cxDel:v=>{closePops();const c=CAIXAS.find(x=>x.id===v),n=c.entries.length;confirmDel({title:'Excluir '+esc(c.name)+'?',body:(n?'Os '+n+' lançamentos serão apagados. ':'')+'Para guardar o histórico do dinheiro, prefira encerrar o caixa.',typed:n?c.name:null,onConfirm:()=>{CAIXAS.splice(CAIXAS.indexOf(c),1);S.cx=null;bdRe();toast('Caixa excluído');}});},
  cxRev:v=>{const [cid,eid]=v.split('|'),c=CAIXAS.find(x=>x.id===cid),e=c&&c.entries.find(x=>x.id===eid);if(!e)return;
   confirmDel({title:'Estornar este lançamento?',body:'“'+esc(e.desc)+'” ('+(e.t==='in'?'entrada':'saída')+' de '+cxMoney(e.v)+') continua na lista, marcado como estornado, e um lançamento contrário desfaz o efeito no saldo. Nada é apagado.',label:'Estornar',onConfirm:()=>{e.rev=true;c.entries.push({id:'ce'+(++_cxe),t:e.t==='in'?'out':'in',v:e.v,d:myTd(),desc:'Estorno: '+e.desc,cat:'Estorno',by:ME_NAME,est:true,of:e.id});bdRe();toast('Lançamento estornado');}});}
 });
-document.addEventListener('input',e=>{if(e.target.id!=='cxQ')return;S.cxq=e.target.value;const c=CAIXAS.find(x=>x.id===S.cx),box=$('#cxRows');if(c&&box)box.innerHTML=cxRows(c);});
-for(const k of ['nav','mnOpen','mnTab','evOpen','evTab']){const base=A[k];if(base)A[k]=function(){S.cx=null;S.cxv='aberto';S.cxf='all';S.cxq='';return base.apply(this,arguments);};}
+document.addEventListener('input',e=>{if(e.target.id!=='cxQ')return;S.cxq=e.target.value;S.cxN=30;const c=CAIXAS.find(x=>x.id===S.cx),box=$('#cxRows');if(c&&box)box.innerHTML=cxRows(c);});
+for(const k of ['nav','mnOpen','mnTab','evOpen','evTab']){const base=A[k];if(base)A[k]=function(){S.cx=null;S.cxv='aberto';S.cxf='all';S.cxq='';S.cxN=30;return base.apply(this,arguments);};}
 /* dados de demonstração */
 (()=>{const mi=n=>(MINIS.find(m=>m.n===n)||{}).id;
- const lo=mi('Louvor');if(lo){const p=cxNew('min',lo,'Caixa principal',{main:true});
-  cxAdd(p,'in',2500,'2026-07-05','Aporte da igreja · 3º trimestre','Aporte da igreja','Rafael Pereira');
+ const lo=mi('Louvor');if(lo){const p=cxNew('min',lo,'Caixa principal',{main:true});p.ini={v:80000,d:'2026-07-01',st:'confirmado',by:'Ana Clara Lima'};
+  cxAdd(p,'in',2500,'2026-07-05','Repasse da igreja · 3º trimestre','Repasse da igreja','Rafael Pereira');
   cxAdd(p,'out',386.9,'2026-07-18','Cordas e palhetas','Material','Ana Clara Lima',{file:'nota-cordas.pdf'});
-  cxAdd(p,'out',420,'2026-08-02','Manutenção do teclado','Serviços','Ana Clara Lima',{file:'recibo-teclado.jpg'});
-  cxAdd(p,'in',340,'2026-08-16','Venda de CDs do ministério','Venda','Rafael Pereira');
-  cxAdd(p,'out',128.5,'2026-09-12','Lanche do ensaio geral','Alimentação','Ana Clara Lima');
+  cxAdd(p,'out',420,'2026-08-02','Manutenção do teclado','Serviços','Ana Clara Lima',{file:'recibo-teclado.jpg',pay:'cx',st:'pend',why:'Falta o CNPJ do prestador na nota'});
+  cxAdd(p,'in',340,'2026-08-16','Venda de CDs do ministério','Venda','Rafael Pereira',{fm:'Dinheiro',st:'conferir'});
+  cxAdd(p,'out',128.5,'2026-09-12','Lanche do ensaio geral','Alimentação','Ana Clara Lima',{pay:'bolso',st:'conferir'});
   const bad=cxAdd(p,'out',64,'2026-09-19','Impressão de cifras (valor errado)','Material','Ana Clara Lima');const bi=bad.entries[bad.entries.length-1];bi.rev=true;
   cxAdd(p,'in',64,'2026-09-19','Estorno: Impressão de cifras (valor errado)','Estorno','Rafael Pereira',{est:true,of:bi.id});
   cxAdd(p,'out',46,'2026-09-19','Impressão de cifras','Material','Ana Clara Lima');
-  cxAdd(p,'in',600,'2026-09-27','Oferta para o ministério','Oferta ou doação','Rafael Pereira');
+  cxAdd(p,'in',600,'2026-09-27','Rifa do ministério','Outros','Rafael Pereira',{fm:'Pix',st:'conc'});
   const r=cxNew('min',lo,'Retiro de Louvor 2026');
-  cxAdd(r,'in',4800,'2026-09-01','Inscrições do retiro (24 pessoas)','Inscrição','Rafael Pereira');
+  cxAdd(r,'in',4800,'2026-09-01','Inscrições do retiro (24 pessoas)','Inscrição','Rafael Pereira',{fm:'Pix',st:'banco'});
   cxAdd(r,'out',1500,'2026-09-05','Sinal da chácara','Hospedagem','Ana Clara Lima',{file:'contrato-chacara.pdf'});
   cxAdd(r,'out',612.3,'2026-09-26','Compras do mercado','Alimentação','Ana Clara Lima');
   cxXfer(p,r,1000,'2026-09-02','Rafael Pereira');cxXfer(r,p,200,'2026-09-29','Ana Clara Lima');
   const n=cxNew('min',lo,'Cantata de Natal 2025',{status:'encerrado',closedAt:'2026-01-10'});
-  cxAdd(n,'in',1800,'2025-11-20','Aporte da igreja para a cantata','Aporte da igreja','Rafael Pereira');
+  cxAdd(n,'in',1800,'2025-11-20','Repasse da igreja para a cantata','Repasse da igreja','Rafael Pereira');
   cxAdd(n,'out',950,'2025-12-10','Figurinos e cenário','Material','Ana Clara Lima');
   cxAdd(n,'out',310,'2025-12-21','Lanche da apresentação','Alimentação','Ana Clara Lima');
   cxAdd(n,'out',540,'2026-01-10','Repasse à igreja no encerramento','Repasse','Rafael Pereira');}
- const re=mi('Recepção');if(re){const p=cxNew('min',re,'Caixa principal',{main:true});
-  cxAdd(p,'in',800,'2026-08-10','Aporte da igreja · materiais','Aporte da igreja','Rafael Pereira');
+ const re=mi('Recepção');if(re){const p=cxNew('min',re,'Caixa principal',{main:true});p.ini={v:30000,d:'2026-08-01',st:'declarado',by:'Juliana Reis'};
+  cxAdd(p,'in',800,'2026-08-10','Repasse da igreja · materiais','Repasse da igreja','Rafael Pereira');
   cxAdd(p,'out',214.8,'2026-08-24','Crachás e cordões','Material','Juliana Reis',{file:'nota-crachas.pdf'});}
  const cm=EVTS.find(e=>e.t==='Congresso de Mulheres 2027');if(cm){const p=cxNew('evt',cm.id,'Caixa principal',{main:true});
-  cxAdd(p,'in',5000,'2026-09-02','Aporte inicial da igreja','Aporte da igreja','Rafael Pereira');
-  cxAdd(p,'in',3000,'2026-09-15','Patrocínio · Livraria Esperança','Oferta ou doação','Diego Martins');
-  cxAdd(p,'out',2000,'2026-09-20','Sinal do auditório','Serviços','Diego Martins',{file:'contrato-auditorio.pdf'});
-  cxAdd(p,'out',380,'2026-09-24','Arte e impressão dos crachás','Material','Diego Martins');
-  cxAdd(p,'out',1200,'2026-09-28','Contratação de som','Serviços','Diego Martins',{file:'orcamento-som.pdf'});
+  cxVerbaAdd(p,5000,'2026-09-02','Rafael Pereira','aprovada','Aporte inicial');{const vq=cxVerbaAdd(p,4000,'2026-09-30','Diego Martins','pedida','Segunda parcela do som e hospedagem');vq.ap=1;APROVS.push(AP('verba','Verba · '+cm.t,4000,'2026-09-30','Diego Martins',{cxid:p.id,vid:vq.id,why:vq.why}));}
+  cxAdd(p,'in',3000,'2026-09-15','Patrocínio · Livraria Esperança','Outros','Diego Martins',{fm:'Pix',st:'banco'});
+  cxAdd(p,'out',2000,'2026-09-20','Sinal do auditório','Serviços','Diego Martins',{file:'contrato-auditorio.pdf',pay:'bolso',st:'conferir'});
+  cxAdd(p,'out',380,'2026-09-24','Arte e impressão dos crachás','Material','Diego Martins',{pay:'bolso',st:'conferir'});
+  cxAdd(p,'out',1200,'2026-09-28','Contratação de som','Serviços','Diego Martins',{file:'orcamento-som.pdf',pay:'cx',st:'ok'});
+  cxAdvs(p).push({id:'ad1',v:300000,d:'2026-09-25',by:'Rafael Pereira',who:'Diego Martins',due:'2026-10-25',st:'aberto',used:0});
   const al=cxNew('evt',cm.id,'Alimentação'),rc=cxNew('evt',cm.id,'Recepção');
   cxXfer(p,al,1500,'2026-09-29','Rafael Pereira');cxXfer(p,rc,600,'2026-09-29','Rafael Pereira');
   cxAdd(al,'out',520,'2026-09-30','Coffee break · sinal ao buffet','Alimentação','Juliana Reis',{file:'sinal-buffet.pdf'});
   cxAdd(rc,'out',140,'2026-09-30','Cordões e porta-crachás','Material','Juliana Reis');}
+ const rj=EVTS.find(e=>e.t==='Retiro de Jovens 2026');if(rj){const p=cxNew('evt',rj.id,'Caixa principal',{main:true});cxVerbaAdd(p,3000,'2026-09-05','Rafael Pereira','aprovada','Orçamento do retiro');cxAdd(p,'out',1500,'2026-09-12','Sinal da chácara','Hospedagem','Isabela Rocha',{file:'contrato-chacara.pdf',pay:'bolso',st:'conferir'});}
+ const cmi=EVTS.find(e=>e.t==='Conferência Missões');if(cmi)cxNew('evt',cmi.id,'Caixa principal',{main:true});
+ ['Jovens e Adolescentes','Eventos'].forEach(n=>{const id=mi(n);if(id)cxNew('min',id,'Caixa principal',{main:true});});
 })();
 
+/* ---------- Registrar e concluir encontro: UMA tela para todo encontro (Tiago, 07/11/2026) ----------
+   É a chamada das Casas: uma página dentro da aba Encontros (nunca uma janela), com a data, o que foi tratado,
+   os Itens do encontro (mtStart/mtField) e a chamada (Presente, motivo da ausência, Marcar todos presentes).
+   Casas, Ministérios, rede de casas, rede regional, Discipulado e Acompanhamento só dizem quem são os participantes,
+   quais campos o domínio pede e o que fazer ao salvar. */
+let _mcCfg=null;
+function mtPanel(cfg){_mcCfg=cfg;const n=cfg.people.filter(p=>p.on).length,fld=x=>`<label class="fld"><span class="fl">${esc(x.label)}${x.opt?' <small>opcional</small>':''}</span>${x.type==='text'?`<input name="${x.name}" maxlength="${x.max||80}" placeholder="${esc(x.ph||'')}" value="${esc(x.value||'')}" autocomplete="off">`:`<textarea class="ta" name="${x.name}" rows="${x.rows||3}" placeholder="${esc(x.ph||'')}">${esc(x.value||'')}</textarea>`}<span class="err"></span></label>`;
+ return `<section class="card pc chm mc"><div class="sh"><div style="display:flex;align-items:center;gap:10px"><button type="button" class="ibtn sm" data-a="mcBack" aria-label="Voltar">${ic('chevL',16,2)}</button><h2>${cfg.title}</h2></div><span class="who" id="mcCnt"><b>${n}</b> de ${cfg.people.length} presentes</span></div>
+  ${cfg.sub?`<p class="who" style="margin:-2px 0 12px">${cfg.sub}</p>`:''}
+  <form id="mcF" class="fgrid" style="grid-template-columns:1fr 1fr" novalidate>
+   <div class="mc-l">${cfg.dateEditable?`<label class="fld"><span class="fl">Data do encontro</span><input type="date" name="d" value="${cfg.date}" max="${cfg.dateMax||''}"><span class="err"></span></label>`:''}${(cfg.fields||[]).map(fld).join('')}</div>
+   <div class="fld mc-its">${meetItSec(window._meetO)}</div>
+   <div class="wide chl"><div class="chh"><span class="fl">Participantes</span><button type="button" class="lnk" data-a="mcAll">Marcar todos presentes</button></div>
+    ${cfg.people.length?cfg.people.map(p=>`<div class="chr ${p.on?'on':''}" data-p="${esc(p.id)}">${p.av||avN(p.n)}<span class="chn"><b>${esc(p.n)}</b><span>${esc(p.role||'')}</span></span>
+     <input class="why" name="why-${esc(p.id)}" placeholder="Motivo da ausência (opcional)" value="${esc(p.why||'')}">
+     <label class="chk"><input type="checkbox" name="p-${esc(p.id)}" ${p.on?'checked':''}><span>${ic('check',14,2.6)}</span>Presente</label></div>`).join(''):'<p class="who" style="padding:14px 4px">Ninguém convocado para este encontro.</p>'}</div>
+   <div class="dfoot"><button type="button" class="btn sec" data-a="mcBack">Cancelar</button><button type="submit" class="btn pri">${cfg.submit||'Salvar chamada'}</button></div></form></section>`;}
+function mcCount(){const f=$('#mcF');if(!f)return;const n=$$('.chr input[type=checkbox]',f).filter(x=>x.checked).length,c=$('#mcCnt');if(c)c.innerHTML=`<b>${n}</b> de ${$$('.chr',f).length} presentes`;}
+function mcSave(f){const cfg=_mcCfg;if(!cfg)return;const fd=new FormData(f),pres={},why={};cfg.people.forEach(p=>{pres[p.id]=fd.has('p-'+p.id);why[p.id]=pres[p.id]?'':(fd.get('why-'+p.id)||'').trim();});
+ $$('.fld.bad',f).forEach(x=>x.classList.remove('bad'));
+ const bad=(n,m)=>{const i=f.elements[n];if(!i)return;const fl=i.closest('.fld');fl.classList.add('bad');const er=fl.querySelector('.err');if(er)er.textContent=m;i.focus();};
+ const data={d:cfg.dateEditable?(fd.get('d')||''):cfg.date,f:Object.fromEntries((cfg.fields||[]).map(x=>[x.name,(fd.get(x.name)||'').trim()])),pres,why};
+ if(cfg.dateEditable&&!data.d)return bad('d','Escolha a data');
+ if(cfg.dateEditable&&cfg.dateMax&&data.d>cfg.dateMax)return bad('d','Para datas futuras, use Agendar');
+ for(const x of cfg.fields||[]){if(x.req&&data.f[x.name].length<(x.min||1))return bad(x.name,x.msg||'Preencha este campo');}
+ const b=f.querySelector('[type=submit]');if(b)b.classList.add('busy');
+ if(cfg.onSave(data,bad)===false&&b)b.classList.remove('busy');}
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.type==='checkbox'&&t.closest&&t.closest('#mcF')){const r=t.closest('.chr');if(r)r.classList.toggle('on',t.checked);mcCount();}});
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='mcF'){e.preventDefault();mcSave(e.target);}});
+const mcGo=()=>{render();window.scrollTo({top:0});};
+const mcPeople=(names,sel)=>names.map(n=>({id:n,n,role:'',on:!!(sel&&sel[n]),why:''}));
+
+/* ---- Discipulado ---- */
+function mtCfgDisc(d){const mc=S.mtc,from=mc.from?d.meets.find(x=>x.id===mc.from):null,t=TODAY.toISOString().slice(0,10),names=from&&from.parts&&from.parts.length?from.parts:partsOf(d);
+ return {title:from?'Concluir encontro':'Registrar encontro',sub:from?'Faça a chamada e conte o que foi tratado para fechar o encontro agendado.':esc(d.n)+'. Para um encontro que já aconteceu e não foi agendado.',
+  date:from?from.d:t,dateEditable:!from,dateMax:t,
+  fields:[{name:'c',label:'Conteúdo tratado',type:'textarea',req:true,ph:'O que foi conversado ou trabalhado',msg:'Descreva o que foi tratado'},{name:'note',label:'Anotação pessoal',opt:true,rows:2,ph:'Só você vê'}],
+  people:mcPeople(names),onBack:()=>{S.mtc=null;mcGo();},
+  onSave:data=>{const nm=MT(data.d,'done',{c:data.f.c,note:data.f.note,mat:from?from.mat:'',mref:from?from.mref:'',mode:from?from.mode:'Presencial',t:from?from.time:'19:30',parts:names});nm.pres=data.pres;nm.why=data.why;
+   if(from)d.meets.splice(d.meets.indexOf(from),1);d.meets.push(nm);mtFinish(nm,from);d.last=Math.max(0,-inDays(data.d));S.mtc=null;S.dpt='enc';mcGo();toast(`Encontro com ${first(d)} registrado · contato em dia`);}};}
+
+/* ---- Acompanhamento ---- */
+function mtCfgCare(c){const mc=S.mtc,m=mc.idx!=null?c.sched[mc.idx]:null,t=TODAY.toISOString().slice(0,10),names=[...new Set([c.n,c.resp].filter(Boolean))];
+ return {title:m?'Concluir encontro':'Registrar encontro',sub:m?esc(c.n)+' · '+fmtD(m.d)+' às '+m.t:'Caso de '+esc(c.n)+'. Para um encontro que já aconteceu e não foi agendado.',
+  date:m?m.d:t,dateEditable:!m,dateMax:t,
+  fields:[{name:'t',label:'O que foi tratado?',type:'textarea',req:true,min:5,ph:'Resumo do encontro. Só quem vê o caso tem acesso.',msg:m?'Escreva um resumo do encontro':'Conte o que foi tratado'},{name:'result',label:'Resultado / próximos passos',opt:true,rows:2,ph:'Encaminhamentos e próximos passos'}],
+  people:mcPeople(names),onBack:()=>{S.mtc=null;mcGo();},
+  onSave:data=>{careInit(c);
+   if(m){c.sched.splice(mc.idx,1);const nm={...m,time:m.t,t:data.f.t,result:data.f.result,pres:data.pres,why:data.why};c.meets.unshift(nm);careLog(c,'Encontro realizado',data.f.t,m.rid);}
+   else{const nm={d:data.d,t:data.f.t,result:data.f.result,rid:'care'+(++careSequence),pres:data.pres,why:data.why};mtFinish(nm);c.meets.unshift(nm);careLog(c,'Encontro registrado',data.f.t,nm.rid);}
+   c.meets.sort((a,b)=>a.d<b.d?1:-1);S.mtc=null;S.careTab='meetings';mcGo();toast(m?'Encontro concluído e registrado':'Encontro registrado');}};}
+
+/* ---- Ministérios, rede de casas e rede regional ---- */
+function mtCfgSe(k,o){const mc=S.mtc,m=mc.mid&&o.meets.find(x=>x.id===mc.mid),list=m?seInv(k,o,m):sePool(k,o),t=TODAY.toISOString().slice(0,10);
+ return {title:m?'Concluir encontro':'Registrar encontro',sub:esc(o.n)+(m?' · '+fmtD(m.d):'. Para um encontro que já aconteceu e não foi agendado.'),
+  date:m?m.d:t,dateEditable:!m,dateMax:t,
+  fields:[...(m?[]:[{name:'topic',label:'Pauta',type:'text',opt:true,ph:'Assunto do encontro'}]),{name:'notes',label:'O que foi tratado',opt:true,ph:'Resumo do encontro',value:m?m.notes:'',rows:3}],
+  people:list.map(p=>({id:p.n,n:p.n,role:(p.from||'')+(m&&RS_L[p.r||'']?' · '+RS_L[p.r||'']:''),on:m?(m.pres?!!m.pres[p.n]:p.r==='sim'):false,why:''})),
+  onBack:()=>{S.mtc=null;mcGo();},
+  onSave:data=>{const pres=data.pres;
+   if(m){m.done=true;m.pres=pres;m.why=data.why;m.notes=data.f.notes;}
+   else{const x=seM(0,'','',{});x.d=data.d;x.done=true;x.pres=pres;x.why=data.why;x.notes=data.f.notes;x.topic=data.f.topic||'';x.inv=list.filter(p=>pres[p.n]).map(p=>({...p,r:'sim',why:''}));mtFinish(x);o.meets.push(x);}
+   S.mtc=null;mcGo();toast(m?'Encontro concluído':'Encontro registrado');}};}
+
+/* a tela entra no lugar da lista de encontros do domínio; as ações de registrar e concluir só abrem a tela */
+{const _d=dEnc;dEnc=function(d){return S.mtc&&S.mtc.host==='disc'&&S.mtc.owner===d.id?mtPanel(mtCfgDisc(d)):_d.apply(this,arguments);};
+ const _c=careMeetings;careMeetings=function(c){return S.mtc&&S.mtc.host==='care'&&S.mtc.owner===c.id?mtPanel(mtCfgCare(c)):_c.apply(this,arguments);};
+ const _s=seEncounters;seEncounters=function(k,o){return S.mtc&&S.mtc.host==='se'&&S.mtc.k===k&&S.mtc.owner===o.id?mtPanel(mtCfgSe(k,o)):_s.apply(this,arguments);};}
+Object.assign(S,{mtc:null});
+Object.assign(A,{
+ mcBack:()=>{if(_mcCfg&&_mcCfg.onBack)_mcCfg.onBack();},
+ mcAll:()=>{$$('.chr input[type=checkbox]',$('#mcF')).forEach(x=>{x.checked=true;x.closest('.chr').classList.add('on');});mcCount();},
+ dReg:()=>{const d=dById(S.disc);S.mtc={host:'disc',owner:d.id};mtStart(null);S.dpt='enc';mcGo();},
+ dConclude:v=>{const d=dById(S.disc),f=d.meets.find(m=>m.id===v);S.mtc={host:'disc',owner:d.id,from:v};mtStart(f);S.dpt='enc';mcGo();},
+ cReg:v=>{S.mtc={host:'care',owner:v};mtStart(null);S.careTab='meetings';mcGo();},
+ cDone:v=>{const [id,i]=v.split('|'),c=cById(id);S.mtc={host:'care',owner:id,idx:+i};mtStart(c.sched[+i]);S.careTab='meetings';mcGo();},
+ seReg:v=>{const {k,oid}=SE_PARSE(v);S.mtc={host:'se',k,owner:oid};mtStart(null);mcGo();},
+ seCall:v=>{const {k,oid,mid}=SE_PARSE(v),o=SE_O(k,oid);S.mtc={host:'se',k,owner:oid,mid};mtStart(o.meets.find(x=>x.id===mid));mcGo();}});
+
+{const _n=A.nav;A.nav=v=>{S.mtc=null;_n(v);};}
+/* presença de exemplo nos encontros realizados de Discipulado e Acompanhamento (a chamada agora é a mesma em todo encontro) */
+(()=>{try{DISC.forEach(d=>(d.meets||[]).forEach(m=>{if(m.type==='done'&&!m.pres){const ns=(m.parts&&m.parts.length?m.parts:partsOf(d));m.pres=Object.fromEntries(ns.map((n,i)=>[n,!(i===1&&m.d.charCodeAt(9)%4===0)]));m.why={};}}));CASES.forEach(c=>(c.meets||[]).forEach(m=>{if(!m.pres){const ns=[...new Set([c.n,c.resp].filter(Boolean))];m.pres=Object.fromEntries(ns.map(n=>[n,true]));m.why={};}}));}catch(err){}})();

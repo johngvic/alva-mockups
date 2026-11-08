@@ -142,18 +142,21 @@ function dvFormV(v){
    <label class="fld"><span class="fl">Sobre o devocional <small>opcional</small></span><textarea class="ta" name="desc" rows="2" maxlength="200" placeholder="Em uma frase, do que se trata">${esc(v?v.desc:'')}</textarea></label>
    <div class="fgrid"><label class="fld"><span class="fl">Começa em</span><input type="date" name="from" value="${v?v.from:''}"><span class="err"></span></label><label class="fld"><span class="fl">Termina em</span><input type="date" name="to" value="${v?v.to:''}"><span class="err"></span></label></div>
    <p class="hint" id="dvN"></p>
+   <label class="tog"><input type="checkbox" name="rem" ${v&&v.rem?'checked':''}><span class="sw"></span><span><b>Lembrete diário</b><small>Um aviso por dia aos participantes, na hora que você escolher. Desligado por padrão.</small></span></label>
+   <label class="fld" id="dvRemT" ${v&&v.rem?'':'hidden'}><span class="fl">Hora do lembrete</span><input type="time" name="remt" value="${v&&v.remt?v.remt:'07:00'}"></label>
    ${nov&&seriesOpts?`<label class="fld"><span class="fl">Começar de uma série <small>opcional</small></span><span class="selw"><select name="ser"><option value="">Não, montar do zero</option>${seriesOpts}</select>${ic('updown',14)}</span><span class="hint">Cada conteúdo da série vira um dia, na ordem. Dá para trocar depois.</span></label>`:''}`,nov?'Criar devocional':'Salvar',
   (f,bad)=>{const fd=new FormData(f),n=fd.get('n').trim(),a=fd.get('from'),b=fd.get('to');
    if(!n)return bad('n','Dê um nome ao devocional');if(!a)return bad('from','Escolha o primeiro dia');if(!b)return bad('to','Escolha o último dia');if(b<a)return bad('to','O último dia vem antes do primeiro');
    if(Math.round((Date.parse(b)-Date.parse(a))/864e5)+1>120)return bad('to','O período pode ter até 120 dias');
    if(!nov){const fora=Object.keys(v.days).filter(d=>dvHas(v,d)&&(d<a||d>b));if(fora.length)return bad('to',`Há ${fora.length} dia${fora.length>1?'s':''} com conteúdo fora do novo período. Remova o conteúdo antes.`);
-    Object.keys(v.days).filter(d=>d<a||d>b).forEach(d=>delete v.days[d]);Object.assign(v,{n,desc:fd.get('desc').trim(),from:a,to:b});closeDlg();dvRe();toast('Devocional atualizado');return;}
-   const x=dvMk({n,desc:fd.get('desc').trim(),from:a,to:b});const sid=fd.get('ser'),sr=sid&&NX_SERIES.find(s=>s.id===sid);
+    Object.keys(v.days).filter(d=>d<a||d>b).forEach(d=>delete v.days[d]);Object.assign(v,{n,desc:fd.get('desc').trim(),from:a,to:b,rem:!!fd.get('rem'),remt:fd.get('remt')||'07:00'});closeDlg();dvRe();toast('Devocional atualizado');return;}
+   const x=dvMk({n,desc:fd.get('desc').trim(),from:a,to:b,rem:!!fd.get('rem'),remt:fd.get('remt')||'07:00'});const sid=fd.get('ser'),sr=sid&&NX_SERIES.find(s=>s.id===sid);
    if(sr)dvDates(x).forEach((d,i)=>{const it=dvLibItem(sr.items[i]);if(it)x.days[d]={t:`Dia ${i+1} · ${it.t}`,theme:'',files:[],lib:it.id};});
    DV.unshift(x);S.dv=x.id;S.dvTab='dias';closeDlg();render();window.scrollTo(0,0);requestAnimationFrame(tabInd);toast('Devocional criado. Agora monte os dias e escolha os participantes');});
  const f=$('#dvN')?$('#dvN').closest('form'):null;if(!f)return;
  const upd=()=>{const a=f.elements.from.value,b=f.elements.to.value;$('#dvN').textContent=a&&b&&b>=a?`${Math.round((Date.parse(b)-Date.parse(a))/864e5)+1} dias de devocional`:'';};
  f.addEventListener('input',upd);f.addEventListener('change',upd);upd();
+ f.addEventListener('change',e=>{if(e.target.name==='rem')$('#dvRemT').hidden=!e.target.checked;});
 }
 function dvDayDlg(iso){
  const v=DV.find(x=>x.id===S.dv),old=v.days[iso]||null,no=dvDayNo(v,iso);

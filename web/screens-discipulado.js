@@ -202,6 +202,7 @@ const chamadaBlock=names=>`<div class="fld wide chm"><span class="fl">Chamada</s
 function bindChamada(f){f.addEventListener('change',e=>{const n=e.target.name||'';if(!/^ch\d+$/.test(n))return;const m=f.querySelector('[name=cm'+n.slice(2)+']');if(m)m.hidden=e.target.value!=='a';const b=f.querySelector('.chm');if(b)b.classList.remove('bad');});}
 function chamadaOk(f){const rs=[...f.querySelectorAll('.chm-r')],b=f.querySelector('.chm');if(!b||rs.every((r,i)=>f.querySelector('[name=ch'+i+']:checked')))return true;b.classList.add('bad');b.querySelector('.err').textContent='Marque presente ou ausente para cada pessoa';b.scrollIntoView({block:'nearest'});return false;}
 function regDlg(d,from){
+ mtStart(from);
  openDlg(`${dlgHead(from?'Concluir encontro':'Registrar encontro',from?'Faça a chamada e conte o que foi tratado para fechar o encontro agendado.':'Para um encontro que já aconteceu e não foi agendado antes.')}
  <form class="fgrid one" id="regF" novalidate>
   <label class="fld"><span class="fl">Data</span><input type="date" name="d" value="${from?from.d:TODAY.toISOString().slice(0,10)}" max="${TODAY.toISOString().slice(0,10)}"><span class="err"></span></label>
@@ -209,13 +210,14 @@ function regDlg(d,from){
   ${partsField(d)}
   ${chamadaBlock(partsOf(d))}
   <label class="fld"><span class="fl">Anotação pessoal <small>opcional</small></span><textarea class="ta" name="note" rows="2" placeholder="Só você vê"></textarea></label>
-  <label class="fld"><span class="fl">Material de apoio <small>opcional</small></span>${atomSel(from&&from.mref)}</label>
+  <div class="fld">${meetItSec(window._meetO)}</div>
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri">${from?'Concluir':'Registrar'}</button></div></form>`);
- bindParts();const f=$('#regF');bindChamada(f);f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
+ bindParts();const f=$('#regF');bindChamada(f);
+f.addEventListener('input',e=>e.target.closest('.fld')?.classList.remove('bad'));
  f.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(f);const bad=(n,m)=>{const i=f.querySelector(`[name=${n}]`);i.closest('.fld').classList.add('bad');i.closest('.fld').querySelector('.err').textContent=m;i.focus();};
   if(!fd.get('d'))return bad('d','Escolha a data');if(!fd.get('c').trim())return bad('c','Descreva o que foi tratado');
   if(!chamadaOk(f))return;
-  const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{if(from)d.meets.splice(d.meets.indexOf(from),1);d.meets.push(MT(fd.get('d'),'done',{c:fd.get('c').trim(),note:fd.get('note'),...atomPick(fd.get('mat')),mode:from?from.mode:'Presencial',t:from?from.time:'19:30',parts:$$('#parts .pchip').map(p=>p.textContent.replace('×','').trim())}));
+  const b=f.querySelector('[type=submit]');b.classList.add('busy');setTimeout(()=>{if(from)d.meets.splice(d.meets.indexOf(from),1);d.meets.push(MT(fd.get('d'),'done',{c:fd.get('c').trim(),note:fd.get('note'),...(from?{mat:from.mat,mref:from.mref}:{}),mode:from?from.mode:'Presencial',t:from?from.time:'19:30',parts:$$('#parts .pchip').map(p=>p.textContent.replace('×','').trim())}));mtFinish(d.meets[d.meets.length-1],from);
    d.last=Math.max(0,-inDays(fd.get('d')));closeDlg();S.dpt='enc';render();toast(`Encontro com ${first(d)} registrado · contato em dia`);},800);});
 }
 

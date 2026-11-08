@@ -177,16 +177,17 @@ function hEnc(c){
  </section>`;
 }
 function hChamada(c){
- const m=c.meets.find(x=>x.id===S.chamada);const n=c.ppl.filter(p=>m.pres[p.id]).length;
- return `<section class="card pc chm"><div class="sh"><div style="display:flex;align-items:center;gap:10px"><button class="ibtn sm" data-a="hCallBack" aria-label="Voltar">${ic('chevL',16,2)}</button><h2>Chamada · ${wd(m.d)}, ${fmtD(m.d)}</h2></div><span class="who" id="chCnt"><b>${n}</b> de ${c.ppl.length} presentes</span></div>
-  <form id="chF" class="fgrid" style="grid-template-columns:1fr 1fr">
-   <label class="fld"><span class="fl">Como foi o encontro? <small>opcional</small></span><textarea class="ta" name="desc" rows="3" placeholder="Tema, destaques, pedidos">${esc(m.desc)}</textarea></label>
-   <label class="fld"><span class="fl">Material de apoio <small>opcional</small></span>${atomSel(m.mref)}<span class="hint">Fica visível para os participantes no app. Pregação, vídeo, música ou material, cadastrados em Conteúdo.</span></label>
-   <div class="wide chl"><div class="chh"><span class="fl">Participantes</span><button type="button" class="lnk" data-a="hAllP">Marcar todos presentes</button></div>
-    ${c.ppl.map(p=>`<div class="chr ${m.pres[p.id]?'on':''}" data-p="${p.id}">${pv(p)}<span class="chn"><b>${esc(p.n)}</b><span>${p.role}</span></span>
-     <input class="why" name="why-${p.id}" placeholder="Motivo da ausência (opcional)" value="${esc(m.why[p.id]||'')}">
-     <label class="chk"><input type="checkbox" name="p-${p.id}" ${m.pres[p.id]?'checked':''}><span>${ic('check',14,2.6)}</span>Presente</label></div>`).join('')}</div>
-   <div class="dfoot"><button type="button" class="btn sec" data-a="hCallBack">Cancelar</button><button type="submit" class="btn pri">Salvar chamada</button></div></form></section>`;
+ const nw=S.chamada==='new',t=TODAY.toISOString().slice(0,10);
+ if(nw&&!S.chNew)S.chNew={id:c.id+'e'+Date.now(),d:t,desc:'',mat:'',pres:{},why:{},done:false};
+ const m=nw?S.chNew:c.meets.find(x=>x.id===S.chamada);mtStart(m);
+ /* a tela é a de todos os encontros (mtPanel, screens-ext-4.js) */
+ return mtPanel({title:nw?'Registrar encontro':`Chamada · ${wd(m.d)}, ${fmtD(m.d)}`,sub:nw?esc(c.n)+'. Para um encontro que já aconteceu e não foi agendado.':'',
+  date:m.d,dateEditable:nw,dateMax:t,
+  fields:[{name:'desc',label:'Como foi o encontro?',opt:true,ph:'Tema, destaques, pedidos',value:m.desc}],
+  people:c.ppl.map(p=>({id:p.id,n:p.n,role:p.role,av:pv(p),on:!!m.pres[p.id],why:m.why[p.id]||''})),
+  onBack:()=>A.hCallBack(),
+  onSave:(data,bad)=>{if(nw){if(c.meets.some(x=>x.d===data.d&&!x.cancelled)){bad('d','Já existe um encontro nessa data');return false;}m.d=data.d;c.meets.unshift(m);c.total++;S.chNew=null;}
+   m.desc=data.f.desc;c.ppl.forEach(p=>{m.pres[p.id]=data.pres[p.id];m.why[p.id]=data.why[p.id];});const was=m.done;m.entries=m.entries||(was?[{d:m.d,t:'Encontro realizado e chamada registrada',by:c.leader}]:[]);m.entries.push({d:TODAY.toISOString().slice(0,10),t:was?'Registro e chamada atualizados':'Encontro realizado e chamada registrada',by:ME.n||c.leader});m.done=true;S.chamada=null;render();toast(`Chamada salva · ${c.ppl.filter(p=>m.pres[p.id]).length} de ${c.ppl.length} presentes`);}});
 }
 
 function casasAfter(){
@@ -198,7 +199,7 @@ function casasAfter(){
  const ch=$('#chF');if(ch){const upd=()=>{const n=$$('.chr input[type=checkbox]').filter(x=>x.checked).length;$('#chCnt').innerHTML=`<b>${n}</b> de ${hById(S.casa).ppl.length} presentes`;};
   ch.addEventListener('change',e=>{if(e.target.type==='checkbox'){e.target.closest('.chr').classList.toggle('on',e.target.checked);upd();}});
   ch.addEventListener('submit',e=>{e.preventDefault();const c=hById(S.casa),m=c.meets.find(x=>x.id===S.chamada),fd=new FormData(ch),b=ch.querySelector('[type=submit]');b.classList.add('busy');
-   setTimeout(()=>{m.desc=fd.get('desc').trim();Object.assign(m,atomPick(fd.get('mat')));c.ppl.forEach(p=>{m.pres[p.id]=fd.has('p-'+p.id);m.why[p.id]=m.pres[p.id]?'':fd.get('why-'+p.id)||'';});const was=m.done;m.entries=m.entries||(was?[{d:m.d,t:'Encontro realizado e chamada registrada',by:c.leader}]:[]);m.entries.push({d:TODAY.toISOString().slice(0,10),t:was?'Registro e chamada atualizados':'Encontro realizado e chamada registrada',by:ME.n||c.leader});m.done=true;S.chamada=null;render();toast(`Chamada salva · ${c.ppl.filter(p=>m.pres[p.id]).length} de ${c.ppl.length} presentes`);},700);});}
+   setTimeout(()=>{m.desc=fd.get('desc').trim();c.ppl.forEach(p=>{m.pres[p.id]=fd.has('p-'+p.id);m.why[p.id]=m.pres[p.id]?'':fd.get('why-'+p.id)||'';});const was=m.done;m.entries=m.entries||(was?[{d:m.d,t:'Encontro realizado e chamada registrada',by:c.leader}]:[]);m.entries.push({d:TODAY.toISOString().slice(0,10),t:was?'Registro e chamada atualizados':'Encontro realizado e chamada registrada',by:ME.n||c.leader});m.done=true;S.chamada=null;render();toast(`Chamada salva · ${c.ppl.filter(p=>m.pres[p.id]).length} de ${c.ppl.length} presentes`);},700);});}
 }
 function reH(){const c=hById(S.casa);$('#htb').innerHTML=hTabBody(c);$$('.ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.ctab));tabInd();casasAfter();}
 const HA={
@@ -216,7 +217,7 @@ const HA={
  hEdit:v=>{S.hedit=v;reH();},
  hCancel:()=>{S.hedit=null;reH();},
  hCall:v=>{S.chamada=v;reH();$('#htb').scrollIntoView({behavior:'smooth',block:'start'});},
- hCallBack:()=>{const c=hById(S.casa),m=c.meets.find(x=>x.id===S.chamada);if(m&&!m.done){c.meets.splice(c.meets.indexOf(m),1);c.total--;}S.chamada=null;reH();},
+ hCallBack:()=>{const c=hById(S.casa),m=c.meets.find(x=>x.id===S.chamada);if(m&&!m.done){c.meets.splice(c.meets.indexOf(m),1);c.total--;}S.chamada=null;S.chNew=null;reH();},
  hAllP:()=>{$$('.chr input[type=checkbox]').forEach(x=>{x.checked=true;x.closest('.chr').classList.add('on');});$('#chCnt').innerHTML=`<b>${hById(S.casa).ppl.length}</b> de ${hById(S.casa).ppl.length} presentes`;},
  hDelM:v=>{const c=hById(S.casa),i=c.meets.findIndex(m=>m.id===v),m=c.meets[i];
   if(m&&m.series&&!m.done)return caScope(c,m,{title:'Excluir encontro?',body:'Os encontros excluídos somem da lista e dos indicadores. Os convocados são avisados.',label:'Excluir encontro',danger:1,run:l=>{l.forEach(x=>{c.meets.splice(c.meets.indexOf(x),1);c.total--;});render();toast(l.length>1?l.length+' encontros excluídos':'Encontro excluído');}});

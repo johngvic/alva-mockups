@@ -177,7 +177,7 @@ def('secretaria','Documentos',{main:'n',sub:['doc'],form:[
  sl('assin','Assinatura',PASTORES),fl('arq','Arquivo emitido'),ar('obs','Observações')]});
 
 /* ---------- Financeiro ---------- */
-const CONTAS=names('financeiro','Contas financeiras'),PLANO=names('financeiro','Plano de contas'),CCUSTO=names('financeiro','Centros de custo'),CONTATOS=names('financeiro','Contatos');
+const CONTAS=names('financeiro','Contas financeiras'),CONTATOS=names('financeiro','Contatos'),PCC=LSD.financeiro['Plano e centros de custo'].rows,PLANO=PCC.filter(r=>r.k==='plano').map(r=>r.n),CCUSTO=PCC.filter(r=>r.k==='cc').map(r=>r.n);
 const sgn=v=>(v.tipo==='Despesa'?'− ':'+ ')+'R$ '+v.valor;
 def('financeiro','Lançamentos',{main:'n',sub:['data','valor'],
  subFn:v=>[v.data?rfDate(v.data).replace(/ \d{4}$/,''):'',v.valor?sgn(v):''].filter(Boolean).join(' · '),
@@ -188,19 +188,16 @@ def('financeiro','Lançamentos',{main:'n',sub:['data','valor'],
 def('financeiro','Contas financeiras',{main:'n',sub:['banco','saldo'],form:[
  tx('n','Nome da conta',{req:1,ph:'Ex.: Conta principal'}),sl('banco','Banco',['Banco do Brasil','Caixa','Itaú','Bradesco','Nubank','Sicredi','Outro']),
  mo('saldo','Saldo inicial'),sl('tipo','Tipo',['Corrente','Poupança','Caixa físico']),tx('ag','Agência',{half:1}),tx('num','Conta',{half:1})]});
-def('financeiro','Contas a pagar',{main:'n',sub:['venc','valor'],form:[
- tx('n','Descrição',{req:1,ph:'Ex.: Conta de energia'}),mo('valor','Valor',{req:1,half:1}),dt('venc','Vencimento',{pre:'Vence ',req:1,half:1}),
- sl('forn','Fornecedor',CONTATOS),sl('cat','Categoria',PLANO),sl('cc','Centro de custo',CCUSTO),
- tg('rec','Conta recorrente',{hint:'Repete todo mês'}),fl('comp','Boleto ou nota',{multi:1}),ar('obs','Observações')]});
-def('financeiro','Contas a receber',{main:'n',sub:['venc','valor'],form:[
- tx('n','Descrição',{req:1,ph:'Ex.: Inscrições da Conferência'}),mo('valor','Valor',{req:1,half:1}),dt('venc','Vencimento',{pre:'Vence ',req:1,half:1}),
- tx('quem','Quem paga'),sl('cat','Categoria',PLANO),sl('cc','Centro de custo',CCUSTO),ar('obs','Observações')]});
+def('financeiro','Contas a pagar e a receber',{main:'n',sub:['tipo','venc','valor'],seed:()=>({rep:'Não repete'}),form:[
+ sl('tipo','Tipo',['A pagar','A receber'],{def:1}),tx('n','Descrição',{req:1,ph:'Ex.: Conta de energia'}),mo('valor','Valor total',{req:1,half:1}),dt('venc','Primeiro vencimento',{pre:'Vence ',req:1,half:1}),
+ sl('forn','Contato',CONTATOS),sl('cat','Conta do plano',PLANO),sl('cc','Centro de custo',CCUSTO),
+ sl('rep','Repetição',['Não repete','Todo mês'],{def:1}),nu('par','Parcelas (1 a 60)',{if:['rep','Não repete'],ph:'1'}),
+ fl('comp','Boleto ou nota',{multi:1}),ar('obs','Observações')]});
+def('financeiro','Caixa de entrada',{main:'n',sub:['orig'],form:[
+ tx('n','Descrição do documento',{req:1,ph:'Ex.: Nota do material de limpeza'}),fl('arq','Foto ou arquivo',{multi:1,acc:'image/*,.pdf',btn:'Tirar foto ou anexar'}),tx('orig','De onde veio',{ph:'Ex.: Envio manual · Rafael Pereira'})]});
 def('financeiro','Caixas e vendas',{main:'n',sub:['resumo'],form:[
  tx('n','Nome do caixa',{req:1,ph:'Ex.: Cafeteria · hoje'}),sl('setor','Setor',['Cafeteria','Restaurante','Loja']),
  sl('resp','Responsável',PEOPLE),mo('ab','Valor de abertura'),tx('resumo','Resumo',{ph:'Ex.: R$ 77,00 em vendas'})]});
-def('financeiro','Aprovações',{main:'n',sub:['valor','sol'],form:[
- tx('n','O que aprovar',{req:1,ph:'Ex.: Compra de projetor'}),mo('valor','Valor',{req:1}),tx('sol','Solicitante',{ph:'Ministério ou pessoa'}),
- sl('cat','Categoria',PLANO),sl('cc','Centro de custo',CCUSTO),ar('just','Justificativa'),fl('orc','Orçamentos e cotações',{multi:1,btn:'Anexar orçamentos'})]});
 def('financeiro','Importar e conciliar',{main:'n',sub:['conta'],form:[
  tx('n','Nome da importação',{req:1,ph:'Ex.: Extrato de outubro'}),fl('arq','Arquivo do extrato',{req:1,acc:'.ofx,.csv,.xlsx,.pdf',btn:'Escolher extrato'}),
  sl('conta','Conta',CONTAS),tx('per','Período',{ph:'01/10 a 31/10'})]});
@@ -208,16 +205,15 @@ def('financeiro','Doações',{main:'n',sub:['valor','dest'],form:[
  tx('n','Doador',{req:1}),mo('valor','Valor',{req:1,half:1}),dt('data','Data',{half:1}),
  sl('dest','Destino',['Contribuição livre','Dízimo','Oferta','Missões','Construção']),sl('forma','Forma',['Pix','Cartão','Dinheiro','Transferência']),
  tg('recibo','Enviar recibo')]});
-def('financeiro','Plano de contas',{main:'n',sub:['tipo','cod'],form:[
- tx('n','Nome',{req:1,ph:'Ex.: Dízimos'}),sl('tipo','Tipo',['Receita','Despesa','Ativo','Passivo']),tx('cod','Código',{ph:'1.01'})]});
-def('financeiro','Centros de custo',{main:'n',sub:['resp'],form:[
- tx('n','Nome',{req:1,ph:'Ex.: Kids'}),sl('resp','Responsável',PEOPLE),mo('orc','Orçamento mensal')]});
+def('financeiro','Plano e centros de custo',{main:'n',sub:['cad'],
+ subFn:v=>v.cad==='Centro de custo'?['Centro de custo',v.resp].filter(Boolean).join(' · '):[v.cad||'Conta do plano',v.tipo,v.cod].filter(Boolean).join(' · '),
+ seed:s=>{const p=s.split(' · ');return p[0]==='Centro de custo'?{cad:p[0],resp:p[1]}:{cad:p[0],tipo:p[1],cod:p[2]};},
+ form:[sl('cad','O que cadastrar',['Conta do plano','Centro de custo'],{def:1}),tx('n','Nome',{req:1,ph:'Ex.: Dízimos'}),
+ sl('tipo','Tipo',['Receita','Despesa','Ativo','Passivo'],{if:['cad','Conta do plano']}),tx('cod','Código',{ph:'1.01',if:['cad','Conta do plano']}),
+ sl('resp','Responsável',PEOPLE,{if:['cad','Centro de custo']}),mo('orc','Orçamento mensal',{if:['cad','Centro de custo']})]});
 def('financeiro','Contatos',{main:'n',sub:['tipo','cat'],form:[
  tx('n','Nome',{req:1}),sl('tipo','Tipo',['Fornecedor','Doador','Prestador','Outro']),tx('cat','Categoria',{ph:'Ex.: energia'}),
  tx('doc','CPF ou CNPJ'),tx('tel','Telefone',{half:1}),tx('email','E-mail',{half:1}),ar('obs','Observações')]});
-def('financeiro','Contador',{main:'n',sub:['per'],form:[
- tx('n','Pacote',{req:1,ph:'Ex.: Fechamento de outubro'}),tx('per','Período',{pre:'Período: ',ph:'out 2026'}),
- tx('email','Enviar para',{ph:'contador@email.com'}),fl('arq','Arquivos',{multi:1,btn:'Anexar arquivos'}),ar('obs','Mensagem ao contador')]});
 def('financeiro','Fechamentos',{main:'n',sub:['obs'],form:[
  tx('n','Mês de referência',{req:1,ph:'Outubro de 2026'}),ar('obs','Observações')]});
 def('financeiro','Mensagens',{main:'n',sub:['para'],form:[

@@ -1,5 +1,5 @@
 const A={
- nav:v=>{S.active=v;S.navOpen={};S.sala=null;S.slTab='dados';S.uEd=null;S.chp=null;S.chpEd=null;S.case=null;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.bbd=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
+ nav:v=>{S.active=v;S.navOpen={};S.sala=null;S.slTab='dados';S.uEd=null;S.chp=null;S.chpEd=null;S.case=null;S.member=null;S.integ=null;S.disc=null;S.casa=null;S.chamada=null;S.mini=null;S.user=null;S.evt=null;S.bbd=null;S.esc=null;S.preg=null;S.mat=null;S.camp=null;S.jor=null;S.cur=null;S.pw=null;S.fct=null;S.fcx=null;S.fqSt=null;S.fqCxI=null;closePops();$('#side').classList.remove('open');render();window.scrollTo({top:0});},
  churchMenu:(v,b)=>{const p=$('#churchPop');closePops(p);p.classList.toggle('open');b.setAttribute('aria-expanded',p.classList.contains('open'));},
  setChurch:v=>{S.church=+v;softSide();toast(`Agora em ${CHURCHES[S.church].n}`);},
  meMenu:()=>{const p=$('#mePop');closePops(p);p.classList.toggle('open');},

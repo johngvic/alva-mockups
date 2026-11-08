@@ -62,7 +62,7 @@ rpPage=function(key){
   +'<div class="pop" id="rpsPop-'+f.k+'" role="menu" style="left:0;top:calc(100% + 6px);max-height:300px;overflow:auto"><button class="pi" data-a="rpsPick" data-v="'+f.k+'|todos">'+esc(f.l)+': todos'+(!on?'<span class="ck">'+ic('check',16,2.25)+'</span>':'')+'</button><hr>'
   +f.opts().map(x=>'<button class="pi" data-a="rpsPick" data-v="'+f.k+'|'+esc(x[0])+'">'+esc(x[1])+(String(x[0])===v?'<span class="ck">'+ic('check',16,2.25)+'</span>':'')+'</button>').join('')+'</div></div>';};
  return sxHead('Relatórios',D.l,D.lede,`<button class="btn sec" data-a="rptCols">${ic('sliders',15)}Colunas</button><button class="btn sec" data-a="rptPdf">${ic('file',15)}Gerar PDF</button><button class="btn pri" data-a="rptCsv">${ic('download',15)}Exportar CSV</button>`)
- +(D.tabs.length>1?sxSeg('rptTab',D.tabs.map(t=>[t.k,t.l]),T.k):'')
+ +(D.tabs.length>1?(D.tabs.some(t=>t.g)?'<div class="utabs rp-gt rise" style="--d:2" role="tablist">'+D.tabs.map((t,i)=>(t.g&&(i===0||D.tabs[i-1].g!==t.g)?'<span class="rp-gl">'+esc(t.g)+'</span>':'')+'<button role="tab" class="'+(T.k===t.k?'on':'')+'" aria-selected="'+(T.k===t.k)+'" data-a="rptTab" data-v="'+t.k+'">'+esc(t.l)+'</button>').join('')+'</div>':sxSeg('rptTab',D.tabs.map(t=>[t.k,t.l]),T.k)):'')
  +`<div class="sx-note rise" style="--d:2;--c:var(--brand-text)">${ic('shield',17,2)}<span>${key==='multi'?'<b>Escopo: toda a organização.</b> <small>Vê, filtra e exporta as igrejas e regionais a que a pessoa tem acesso, não só a igreja ativa. ':'<b>Escopo: toda a igreja.</b> <small>Quem tem acesso só a uma Casa ou a um ministério vê, filtra e exporta só o que é dele. '}${esc(T.note||'Exportar PDF e CSV exige Editar ou Administrar neste módulo.')}</small></span></div>`
  +`<section class="card mtab rpt rise" style="--d:3" aria-label="${esc(D.l)}"><div class="tbar"><label class="sbox">${ic('search',16)}<input data-rpq placeholder="Buscar nos campos mostrados" value="${esc(st.q||'')}" autocomplete="off"></label>${(T.fl||[]).map(dd).join('')}
    ${T.chip?`<div class="chips" role="tablist" aria-label="${esc(T.chip.l||'Situação')}">${[['todos','Todos',null,null],...items].map(it=>`<button role="tab" class="chipf ${st.chip===it[0]?'on':''}" data-a="rptChip" data-v="${it[0]}" aria-selected="${st.chip===it[0]}">${it[0]!=='todos'?`<i style="background:${it[2]}"></i>`:''}${esc(it[1])}<small>${it[0]==='todos'?base.length:base.filter(r=>T.chip.by(r)===it[0]).length}</small></button>`).join('')}</div>`:''}</div>
@@ -206,7 +206,7 @@ actCards=function(){
    <div class="act-m"><span class="act-bar"><i style="width:${Math.round(12/16*100)}%"></i></span>12/16 aceitaram</div>
    <div class="act-box">${PENDING.slice(0,3).map((p,i)=>actRow(av(p),esc(p.n),ACT_ROLE[i])).join('')}${actMore(PENDING.length-3,'goTask','t2','sem resposta')}
     <div class="ar-foot">${ic('calendar',13,2)}<span><b>${DRAFTS.length} escalas de outubro</b> em rascunho · fecham dia 10</span></div></div>
-   <div class="foot"><button class="btn pri" data-a="remind">Lembrar os ${PENDING.length}</button><button class="lnk" data-a="goTask" data-v="t2">Abrir escalas</button></div>
+   <div class="foot"><button class="btn pri" data-a="goTask" data-v="t2">Abrir escalas</button></div>
   </article>
   ${myTasksAct()}
   <article class="card act alldone" id="allDone" style="${openCount()?'display:none':''}">${logo(18,false)}<p>Tudo em dia por aqui.</p><span class="who">Nada pendente agora. Que tal olhar a escala de domingo com calma?</span><button class="lnk" data-a="undoAll">Restaurar pendências</button></article>
@@ -237,8 +237,13 @@ myTasksAct=function(){const all=myTasks(),u=myUrgent(),late=u.filter(x=>x.late).
  h=h.replace(/<button class="btn sec sm" data-a="cxEntry" data-v="([^"|]+)\|out">[\s\S]*?<\/button><button class="btn pri sm" data-a="cxEntry" data-v="[^"|]+\|in">[\s\S]*?<\/button>/,'<button class="btn pri sm" data-a="cxEntry" data-v="$1|in">'+ic('plus',14,2.2)+'Novo lançamento</button>');
  h=h.replace(/<div class="row2" style="justify-content:center"><button class="btn sec sm" data-a="cxEntry" data-v="([^"|]+)\|out">[\s\S]*?<\/button><button class="btn pri sm" data-a="cxEntry"[\s\S]*?<\/button><\/div>/,'<button class="btn pri sm" data-a="cxEntry" data-v="$1|in" style="margin-top:6px">'+ic('plus',14,2.2)+'Registrar o primeiro lançamento</button>');
  return h;};}
+{const _v=cxView;cxView=function(c){let h=_v(c);
+ h=h.replace('<div class="cxs">',cxFundoPanel(c)+cxEncBanner(c)+'<div class="cxs">');
+ if(cxKind(c)==='proj'&&c.main&&c.status!=='encerrado'&&!c.closeReq)h=h.replace('<div class="pact">','<div class="pact"><button class="btn sec sm" data-a="cxClose" data-v="'+c.id+'">Pedir encerramento</button>');
+ h=h.replace(/<div class="cxs">[\s\S]*?<\/div><div class="cxt">/,'<div class="cxt">');
+ return h;};}
 cxEntryDlg=function(cid,t){
- const c=CAIXAS.find(x=>x.id===cid);if(!c||c.status==='encerrado')return;let file=null,cat='';const zel=c.ownerType==='zel',CC=k=>zel?(k==='in'?['Aporte da igreja','Outros']:ZCATS):CX_CATS[k];
+ const c=CAIXAS.find(x=>x.id===cid);if(!c||c.status==='encerrado')return;if(c.closeReq){toast('Encerramento aguardando o Financeiro: o caixa não recebe lançamentos novos');return;}let file=null,cat='';const zel=c.ownerType==='zel',CC=k=>zel?(k==='in'?['Outros']:ZCATS):(k==='in'&&cxKind(c)==='proj'?CX_CATS.inp:CX_CATS[k]);
  openDlg(dlgHead('Novo lançamento',esc(c.name)+' · saldo atual '+cxMoney(cxBal(c)))+'<form id="cxF" class="cxf" novalidate>'
   +'<div class="cxf-ty" role="radiogroup" aria-label="Tipo"><label class="in"><input type="radio" name="t" value="in"'+(t!=='out'?' checked':'')+'><span class="cxf-ti">'+ic('arrowDn',16,2.2)+'</span><span><b>Entrada</b><small>Oferta, inscrição, venda</small></span></label><label class="out"><input type="radio" name="t" value="out"'+(t==='out'?' checked':'')+'><span class="cxf-ti">'+ic('arrowUp',16,2.2)+'</span><span><b>Saída</b><small>Compra, serviço, despesa</small></span></label></div>'
   +'<div class="cxf-g"><label class="fld"><span class="fl">Valor</span><span class="cxf-v"><em>R$</em><input name="v" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></span><span class="err"></span></label>'
@@ -246,43 +251,50 @@ cxEntryDlg=function(cid,t){
   +'<label class="fld"><span class="fl">Descrição</span><input name="desc" maxlength="80" autocomplete="off" placeholder="Ex.: Compra de cordas"><span class="err"></span></label>'
   +'<div class="fld"><span class="fl">Categoria</span><div class="cxf-cats" id="cxCats"></div></div>'
   +(zel?'<div class="fld" id="cxNatW"><span class="fl">Tipo de gasto</span><div class="yn" role="radiogroup"><label><input type="radio" name="nat" value="Material" checked><span>Material</span></label><label><input type="radio" name="nat" value="Mão de obra"><span>Mão de obra</span></label></div></div><div class="fld" id="cxFornW"><span class="fl">Fornecedor <small>opcional</small></span><span class="selw"><select name="forn"><option value="">Compra direta, sem fornecedor cadastrado</option>'+ZFORN.map(f=>'<option value="'+f.id+'">'+esc(f.n)+'</option>').join('')+'</select>'+ic('updown',14)+'</span></div>':'')
+  +'<div class="fld" id="cxPayW"><span class="fl">Paguei com</span><div class="yn" role="radiogroup"><label><input type="radio" name="pay" value="cx"'+(cxKind(c)==='perm'?' checked':'')+'><span>Dinheiro do caixa</span></label><label><input type="radio" name="pay" value="bolso"'+(cxKind(c)==='proj'?' checked':'')+'><span>Meu bolso (reembolsar)</span></label></div></div>'
+  +'<div class="fld" id="cxFmW"><span class="fl">Como entrou</span><div class="yn" role="radiogroup"><label><input type="radio" name="fm" value="Dinheiro" checked><span>Dinheiro</span></label><label><input type="radio" name="fm" value="Cartão"><span>Cartão</span></label><label><input type="radio" name="fm" value="Pix"><span>Pix</span></label></div></div>'
+  +'<p class="who" id="cxPH" style="margin:0"></p>'
   +'<div class="fld"><span class="fl">Comprovante <small>opcional</small></span><label class="cxf-drop" id="cxDrop"><input type="file" name="file" accept="image/*,application/pdf"><span class="cxf-di">'+ic('upload',18,2)+'</span><span class="cxf-dt"><b>Arraste o arquivo aqui ou <u>escolha no computador</u></b><small>Foto ou PDF da nota, até 10 MB</small></span></label><div class="cxf-file" id="cxFile" hidden></div></div>'
   +'<p class="cxf-warn" id="cxH" hidden>'+ic('alert',14,2)+'<span>Esta saída é maior que o saldo e deixa o caixa negativo.</span></p>'
   +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="cxGo">Lançar</button></div></form>','cxfd');
  const f=$('#cxF'),typ=()=>f.querySelector('[name=t]:checked').value;
  const paint=()=>{const k=typ();if(!CC(k).includes(cat))cat=(zel&&k==='out'&&CC(k).includes(zLastCat(c.ownerId)))?zLastCat(c.ownerId):CC(k)[0];const nw=$('#cxNatW');if(nw)nw.hidden=k==='in';const fw=$('#cxFornW');if(fw)fw.hidden=k==='in';
   $('#cxCats').innerHTML=CC(k).map(x=>'<button type="button" class="chipf '+(x===cat?'on':'')+'" data-cat="'+esc(x)+'">'+esc(x)+'</button>').join('');
-  const v=Math.round((+f.elements.v.value||0)*100);$('#cxH').hidden=!(k==='out'&&v>cxBal(c));
-  f.dataset.t=k;$('#cxGo').textContent=(k==='in'?'Lançar entrada':'Lançar saída')+(v?' · '+cxMoney(v):'');};
+  const v=Math.round((+f.elements.v.value||0)*100),pw=f.querySelector('[name=pay]:checked'),lm=cxLimited(c)&&c.main,over=k==='out'&&(lm?cxNeed(c,v,pw&&pw.value)>cxLimit(c):v>(cxKind(c)==='proj'&&c.main?cxDisp(c):cxBal(c))),blk=over&&lm&&cxOverMode()==='block';
+  $('#cxH').hidden=!over;if(over)$('#cxH span').textContent=lm?(blk?'Esta saída passa do limite restante ('+cxMoney(Math.max(0,cxLimit(c)))+'). Peça reforço de verba para continuar.':'Esta saída passa do limite restante. Ela será lançada e o financeiro vê o alerta.'):'Esta saída é maior que o saldo e deixa o caixa negativo.';
+  f.dataset.t=k;cxPayPaint(f,c,k);$('#cxGo').textContent=(k==='in'?'Lançar entrada':'Lançar saída')+(v?' · '+cxMoney(v):'');$('#cxGo').disabled=blk;};
  const showFile=fl=>{file=fl;const b=$('#cxFile'),d=$('#cxDrop');if(!fl){b.hidden=true;d.hidden=false;f.elements.file.value='';return;}
   const kb=fl.size?Math.max(1,Math.round(fl.size/1024)):0,pdf=/pdf$/i.test(fl.type||fl.name);
   b.innerHTML='<span class="cxf-fi">'+ic(pdf?'file':'image',16,2)+'</span><span class="cxf-dt"><b>'+esc(fl.name)+'</b><small>'+(pdf?'PDF':'Imagem')+(kb?' · '+(kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB'):'')+'</small></span><button type="button" class="ibtn sm" id="cxFRm" aria-label="Tirar comprovante">'+ic('x',14)+'</button>';
   b.hidden=false;d.hidden=true;$('#cxFRm').onclick=()=>showFile(null);};
  paint();setTimeout(()=>f.elements.v.focus(),60);
- f.addEventListener('change',e=>{if(e.target.name==='t')paint();if(e.target.name==='file')showFile(e.target.files[0]||null);});
+ f.addEventListener('change',e=>{if(e.target.name==='t'||e.target.name==='pay'||e.target.name==='fm')paint();if(e.target.name==='file')showFile(e.target.files[0]||null);});
  f.addEventListener('input',e=>{e.target.closest('.fld')?.classList.remove('bad');if(e.target.name==='v')paint();});
  $('#cxCats').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(!b)return;cat=b.dataset.cat;paint();});
  const dz=$('#cxDrop');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over');}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over');}));
  dz.addEventListener('drop',e=>{const fl=e.dataTransfer&&e.dataTransfer.files[0];if(fl)showFile(fl);});
  f.onsubmit=e=>{e.preventDefault();const q=f.elements,bad=(n,m)=>{const i=q[n],fl=i.closest('.fld');fl.classList.add('bad');fl.querySelector('.err').textContent=m;i.focus();};
   const v=+q.v.value;if(!(v>0))return bad('v','Informe um valor maior que zero');if(!q.d.value)return bad('d','Escolha a data');if(!q.desc.value.trim())return bad('desc','Descreva o lançamento');
-  cxAdd(c,typ(),v,q.d.value,q.desc.value.trim(),cat,ME_NAME,Object.assign({file:file?file.name:''},zel&&typ()==='out'?{nat:q.nat?q.nat.value:'Material',forn:q.forn?q.forn.value:''}:{}));
+  if(typ()==='out'&&cxLimited(c)&&c.main&&cxOverMode()==='block'&&cxNeed(c,Math.round(v*100),q.pay&&q.pay.value)>cxLimit(c))return bad('v','Passa do limite restante. Peça reforço de verba');
+  cxAdd(c,typ(),v,q.d.value,q.desc.value.trim(),cat,ME_NAME,Object.assign({file:file?file.name:''},zel&&typ()==='out'?{nat:q.nat?q.nat.value:'Material',forn:q.forn?q.forn.value:''}:{},typ()==='out'?{pay:q.pay.value,st:'conferir'}:{fm:q.fm.value,st:'conferir'}));
   closeDlg();bdRe();toast((typ()==='in'?'Entrada':'Saída')+' de '+cxMoney(Math.round(v*100))+' lançada');};};
 
 cxCloseDlg=function(cid){
- const c=CAIXAS.find(x=>x.id===cid);if(!c||c.main)return;const bal=cxBal(c),others=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado'),n=cxValid(c).length;
- const opts=[...others.map(x=>['to:'+x.id,x.main?'Devolver ao '+esc(x.name):'Transferir para '+esc(x.name),x.main?'O saldo volta para o caixa principal do ministério':'Passa para outro caixa aberto',x.main?'undo':'arrowRL',cxMoney(cxBal(x))+' hoje']),['church','Repassar à igreja','Sai do ministério e vai para o Financeiro da igreja','church',''],['keep','Deixar neste caixa','O saldo fica parado no caixa encerrado','lock','']];
- openDlg(dlgHead('Encerrar caixa','Fica só para consulta, sem novos lançamentos. Dá para reabrir depois.')+'<form id="cxC" class="cxc" novalidate>'
+ const c=CAIXAS.find(x=>x.id===cid);if(!c||(c.main&&cxKind(c)!=='proj'))return;if(c.main&&cxUnitAll(c).some(x=>x!==c&&x.status!=='encerrado')){toast('Encerre antes os outros caixas deste projeto');return;}if(c.main&&cxAdvLate(c)){toast('Há adiantamento vencido: preste contas antes de pedir o encerramento');return;}const bal=cxBal(c),mnD=c.main?cxMinDest(c):null,others=cxOwn(c.ownerType,c.ownerId).filter(x=>x.id!==c.id&&x.status!=='encerrado'),n=cxValid(c).length;
+ const opts=[...(mnD?[['to:'+mnD.id,'Devolver ao ministério','A sobra das inscrições e vendas vai para o caixa principal do '+esc(cxOwnerName(mnD)),'undo',cxMoney(cxBal(mnD))+' hoje']]:[]),...others.map(x=>['to:'+x.id,x.main?'Devolver ao '+esc(x.name):'Transferir para '+esc(x.name),x.main?'O saldo volta para o caixa principal do ministério':'Passa para outro caixa aberto',x.main?'undo':'arrowRL',cxMoney(cxBal(x))+' hoje']),['church','Repassar à igreja',cxKind(c)==='proj'?'O dinheiro sai do projeto e volta para o Financeiro da igreja':'Sai do ministério e vai para o Financeiro da igreja','church',''],...(cxKind(c)==='proj'?[]:[['keep','Deixar neste caixa','O saldo fica parado no caixa encerrado','lock','']])];
+ openDlg(dlgHead(c.main?'Pedir o encerramento do caixa':'Encerrar caixa',c.main?'O Financeiro confere e aprova; só então o caixa fecha e a sobra segue o destino escolhido.':'Fica só para consulta, sem novos lançamentos. Dá para reabrir depois.')+'<form id="cxC" class="cxc" novalidate>'
   +'<div class="cxc-s"><span class="cxc-i">'+ic('wallet',18,1.9)+'</span><div><b>'+esc(c.name)+'</b><small>'+n+' lançamento'+(n===1?'':'s')+' · entradas '+cxMoney(cxIn(c))+' · saídas '+cxMoney(cxOut(c))+'</small></div><div class="cxc-b '+(bal<0?'neg':'')+'"><small>Saldo</small><b>'+cxMoney(bal)+'</b></div></div>'
   +(bal>0?'<div class="fld"><span class="fl">O que fazer com o saldo?</span><div class="cxc-o" role="radiogroup">'+opts.map((o,i)=>'<label><input type="radio" name="dest" value="'+o[0]+'"'+(i===0?' checked':'')+'><span class="cxc-oi">'+ic(o[3],16,2)+'</span><span class="cxc-ot"><b>'+o[1]+'</b><small>'+o[2]+'</small></span>'+(o[4]?'<em>'+o[4]+'</em>':'')+'<i class="cxc-rd"></i></label>').join('')+'</div></div>'
    +'<div class="cxc-res" id="cxRes"></div>'
    :'<p class="cxc-note">'+ic('info',14,2)+'<span>'+(bal<0?'O saldo está negativo ('+cxMoney(bal)+') e fica registrado no caixa encerrado.':'O saldo está zerado. Não há nada a transferir.')+'</span></p>')
-  +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="cxCGo">Encerrar caixa</button></div></form>','cxcd');
+  +(c.main&&cxVerbaOk(c)?'<p class="cxc-note">'+ic('info',14,2)+'<span>A verba aprovada de '+cxMoney(cxVerbaOk(c))+' não vira dinheiro: o que não foi usado expira. Só a sobra real, das inscrições e vendas, é transferida.</span></p>':'')
+  +'<div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="cxCGo">'+(c.main?'Pedir encerramento':'Encerrar caixa')+'</button></div></form>','cxcd');
  const f=$('#cxC'),paint=()=>{if(!(bal>0))return;const v=f.querySelector('[name=dest]:checked').value,keep=v==='keep',to=v.startsWith('to:')?CAIXAS.find(x=>x.id===v.slice(3)):null;
   $('#cxRes').innerHTML='<span>Saldo final deste caixa</span><b>'+cxMoney(keep?bal:0)+'</b>'+(to?'<span class="cxc-ar">'+ic('arrowR',13,2)+esc(to.name)+' fica com '+cxMoney(cxBal(to)+bal)+'</span>':v==='church'?'<span class="cxc-ar">'+ic('arrowR',13,2)+'lançado como repasse à igreja</span>':'');
-  $('#cxCGo').textContent=keep?'Encerrar caixa':to?(to.main?'Encerrar e devolver ':'Encerrar e transferir ')+cxMoney(bal):'Encerrar e repassar '+cxMoney(bal);};
+  $('#cxCGo').textContent=c.main?'Pedir encerramento':keep?'Encerrar caixa':to?(to.main?'Encerrar e devolver ':'Encerrar e transferir ')+cxMoney(bal):'Encerrar e repassar '+cxMoney(bal);};
  paint();f.addEventListener('change',paint);
  f.onsubmit=e=>{e.preventDefault();const r=f.querySelector('[name=dest]:checked'),dest=bal>0&&r?r.value:'keep',t=myTd();
+  if(c.main&&cxKind(c)==='proj'){cxEncAsk(c,dest,Math.max(0,bal));closeDlg();bdRe();toast('Pedido de encerramento enviado ao Financeiro');return;}
   if(dest.startsWith('to:')){const to=CAIXAS.find(x=>x.id===dest.slice(3));cxXfer(c,to,bal/100,t,ME_NAME);}
   else if(dest==='church')cxAdd(c,'out',bal/100,t,'Repasse à igreja no encerramento','Repasse',ME_NAME);
   c.status='encerrado';c.closedAt=t;closeDlg();S.cxv='encerrado';bdRe();toast('Caixa encerrado');};};
@@ -561,9 +573,9 @@ lede=function(){return '';};
  Restaurante:['Visão geral','Itens','Categorias','Vendas','Caixa diário','Movimentações'],
  Loja:['Visão geral','Itens','Categorias','Vendas','Pedidos do app','Caixa diário','Movimentações'],
  Secretaria:['Visão geral','Atos','Documentos','Cargos e mandatos','Análises'],
- Financeiro:['Visão geral','Lançamentos','Importar e conciliar','Contas a pagar','Contas a receber','Doações','Aprovações','Mensagens','DRE','Informe anual','Caixas e vendas','Contador','Fechamentos','Contas financeiras','Plano de contas','Centros de custo','Contatos'],
+ Financeiro:['Visão geral','Caixa de entrada','Lançamentos','Contas a pagar e a receber','Aprovações','Importar e conciliar','Exportação contábil','Doações','Caixas e vendas','Informe anual','DRE','Fechamentos','Contas financeiras','Plano e centros de custo','Contatos','Mensagens'],
  Comunicação:['Notícias','Banners','Notificações','Transmissões'],
- Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],
+ Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Zeladoria','Almoxarifado','Cafeteria','Restaurante','Loja','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],
  Administração:['Usuários e permissões','Superusuários','Visitantes','Recursos habilitados','Parâmetros do sistema','Multi-igreja','Auditoria e LGPD']};
  const by=(list,key,order)=>{const ix=x=>{const i=order.indexOf(key(x));return i<0?999:i;};list.sort((a,b)=>ix(a)-ix(b));};
  const apply=()=>NAV.forEach(g=>{if(ORD[g[0]])by(g[1],x=>x[2],ORD[g[0]]);g[1].forEach(n=>{if(n[3]&&SUB[n[2]])by(n[3],c=>c[1],SUB[n[2]]);});});

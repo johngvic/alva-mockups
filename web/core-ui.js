@@ -94,7 +94,7 @@ function setDone(id,v){const t=TASKS.find(x=>x.id===id);t.done=v;const el=$('#'+
 const LP={busy:false,st:{},mo:null,rows:'.trow:not(.thead),.sx-r,.igq-r:not(.igq-h)'};
 function lpBox(box,key){
  const mine=box.querySelector(':scope > .lp-f');
- const own=[...box.querySelectorAll('.mpg')].some(m=>!m.closest('.lp-f'))||!!box.querySelector('.fd-pf');
+ const own=[...box.querySelectorAll('.mpg')].some(m=>!m.closest('.lp-f'))||!!box.querySelector('.fd-pf')||box.classList.contains('lp-no');
  const rows=own?[]:[...box.querySelectorAll(LP.rows)];
  rows.forEach(r=>{r.style.display='';});
  const olds=[...box.querySelectorAll('.tfoot:not(.lp-f)')];

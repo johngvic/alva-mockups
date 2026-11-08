@@ -17,7 +17,7 @@ const EVTS=[
  EV({t:'Culto + Batismo',type:'Batismo',d:'2026-10-18',time:'16h',place:'Chácara Alva',regs:[R('Ana Lima','2026-09-20','—',0)]}),
  EV({t:'Conferência Missões',type:'Conferência',d:'2026-10-09',time:'19h30',place:'Auditório',paid:true,price:60,cap:150,checkin:'inteiro',regs:[R('Felipe Andrade','2026-09-18','pago',60),R('Diego Faria','2026-09-22','pendente',60)]}),
  EV({t:'Convergir 2027',type:'Conferência',st:'previsao',prev:'Fev/2027',d:''}),
- EV({t:'Congresso de Mulheres 2027',type:'Conferência',st:'previsao',prev:'Mar/2027',d:''}),
+ EV({t:'Congresso de Mulheres 2027',type:'Conferência',st:'previsao',prev:'Mar/2027',d:'',min:'Eventos'}),
  EV({t:'12 Horas de Oração',type:'Evento especial',d:'2026-10-24',time:'05h às 17h',min:'Intercessão',regs:[R('Renata Campos','2026-09-25','—',0),R('Elisa Moura','2026-09-26','—',0)]}),
  (++_eid,null),/* o ensaio do louvor (ev11) saiu do mock; o id fica reservado para os seguintes não mudarem */
  EV({kind:'culto',t:'Culto de Quarta',type:'Culto',d:'2026-09-30',time:'19h30',min:'Louvor',rep:'semanal'}),

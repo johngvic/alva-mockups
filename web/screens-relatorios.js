@@ -114,27 +114,43 @@ rpDef('membros','Membros','Lista de membros com situação, integração e minis
   cols:[rpCol('n','Titular',r=>r.n),rpCol('fam','Familiares',r=>r.fam.map(f=>(byId(f[0])?byId(f[0]).n:'—')+' ('+f[1]+')').join('; ')||'—'),rpCol('q','Pessoas',r=>1+r.fam.length,{n:1}),rpCol('addr','Endereço',r=>rpAddr(r.addr),{s:1,off:true}),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true})]}
 ]);
 
+/* Encontros em todos os relatórios que têm encontro (Casas, Ministérios, Discipulado, Acompanhamento): mesmas colunas de situação e itens do encontro */
+const rpMtItens=m=>(typeof meetItems==='function'?meetItems(m):[]).map(i=>i.t).join('; ')||'—';
+/* Aba Encontros: as mesmas colunas, na mesma ordem, em Casas, Ministérios, Discipulado e Acompanhamento (Tiago, 07/11/2026) */
+const RPENC_L={done:'Realizado',sched:'Agendado',pend:'Chamada pendente',cancel:'Cancelado'},RPENC_C={done:rpOk,sched:rpInfo,pend:rpWarn,cancel:rpOff};
+const rpEncRow=(o)=>({d:o.d,who:o.who,resp:o.resp||'',st:o.st,mode:o.mode||'Presencial',subj:o.subj||'',it:rpMtItens(o.m),yes:o.yes||0,tot:o.tot||0});
+const rpEncTab=(whoL,rows,note)=>({k:'encontros',l:'Encontros',note:note||'',rows:()=>rows().sort((a,b)=>a.d<b.d?1:-1),
+  chip:{l:'Situação',by:r=>r.st,items:rs=>['done','sched','pend','cancel'].filter(k=>rs.some(r=>r.st===k)).map(k=>rpC(k,RPENC_L[k],RPENC_C[k]))},
+  fl:[{k:'who',l:whoL,opts:()=>rpUniq(rows().map(r=>r.who)).map(x=>typeof x==='string'?[x,x]:x),ok:(r,v)=>r.who===v},{k:'resp',l:'Responsável',opts:()=>rpUniq(rows().map(r=>r.resp).filter(Boolean)).map(x=>typeof x==='string'?[x,x]:x),ok:(r,v)=>r.resp===v}],
+  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('who',whoL,r=>r.who),rpCol('resp','Responsável',r=>r.resp||'—'),rpCol('st','Situação',r=>RPENC_L[r.st]),rpCol('mode','Modalidade',r=>r.mode),rpCol('subj','Assunto',r=>r.subj||'—'),rpCol('it','Itens do encontro',r=>r.it),
+   rpCol('pr','Presentes',r=>r.tot?r.yes+' de '+r.tot:'—'),rpCol('pc','Presença',r=>r.tot?Math.round(r.yes/r.tot*100)+'%':'—',{raw:r=>r.tot?r.yes/r.tot:-1})]});
 rpDef('integracao','Integração','Pessoas em integração e as turmas, com a etapa de cada uma.',[
  {k:'pessoas',l:'Pessoas',rows:()=>INTEGS.flatMap(i=>i.ppl.map(p=>Object.assign({turma:i.n},p))),
   chip:{l:'Situação',by:r=>r.st,items:['pendente','aceito','andamento','integrado'].map(k=>rpCh(k,IST[k][0],IST[k][1]))},
   fl:[{k:'turma',l:'Integração',opts:()=>INTEGS.map(i=>[i.n,i.n]),ok:(r,v)=>r.turma===v}],
   cols:[rpCol('n','Nome',r=>r.n),rpCol('turma','Integração',r=>r.turma),rpCol('st','Situação',r=>IST[r.st][0]),rpCol('step','Etapa',r=>r.step+' de 5',{raw:r=>r.step}),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true})]},
  {k:'turmas',l:'Integrações',rows:()=>INTEGS.slice(),
-  cols:[rpCol('n','Integração',r=>r.n),rpCol('date','Data',r=>rpD(r.date)),rpCol('time','Horário',r=>r.time||'—'),rpCol('q','Pessoas',r=>r.ppl.length,{n:1}),rpCol('ok','Integradas',r=>r.ppl.filter(p=>p.st==='integrado').length,{n:1}),rpCol('and','Em etapas',r=>r.ppl.filter(p=>p.st==='andamento').length,{n:1}),rpCol('lim','Limite',r=>r.limit||'—',{n:1}),rpCol('resp','Responsável',r=>{const m=byId(r.resp);return m?m.n:'—';}),rpCol('cur','Atual',r=>rpYes(r.current))]}
+  cols:[rpCol('n','Integração',r=>r.n),rpCol('date','Data',r=>rpD(r.date)),rpCol('time','Horário',r=>r.time||'—'),rpCol('q','Pessoas',r=>r.ppl.length,{n:1}),rpCol('ok','Integradas',r=>r.ppl.filter(p=>p.st==='integrado').length,{n:1}),rpCol('and','Em etapas',r=>r.ppl.filter(p=>p.st==='andamento').length,{n:1}),rpCol('lim','Limite',r=>r.limit||'—',{n:1}),rpCol('resp','Responsável',r=>{const m=byId(r.resp);return m?m.n:'—';}),rpCol('cur','Atual',r=>rpYes(r.current))]},
+ {k:'pendentes',l:'Pendentes e fila',note:'Pedidos que esperam decisão e pessoas na fila de espera. A fila é da igreja, não de uma integração.',
+  rows:()=>[...INTEGS.flatMap(i=>i.ppl.filter(p=>p.st==='pendente').map(p=>({n:p.n,sit:'pedido',turma:i.n,pos:0,since:'',why:'',ph:p.ph}))),...IGFILA.map((p,i)=>({n:p.n,sit:'fila',turma:'—',pos:i+1,since:p.since,why:(IGWHY[p.why]||[''])[0],ph:p.ph}))],
+  chip:{l:'Situação',by:r=>r.sit,items:[rpC('pedido','Pedido a decidir',rpWarn),rpC('fila','Na fila de espera',rpInfo)]},
+  cols:[rpCol('n','Pessoa',r=>r.n),rpCol('sit','Situação',r=>r.sit==='fila'?'Na fila de espera':'Pedido a decidir'),rpCol('pos','Posição na fila',r=>r.pos||'—',{n:1,raw:r=>r.pos}),rpCol('why','Motivo da espera',r=>r.why||'—'),rpCol('turma','Integração',r=>r.turma),rpCol('since','Na fila desde',r=>r.since?rpD(r.since):'—',{raw:r=>r.since}),rpCol('ph','Telefone',r=>r.ph||'—',{s:1,off:true})]}
 ]);
 
 rpDef('discipulado','Discipulado','Quem discipula quem, o ritmo de contato e o último encontro.',[
  {k:'pares',l:'Discípulos e discipuladores',rows:()=>DISC.filter(d=>d.parent),
   chip:{l:'Situação',by:r=>dStatus(r),items:['emdia','atrasado','pausado'].map(k=>rpCh(k,DST[k][0],DST[k][1]))},
   fl:[{k:'par',l:'Discipulador',opts:()=>rpUniq(DISC.filter(d=>d.parent).map(d=>(DISC.find(x=>x.id===d.parent)||{}).n)),ok:(r,v)=>(DISC.find(x=>x.id===r.parent)||{}).n===v}],
-  cols:[rpCol('n','Discípulo',r=>r.n.replace('Pr. ','')),rpCol('par','Discipulador',r=>(DISC.find(x=>x.id===r.parent)||{n:'—'}).n),rpCol('role','Papel',r=>r.role),rpCol('stage','Etapa',r=>r.stage?TRILHA[r.stage-1]:'—'),rpCol('rhy','Ritmo',r=>RHY[r.rhythm]||'—'),rpCol('last','Último contato',r=>dLbl(r.last),{raw:r=>r.last}),rpCol('enc','Encontros',r=>r.meets.length,{n:1}),rpCol('st','Situação',r=>DST[dStatus(r)][0])]}
+  cols:[rpCol('n','Discípulo',r=>r.n.replace('Pr. ','')),rpCol('par','Discipulador',r=>(DISC.find(x=>x.id===r.parent)||{n:'—'}).n),rpCol('role','Papel',r=>r.role),rpCol('stage','Etapa',r=>r.stage?TRILHA[r.stage-1]:'—'),rpCol('rhy','Ritmo',r=>RHY[r.rhythm]||'—'),rpCol('last','Último contato',r=>dLbl(r.last),{raw:r=>r.last}),rpCol('enc','Encontros',r=>r.meets.length,{n:1}),rpCol('st','Situação',r=>DST[dStatus(r)][0])]},
+ rpEncTab('Discípulo',()=>DISC.flatMap(d=>(d.meets||[]).map(m=>{const ps=m.pres||{},ks=Object.keys(ps);return rpEncRow({m,d:m.d,who:d.n.replace('Pr. ',''),resp:(DISC.find(x=>x.id===d.parent)||{}).n||'',st:m.cancelled||m.type==='cancel'?'cancel':m.type==='done'?'done':'sched',mode:m.mode,subj:'',yes:m.type==='done'?ks.filter(k=>ps[k]).length:0,tot:m.type==='done'?ks.length:0});})),'Encontros de discipulado. O que foi tratado não entra no relatório.')
 ]);
 
 rpDef('acompanhamento','Acompanhamento','Casos de acompanhamento pastoral: quem cuida, desde quando e o último contato.',[
  {k:'casos',l:'Casos',rows:()=>CASES.slice(),note:'Descrição e anotações do caso nunca entram no relatório.',
   chip:{l:'Situação',by:r=>r.st,items:['urgente','acompanhando','resolvido'].map(k=>rpCh(k,CST[k][0],CST[k][1]))},
   fl:[{k:'resp',l:'Responsável',opts:()=>rpUniq(CASES.map(c=>c.resp)),ok:(r,v)=>r.resp===v},{k:'tipo',l:'Tipo',opts:()=>rpUniq(CASES.map(c=>c.type)),ok:(r,v)=>r.type===v}],
-  cols:[rpCol('n','Pessoa',r=>r.n),rpCol('type','Tipo',r=>r.type),rpCol('st','Situação',r=>CST[r.st][0]),rpCol('resp','Responsável',r=>r.resp),rpCol('op','Aberto em',r=>rpD(r.opened),{raw:r=>r.opened}),rpCol('last','Último contato',r=>rpD(r.meets[0]&&r.meets[0].d),{raw:r=>r.meets[0]?r.meets[0].d:''}),rpCol('q','Encontros',r=>r.meets.length,{n:1}),rpCol('rs','Restrito',r=>rpYes(r.restr))]}
+  cols:[rpCol('n','Pessoa',r=>r.n),rpCol('type','Tipo',r=>r.type),rpCol('st','Situação',r=>CST[r.st][0]),rpCol('resp','Responsável',r=>r.resp),rpCol('op','Aberto em',r=>rpD(r.opened),{raw:r=>r.opened}),rpCol('last','Último contato',r=>rpD(r.meets[0]&&r.meets[0].d),{raw:r=>r.meets[0]?r.meets[0].d:''}),rpCol('q','Encontros',r=>r.meets.length,{n:1}),rpCol('rs','Restrito',r=>rpYes(r.restr))]},
+ rpEncTab('Pessoa',()=>CASES.flatMap(c=>[...(c.sched||[]).map(m=>rpEncRow({m,d:m.d,who:c.n,resp:c.resp,st:'sched',mode:m.mode})),...(c.meets||[]).map(m=>{const ps=m.pres||{},ks=Object.keys(ps);return rpEncRow({m,d:m.d,who:c.n,resp:c.resp,st:'done',mode:m.mode,subj:'',yes:ks.filter(k=>ps[k]).length,tot:ks.length});})]),'Encontros dos casos de acompanhamento. O que foi tratado e os resultados nunca entram no relatório.')
 ]);
 
 rpDef('oracao','Pedidos de oração','Pedidos de oração e quantas pessoas estão intercedendo. O texto do pedido não entra no relatório.',[
@@ -152,9 +168,7 @@ rpDef('casas','Casas de Apascentamento','Casas, participantes, presença nos úl
   chip:{l:'Função',by:r=>r.role,items:['Líder','Anfitrião','Participante'].map(k=>rpCh(k,k))},
   fl:[{k:'casa',l:'Casa',opts:()=>CASAS.map(c=>[c.n,c.n]),ok:(r,v)=>r.casa===v}],
   cols:[rpCol('n','Nome',r=>r.n),rpCol('casa','Casa',r=>r.casa),rpCol('role','Função',r=>r.role),rpCol('since','Desde',r=>r.since||'—'),rpCol('pr','Presença (8 encontros)',r=>{const l=r.c.meets;return l.length?Math.round(l.filter(m=>m.pres[r.id]).length/l.length*100)+'%':'—';},{n:1,raw:r=>{const l=r.c.meets;return l.length?Math.round(l.filter(m=>m.pres[r.id]).length/l.length*100):0;}})]},
- {k:'presenca',l:'Últimos encontros',rows:()=>CASAS.flatMap(c=>c.meets.slice(0,4).map(m=>({casa:c.n,m,c}))).sort((a,b)=>a.m.d<b.m.d?1:-1),
-  fl:[{k:'casa',l:'Casa',opts:()=>CASAS.map(c=>[c.n,c.n]),ok:(r,v)=>r.casa===v}],
-  cols:[rpCol('d','Data',r=>rpD(r.m.d),{raw:r=>r.m.d}),rpCol('casa','Casa',r=>r.casa),rpCol('desc','Assunto',r=>r.m.desc||'—'),rpCol('pres','Presentes',r=>r.c.ppl.filter(p=>r.m.pres[p.id]).length+' de '+r.c.ppl.length),rpCol('pc','Presença',r=>Math.round(r.c.ppl.filter(p=>r.m.pres[p.id]).length/Math.max(1,r.c.ppl.length)*100)+'%',{n:1,raw:r=>Math.round(r.c.ppl.filter(p=>r.m.pres[p.id]).length/Math.max(1,r.c.ppl.length)*100)})]},
+ rpEncTab('Casa',()=>CASAS.flatMap(c=>c.meets.map(m=>rpEncRow({m,d:m.d,who:c.n,resp:c.leader,st:m.cancelled?'cancel':m.done?'done':m.scheduled?'sched':'pend',mode:m.mode,subj:m.desc,yes:m.done?c.ppl.filter(p=>m.pres&&m.pres[p.id]).length:0,tot:m.done?c.ppl.length:0}))),'Todos os encontros das casas, com a situação, os itens usados e a presença dos realizados.'),
  {k:'redes',l:'Redes',rows:()=>REDES.slice(),
   cols:[rpCol('n','Rede',r=>r.n),rpCol('sup','Supervisor',r=>r.sup),rpCol('q','Casas',r=>r.casas.length,{n:1}),rpCol('p','Participantes',r=>r.casas.reduce((n,h)=>n+(hById(h)?hById(h).ppl.length:0),0),{n:1}),rpCol('cs','Casas da rede',r=>r.casas.map(h=>hById(h)?hById(h).n:'').filter(Boolean).join('; '))]}
 ]);
@@ -165,7 +179,8 @@ rpDef('ministerios','Ministérios','Ministérios, líderes, times e membros por 
   cols:[rpCol('n','Ministério',r=>r.n),rpCol('lead','Líder',r=>r.lead),rpCol('mem','Membros',r=>r.mem,{n:1}),rpCol('teams','Times',r=>r.teamsN,{n:1}),rpCol('st','Situação',r=>r.active?'Ativo':'Inativo'),rpCol('ph','Telefone',r=>r.phone,{off:true})]},
  {k:'membros',l:'Membros por ministério',rows:()=>MEMBERS.flatMap(m=>m.min.map(x=>({m,min:x}))),
   fl:[{k:'min',l:'Ministério',opts:()=>MIN_ALL.map(x=>[x,x]),ok:(r,v)=>r.min===v}],
-  cols:[rpCol('min','Ministério',r=>r.min),rpCol('n','Membro',r=>r.m.n),rpCol('role','Função',r=>r.m.role),rpCol('since','Desde',r=>r.m.since),rpCol('ph','Telefone',r=>r.m.ph||'—',{s:1,off:true})]}
+  cols:[rpCol('min','Ministério',r=>r.min),rpCol('n','Membro',r=>r.m.n),rpCol('role','Função',r=>r.m.role),rpCol('since','Desde',r=>r.m.since),rpCol('ph','Telefone',r=>r.m.ph||'—',{s:1,off:true})]},
+ rpEncTab('Ministério',()=>MINIS.flatMap(mi=>mnMeets(mi).map(m=>{const ps=m.pres||{},ks=Object.keys(ps);return rpEncRow({m,d:m.d,who:mi.n,resp:mi.lead,st:m.cancelled?'cancel':m.done?'done':'sched',mode:m.mode,subj:m.topic,yes:m.done?ks.filter(k=>ps[k]).length:0,tot:m.done?ks.length:0});})),'Encontros dos ministérios, realizados, agendados e cancelados. O que foi tratado não entra no relatório.')
 ]);
 
 rpDef('kids','Kids','Salas, turmas e times do Ministério Infantil.',[
@@ -296,17 +311,27 @@ const rpRecSt=r=>(r.got||0)>=r.v?'rec':(r.prev&&r.prev<SX_TODAY)?'atr':'prev';
 const rpCxEx={ex:1,name:'Ministério de Louvor · Caixa principal',kind:'Ministério',in:420000,out:185000};
 const rpCxRows=()=>{const l=CAIXAS.filter(x=>x.entries.length);return l.length?l:[rpCxEx];};
 const rpCxV=x=>x.ex?x:{name:cxOwnerName(x)+' · '+x.name,kind:cxOwnerKind(x),in:cxIn(x),out:cxOut(x)};
-rpDef('financeiro','Financeiro','Lançamentos, contas a pagar e a receber, contas financeiras e caixas. DRE e fluxo de caixa ficam em Análises.',[
+rpDef('financeiro','Financeiro','Lançamentos, contas a pagar e a receber, contas financeiras, caixas, plano de contas, centros de custo e contatos. A DRE tem a sua página, e a exportação para o sistema do contador fica em Financeiro › Exportação contábil.',[
  {k:'lancamentos',l:'Lançamentos',rows:()=>LANCS.slice().sort((a,b)=>a.d<b.d?1:-1),
   chip:{l:'Tipo',by:r=>r.tipo,items:[rpC('e','Entradas',rpOk),rpC('s','Saídas',rpBad),rpC('t','Transferências',rpInfo)]},
-  fl:[{k:'comp',l:'Competência',opts:()=>[...new Set(LANCS.map(l=>l.comp))].sort().reverse().map(k=>[k,monthName(k)]),ok:(r,v)=>r.comp===v},{k:'cat',l:'Categoria',opts:()=>rpUniq(LANCS.map(l=>l.cat)),ok:(r,v)=>r.cat===v},{k:'conta',l:'Conta',opts:()=>[[rpConta,rpConta]],ok:(r,v)=>(r.conta||rpConta)===v},{k:'st',l:'Situação',opts:()=>Object.keys(rpLcSt).map(k=>[k,rpLcSt[k]]),ok:(r,v)=>r.st===v}],
-  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('comp','Competência',r=>monthName(r.comp)),rpCol('desc','Descrição',r=>r.desc),rpCol('conta','Conta',r=>r.conta||rpConta),rpCol('cat','Categoria',r=>r.cat),rpCol('tipo','Tipo',r=>r.tipo==='e'?'Entrada':r.tipo==='s'?'Saída':'Transferência'),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>rpLcSt[r.st]||r.st),rpCol('orig','Origem',r=>r.orig||'Manual'),rpCol('who','Lançado por',r=>r.who||'—',{off:true})]},
+  fl:[{k:'comp',l:'Competência',opts:()=>[...new Set(LANCS.map(l=>l.comp))].sort().reverse().map(k=>[k,monthName(k)]),ok:(r,v)=>r.comp===v},{k:'cat',l:'Categoria',opts:()=>rpUniq(LANCS.map(l=>l.cat)),ok:(r,v)=>r.cat===v},{k:'conta',l:'Conta',opts:()=>[[rpConta,rpConta]],ok:(r,v)=>(r.conta||rpConta)===v},{k:'st',l:'Situação',opts:()=>Object.keys(rpLcSt).map(k=>[k,rpLcSt[k]]),ok:(r,v)=>r.st===v},{k:'cpf',l:'Comprovante',opts:()=>[['com','Com comprovante'],['sem','Saída sem comprovante']],ok:(r,v)=>v==='com'?!!r.cp:cpMiss(r)}],
+  cols:[rpCol('d','Data',r=>rpD(r.d),{raw:r=>r.d}),rpCol('comp','Competência',r=>monthName(r.comp)),rpCol('desc','Descrição',r=>r.desc),rpCol('conta','Conta',r=>r.conta||rpConta),rpCol('cat','Categoria',r=>r.cat),rpCol('tipo','Tipo',r=>r.tipo==='e'?'Entrada':r.tipo==='s'?'Saída':'Transferência'),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>rpLcSt[r.st]||r.st),rpCol('ct','Contato',r=>r.ct?ctN(r.ct):'—'),rpCol('cc','Centro de custo',r=>r.rt&&r.rt.length?'Rateado: '+rtTxt(r):ccN(r.cc||'cc1')),rpCol('cp','Comprovante',r=>r.tipo==='s'?(r.cp?r.cp:cpReq(r)?'Sem comprovante':'Não se aplica'):'—'),rpCol('orig','Origem',r=>r.orig||'Manual'),rpCol('who','Lançado por',r=>r.who||'—',{off:true})]},
  {k:'pagar',l:'Contas a pagar',rows:()=>PAGAR.slice().sort((a,b)=>a.venc<b.venc?-1:1),
   chip:{l:'Situação',by:r=>r.paid?'pg':r.venc<SX_TODAY?'ven':'ab',items:[rpC('ab','A vencer',rpWarn),rpC('ven','Vencidas',rpBad),rpC('pg','Pagas',rpOk)]},
-  cols:[rpCol('desc','Conta',r=>r.desc),rpCol('cat','Categoria',r=>r.cat),rpCol('venc','Vencimento',r=>rpD(r.venc),{raw:r=>r.venc}),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>r.paid?'Paga':r.venc<SX_TODAY?'Vencida':'A vencer')]},
+  cols:[rpCol('desc','Conta',r=>r.desc),rpCol('cat','Categoria',r=>r.cat),rpCol('ct','Fornecedor ou funcionário',r=>r.ct?ctN(r.ct):'—'),rpCol('cc','Centro de custo',r=>r.rt&&r.rt.length?'Rateado: '+rtTxt(r):ccN(r.cc||'cc1')),rpCol('venc','Vencimento',r=>rpD(r.venc),{raw:r=>r.venc}),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('ab','Em aberto',r=>brl2(tSd(r)),{n:1,raw:r=>tSd(r)}),rpCol('st','Situação',r=>r.paid?'Paga':r.venc<SX_TODAY?'Vencida':'A vencer')]},
  {k:'receber',l:'Contas a receber',rows:()=>RECEB.slice(),
   chip:{l:'Situação',by:r=>rpRecSt(r),items:[rpC('prev','Previstas',rpInfo),rpC('atr','Atrasadas',rpBad),rpC('rec','Recebidas',rpOk)]},
-  cols:[rpCol('desc','Descrição',r=>r.desc),rpCol('prev','Previsão',r=>rpD(r.prev),{raw:r=>r.prev||''}),rpCol('v','Valor previsto',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('st','Situação',r=>({prev:'Prevista',atr:'Atrasada',rec:'Recebida'})[rpRecSt(r)]),rpCol('got','Valor recebido',r=>rpRecSt(r)==='rec'?brl2(r.got):'—',{n:1,raw:r=>rpRecSt(r)==='rec'?r.got:0})]},
+  cols:[rpCol('desc','Descrição',r=>r.desc),rpCol('ct','Cliente',r=>r.ct?ctN(r.ct):'—'),rpCol('cc','Centro de custo',r=>r.rt&&r.rt.length?'Rateado: '+rtTxt(r):ccN(r.cc||'cc1')),rpCol('prev','Previsão',r=>rpD(r.prev),{raw:r=>r.prev||''}),rpCol('v','Valor previsto',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('ab','Em aberto',r=>brl2(tSd(r)),{n:1,raw:r=>tSd(r)}),rpCol('st','Situação',r=>({prev:'Prevista',atr:'Atrasada',rec:'Recebida'})[rpRecSt(r)]),rpCol('got','Valor recebido',r=>rpRecSt(r)==='rec'?brl2(r.got):'—',{n:1,raw:r=>rpRecSt(r)==='rec'?r.got:0})]},
+ {k:'plano',l:'Plano de contas',rows:()=>PLANO.map(a=>({...a,on:!FINAT.has(a.n)})),
+  chip:{l:'Situação',by:r=>r.on?'on':'off',items:[rpC('on','Ativas',rpOk),rpC('off','Inativas',rpOff)]},
+  fl:[{k:'g',l:'Grupo da DRE',opts:()=>DRG.map(g=>[g[0],g[1]]),ok:(r,v)=>r.g===v},{k:'t',l:'Natureza',opts:()=>[['e','Entrada'],['s','Saída']],ok:(r,v)=>r.t===v}],
+  cols:[rpCol('c','Código',r=>r.c),rpCol('n','Conta',r=>r.n),rpCol('g','Grupo da DRE',r=>(DRG.find(g=>g[0]===r.g)||[,''])[1]),rpCol('t','Natureza',r=>r.t==='e'?'Entrada':'Saída'),rpCol('fv','Fixa ou variável',r=>r.fv==='f'?'Fixa':r.fv==='v'?'Variável':'—'),rpCol('cc','Código contábil',r=>r.cc||'—',{off:true}),rpCol('pr','Reconhece',r=>r.pr==='comp'?'Na competência':'No pagamento',{off:true}),rpCol('st','Situação',r=>r.on?'Ativa':'Inativa')]},
+ {k:'centros',l:'Centros de custo',rows:()=>CCUSTOS.slice(),
+  chip:{l:'Situação',by:r=>r.on?'on':'off',items:[rpC('on','Ativos',rpOk),rpC('off','Inativos',rpOff)]},
+  cols:[rpCol('n','Centro de custo',r=>r.n),rpCol('cod','Código contábil',r=>r.cod||'—',{off:true}),rpCol('st','Situação',r=>r.on?'Ativo':'Inativo')]},
+ {k:'contatos',l:'Contatos',rows:()=>CONTATOS.slice(),
+  chip:{l:'Tipo',by:r=>r.tp,items:[rpC('f','Fornecedores',rpOff),rpC('c','Clientes',rpOff),rpC('a','Os dois',rpOff),rpC('u','Funcionários',rpOff)]},
+  cols:[rpCol('n','Nome',r=>r.n),rpCol('tp','Tipo',r=>CTTP[r.tp]),rpCol('role','Cargo',r=>r.role||'—',{off:true}),rpCol('mb','Vínculo',r=>r.tp==='u'?(r.mb?'Membro':'Não é membro'):'—',{off:true}),rpCol('doc','CPF ou CNPJ',r=>r.doc||'—'),rpCol('em','E-mail',r=>r.email||'—'),rpCol('tel','Telefone',r=>r.tel||'—'),rpCol('p','A pagar',r=>brl2(ctAb(r.id)[0]),{n:1,raw:r=>ctAb(r.id)[0]}),rpCol('r','A receber',r=>brl2(ctAb(r.id)[1]),{n:1,raw:r=>ctAb(r.id)[1]})]},
  {k:'contas',l:'Contas financeiras',rows:()=>FCONTAS.map(a=>({n:a.n,tipo:a.tipo,banco:a.banco||'—',ini:a.ini,atual:a.atual,on:true})),
   chip:{l:'Situação',by:r=>r.on?'on':'off',items:[rpC('on','Ativas',rpOk),rpC('off','Inativas',rpOff)]},
   cols:[rpCol('n','Conta',r=>r.n),rpCol('tipo','Tipo',r=>r.tipo),rpCol('b','Banco',r=>r.banco),rpCol('ini','Saldo inicial',r=>brl2(r.ini),{n:1,raw:r=>r.ini}),rpCol('at','Saldo atual',r=>brl2(r.atual),{n:1,raw:r=>r.atual}),rpCol('st','Situação',r=>r.on?'Ativa':'Inativa')]},
@@ -346,6 +371,104 @@ rpDef('usuarios','Usuários e visitantes','Contas do painel e contas de visitant
  {k:'visitantes',l:'Visitantes',rows:()=>ID_VISITORS.slice(),
   chip:{l:'Situação',by:r=>r.status==='Ativo'?'Ativo':'Revogado',items:[rpC('Ativo','Ativos',rpOk),rpC('Revogado','Revogados',rpBad)]},
   cols:[rpCol('n','Visitante',r=>r.n),rpCol('church','Igreja',r=>r.church),rpCol('created','Criado em',r=>rpD(r.created),{raw:r=>r.created}),rpCol('int','Integração',r=>r.integration||'—'),rpCol('st','Situação',r=>r.status),rpCol('e','E-mail',r=>r.e||'—',{s:1,off:true})]}
+]);
+
+/* ---------- Batimento dos relatórios (06/11/2026, HND-129): subgrupos de abas, Financeiro completo, Zeladoria, Conteúdo e vendas ---------- */
+{
+ /* abas em subgrupos (g) e na ordem pedida; a aba que não está na lista fica fora */
+ const arrange=(key,order,groups)=>{const D=RP[key];D.tabs=order.map(k=>Object.assign(D.tabs.find(t=>t.k===k),{g:groups[k]}));};
+ const tab=(key,k)=>RP[key].tabs.find(t=>t.k===k);
+
+ /* ----- Financeiro ----- */
+ const F=RP.financeiro;
+ tab('financeiro','pagar').cols.splice(4,0,rpCol('rep','Repete todo mês',r=>rpYes(r.rep)),rpCol('par','Parcela',r=>r.par?r.si+' de '+r.sn:'—'));
+ tab('financeiro','receber').cols.push(rpCol('rep','Repete todo mês',r=>rpYes(r.rep)),rpCol('par','Parcela',r=>r.par?r.si+' de '+r.sn:'—'));
+ F.tabs=F.tabs.filter(t=>t.k!=='caixas');
+ const unitTipo=u=>({Ministérios:'Ministério',Obras:'Obra',Cultos:'Culto',Eventos:'Evento',Campanhas:'Campanha'})[u.g]||u.g;
+ const cxLbl=({c,e})=>{const s=cxStat(e),m=s&&CXSTL[e.t]&&CXSTL[e.t][s];return m?(s==='banco'&&e.fm==='Dinheiro'?'Depositada no banco':m[1]):(e.t==='out'?'Conferida':'Recebida no banco');};
+ const apTipo={lanc:'Lançamento',imp:'Extrato importado',verba:'Pedido de verba',enc:'Encerramento de caixa'};
+ const feSt={pend:'Pendente',lanc:'Lançado',arq:'Arquivado'};
+ const mqOf=v=>{const o=fqMaqOf(v);return o?o.maq:null;};
+ F.tabs.push(
+  {k:'caixas',l:'Caixas',rows:()=>pcUnits(),note:'O líder de um ministério ou evento vê só o caixa dele (na tela do ministério ou do evento); aqui o Financeiro vê todos. Verba é autorização, não é dinheiro. No caixa de evento ou de obra, No caixa é o dinheiro de verdade (adiantamento + receitas − despesas pagas com o caixa) e Limite restante é o quanto ainda pode gastar (verba − gasto − adiantamento em aberto, mais as receitas se o parâmetro do sistema deixar).',
+   chip:{l:'Situação',by:r=>r.closed?'enc':'ab',items:[rpC('ab','Abertos',rpOk),rpC('enc','Encerrados',rpOff)]},
+   fl:[{k:'tipo',l:'Tipo',opts:()=>[['Ministério','Ministério'],['Evento','Evento'],['Culto','Culto'],['Obra','Obra'],['Campanha','Campanha']],ok:(r,v)=>unitTipo(r)===v}],
+   cols:[rpCol('n','Caixa',r=>r.n),rpCol('k','Tipo',r=>unitTipo(r)),rpCol('f','Fundo',r=>r.kind==='perm'?'Permanente':r.kind==='proj'?'De projeto':'Campanha'),
+    rpCol('in','Entradas',r=>brl2(r.in),{n:1,raw:r=>r.in}),rpCol('out','Saídas',r=>brl2(r.out),{n:1,raw:r=>r.out}),rpCol('bal','No caixa',r=>brl2(r.kind==='proj'&&r.cx?cxCash(r.cx)/100:r.in-r.out),{n:1,raw:r=>r.kind==='proj'&&r.cx?cxCash(r.cx)/100:r.in-r.out}),
+    rpCol('vb','Verba aprovada',r=>r.kind==='proj'?brl2(r.verba):'—',{n:1,raw:r=>r.verba}),rpCol('ad','Adiantamento em aberto',r=>r.kind==='proj'&&r.cx?brl2(cxAdvOpen(r.cx)/100):'—',{n:1,raw:r=>r.kind==='proj'&&r.cx?cxAdvOpen(r.cx)/100:0}),rpCol('dp','Limite restante',r=>r.kind==='proj'&&r.cx?brl2(cxLimit(r.cx)/100):'—',{n:1,raw:r=>r.kind==='proj'&&r.cx?cxLimit(r.cx)/100:0}),
+    rpCol('pc','A conferir',r=>r.cx?pcPend(r):0,{n:1}),rpCol('st','Situação',r=>r.closed?'Encerrado':'Aberto')]},
+  {k:'verbas',l:'Verbas',note:'A verba é pedida pelo líder e decidida só pelo Admin do Financeiro. Não é dinheiro: é autorização de gasto, e a que não foi usada expira no encerramento.',
+   rows:()=>CAIXAS.filter(c=>c.main).flatMap(c=>cxVerbas(c).map(v=>({c,v}))).sort((a,b)=>a.v.d<b.v.d?1:-1),
+   chip:{l:'Situação',by:r=>r.v.st,items:[rpC('pedida','Aguardando o Financeiro',rpWarn),rpC('aprovada','Aprovadas',rpOk),rpC('recusada','Recusadas',rpBad)]},
+   cols:[rpCol('c','Caixa',r=>cxOwnerName(r.c)),rpCol('t','Tipo',r=>cxOwnerKind(r.c)),rpCol('d','Pedido em',r=>rpD(r.v.d),{raw:r=>r.v.d}),rpCol('by','Pedido por',r=>r.v.by||'—'),rpCol('v','Valor',r=>cxMoney(r.v.v),{n:1,raw:r=>r.v.v/100}),rpCol('st','Situação',r=>({pedida:'Aguardando o Financeiro',aprovada:'Aprovada',recusada:'Recusada'})[r.v.st]||r.v.st),rpCol('ap','Decidida por',r=>r.v.appr||'—'),rpCol('why','Motivo',r=>r.v.why||'—',{off:true})]},
+  {k:'cxlanc',l:'Despesas e receitas dos caixas',note:'Cada linha é um lançamento do líder no caixa dele. O Financeiro confere a nota; a despesa paga do bolso vira reembolso a pagar. Transferências entre caixas e estornos não entram.',
+   rows:()=>pcUnits().flatMap(u=>u.cx?pcLcs(u):[]).sort((a,b)=>a.e.d<b.e.d?1:-1),
+   chip:{l:'Situação',by:r=>cxLbl(r),items:rows=>[...new Set(rows.map(cxLbl))].map(x=>rpCh(x,x))},
+   fl:[{k:'t',l:'Tipo',opts:()=>[['in','Receita'],['out','Despesa']],ok:(r,v)=>r.e.t===v},{k:'pay',l:'Pago com',opts:()=>[['bolso','Do bolso (reembolsar)'],['cx','Dinheiro do caixa']],ok:(r,v)=>r.e.pay===v}],
+   cols:[rpCol('d','Data',r=>rpD(r.e.d),{raw:r=>r.e.d}),rpCol('c','Caixa',r=>cxOwnerName(r.c)+(r.c.main?'':' · '+r.c.name)),rpCol('t','Tipo',r=>r.e.t==='in'?'Receita':'Despesa'),rpCol('ds','Descrição',r=>r.e.desc),rpCol('cat','Categoria',r=>r.e.cat||'—'),rpCol('v','Valor',r=>cxMoney(r.e.v),{n:1,raw:r=>r.e.v/100}),rpCol('pg','Pago com',r=>r.e.t==='out'?(r.e.pay==='bolso'?'Do bolso':'Dinheiro do caixa'):'—'),rpCol('st','Situação',r=>cxLbl(r)),rpCol('by','Lançado por',r=>r.e.by||'—',{off:true})]},
+  {k:'vendas',l:'Vendas e conciliação',note:'Vendas no cartão dos módulos de vendas (últimos 7 dias do exemplo), com a maquininha, a taxa e em que passo a conciliação está.',
+   rows:()=>fqSales().slice().sort((a,b)=>(a.date+a.time)<(b.date+b.time)?1:-1),
+   chip:{l:'Situação',by:r=>fqStat(r).st,items:[rpC('conferir','A conferir',rpWarn),rpC('maq','Conciliada com a maquininha',rpInfo),rpC('banco','Recebida no banco',rpOk)]},
+   fl:[{k:'mod',l:'Módulo',opts:()=>Object.entries(FQMODN),ok:(r,v)=>r.store===v}],
+   cols:[rpCol('id','Venda',r=>r.id),rpCol('d','Data',r=>rpD(r.date)+' '+r.time,{raw:r=>r.date+r.time}),rpCol('m','Módulo',r=>FQMODN[r.store]||r.store),rpCol('mq','Maquininha',r=>(mqOf(r)||{n:'—'}).n),rpCol('fp','Forma',r=>fqLbl(r)),rpCol('tot','Valor',r=>brl2(r.total),{n:1,raw:r=>r.total}),rpCol('tx','Taxa',r=>brl2(fqTaxa(r)),{n:1,raw:r=>fqTaxa(r)}),rpCol('lq','A receber',r=>brl2(r.total-fqTaxa(r)),{n:1,raw:r=>r.total-fqTaxa(r)}),rpCol('pv','Recebe em',r=>fqPv(r)),rpCol('st','Situação',r=>({conferir:'A conferir',maq:'Conciliada com a maquininha',banco:'Recebida no banco'})[fqStat(r).st])]},
+  {k:'maq',l:'Maquininhas e totens',
+   rows:()=>[...FQMAQ.map(m=>({k:'Maquininha',m,n:m.n,mod:m.mod,cc:m.cc,id:m.est,quem:m.adq,conta:m.conta})),...FQTOT.map(t=>({k:'Totem',m:t,n:t.n,mod:t.mod,cc:t.cc,id:t.term,quem:t.prov,conta:(fqMq(t.maq)||{n:'—'}).n}))],
+   fl:[{k:'tipo',l:'Tipo',opts:()=>[['Maquininha','Maquininhas'],['Totem','Totens']],ok:(r,v)=>r.k===v},{k:'mod',l:'Módulo',opts:()=>Object.entries(FQMODM),ok:(r,v)=>r.mod===v}],
+   cols:[rpCol('n','Nome',r=>r.n),rpCol('k','Tipo',r=>r.k),rpCol('mod','Módulo',r=>FQMODM[r.mod]),rpCol('who','Adquirente ou provedor',r=>r.quem),rpCol('id','Estabelecimento ou terminal',r=>r.id),rpCol('cc','Centro de custo',r=>fqCcN(r.cc)),rpCol('ct','Recebe em',r=>r.k==='Totem'?'Maquininha: '+r.conta:r.conta),
+    rpCol('nv','Vendas no cartão (7 dias)',r=>fqSales().filter(v=>{const o=fqMaqOf(v);return o&&(r.k==='Totem'?o.tot&&o.tot.id===r.m.id:o.maq.id===r.m.id);}).length,{n:1})]},
+  {k:'aprov',l:'Aprovações',note:'Só o que está aguardando decisão. Decide o Admin do Financeiro: lançamento, extrato importado, pedido de verba e pedido de encerramento de caixa.',
+   rows:()=>APROVS.slice(),
+   chip:{l:'Tipo',by:r=>r.tipo,items:Object.keys(apTipo).map(k=>rpCh(k,apTipo[k]))},
+   cols:[rpCol('ds','Pedido',r=>r.desc),rpCol('tp','Tipo',r=>apTipo[r.tipo]||r.tipo),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('d','Em',r=>rpD(r.d),{raw:r=>r.d}),rpCol('w','Pedido por',r=>r.who||'—')]},
+  {k:'entrada',l:'Caixa de entrada',note:'Documentos que chegaram por envio manual, e-mail e WhatsApp. A coluna “De” pode ter telefone ou e-mail de quem enviou.',
+   rows:()=>FEDOCS.slice().sort((a,b)=>a.q<b.q?1:-1),
+   chip:{l:'Situação',by:r=>r.st,items:[rpC('pend','Pendentes',rpWarn),rpC('lanc','Lançados',rpOk),rpC('arq','Arquivados',rpOff)]},
+   fl:[{k:'o',l:'Origem',opts:()=>Object.entries(FE_OR).map(([k,v])=>[k,v[0]]),ok:(r,v)=>r.orig===v}],
+   cols:[rpCol('n','Documento',r=>r.nome),rpCol('o','Origem',r=>FE_OR[r.orig][0]),rpCol('de','De',r=>r.de,{s:1}),rpCol('q','Chegou em',r=>rpD(r.q.slice(0,10))+' '+r.q.slice(11,16),{raw:r=>r.q}),rpCol('kb','Tamanho (KB)',r=>r.kb,{n:1}),rpCol('st','Situação',r=>feSt[r.st]||r.st),rpCol('nt','Observação',r=>r.nota||'—',{off:true})]},
+  {k:'fech',l:'Fechamentos',note:'Fechado trava os lançamentos do mês e o Admin pode reabrir; selado não reabre mais.',
+   rows:()=>FCLOSED.map(([m,s])=>({m,s})),
+   chip:{l:'Situação',by:r=>r.s,items:[rpC('Fechado','Fechados',rpWarn),rpC('Selado','Selados',rpOk)]},
+   cols:[rpCol('m','Mês',r=>monthName(r.m),{raw:r=>r.m}),rpCol('s','Situação',r=>r.s)]}
+ );
+ arrange('financeiro',['lancamentos','pagar','receber','caixas','verbas','cxlanc','vendas','maq','aprov','entrada','fech','contas','plano','centros','contatos'],
+  {lancamentos:'Movimento',pagar:'Movimento',receber:'Movimento',caixas:'Caixas e vendas',verbas:'Caixas e vendas',cxlanc:'Caixas e vendas',vendas:'Caixas e vendas',maq:'Caixas e vendas',aprov:'Controle',entrada:'Controle',fech:'Controle',contas:'Cadastros',plano:'Cadastros',centros:'Cadastros',contatos:'Cadastros'});
+ F.lede='Lançamentos, contas a pagar e a receber, caixas e verbas, vendas e conciliação, maquininhas, aprovações, caixa de entrada, fechamentos e os cadastros do Financeiro. A DRE tem a sua página, e a exportação para o sistema do contador fica em Financeiro › Exportação contábil.';
+
+ /* ----- Conteúdo: biblioteca × trilhas, e onde cada item foi usado em encontros ----- */
+ [['pregacoes','sermon'],['musicas','song'],['videos','video'],['materiais','material']].forEach(([k,r])=>tab('conteudo',k).cols.push(rpCol('use','Usado em encontros',x=>ctMeetUses(r+'|'+x.id).length,{n:1})));
+ arrange('conteudo',['pregacoes','musicas','videos','materiais','series','jornadas','cursos'],{pregacoes:'Biblioteca',musicas:'Biblioteca',videos:'Biblioteca',materiais:'Biblioteca',series:'Trilhas',jornadas:'Trilhas',cursos:'Trilhas'});
+
+ /* ----- Almoxarifado ----- */
+ arrange('almoxarifado',['itens','resumo','emprestimos','movimentacoes'],{itens:'Estoque',resumo:'Estoque',emprestimos:'Movimento',movimentacoes:'Movimento'});
+
+ /* ----- Cafeteria, Restaurante e Loja: origem da venda e conciliação financeira ----- */
+ const concL=s=>{if(s.status!=='completed')return '—';const x=fqStat(s).st;return x==='conferir'?'A conferir':x==='maq'?'Conciliada com a maquininha':s.method==='Dinheiro'?'Depositada no banco':'Recebida no banco';};
+ ['cafe','rest','shop'].forEach(k=>{const v=tab(k,'vendas');
+  v.cols.splice(4,0,rpCol('or','Origem',r=>foodOrigin(r)));
+  v.cols.splice(7,0,rpCol('cf','Conciliação',r=>concL(r)));
+  v.fl.push({k:'or',l:'Origem',opts:()=>[['Balcão','Balcão'],['Totem','Totem'],['App','App']],ok:(r,x)=>foodOrigin(r)===x});});
+}
+
+/* ---------- Zeladoria ---------- */
+rpDef('zeladoria','Zeladoria','Pedidos de manutenção e melhorias: da avaliação ao orçamento, à aprovação do Financeiro, à execução e à prestação de contas.',[
+ {k:'trabalhos',l:'Trabalhos',
+  rows:()=>ZJ.slice().sort((a,b)=>a.pedDate<b.pedDate?1:-1),
+  chip:{l:'Situação',by:r=>r.st,items:rows=>[...new Set(rows.map(r=>r.st))].map(k=>rpCh(k,ZSTL[k]||k))},
+  fl:[{k:'tipo',l:'Tipo',opts:()=>[['Manutenção','Manutenção'],['Melhoria','Melhoria']],ok:(r,v)=>r.tipo===v},{k:'urg',l:'Urgência',opts:()=>[['Urgente','Urgente'],['Normal','Normal']],ok:(r,v)=>(r.urg||'Normal')===v}],
+  cols:[rpCol('n','Trabalho',r=>r.n),rpCol('tp','Tipo',r=>r.tipo),rpCol('lc','Local',r=>r.local||'—'),rpCol('urg','Urgência',r=>r.urg||'Normal'),rpCol('pb','Pedido por',r=>r.pedBy||'—'),rpCol('pd','Pedido em',r=>rpD(r.pedDate),{raw:r=>r.pedDate}),
+   rpCol('st','Situação',r=>ZSTL[r.st]||r.st),rpCol('ex','Execução',r=>r.exec==='equipe'?'Equipe da Zeladoria':r.exec==='terceiro'?'Fornecedor':'—'),rpCol('rs','Responsável',r=>r.resp||'—'),
+   rpCol('ap','Valor aprovado',r=>r.apr?brl2(r.apr.v):'—',{n:1,raw:r=>r.apr?r.apr.v:0}),rpCol('vb','Verba liberada',r=>brl2(zLib(r)),{n:1,raw:r=>zLib(r)}),
+   rpCol('gs','Gasto',r=>{const c=CAIXAS.find(x=>x.ownerType==='zel'&&x.ownerId===r.id);return brl2(c?cxOut(c)/100:0);},{n:1,raw:r=>{const c=CAIXAS.find(x=>x.ownerType==='zel'&&x.ownerId===r.id);return c?cxOut(c)/100:0;}}),
+   rpCol('fim','Previsão de fim',r=>r.fim?rpD(r.fim):'—',{raw:r=>r.fim||''})]},
+ {k:'material',l:'Materiais e mão de obra',note:'Tudo o que a Zeladoria prevê e gasta, em todos os trabalhos: material e mão de obra, previsto (orçamento e proposta escolhida) e gasto (lançado no caixa do trabalho). Filtre por tipo, situação do item e situação do trabalho.',
+  rows:()=>ZJ.flatMap(j=>{const pv=zProp(j),cx=CAIXAS.find(x=>x.ownerType==='zel'&&x.ownerId===j.id),
+    mt=(j.mat||[]).map(m=>({j,tipo:'Material',sit:'previsto',item:m.i,forn:'',v:m.v,d:'',cat:j.cat||''})),
+    mo=pv?[{j,tipo:'Mão de obra',sit:'previsto',item:'Proposta escolhida',forn:zFn(pv.forn),v:pv.v,d:'',cat:j.cat||''}]:[],
+    gs=(cx?cxValid(cx).filter(e=>e.t==='out'&&!e.xfer):[]).map(e=>({j,tipo:e.nat||'—',sit:'gasto',item:e.desc,forn:e.forn?zFn(e.forn):'',v:e.v/100,d:e.d,cat:e.cat||''}));
+    return [...mt,...mo,...gs];}).sort((a,b)=>(a.j.n+a.sit+a.tipo)<(b.j.n+b.sit+b.tipo)?-1:1),
+  chip:{l:'Situação do item',by:r=>r.sit,items:[rpC('previsto','Previsto',rpInfo),rpC('gasto','Gasto',rpOk)]},
+  fl:[{k:'tp',l:'Tipo',opts:()=>[['Material','Material'],['Mão de obra','Mão de obra']],ok:(r,v)=>r.tipo===v},{k:'js',l:'Situação do trabalho',opts:()=>Object.entries(ZSTL),ok:(r,v)=>r.j.st===v},{k:'j',l:'Trabalho',opts:()=>ZJ.map(j=>[j.id,j.n]),ok:(r,v)=>r.j.id===v}],
+  cols:[rpCol('j','Trabalho',r=>r.j.n),rpCol('tp','Tipo',r=>r.tipo),rpCol('i','Item',r=>r.item),rpCol('f','Fornecedor',r=>r.forn||'—'),rpCol('sit','Situação do item',r=>r.sit==='gasto'?'Gasto':'Previsto'),rpCol('v','Valor',r=>brl2(r.v),{n:1,raw:r=>r.v}),rpCol('d','Data do gasto',r=>r.d?rpD(r.d):'—',{raw:r=>r.d}),rpCol('cat','Categoria',r=>r.cat||'—'),rpCol('st','Situação do trabalho',r=>ZSTL[r.j.st]||r.j.st)]}
 ]);
 
 /* menu Relatórios e roteamento */

@@ -394,9 +394,13 @@ const CT_KIND={sermon:'content.sermon',video:'content.video',song:'content.song'
 const ctHash=s=>[...String(s)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
 const ctTab=id=>{if(S.cttK!==id){S.cttK=id;S.ctt='det';}return S.ctt;};
 function ctPage(kind,id,o,det){const t=ctTab(id),{ini,con}=ctProgRows(kind,id),nc=cmtList(CT_KIND[kind]+':'+id).length;
- const tabs=[['det','Detalhes','ctTab',null],['prog','Progresso','ctTab',null],['cmt','Comentários','ctTab',nc||null],['uso','Usos','ctTab',null]];
+ const tabs=[['det','Detalhes','ctTab',null],['prog','Progresso','ctTab',null],['cmt','Comentários','ctTab',nc||null],['uso','Usos','ctTab',null],['hist','Histórico','ctTab',null]];
  return joHead(null,o.crumbs,o.title,o.sub,[[nfmt(ini),'Iniciaram'],[nfmt(con),'Concluíram'],[nc,'Comentários'],[o.files,o.filesLabel||'Arquivos']],tabs,t,o.act)
-  +(t==='det'?det:`<div class="rise" style="--d:2">${t==='prog'?ctProgTab(kind,id):t==='cmt'?cmtCard(CT_KIND[kind],id):ctUsesCard(kind,id)}</div>`);}
+  +(t==='det'?det:`<div class="rise" style="--d:2">${t==='prog'?ctProgTab(kind,id):t==='cmt'?cmtCard(CT_KIND[kind],id):t==='hist'?ctHistTab(kind,id):ctUsesCard(kind,id)}</div>`);}
+/* Histórico do conteúdo: o mesmo desenho da aba Histórico da ficha do membro (exemplo gerado, sem edição) */
+function ctHistTab(kind,id){const h=ctHash(kind+id),N=ctNames(),who=i=>N[(h>>>i)%N.length]||'Equipe de conteúdo',d=n=>fmtD(addDays(-n));
+ const L=[['Conteúdo criado',who(1),'pes',d(30+h%20)],['Arquivos enviados',who(1),'pes',d(29+h%20)],['Publicado para a igreja',who(2),'pes',d(26+h%20)],['Texto editado',who(3),'pes',d(8+h%9)],['Visibilidade conferida','Sistema','sys',d(2+h%5)]].reverse();
+ return `<section class="card pc"><div class="sh"><h2>Histórico</h2><span class="who">${L.length} registros</span></div><ol class="htl">${L.map(x=>`<li><span class="hd2">${x[3]}</span><span class="hdot ${x[2]}"></span><span class="hb"><b>${x[0]}</b><span>${x[2]==='sys'?'Automático · '+x[1]:'por '+esc(x[1])}</span></span></li>`).join('')}</ol></section>`;}
 const ctRow=(l,v,w)=>`<div${w?' class="wide"':''}><dt>${l}</dt><dd>${v||'<span class="soft">Não informado</span>'}</dd></div>`;
 
 /* Progresso: entrar marca Iniciado (automático); Concluído é a pessoa quem marca */
@@ -424,9 +428,9 @@ const atomSel=cur=>`<span class="selw"><select name="mat"><option value="">Nenhu
 const atomPick=v=>{const [k,id]=(v||'').split('|'),g=ATOMS().find(z=>z[0]&&z[1]===k),x=g&&g[2].find(z=>z.id===id);return x?{mat:atomTitle(x),mref:v}:{mat:'',mref:''};};
 /* onde um item é usado em encontros: a Casa aparece pelo nome; discipulado e acompanhamento só pelo tipo e a data, sem a pessoa (quem cadastra conteúdo pode não ver a rede nem o caso) */
 const ctMeetUses=ref=>{const r=[],dt=m=>fmtD(m.d);
- CASAS.forEach(c=>c.meets.forEach(m=>{if(m.mref===ref)r.push({d:m.d,i:'home',t:c.n,sub:dt(m)+' · encontro da Casa',go:'cas|'+c.id});}));
- DISC.forEach(d=>d.meets.forEach(m=>{if(m.mref===ref)r.push({d:m.d,i:'heart',t:'Encontro de discipulado',sub:dt(m)});}));
- CASES.forEach(c=>(c.meets||[]).forEach(m=>{if(m.mref===ref)r.push({d:m.d,i:'hand',t:'Encontro de acompanhamento',sub:dt(m)});}));
+ CASAS.forEach(c=>c.meets.forEach(m=>{if(meetItHas(m,ref))r.push({d:m.d,i:'home',t:c.n,sub:dt(m)+' · encontro da Casa',go:'cas|'+c.id});}));
+ DISC.forEach(d=>d.meets.forEach(m=>{if(meetItHas(m,ref))r.push({d:m.d,i:'heart',t:'Encontro de discipulado',sub:dt(m)});}));
+ CASES.forEach(c=>(c.meets||[]).forEach(m=>{if(meetItHas(m,ref))r.push({d:m.d,i:'hand',t:'Encontro de acompanhamento',sub:dt(m)});}));
  return r.sort((a,b)=>a.d<b.d?1:-1);};
 function ctUses(kind,id){
  const G=[],add=(h,rows)=>{if(rows.length)G.push({h,rows});},ml=m=>{const x=MINIS.find(z=>z.n===m);return {i:'users',t:m,sub:'Restrito aos integrantes do ministério',go:x?'min|'+x.id:''};};

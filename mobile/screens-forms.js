@@ -83,7 +83,7 @@ function rfSave(c,r,F,sh){const v=rfRead(sh,F),off=f=>f.if&&v[f.if[0]]!==f.if[1]
  const n=v[c.main],s=rfSub(c,v)||(r&&r.s)||c.empty||'Sem detalhes ainda',d=rfDetail(c,v),im=c.form.find(f=>f.t==='image'),cover=(im&&v[im.k]&&v[im.k][0]&&v[im.k][0].url)||'';
  const cap=parseInt(v.cap)||0;
  if(r)Object.assign(r,{n,s,v,d,cover:cover||r.cover},cap?{cap}:{});
- else c.rows.unshift({id:'x'+Date.now(),n,s,v,d,cover,cap:cap||10,oc:0,st:pub&&c.ST.pb?'pb':Object.keys(c.ST)[0]});
+ else c.rows.unshift({id:'x'+Date.now(),n,s,v,d,cover,cap:cap||10,oc:0,st:pub&&c.ST.pb?'pb':c.newSt?c.newSt():Object.keys(c.ST)[0]});
  closeSheet();softRender();toast('success',r?'Salvo':'Criado',n);}
 
 function rfForm(c,r){
@@ -94,7 +94,7 @@ function rfForm(c,r){
   if(f.h){h+=`<p class="eb2" style="padding-top:8px">${f.h}</p>`;continue;}
   if(f.half&&F[i+1]&&F[i+1].half){h+=`<div class="row g3">${rfField(f,v)}${rfField(F[i+1],v)}</div>`;i++;continue;}
   h+=rfField(f,v);}
- sheet(`<div class="stack g5"><h3 class="t2">${r?'Editar':c.add}</h3>${h}<div class="row g3 rfact"><button class="btn outline md grow" data-a="closeSheet">Cancelar</button><button class="btn primary md grow" id="lfOk">Salvar</button></div></div>`,sh=>{rfWire(sh,F);$('#lfOk',sh).addEventListener('click',()=>rfSave(c,r,F,sh));});}
+ sheet(`<div class="stack g5"><h3 class="t2">${r?(c.editLabel&&c.editLabel(r)||'Editar'):c.add}</h3>${h}<div class="row g3 rfact"><button class="btn outline md grow" data-a="closeSheet">Cancelar</button><button class="btn primary md grow" id="lfOk">Salvar</button></div></div>`,sh=>{rfWire(sh,F);$('#lfOk',sh).addEventListener('click',()=>rfSave(c,r,F,sh));});}
 
 /* ---------- Conteúdo: formulários de cada seção ---------- */
 const RF_SERIES=['Fundamentos da fé','Casa e família','Propósito'],RF_PASTORES=['Pr. Rafael Pereira','Pr. Marcos Lima','Convidado'];

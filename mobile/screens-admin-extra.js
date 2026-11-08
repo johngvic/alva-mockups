@@ -5,8 +5,8 @@
    ========================================================= */
 {
 const g=gMod('admin'),gc=gMod('comunicacao');
-g[5]=['Usuários e permissões','Papéis e matriz','Visitantes','Superusuários','Recursos habilitados','Parâmetros do sistema','Multi-igreja','Auditoria','LGPD'];
-gc[5]=['Notícias','Notificações','Automações','Modelos','Mensagens','Banners','Transmissões'];
+g[5]=['Usuários e permissões'];
+gc[5]=['Notícias','Notificações','Mensagens','Banners','Transmissões'];
 const B=t=>(k,l,o)=>Object.assign({k,l,t},o||{});
 const tx=B('text'),ar=B('area'),nu=B('num');
 const sl=(k,l,opts,o)=>Object.assign({k,l,t:'sel',opts},o||{});

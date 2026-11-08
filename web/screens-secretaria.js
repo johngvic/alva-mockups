@@ -498,7 +498,7 @@ function sxMdDlg(){
 }
 Object.assign(A,{
  sxCgTab:v=>{S.sxCg=v;render();},sxMdF:v=>{S.sxMdF=v;render();},sxMdNew:()=>sxMdDlg(),sxCgNew:()=>sxCgDlg(),sxCgEdit:v=>sxCgDlg(v),
- sxMdEnd:v=>{const x=SX_MAND.find(y=>y.id===v);sxDlg('Encerrar mandato',esc(x.pessoa)+' · '+esc(sxCargo(x.cg).n),`<p class="sx-eff">${ic('info',14,2)} O mandato termina hoje.${x.sc?' O acesso '+esc(sxCargo(x.cg).ac.area)+' concedido por ele é retirado.':''}</p>`,sxOk('Encerrar mandato'));
+ sxMdEnd:v=>{const x=SX_MAND.find(y=>y.id===v);sxDlg('Encerrar mandato',esc(x.pessoa)+' · '+esc(sxCargo(x.cg).n),`<p class="sx-eff">${ic('info',14,2)} Só o administrador da Secretaria encerra um mandato. O mandato termina hoje.${x.sc?' O acesso '+esc(sxCargo(x.cg).ac.area)+' concedido por ele é retirado.':''}</p>`,sxOk('Encerrar mandato'));
   const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxRevoke(x);x.fim=x.ini>SX_TODAY?x.ini:SX_TODAY;x.enc=1;sxLog('Encerrou','Mandato',sxCargo(x.cg).n+' · '+x.pessoa);closeDlg();render();toast('Mandato encerrado');};}
 });
 

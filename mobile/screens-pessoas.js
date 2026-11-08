@@ -56,24 +56,25 @@ const LSD={
  }
 };
 S.ls={key:'',q:'',f:'all'};
-const lsCfg=()=>{const sc=gMod(S.gmod)[5];return LSD[S.gmod][sc.length>5?S.gsec:sc[S.gtab]];};
+const lsC=(mod,sec)=>{const c=LSD[mod][sec],o=APPSEC[mod+'|'+sec];return o?Object.assign(Object.create(c),o):c;};
+const lsCfg=()=>{const sc=gMod(S.gmod)[5];return lsC(S.gmod,sc.length>5?S.gsec:sc[S.gtab]);};
 const lsRow=id=>lsCfg().rows.find(r=>r.id===id);
 const lsTag=(c,st)=>{const t=c.ST[st];return vsTag(t[0],t[1]);};
 function lsRows(c){const q=norm2(S.ls.q),l=c.rows.filter(r=>(S.ls.f==='all'||r.st===S.ls.f)&&(!q||norm2(r.n+' '+r.s).includes(q)));let g=null;
  return l.length?`<div class="vl">${l.map(r=>{const head=r.g&&r.g!==g?(g=r.g,`<p class="eb2" style="padding:16px 0 8px;box-shadow:inset 0 -1px 0 var(--line)">${r.g}</p>`):'';return head+`<button class="vr tap" data-a="lsOpen" data-v="${r.id}">${c.av?pavM(r.n,lsAv[r.id.length%6]):''}<span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(r.n)}</span><span class="vs">${esc(r.s)}</span></span>${lsTag(c,r.st)}</button>`;}).join('')}</div>`:vsEmpty('Nada encontrado','Tente outra busca ou filtro.');}
-function lsBody(m,sec){const c=LSD[m[0]][sec];if(c.restrict&&S.role!=='admin')return `<div class="stack g5 vs-root">${vsEmpty('Área restrita','Só o Administrador e quem a igreja autorizar acessam este registro. Cada consulta vai para a auditoria.')}</div>`;if(c.custom)return `<div class="stack g5 vs-root">${c.custom()}</div>`;const key=m[0]+'|'+sec;if(S.ls.key!==key)Object.assign(S.ls,{key,q:'',f:'all'});
+function lsBody(m,sec){const c=lsC(m[0],sec);if(c.restrict&&S.role!=='admin')return `<div class="stack g5 vs-root">${vsEmpty('Área restrita','Só o Administrador e quem a igreja autorizar acessam este registro. Cada consulta vai para a auditoria.')}</div>`;if(c.custom)return `<div class="stack g5 vs-root">${c.custom()}</div>`;const key=m[0]+'|'+sec;if(S.ls.key!==key)Object.assign(S.ls,{key,q:'',f:'all'});
  const n=st=>c.rows.filter(r=>st==='all'||r.st===st).length,sts=Object.keys(c.ST);
  return `<div class="stack g5 vs-root">${vsHead(c.rows.length+' '+c.noun,c.noAdd?'':vsAdd(m[0],'lsNew',c.add))}${c.rows.length>6?vsSearch('lsQ','Buscar',''):''}${sts.length>1?vsChips('lsF',S.ls.f,[['all','Todos',n('all')],...sts.map(s=>[s,c.ST[s][1],n(s)])]):''}<div id="lsList">${lsRows(c)}</div></div>`;}
-function lsSheet(id){const m=S.gmod,c=lsCfg(),r=lsRow(id);if(c.sheet==='usr')return admUserSheet(id);const acts=c.acts.filter(a=>a[2].includes(r.st));
+function lsSheet(id){const m=S.gmod,c=lsCfg(),r=lsRow(id);if(c.sheet==='usr')return admUserSheet(id);const acts=c.acts.filter(a=>a[2].includes(r.st)&&can(m,a[3]||'editar'));
  sheet(`<div class="stack g5">${r.cover?`<img class="rfcover" src="${r.cover}" alt="">`:''}<div class="row g3" style="align-items:center">${c.av?pavM(r.n,lsAv[r.id.length%6],'lg'):''}<div class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><h3 class="t2">${esc(r.n)}</h3>${lsTag(c,r.st)}</div></div>
  <div class="vl">${r.d.map(([l,v])=>`<div class="vr"><span class="vs" style="min-width:104px">${l}</span><span class="grow" style="text-align:right;overflow-wrap:anywhere">${esc(v)}</span></div>`).join('')}</div>
- ${rfMedia(r)}${c.extra?c.extra(r):''}<div class="stack g3">${can(m,'editar')?acts.map((a,i)=>`<button class="btn ${i?'outline':'primary'} md block" data-a="lsAct" data-v="${id}|${a[1]}">${a[0]}</button>`).join('')+(c.ro?(acts.length?'':'<button class="btn outline md block" data-a="closeSheet">Fechar</button>'):`<button class="btn outline md block" data-a="lsEdit" data-v="${id}">Editar</button>`):'<p class="callout">Você só pode ver esta ficha.</p>'}
- ${can(m,'excluir')&&!c.ro?`<button class="btn danger md block" data-a="lsDel" data-v="${id}">Excluir</button>`:''}</div></div>`);}
+ ${rfMedia(r)}${c.extra?c.extra(r):''}<div class="stack g3">${can(m,'editar')?acts.map((a,i)=>`<button class="btn ${i?'outline':'primary'} md block" data-a="lsAct" data-v="${id}|${a[1]}">${a[0]}</button>`).join('')+(c.ro?(acts.length?'':'<button class="btn outline md block" data-a="closeSheet">Fechar</button>'):(!c.canEdit||c.canEdit(r)?`<button class="btn outline md block" data-a="lsEdit" data-v="${id}">${c.editLabel?c.editLabel(r):'Editar'}</button>`:'')):'<p class="callout">Você só pode ver esta ficha.</p>'}
+ ${can(m,'excluir')&&!c.ro&&!(c.noDel&&c.noDel(r))?`<button class="btn danger md block" data-a="lsDel" data-v="${id}">Excluir</button>`:''}</div></div>`);}
 function lsForm(id){const c=lsCfg(),r=id?lsRow(id):null;if(c.form)return rfForm(c,r);
  sheet(`<div class="stack g5"><h3 class="t2">${r?'Editar':c.add}</h3>${c.fields.map(([k,l,ph])=>field({id:'lf_'+k,label:l,ph,val:r?r[k]:''})).join('')}
  <div class="row g3"><button class="btn outline md grow" data-a="closeSheet">Cancelar</button><button class="btn primary md grow" id="lfOk">Salvar</button></div></div>`,sh=>$('#lfOk',sh).addEventListener('click',()=>{
   const n=val('lf_n'),s=val('lf_s');if(!n){setErr('lf_n','Preencha este campo.');return;}
-  if(r){r.n=n;r.s=s||r.s;}else c.rows.unshift({id:'x'+Date.now(),n,s:s||'Sem detalhes ainda',st:Object.keys(c.ST)[0],cap:10,oc:0,d:[['Criado em','hoje'],['Responsável',S.user.name]]});
+  if(r){r.n=n;r.s=s||r.s;}else c.rows.unshift({id:'x'+Date.now(),n,s:s||'Sem detalhes ainda',st:c.newSt?c.newSt():Object.keys(c.ST)[0],cap:10,oc:0,d:[['Criado em','hoje'],['Responsável',S.user.name]]});
   closeSheet();softRender();toast('success',r?'Salvo':'Criado',n);}));}
 Object.assign(A,{
  lsF:v=>{S.ls.f=v;softRender();},lsOpen:id=>lsSheet(id),lsNew:()=>lsForm(),lsEdit:id=>lsForm(id),

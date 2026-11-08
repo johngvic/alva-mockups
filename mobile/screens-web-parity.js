@@ -31,6 +31,7 @@ const ZC=['Ar-condicionado','Pintura','Elétrica','Hidráulica','Portas e portõ
 const ZLOC=['Banheiros','Sala de Kids','Salão principal','Hall de entrada','Estacionamento','Sala 3','Anexo','Templo','Cozinha'];
 const ZT={pe:['warning','Pedido'],or:['info','Orçamento'],ap:['warning','Aprovação'],ex:['info','Execução'],co:['ok','Concluído']};
 const zT=def({noun:'trabalhos',add:'Pedir um trabalho',ST:ZT,main:'n',sub:['local','quem'],
+ extra:r=>(r.st==='ex'||r.st==='co')&&can('zeladoria','criar')?`<button class="btn outline md block" data-a="zeDesp" data-v="${r.id}">${ic('camera',18,1.8)}Adicionar despesa</button>`:'',
  acts:[['Avaliar pedido','or',['pe']],['Enviar para aprovação','ap',['or']],['Aprovar e iniciar','ex',['ap']],['Concluir trabalho','co',['ex']]],
  form:[tx('n','O que precisa ser feito',{req:1,ph:'Ex.: Trocar o ar-condicionado'}),sl('local','Onde',ZLOC),tx('quem','Quem pediu',{ph:'Nome'}),
   sl('tipo','Tipo',['Manutenção','Melhoria']),sl('cat','Categoria',ZC),tg('urg','Urgente',{hint:'Avaliar o quanto antes'}),
@@ -66,9 +67,11 @@ const zeAna=()=>{const cats=ZCT.map(([n,,v])=>[n,parseInt(v.replace(/\./g,''))])
  +sec('Por fornecedor',`<div class="vl">${forn.map(([n,v])=>bar(n,v,forn[2][1]>11500?forn[2][1]:11500,R$(v))).join('')}</div>`)
  +sec('Material × mão de obra',`<div class="vl">${mat.map(([n,v])=>bar(n,v,mat[1][1],R$(v))).join('')}</div>`);};
 LSD.zeladoria={'Visão geral':{custom:zeVis},'Trabalhos':zT,'Fornecedores':zF,'Categorias':zC,'Análises':{custom:zeAna}};
-gMod('zeladoria')[5]=['Visão geral','Trabalhos','Fornecedores','Categorias','Análises'];
+gMod('zeladoria')[5]=['Visão geral','Trabalhos','Fornecedores'];
 GPEND.zeladoria=[['Pedidos a avaliar',2],['Aguardando aprovação',1]];
-Object.assign(A,{zeOpen:id=>{closeSheet();goSec('zeladoria','Trabalhos');lsSheet(id);}});
+Object.assign(A,{zeOpen:id=>{closeSheet();goSec('zeladoria','Trabalhos');lsSheet(id);},
+ zeDesp:async id=>{const r=lsRow(id);await closeSheet();
+  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Adicionar despesa</h3><p class="callout">${esc(r.n)}</p></div>${field({id:'zd_v',label:'Valor',ph:'0,00',im:'decimal'})}${field({id:'zd_d',label:'O que foi comprado',ph:'Ex.: Material elétrico'})}<label class="rfadd tap" for="zd_f">${ic('camera',18)}<span>Tirar foto do comprovante</span></label><input id="zd_f" type="file" accept="image/*" capture="environment" hidden><div class="row g3"><button class="btn outline md grow" data-a="closeSheet">Cancelar</button><button class="btn primary md grow" id="zdOk">Salvar</button></div></div>`,sh=>$('#zdOk',sh).addEventListener('click',()=>{closeSheet();toast('success','Despesa adicionada',r.n+' · lançada no caixa da Zeladoria.');}));}});
 
 /* ======================= SECRETARIA ======================= */
 const SA=def({noun:'atos',add:'Registrar ato',ST:{pd:['warning','Pendente'],re:['ok','Realizado'],in:['info','Informado'],rc:['off','Recusado']},acts:[['Aprovar ato','re',['pd']],['Recusar','rc',['pd']]],main:'n',sub:['tipo','data','local'],
@@ -96,7 +99,7 @@ const seAna=()=>{const ent=[2,2,3,3,21,21,11,3,1],sai=[0,1,0,0,1,0,1,0,0],m=['ja
  +sec('Mês a mês',`<div class="vl">${m.map((x,i)=>bar(x,ent[i],mx,ent[i]+' entradas'+(sai[i]?' · '+sai[i]+' saída':''))).join('')}</div>`)
  +'<p class="callout">A lista de quem saiu, com o motivo, está em Relatórios › Membros.</p>';};
 LSD.secretaria={'Visão geral':{custom:seVis},'Atos':SA,'Documentos':SD,'Cargos e mandatos':SC,'Análises':{custom:seAna},'Mensagens':SM};
-gMod('secretaria')[5]=['Visão geral','Atos','Documentos','Cargos e mandatos','Análises','Mensagens'];
+gMod('secretaria')[5]=['Visão geral','Atos','Documentos','Cargos e mandatos'];
 Object.assign(A,{seGo:s=>goSec('secretaria',s),seNew:s=>{goSec('secretaria',s);A.lsNew();}});
 
 /* ======================= CUIDADO › Disciplina (restrita) ======================= */
@@ -104,13 +107,13 @@ LSD.cuidado['Disciplina']=def({noun:'registros',add:'Novo registro',av:1,restric
  acts:[['Registrar revisão','vg',['rv']],['Encerrar registro','en',['vg','rv','ag']]],main:'n',sub:['tipo','resp'],
  form:[sl('n','Pessoa',PEOPLE,{req:1}),sl('tipo','Tipo',['Admoestação','Afastamento temporário','Desligamento'],{req:1}),sl('resp','Responsável',PASTORES),dt('desde','Desde',{half:1}),dt('rev','Revisão',{half:1}),ar('obs','Motivo (reservado)',{ph:'Fica só neste registro'})],
  rows:rows('dc',[['Juliana Prado','Afastamento temporário · Pr. Marcos Souza','rv'],['Ana Clara Lima','Afastamento temporário · Pr. Rafael Pereira','ag'],['Elisa Moura','Afastamento temporário · Pr. Rafael Pereira','vg'],['Otávio Lins','Admoestação · Pr. Rafael Pereira','vg'],['Marcos Alves','Admoestação · Pr. Marcos Lima','en'],['Paulo Reis','Desligamento · Pr. Rafael Pereira','en']],([n,s,st])=>({n,s,st}))});
-gMod('cuidado')[5]=['Discipulado','Acompanhamento','Pedidos de oração','Disciplina'];
+gMod('cuidado')[5]=['Discipulado','Acompanhamento','Pedidos de oração'];
 
 /* ======================= PESSOAS › Devocional ======================= */
 LSD.pessoas['Devocional']=def({noun:'devocionais',add:'Novo devocional',ST:{em:['info','Em andamento'],ag:['warning','Agendado'],en:['off','Encerrado']},acts:[['Encerrar devocional','en',['em']]],main:'n',sub:['per','part','lei'],
  form:[tx('n','Título',{req:1,ph:'Ex.: Liderança Forte'}),ar('desc','Descrição'),dt('ini','Começa em',half()),nu('dias','Dias',{half:1,ph:'15'}),mu('pub','Para quem',['Todos','Pastores','Líderes','Jovens']),tx('per','Período',{ph:'21 set a 5 out'}),nu('part','Participantes',{sfx:'participantes'}),tx('lei','Leitura',{ph:'72% de leitura'}),ar('roteiro','Conteúdo dos dias',{ph:'Um conteúdo por dia'})],
  rows:rows('dv',[['Liderança Forte','21 set a 5 out · 12 participantes · 72% de leitura','em'],['Tempo com Deus · Pastores','5 out a 14 out · 4 participantes','ag'],['Semana de Oração','8 set a 14 set · 8 participantes · 91% de leitura','en']],([n,s,st])=>({n,s,st}))});
-gMod('pessoas')[5]=['Membros','Integração','Devocional'];
+gMod('pessoas')[5]=['Membros','Integração'];
 
 /* ======================= ALMOXARIFADO › Distribuições e Transferências ======================= */
 const DEST=['Recepção','Ministério Kids','Louvor','Conferência Missões','Cozinha'];
@@ -121,17 +124,17 @@ LSD.almox['Transferências']=def({noun:'transferências',add:'Nova transferênci
  subFn:v=>[v.qtd?'×'+v.qtd:'',(v.de||'')+' → '+(v.para||''),v.data?rfDate(v.data):''].filter(Boolean).join(' · '),
  form:[sl('n','Item',names('almox','Itens'),{req:1}),sl('de','De',DEST,{req:1}),sl('para','Para',DEST,{req:1}),nu('qtd','Quantidade',{req:1,half:1}),dt('data','Data',half())],
  rows:rows('at',[['Copo descartável 200 ml','×100 · Recepção → Conferência Missões · 20 set','ok']],([n,s,st])=>({n,s,st,x:{qtd:'100',de:'Recepção',para:'Conferência Missões'}}))});
-gMod('almox')[5]=['Visão geral','Itens','Categorias','Empréstimos','Devoluções','Distribuições','Transferências','Movimentações'];
+gMod('almox')[5]=['Visão geral','Itens','Empréstimos','Devoluções','Movimentações'];
 
 /* ======================= ADMINISTRAÇÃO › Automações da plataforma ======================= */
 const JOBS=[['Entrega de notificações','Envia e-mail e push da fila e reenvia o que falhou','A cada minuto','at'],['Lembretes e compromissos','Dispara os lembretes dos compromissos publicados pelos domínios','A cada 5 minutos','at'],['Aniversário e boas-vindas','Felicita quem faz aniversário na hora local de cada igreja','A cada hora','at'],['Transmissão ao vivo (grade)','Gera os compromissos das próximas 24 horas da grade dos canais','A cada hora','at'],['Alertas da equipe','Detecta o que está vencendo e avisa quem cuida, em todos os módulos','A cada hora','at'],['Alertas de estoque','Avisa o estoque abaixo do mínimo de Cafeteria, Restaurante e Loja','A cada hora','ds'],['Pagamentos','Reconcilia, reenvia, expira e lembra o prazo de pagamentos','A cada 10 minutos','at'],['Pedidos do provedor de comércio','Refaz a venda dos pedidos que falharam e aplica cancelamentos pendentes','A cada 5 minutos','fa'],['Sincronização de itens com o provedor','Envia ao provedor os itens que mudaram, com nova tentativa crescente','A cada 5 minutos','fa'],['Sincronização completa','Reenvia o estado de todos os itens vinculados ao provedor','Todo dia, 03:00','at'],['Exportação de dados e exclusão de conta','Gera o arquivo “Baixar meus dados” e conclui a exclusão de conta','A cada 5 minutos','at'],['Retenção e expurgo','Apaga o que passou do prazo de guarda, uma política por origem','Todo dia, 03:00','at'],['Entrega durável de eventos','Reentrega aos consumidores os eventos pendentes ou que falharam','A cada minuto','at'],['Detecção de cadastros duplicados','Compara os cadastros de cada igreja e deixa prontos os pares duplicados','Todo dia, 03:00','at'],['Sincronização com o provedor externo','Importa o que o provedor tem, compara os dois lados e registra divergências','Todo dia, 04:00','at']];
 LSD.admin['Automações']={noun:'jobs',noAdd:1,ro:1,ST:{at:['ok','Ativo'],ds:['off','Desativado'],fa:['danger','Falhou']},acts:[['Tentar de novo','at',['fa']],['Desativar','ds',['at','fa']],['Ativar','at',['ds']]],
  rows:rows('jb',JOBS,([n,d,r,st],i)=>({n,s:r+(st==='fa'?' · falhou na última execução':st==='ds'?' · não roda':' · última: concluída hoje'),st,d:[['O que faz',d],['Recorrência',r],['Última execução',st==='ds'?'—':st==='fa'?'Falhou hoje, 14:20':'Concluída hoje, 14:'+String(10+i*2).padStart(2,'0')],['Fuso','Horário de Brasília']]}))};
-{const a=gMod('admin');a[5]=['Usuários e permissões','Papéis e matriz','Superusuários','Visitantes','Recursos habilitados','Parâmetros do sistema','Multi-igreja','Auditoria','LGPD','Automações'];}
+{const a=gMod('admin');a[5]=['Usuários e permissões'];}
 
 /* ======================= LOJA, CAFETERIA, RESTAURANTE › Divergências e Pedidos do app ======================= */
-gMod('cafe')[5]=gMod('cafe')[5].concat(['Divergências']);gMod('rest')[5]=gMod('rest')[5].concat(['Divergências']);
-gMod('shop')[5]=['Visão geral','Itens','Categorias','Vendas','Pedidos do app','Caixa diário','Movimentações','Divergências'];
+
+gMod('shop')[5]=['Visão geral','Itens','Vendas','Pedidos do app','Caixa diário','Movimentações'];
 const DV={cafe:[['n','Bolo de cenoura · fatia ficou com saldo −2','Vendas do totem e do balcão passaram do estoque. Ajuste o saldo.'],['l','Suco de uva 300 ml (pedido do totem T-2033)','O totem vendeu uma linha que não existe no cadastro. Código do produto no totem: T3301.'],['p','Pipoca · porção: R$ 7,00 no totem, R$ 5,00 no cadastro','O preço da venda difere do preço do item. Confira qual vale.']],rest:[['n','Marmita executiva ficou com saldo −3','As vendas passaram do estoque. Ajuste o saldo.'],['p','Suco natural: R$ 9,00 no totem, R$ 8,00 no cadastro','O preço da venda difere do preço do item. Confira qual vale.']],shop:[['n','Camiseta Alva (G) ficou com saldo −1','Um pedido do app passou do estoque. Ajuste o saldo.']]};
 const DVK={n:['danger','Estoque negativo'],l:['warning','Linha sem item'],p:['info','Preço diferente']};
 const VSX={};Object.keys(DV).forEach(k=>{VSX[k]={div:DV[k].map(([t,a,b],i)=>({id:k+'d'+i,t,a,b}))};});

@@ -1625,3 +1625,16 @@ article.lim-ov{background:linear-gradient(165deg,color-mix(in srgb,var(--danger-
 .phone.dia .wel-line em{background-image:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.9) 50%,transparent 62%),linear-gradient(90deg,#07486e,#008582)}
 @keyframes welShiny{0%{background-position:130% 0,0 0}60%,100%{background-position:-30% 0,0 0}}
 @media (prefers-reduced-motion:reduce){.wel-line em{animation:none;background-position:130% 0,0 0}}
+
+/* Check-in do evento (equipe) e leitura do QR da impressora (participante) */
+.vf{position:relative;height:250px;border-radius:26px;overflow:hidden;background:#06161a;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.vf::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,rgba(169,200,218,.16),transparent 62%)}
+.vf-fr{position:relative;width:172px;height:172px;border-radius:26px;box-shadow:0 0 0 999px rgba(0,0,0,.38)}
+.vf-fr::before,.vf-fr::after{content:"";position:absolute;width:36px;height:36px;border:3px solid #fff;border-radius:11px}
+.vf-fr::before{left:-2px;top:-2px;border-right:0;border-bottom:0}.vf-fr::after{right:-2px;bottom:-2px;border-left:0;border-top:0}
+.vf-ln{position:absolute;left:50%;top:50%;width:152px;margin-left:-76px;height:2px;background:#7cf0c8;box-shadow:0 0 14px #7cf0c8;animation:vfscan 2s ease-in-out infinite alternate}
+@keyframes vfscan{from{transform:translateY(-76px)}to{transform:translateY(76px)}}
+@media (prefers-reduced-motion:reduce){.vf-ln{animation:none}}
+.vf-hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#dfe8e8;font:500 13px/1 var(--font-text)}
+.ckbar{display:block;height:8px;border-radius:99px;background:var(--line);overflow:hidden}.ckbar i{display:block;height:100%;border-radius:99px;background:var(--brand);transition:width .3s}
+.ckqr{display:grid;place-items:center;padding:8px}.ckqr svg{width:220px;height:220px}

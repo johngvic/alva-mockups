@@ -12,13 +12,14 @@ const zCatCol=n=>(ZCAT.find(c=>c.n===n)||{}).c||'';
 const ZTIPOS=['Manutenção','Melhoria'];
 const zLocais=()=>ESPS.filter(e=>e.act).map(e=>e.n);/* o local vem dos Espaços; quem não achar escolhe "Outro local" e digita */
 const ZMAXPROP=5,ZDONEDAYS=180;/* propostas por trabalho; dias que o concluído fica no quadro e nos cartões */
-const ZST=[['pedido','Pedido'],['orcamento','Orçamento'],['aprovacao','Aprovação'],['execucao','Execução'],['concluido','Concluído']];
-const ZSTL={pedido:'Aguardando avaliação',orcamento:'Em orçamento',aprovacao:'Aguardando o Financeiro',execucao:'Em execução',concluido:'Concluído',cancelado:'Cancelado'};
-const ZPILL={pedido:['--st-sol','--st-sol-bg'],orcamento:['--st-ace','--st-ace-bg'],aprovacao:['--st-sol','--st-sol-bg'],execucao:['--st-int','--st-int-bg'],concluido:['--ink-muted','--surface-2'],cancelado:['--st-rec','--st-rec-bg']};
+const ZST=[['pedido','Pedido'],['orcamento','Orçamento'],['aprovacao','Aprovação'],['execucao','Execução'],['concluido','Prestação de contas']];
+const ZSTL={aprovado:'Aprovado · aguardando o início',pedido:'Aguardando avaliação',orcamento:'Em orçamento',aprovacao:'Aguardando o Financeiro',execucao:'Em execução',concluido:'Prestação de contas',encerrado:'Encerrada',cancelado:'Cancelado'};
+const ZPILL={aprovado:['--st-int','--st-int-bg'],pedido:['--st-sol','--st-sol-bg'],orcamento:['--st-ace','--st-ace-bg'],aprovacao:['--st-sol','--st-sol-bg'],execucao:['--st-int','--st-int-bg'],concluido:['--st-sol','--st-sol-bg'],encerrado:['--ink-muted','--surface-2'],cancelado:['--st-rec','--st-rec-bg']};
 const ZAPROV=['Rafael Pereira','Daniela Rocha'];
 const ZTEAM=(()=>{try{const m=MINIS.find(x=>x.n==='Zeladoria'),l=mnPpl(m).map(p=>p.n||p).filter(Boolean);if(l.length)return l;}catch(e){}return ['Bruno Carvalho','Josias Almeida','Edson Ramos','Sérgio Nunes','Valdir Costa','Luiz Antônio'];})();
 const zR=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
 const zR2=v=>'R$ '+(+v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const zStK=j=>j.st==='aprovacao'&&j.apr?'aprovado':j.st==='concluido'&&j.enc?'encerrado':j.st;
 const zPill=s=>`<span class="stp" style="--c:var(${ZPILL[s][0]});--b:var(${ZPILL[s][1]})"><i></i>${ZSTL[s]}</span>`;
 
 let _zfid=0,_zjid=0,_zlid=0;
@@ -88,18 +89,28 @@ const zPrev=j=>zPrevMat(j)+zPrevMao(j);
 /* O caixa do trabalho é o caixa padrão do Alva (CAIXAS, o mesmo dos ministérios e eventos), com o trabalho como dono. */
 const zCx=j=>{let x=CAIXAS.find(c=>c.ownerType==='zel'&&c.ownerId===j.id);
  if(!x){x=cxNew('zel',j.id,'Caixa do trabalho',{main:true});
-  (j.cx.in||[]).forEach(e=>cxAdd(x,'in',e.v,e.d,e.obs||'Liberado pelo Financeiro','Aporte da igreja','Rafael Pereira'));
-  (j.cx.out||[]).forEach(o=>cxAdd(x,'out',o.v,o.d,o.desc,o.cat||j.cat,'Bruno Carvalho',{file:o.comp||'',nat:o.nat,forn:o.forn||''}));
-  if(j.st==='concluido'||j.st==='cancelado'){x.status='encerrado';x.closedAt=j.hist.length?j.hist[j.hist.length-1][0]:NOWD;}}
+  (j.cx.in||[]).forEach(e=>cxVerbaAdd(x,e.v,e.d,'Rafael Pereira','aprovada',e.obs||'Liberado pelo Financeiro'));
+  (j.cx.out||[]).forEach(o=>cxAdd(x,'out',o.v,o.d,o.desc,o.cat||j.cat,'Bruno Carvalho',{file:o.comp||'',nat:o.nat,forn:o.forn||'',...(o.st?{st:o.st,pay:'cx'}:{})}));
+  if((j.st==='concluido'&&j.enc)||j.st==='cancelado'){x.status='encerrado';x.closedAt=j.hist.length?j.hist[j.hist.length-1][0]:NOWD;}}
  return x;};
-const zLib=j=>cxIn(zCx(j))/100;
+const zLib=j=>cxVerbaOk(zCx(j))/100;
 const zGasto=j=>cxOut(zCx(j))/100;
-const zSaldo=j=>cxBal(zCx(j))/100;
+const zSaldo=j=>cxDisp(zCx(j))/100;
 const zOutsOf=j=>cxValid(zCx(j)).filter(e=>e.t==='out'&&!e.xfer);
 const zGastoAno=(y,j)=>(j?[j]:ZJ).reduce((s,x)=>s+zOutsOf(x).filter(e=>e.d.slice(0,4)===String(y)).reduce((a,e)=>a+e.v,0)/100,0);
 const zLate=j=>j.st==='execucao'&&j.fim&&j.fim<NOWD;
+/* O orçamento enviado vira um pedido de verba na fila de Aprovações do Financeiro; aprovado lá, a obra passa para execução (06/11/2026) */
+const zAskApproval=j=>{if(typeof APROVS==='undefined'||APROVS.some(a=>a.zjob===j.id))return;APROVS.push(AP('verba','Obra · '+j.n,zPrev(j),NOWD,j.resp||'Zeladoria',{zjob:j.id,why:'Orçamento da obra enviado pela Zeladoria'}));};
+const zApproved=(j,val,by,d)=>{const i=typeof APROVS!=='undefined'?APROVS.findIndex(a=>a.zjob===j.id):-1;if(i>=0)APROVS.splice(i,1);j.apr={by,d,v:val};j.st='aprovacao';zLog(j,'Aprovado pelo Financeiro: '+zR(val)+' · falta iniciar a obra',by);cxVerbaAdd(zCx(j),val,d,by,'aprovada','Orçamento aprovado');};
+const zPendN=j=>cxValid(zCx(j)).filter(e=>['conferir','pend'].includes(cxStat(e))).length;
+const zRejected=(j,why)=>{j.st='orcamento';j.rej=why||'';zLog(j,'Orçamento devolvido pelo Financeiro'+(why?': '+why:''));};
+ZJ.filter(j=>j.st==='aprovacao'&&!j.apr).forEach(zAskApproval);
+/* concluídos antigos já foram encerrados pelo Financeiro; só a troca das lâmpadas fica em prestação de contas, com um lançamento a conferir */
+ZJ.forEach(j=>{if(j.st==='concluido'&&j.n!=='Trocar as lâmpadas do corredor do anexo')j.enc={by:'Financeiro',d:j.hist.length?j.hist[j.hist.length-1][0]:NOWD};});
+{const jl=ZJ.find(j=>j.n==='Trocar as lâmpadas do corredor do anexo');if(jl&&jl.cx&&jl.cx.out&&jl.cx.out[0])jl.cx.out[0].st='conferir';}
+
 /* Concluído há mais de ZDONEDAYS dias sai do quadro e dos cartões; continua na Lista (filtro Concluído) e nas Análises. */
-const zStale=j=>j.st==='concluido'&&j.hist.length&&(Date.parse(NOWD)-Date.parse(j.hist[j.hist.length-1][0]))/864e5>ZDONEDAYS;
+const zStale=j=>j.st==='concluido'&&!!j.enc;
 const zVis=j=>!j.old&&!zStale(j);
 /* A categoria mora no LANÇAMENTO (despesa), não no trabalho: um trabalho pode ter pintura, piso, ar-condicionado, luminária... */
 const zJobCats=j=>[...new Set(zOutsOf(j).map(e=>e.cat||j.cat).filter(Boolean))];
@@ -130,8 +141,10 @@ function zelVis(){
   else if(j.st==='orcamento'&&j.exec==='terceiro'&&!zProp(j))att.push([j,'file','Falta escolher a proposta',`${j.props.length} proposta${j.props.length===1?'':'s'} recebida${j.props.length===1?'':'s'}`,'Escolher']);
   else if(j.st==='orcamento'&&j.exec==='equipe'&&!j.mat.length)att.push([j,'file','Falta o orçamento do material','A equipe vai fazer; só falta listar o material','Orçar']);
   else if(j.st==='aprovacao'&&!j.apr)att.push([j,'wallet','Aguardando o Financeiro',`Orçamento de ${zR(zPrev(j))} esperando aprovação`,'Abrir']);
+  else if(j.st==='aprovacao'&&j.apr)att.push([j,'circleCheck','Aprovada, falta iniciar',`Verba de ${zR(j.apr.v)} aprovada em ${fmtD(j.apr.d)}`,'Iniciar']);
+  else if(j.st==='concluido'&&!j.enc)att.push([j,'clock','Prestação de contas pendente',zPendN(j)?`${zPendN(j)} lançamento${zPendN(j)===1?'':'s'} a conferir pelo Financeiro`:'Tudo conferido · o Financeiro pode encerrar a obra','Abrir']);
   else if(zLate(j))att.push([j,'clock','Execução atrasada',`Era para terminar em ${fmtD(j.fim)} · ${-inDays(j.fim)} dia${-inDays(j.fim)===1?'':'s'} de atraso`,'Abrir']);
-  else if(j.st==='execucao'&&zLib(j)&&zSaldo(j)<=zLib(j)*.1)att.push([j,'alert','Saldo do caixa quase esgotado',`Sobram ${zR(zSaldo(j))} de ${zR(zLib(j))} liberados · previsto ${zR(zPrev(j))}`,'Abrir']);
+  else if(j.st==='execucao'&&zLib(j)&&zSaldo(j)<=zLib(j)*.1)att.push([j,'alert','Limite do caixa quase esgotado',`Sobram ${zR(zSaldo(j))} de ${zR(zLib(j))} liberados · previsto ${zR(zPrev(j))}`,'Abrir']);
  });
  const attShow=S.zatt?att:att.slice(0,6),execS=exec.slice().sort((a,b)=>(+!!zLate(b))-(+!!zLate(a))||String(a.fim||'9').localeCompare(String(b.fim||'9'))).slice(0,5),doneL=ZJ.filter(j=>j.st==='concluido'&&zVis(j)),doneS=doneL.slice().sort((a,b)=>String(b.hist[b.hist.length-1][0]).localeCompare(String(a.hist[a.hist.length-1][0]))).slice(0,5);
  return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Visão geral</h1><p class="lede">O que precisa de atenção e como andam as obras</p></div>
@@ -169,15 +182,15 @@ function zelTrab(){
  let body;
  if(S.zview==='quadro')body=`<section class="card pc bd-board rise" style="--d:3"><p class="bd-note">${ic('info',13,2)}As etapas são fixas. Abra o trabalho para dar o próximo passo.</p><div class="bd-cols">${ZST.map(s=>{const l=act.filter(j=>j.st===s[0]);return `<div class="bd-col"><header class="bd-ch"><b>${s[1]}</b><small>${l.length}</small></header><div class="bd-list">${l.map(zCard).join('')||'<p class="bd-empty">Nenhum trabalho</p>'}</div></div>`;}).join('')}</div></section>`;
  else body=`<section class="card mtab rise" style="--d:3"><div class="tbar"><label class="sbox">${ic('search',16)}<input id="zq" placeholder="Buscar trabalho, categoria ou local" value="${esc(S.zq)}" autocomplete="off"></label>
-   <div class="chips">${[['todos','Todos'],...ZST.map(s=>[s[0],s[1]]),['cancelado','Cancelados']].map(c=>`<button class="chipf ${S.zst===c[0]?'on':''}" data-a="zSt" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div><div id="zrows">${zRows()}</div></section>`;
+   <div class="chips">${[['todos','Todos'],...ZST.map(s=>[s[0],s[1]]),['encerrado','Encerradas'],['cancelado','Cancelados']].map(c=>`<button class="chipf ${S.zst===c[0]?'on':''}" data-a="zSt" data-v="${c[0]}">${c[1]}</button>`).join('')}</div></div><div id="zrows">${zRows()}</div></section>`;
  return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Trabalhos</h1><p class="lede">Pedidos de manutenção e de melhoria da igreja</p></div><div class="pact"><button class="btn pri" data-a="zNew">${ic('plus',15,2.2)}Pedir um trabalho</button></div></header>
   <section class="card kpis4 k5 rise" style="--d:1">${cards}</section>${tabs}${body}`;
 }
 function zRows(){
- const q=norm(S.zq||''),l=ZJ.filter(j=>(S.zst==='concluido'?j.st==='concluido':S.zst==='todos'?zVis(j)&&j.st!=='cancelado':zVis(j)&&j.st===S.zst)&&(!q||norm(j.n+' '+zJobCats(j).join(' ')+' '+j.local).includes(q)));
+ const q=norm(S.zq||''),l=ZJ.filter(j=>(S.zst==='encerrado'?(j.st==='concluido'&&!!j.enc):S.zst==='concluido'?(j.st==='concluido'&&!j.enc):S.zst==='todos'?zVis(j)&&j.st!=='cancelado':zVis(j)&&j.st===S.zst)&&(!q||norm(j.n+' '+zJobCats(j).join(' ')+' '+j.local).includes(q)));
  if(!l.length)return '<div class="mempty"><p>Nenhum trabalho encontrado.</p><span>Tente outra busca ou outra etapa.</span></div>';
  return `<div class="trow zt thead"><span>Trabalho</span><span>Categorias</span><span>Situação</span><span>Responsável</span><span>Previsto</span><span>Gasto</span><span></span></div>
- ${l.map(j=>`<div class="trow zt" tabindex="0" data-a="zOpen" data-v="${j.id}"><span class="tn"><span class="zt-n"><b>${esc(j.n)}</b><span>${esc(j.local)} · pedido por ${esc(j.pedBy)}</span></span></span><span>${zJobCats(j).map(esc).join(', ')||'<span class="soft">—</span>'}</span><span>${zPill(j.st)}</span><span>${esc(j.resp||'A definir')}</span><span class="num">${zPrev(j)?zR(zPrev(j)):'—'}</span><span class="num">${zGasto(j)?zR(zGasto(j)):'—'}</span><span class="tc">${ic('chevR',16)}</span></div>`).join('')}
+ ${l.map(j=>`<div class="trow zt" tabindex="0" data-a="zOpen" data-v="${j.id}"><span class="tn"><span class="zt-n"><b>${esc(j.n)}</b><span>${esc(j.local)} · pedido por ${esc(j.pedBy)}</span></span></span><span>${zJobCats(j).map(esc).join(', ')||'<span class="soft">—</span>'}</span><span>${zPill(zStK(j))}</span><span>${esc(j.resp||'A definir')}</span><span class="num">${zPrev(j)?zR(zPrev(j)):'—'}</span><span class="num">${zGasto(j)?zR(zGasto(j)):'—'}</span><span class="tc">${ic('chevR',16)}</span></div>`).join('')}
  <div class="tfoot"><span>${l.length} ${l.length===1?'trabalho':'trabalhos'}</span></div>`;
 }
 
@@ -185,6 +198,7 @@ function zRows(){
 function zNext(j){
  if(j.st==='pedido')return ['zEval','Avaliar o pedido',true];
  if(j.st==='orcamento'){const ok=j.exec==='equipe'?j.mat.length>0:j.exec==='terceiro'&&!!zProp(j);return ['zSend','Enviar para aprovação',ok];}
+ if(j.st==='aprovacao'&&j.apr)return ['zStart','Iniciar a obra',true];
  if(j.st==='aprovacao')return ['zApprove','Registrar aprovação do Financeiro',true];
  if(j.st==='execucao')return ['zFinish','Concluir o trabalho',true];
  return null;
@@ -194,16 +208,16 @@ function zelJob(){
  const nx=zNext(j),tabs=[['resumo','Resumo'],['orc','Orçamento'],['caixa','Caixa'],['com','Comentários'],['hist','Histórico']];
  return `<nav class="crumb rise"><span class="soft">Zeladoria</span>${ic('chevR',13,2)}<button class="lnk back" data-a="zBack">Trabalhos</button>${ic('chevR',13,2)}<span>${esc(j.n)}</span></nav>
  <header class="card prof rise" style="--d:1">
-  <div class="pid"><span class="htile" style="--s:64px;background:var(--tone-salvia);color:var(--tone-salvia-ink)">${ic('wrench',30,1.9)}</span><div class="pn"><h1>${esc(j.n)}</h1><p>${esc(j.tipo)} · ${esc(j.local)}</p><div class="ca-tgs">${zPill(j.st)}${zCatTags(j)}${j.urg==='Urgente'&&j.st!=='concluido'&&j.st!=='cancelado'?'<em class="tag warn">Urgente</em>':''}</div></div></div>
+  <div class="pid"><span class="htile" style="--s:64px;background:var(--tone-salvia);color:var(--tone-salvia-ink)">${ic('wrench',30,1.9)}</span><div class="pn"><h1>${esc(j.n)}</h1><p>${esc(j.tipo)} · ${esc(j.local)}</p><div class="ca-tgs">${zPill(zStK(j))}${zCatTags(j)}${j.urg==='Urgente'&&j.st!=='concluido'&&j.st!=='cancelado'?'<em class="tag warn">Urgente</em>':''}</div></div></div>
   <div class="pact">${nx?`<button class="btn pri" data-a="${nx[0]}" data-v="${j.id}" ${nx[2]?'':'disabled'}>${nx[1]}</button>`:''}
    ${j.st!=='concluido'&&j.st!=='cancelado'?`<div style="position:relative"><button class="ibtn" data-a="zMenu" aria-label="Mais ações">${ic('dots',17)}</button><div class="pop" id="zPop" style="right:0;top:calc(100% + 6px)">${j.st!=='pedido'?`<button class="pi" data-a="zResp" data-v="${j.id}">${ic('users',16)}Trocar o responsável</button>`:''}${j.st!=='pedido'&&j.st!=='execucao'?'<hr>':''}${j.st!=='execucao'?`<button class="pi danger" data-a="zCancel" data-v="${j.id}">${ic('x',16)}Cancelar o trabalho</button>`:''}</div></div>`:''}</div>
-  <div class="ikpi hk"><div><b>${zPrev(j)?zR(zPrev(j)):'—'}</b><span>Previsto</span></div><div><b>${zR(zLib(j))}</b><span>Liberado</span></div><div><b>${zR(zGasto(j))}</b><span>Gasto</span></div><div><b class="${zSaldo(j)<0?'neg':''}">${zR(zSaldo(j))}</b><span>Saldo do caixa</span></div></div>
+  <div class="ikpi hk"><div><b>${zPrev(j)?zR(zPrev(j)):'—'}</b><span>Previsto</span></div><div><b>${zR(zLib(j))}</b><span>Verba</span></div><div><b>${zR(zGasto(j))}</b><span>Gasto</span></div><div><b class="${zSaldo(j)<0?'neg':''}">${zR(zSaldo(j))}</b><span>Limite restante</span></div></div>
   <div class="ptabs" role="tablist">${tabs.map(t=>`<button role="tab" class="${S.ztab===t[0]?'on':''}" data-a="zTab" data-v="${t[0]}">${t[1]}${t[0]==='com'&&j.cm.length?`<small>${j.cm.length}</small>`:''}</button>`).join('')}<span class="tind"></span></div>
  </header>
  <div class="rise" style="--d:2">${({resumo:zResumo,orc:zOrc,caixa:zCaixa,com:zCom,hist:zHist})[S.ztab](j)}</div>`;
 }
 function zResumo(j){
- const steps=ZST.map((s,i)=>{const cur=ZST.findIndex(x=>x[0]===j.st),done=j.st==='cancelado'?false:i<cur||j.st==='concluido',on=i===cur&&j.st!=='cancelado';return `<li class="${done?'done':on?'on':''}"><i>${done?ic('check',12,3):i+1}</i>${s[1]}</li>`;}).join('');
+ const steps=ZST.map((s,i)=>{const cur=ZST.findIndex(x=>x[0]===j.st),done=j.st==='cancelado'?false:i<cur||(j.st==='concluido'&&!!j.enc),on=i===cur&&j.st!=='cancelado';return `<li class="${done?'done':on?'on':''}"><i>${done?ic('check',12,3):i+1}</i>${s[1]}</li>`;}).join('');
  return `<div class="pgrid"><div class="col">
   <section class="card pc"><div class="sh"><h2>Andamento</h2></div><ol class="cm-steps zl-steps">${steps}</ol>${j.st==='cancelado'?`<p class="bd-note">${ic('x',13,2)}Trabalho cancelado: ${esc(j.cancel||'')}</p>`:''}</section>
   <section class="card pc"><div class="sh"><h2>O pedido</h2></div>
@@ -214,11 +228,13 @@ function zResumo(j){
    <dl class="kv grid2"><div><dt>Execução</dt><dd>${j.exec?zQuem(j):'<span class="soft">Ainda não avaliado</span>'}</dd></div><div><dt>Responsável</dt><dd>${j.resp?esc(j.resp):'<span class="soft">A definir</span>'}</dd></div>${j.fim?`<div><dt>Previsão de término</dt><dd>${fmtD(j.fim)}${zLate(j)?' <em class="tag warn">Atrasada</em>':''}</dd></div>`:''}${j.exec==='terceiro'&&zProp(j)?`<div><dt>Fornecedor escolhido</dt><dd>${esc(zFn(zProp(j).forn))}</dd></div><div><dt>Prazo</dt><dd>${zProp(j).prazo} dias</dd></div>`:''}</dl></section>
   <section class="card pc"><div class="sh"><h2>Dinheiro</h2></div>
    <div class="zl-ln"><span>Previsto (material + mão de obra)</span><b>${zPrev(j)?zR(zPrev(j)):'—'}</b></div>
-   <div class="zl-ln"><span>Liberado pela igreja</span><b>${zR(zLib(j))}</b></div>
+   <div class="zl-ln"><span>Verba aprovada pela igreja</span><b>${zR(zLib(j))}</b></div>
    <div class="zl-ln"><span>Gasto até agora</span><b>${zR(zGasto(j))}</b></div>
-   <div class="zl-ln tot"><span>Saldo do caixa</span><b class="${zSaldo(j)<0?'neg':''}">${zR(zSaldo(j))}</b></div>
+   <div class="zl-ln tot"><span>Limite restante</span><b class="${zSaldo(j)<0?'neg':''}">${zR(zSaldo(j))}</b></div>
+   <div class="zl-ln"><span>Dinheiro no caixa</span><b>${zR(cxCash(zCx(j))/100)}</b></div>
+   <div class="zl-ln"><span>Adiantamento em aberto</span><b class="${cxAdvLate(zCx(j))?'neg':''}">${zR(cxAdvOpen(zCx(j))/100)}</b></div>
    ${zLib(j)?zBar(zGasto(j),zLib(j)):''}
-   ${j.st==='concluido'?`<p class="bd-note">${ic('circleCheck',13,2)}Prestação de contas: liberado ${zR(zLib(j))}, gasto ${zR(zGasto(j))}, sobra ${zR(zSaldo(j))}.</p>`:''}</section>
+   ${j.st==='concluido'?`<p class="bd-note">${ic('circleCheck',13,2)}${j.enc?`Encerrada por ${esc(j.enc.by)} em ${fmtD(j.enc.d)}: verba ${zR(zLib(j))}, gasto ${zR(zGasto(j))}.`:`Prestação de contas com o Financeiro: ${zPendN(j)?zPendN(j)+(zPendN(j)===1?' lançamento a conferir':' lançamentos a conferir'):'tudo conferido'}. A obra só é encerrada quando não houver pendência.`}</p>`:''}</section>
  </div></div>`;
 }
 function zOrc(j){
@@ -235,7 +251,7 @@ function zOrc(j){
    ${lock?'':`<footer>${p.esc?'':`<button class="btn sec sm" data-a="zPropPick" data-v="${j.id}|${p.id}">Escolher esta</button>`}<button class="btn ghost sm" data-a="zPropDel" data-v="${j.id}|${p.id}">Remover</button></footer>`}</article>`).join('')}</div>`:'<div class="mempty"><p>Nenhuma proposta ainda.</p><span>Cadastre as propostas dos fornecedores e escolha uma.</span></div>'}</section>`;
  const tot=`<section class="card pc"><div class="sh"><h2>Orçamento total</h2></div>
   <div class="zl-ln"><span>Material</span><b>${zR2(zPrevMat(j))}</b></div><div class="zl-ln"><span>Mão de obra</span><b>${zR2(zPrevMao(j))}</b></div><div class="zl-ln tot"><span>Previsto</span><b>${zR2(zPrev(j))}</b></div></section>`;
- const apr=`<section class="card pc"><div class="sh"><h2>Aprovação do Financeiro</h2></div>${j.apr?`<p class="bd-note ok">${ic('circleCheck',13,2)}Aprovado por ${esc(j.apr.by)} em ${fmtD(j.apr.d)} · valor aprovado ${zR(j.apr.v)}</p>`:j.st==='aprovacao'?`<p class="bd-note">${ic('clock',13,2)}Aguardando a aprovação do Financeiro. Quando aprovarem, registre aqui.</p>`:`<p class="who">Depois de enviar o orçamento, o Financeiro aprova e a aprovação fica registrada aqui.</p>`}</section>`;
+ const apr=`<section class="card pc"><div class="sh"><h2>Aprovação do Financeiro</h2></div>${j.apr?`<p class="bd-note ok">${ic('circleCheck',13,2)}Aprovado por ${esc(j.apr.by)} em ${fmtD(j.apr.d)} · valor aprovado ${zR(j.apr.v)}${j.st==='aprovacao'?' · falta iniciar a obra':''}</p>`:j.st==='aprovacao'?`<p class="bd-note">${ic('clock',13,2)}O orçamento está na fila de Aprovações do Financeiro. Quando for aprovado, a aprovação aparece aqui e o trabalho passa para execução.</p>`:`<p class="who">Depois de enviar o orçamento, o Financeiro aprova e a aprovação fica registrada aqui.</p>`}</section>`;
  return `<div class="col">${mat}${mao}<div class="pgrid"><div class="col">${tot}</div><div class="col">${apr}</div></div></div>`;
 }
 /* A aba Caixa é o caixa padrão do Alva (o mesmo dos ministérios e eventos), com o trabalho como dono: saldo, entradas, saídas, busca, lançamentos em tabela única, estorno e comprovante. */
@@ -378,13 +394,16 @@ const ZA={
     <label class="fld"><span class="fl">Responsável pelo trabalho</span><span class="selw"><select name="resp">${zSelOpts(ZTEAM,ZTEAM[0])}</select>${ic('updown',14)}</span></label>`,'Seguir para o orçamento',
    f=>{const fd=new FormData(f);j.exec=fd.get('exec');j.resp=fd.get('resp');j.st='orcamento';zLog(j,'Avaliado: será feito '+(j.exec==='equipe'?'pela equipe da Zeladoria':'por fornecedor'));closeDlg();ZA.zOpen(j.id);toast('Pedido avaliado');});
   $$('#zF [name=exec]').forEach(r=>r.addEventListener('change',()=>$$('#zF .cm-when label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked))));},
- zSend:v=>{const j=zJob(v);j.st='aprovacao';zLog(j,'Orçamento enviado para aprovação do Financeiro');zRe();toast('Enviado para aprovação do Financeiro');},
+ zSend:v=>{const j=zJob(v);j.st='aprovacao';zLog(j,'Orçamento enviado para aprovação do Financeiro');zAskApproval(j);zRe();toast('Enviado para aprovação do Financeiro');},
  zApprove:v=>{const j=zJob(v);
   zForm('Aprovação do Financeiro',esc(j.n),
    `<label class="fld"><span class="fl">Quem aprovou?</span><span class="selw"><select name="by">${zSelOpts(ZAPROV)}</select>${ic('updown',14)}</span></label>
-    ${zFieldMoney('v','Valor aprovado',String(zPrev(j)).replace('.',','))}<label class="fld"><span class="fl">Data da aprovação</span><input type="date" name="d" value="${NOWD}" max="${NOWD}"></label><label class="fld"><span class="fl">Previsão de término</span><input type="date" name="fim" value="${addDays((zProp(j)?zProp(j).prazo:7)+0)}" min="${NOWD}"><span class="hint">Já vem do prazo da proposta. Dá para ajustar.</span></label>`,'Registrar aprovação',
-   (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor aprovado');j.apr={by:fd.get('by'),d:fd.get('d'),v:val};j.fim=fd.get('fim')||'';j.st='execucao';zLog(j,'Aprovado pelo Financeiro: '+zR(val),fd.get('by'));closeDlg();zRe();toast('Aprovação registrada. O trabalho está em execução');});},
- zFinish:v=>{const j=zJob(v);confirmDel({title:'Concluir este trabalho?',body:`Gasto até agora: ${zR(zGasto(j))} de ${zR(zLib(j))} liberados. Depois de concluído, o caixa não recebe mais lançamentos.`,label:'Concluir',onConfirm:()=>{j.st='concluido';const x=zCx(j);x.status='encerrado';x.closedAt=NOWD;zLog(j,'Trabalho concluído');zRe();toast('Trabalho concluído');}});},
+    ${zFieldMoney('v','Valor aprovado',String(zPrev(j)).replace('.',','))}<label class="fld"><span class="fl">Data da aprovação</span><input type="date" name="d" value="${NOWD}" max="${NOWD}"></label>`,'Registrar aprovação',
+   (f,bad)=>{const fd=new FormData(f),val=zNum(fd.get('v'));if(!val)return bad('v','Informe o valor aprovado');zApproved(j,val,fd.get('by'),fd.get('d'));closeDlg();zRe();toast('Aprovação registrada. Falta iniciar a obra');});},
+ zStart:v=>{const j=zJob(v);
+  zForm('Iniciar a obra',esc(j.n),`<label class="fld"><span class="fl">Data de início</span><input type="date" name="ini" value="${NOWD}"><span class="hint">Entre a aprovação e o começo pode haver um prazo. Informe quando a obra de fato começa.</span></label><label class="fld"><span class="fl">Previsão de término</span><input type="date" name="fim" value="${addDays((zProp(j)?zProp(j).prazo:7)+0)}" min="${NOWD}"><span class="hint">Já vem do prazo da proposta. Dá para ajustar.</span></label>`,'Iniciar a obra',
+   (f,bad)=>{const fd=new FormData(f);j.ini=fd.get('ini')||NOWD;j.fim=fd.get('fim')||'';j.st='execucao';zLog(j,'Obra iniciada em '+fmtD(j.ini));closeDlg();zRe();toast('Obra iniciada. O caixa já recebe lançamentos');});},
+ zFinish:v=>{const j=zJob(v);confirmDel({title:'Concluir este trabalho?',body:`Gasto até agora: ${zR(zGasto(j))} de ${zR(zLib(j))} liberados. Depois de concluído, o caixa não recebe mais lançamentos e o Financeiro faz a prestação de contas: a obra só é encerrada quando tudo estiver conferido.`,label:'Concluir',onConfirm:()=>{j.st='concluido';zLog(j,'Trabalho concluído · prestação de contas com o Financeiro');zRe();toast('Trabalho concluído. Falta a prestação de contas do Financeiro');}});},
  zCancel:v=>{closePops();const j=zJob(v);
   zForm('Cancelar este trabalho?',esc(j.n),`<label class="fld"><span class="fl">Por que cancelar?</span><textarea class="ta" name="why" rows="3" maxlength="300" placeholder="Escreva o motivo"></textarea><span class="err"></span></label>`,'Cancelar o trabalho',
    (f,bad)=>{const why=new FormData(f).get('why').trim();if(!why)return bad('why','Escreva o motivo');j.st='cancelado';j.cancel=why;const x=zCx(j);x.status='encerrado';x.closedAt=NOWD;zLog(j,'Cancelado: '+why);closeDlg();zRe();toast('Trabalho cancelado');});},
