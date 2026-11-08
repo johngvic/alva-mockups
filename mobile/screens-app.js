@@ -13,10 +13,10 @@ V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tab
    </div>
    <div class="dots" id="dots"><span class="on"></span><span></span><span></span></div>
   </div>
-  <nav class="pad jump" aria-label="Atalhos">
-   ${(S.role==='visitante'?[['Agenda','tab','agenda',0],['Casas','tab','grupos',0],['Pregações','sub','nxPregs',0],['Vídeos','sub','nxVideos',0],['Séries','sub','nxSeries',0],['Músicas','sub','nxSongs',0],['Oração','prayer','',0],['Quem somos','sub','quemSomos',0],['Ao vivo','sub','aoVivo','live']]:[['Agenda','tab','agenda',S.escalas.filter(x=>x.st==='pendente').length+S.discs.filter(x=>x.st==='pendente').length+invPend()],['Grupos','tab','grupos',0],['Cursos','tab','cursos',0],['Pregações','sub','nxPregs',0],['Vídeos','sub','nxVideos',0],['Séries','sub','nxSeries',0],['Músicas','sub','nxSongs',0],['Oração','prayer','',0],['Contribuir','give','',0],['Apresentações','sub','bebes',0],['Ao vivo','sub','aoVivo','live']]).map(j=>`<button class="jw" data-a="${j[1]}" data-v="${j[2]}"><span>${j[0]}</span>${j[3]==='live'?'<sup class="jlive" aria-label="ao vivo agora"></sup>':j[3]?`<sup aria-label="${j[3]} pendentes">${j[3]}</sup>`:''}</button>`).join('')}
-  </nav>
-  <section class="pad stack g3">
+  <section class="pad stack g3"><p class="eb2">Para assistir e ouvir</p><div class="gtiles">
+   ${(S.role==='visitante'?[['Pregações','book','ceu','nxPregs'],['Vídeos','play','rosado','nxVideos'],['Séries','layers','menta','nxSeries'],['Músicas','music','ambar','nxSongs'],['Quem somos','church','brasa','quemSomos']]:[['Pregações','book','ceu','nxPregs'],['Vídeos','play','rosado','nxVideos'],['Séries','layers','menta','nxSeries'],['Músicas','music','ambar','nxSongs']]).map(j=>`<button class="gtile" data-a="sub" data-v="${j[3]}"><span style="color:var(--tone-${j[2]}-ink,var(--brand-text))">${ic(j[1],24,1.6)}</span><span>${j[0]}</span></button>`).join('')}
+  </div></section>
+<section class="pad stack g3">
    <div class="row g3" style="align-items:stretch">
     ${S.role==='visitante'?`<div class="cta gr-lima grow" style="color:#010f12">${S.igFila?`<div><h3>Você está na fila</h3><p>${S.igFila}º para a próxima integração</p></div><button class="btn dark md" data-a="igLeave">Sair da fila</button>`:`<div><h3>Quero fazer parte</h3><p>Conheça o caminho para ser membro</p></div><button class="btn dark md" data-a="wantMember">Começar</button>`}</div>`:`<div class="cta gr-lima grow" style="color:#010f12"><div><h3>Contribuir</h3><p>Dízimos, ofertas e missões</p></div><button class="btn dark md" data-a="sub" data-v="contribuir">Contribuir</button></div>`}
     <div class="cta gr-vinho grow" style="color:#fff"><div><h3>Pedido de oração</h3><p>Nossa equipe ora por você</p></div><button class="btn onmedia md" data-a="prayer">Pedir oração</button></div>
