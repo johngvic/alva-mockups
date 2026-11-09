@@ -1,7 +1,7 @@
 /* ===== Secretaria no app administrativo (Tiago, 08/11/2026) =====
  * Spec `secretariat`: o ato é Realizado (Done) ou Informado (Reported); o informado de outra igreja nasce Pendente e a Secretaria Aceita ou Recusa
  * (recusa com motivo em texto livre; aceitar Consagração pede o cargo). O documento é Válido ou Revogado (com motivo); o pedido de declaração é
- * Pendente, Emitida ou Recusada. A situação do membro (afastamento, desligamento, volta) é confirmada em "Precisa da sua atenção", sem recusa.
+ * Pendente, Emitida ou Recusada. A situação do membro (afastamento, desligamento, volta) é confirmada em "Precisam de atenção", sem recusa.
  * Registrar ato, modelos, arquivo, cargos e mandatos (concedem acesso), análises e a página Mensagens ficam na web ou no módulo Comunicação. */
 const SEC_TYPES=['Batismo','Casamento','Consagração','Apresentação','Curso concluído'];
 const SEC_AST={pe:['warning','Pendente'],re:['ok','Realizado'],in:['info','Informado'],rc:['danger','Recusado']};
@@ -45,12 +45,12 @@ function secDocSheet(id){const d=secDocs.find(x=>x.id===id),ed=can('secretaria',
   <div class="stack g3">${ed&&d.st==='va'?`<button class="btn danger md block" data-a="secRevogar" data-v="${id}">Revogar</button>`:''}<button class="tlink" data-a="closeSheet">Fechar</button></div></div>`);}
 /* Visão geral */
 function secVis(){const ed=can('secretaria','editar'),pa=secAtos.filter(a=>a.st==='pe').length,pd=secPed.filter(p=>p.st==='pe').length,mv=secMands.filter(m=>m.st==='vc').length;
- const items=[...secSit.map(s=>`<div class="vr"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${SEC_KIND[s.k]} de ${esc(s.n)}</span><span class="vs">${s.d}</span></span>${ed?`<button class="btn outline sm" data-a="secRev" data-v="${s.id}">Revisar</button>`:''}</div>`),
-  pa?`<button class="vr tap" data-a="ovGo" data-v="Atos"><span class="grow stack" style="gap:2px"><span class="vn">${pa} ${pa===1?'ato aguarda':'atos aguardam'} decisão</span><span class="vs">Informados em outra igreja</span></span><span class="vs">Decidir</span></button>`:'',
-  pd?`<button class="vr tap" data-a="secGoDoc"><span class="grow stack" style="gap:2px"><span class="vn">${pd} ${pd===1?'pedido':'pedidos'} de declaração</span><span class="vs">Que não saíram sozinhos</span></span><span class="vs">Ver pedidos</span></button>`:'',
-  mv?`<button class="vr tap" data-a="ovGo" data-v="Cargos e mandatos"><span class="grow stack" style="gap:2px"><span class="vn">${mv} ${mv===1?'mandato vencendo':'mandatos vencendo'}</span><span class="vs">Thiago Barros · Secretário(a) · vence em 31 dias</span></span><span class="vs">Ver</span></button>`:''].filter(Boolean);
+ const items=[...secSit.map(s=>ed?rsAtt('warn',SEC_KIND[s.k]+' de '+esc(s.n),s.d,'secRev',s.id):rsAttV('warn',SEC_KIND[s.k]+' de '+esc(s.n),s.d)),
+  pa?rsAtt('warn',pa+' '+(pa===1?'ato aguarda':'atos aguardam')+' decisão','Informados em outra igreja','ovGo','Atos'):'',
+  pd?rsAtt('warn',pd+' '+(pd===1?'pedido':'pedidos')+' de declaração','Que não saíram sozinhos','secGoDoc',''):'',
+  mv?rsAtt('info',mv+' '+(mv===1?'mandato vencendo':'mandatos vencendo'),'Thiago Barros · Secretário(a) · vence em 31 dias','ovGo','Cargos e mandatos'):''].filter(Boolean);
  return `<div class="vk"><div><b>142</b><span>Membros ativos</span></div><div><b>2</b><span>Afastados</span></div><div><b>${secDocs.length}</b><span>Documentos em 30 dias</span></div></div>`
-  +`<section class="stack g3"><p class="eb2">Precisam de atenção</p>${items.length?`<div class="vl">${items.join('')}</div>`:vsEmpty('Tudo em dia','Nada esperando você agora.')}</section>`
+  +`<section class="stack g3"><p class="eb2">Precisam de atenção</p>${items.join('')||rsOk('Tudo em dia','Nada esperando você agora.')}</section>`
   +`<section class="stack g3"><div class="row between" style="align-items:baseline"><p class="eb2">Documentos recentes</p><button class="tlink" data-a="ovGo" data-v="Documentos">Ver todos</button></div><div class="vl">${secDocs.slice(0,5).map(d=>`<button class="vr tap" data-a="secDoc" data-v="${d.id}"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(d.t)}</span><span class="vs">${esc(d.n)} · ${d.d} · nº ${d.num}</span></span>${vsTag(d.st==='va'?'ok':'off',d.st==='va'?'Válido':'Revogado')}</button>`).join('')}</div></section>`;}
 function secRevSheet(id){const s=secSit.find(x=>x.id===id);
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${SEC_KIND[s.k]} de ${esc(s.n)}</h3><p class="callout">O que muda ao confirmar. Em ${s.d}.</p></div><div class="vl">${s.fx.map(([a,v])=>`<div class="vr"><span class="vs" style="min-width:140px">${a}</span><span class="grow" style="text-align:right">${esc(v)}</span></div>`).join('')}</div>

@@ -9,6 +9,8 @@ const rsSec=(t,b,sub)=>`<section class="stack g3"><div class="row between" style
 /* cartão de um gráfico: o que separa um gráfico do outro */
 const rsCard=(t,b,sub)=>`<section class="rcard"><div class="row between" style="align-items:baseline"><p class="eb2">${t}</p>${sub?`<span class="vs">${sub}</span>`:''}</div>${b}</section>`;
 const rsAtt=(tone,t,s,act,val)=>`<button class="ova ${tone}" data-a="${act}" data-v="${esc(val||'')}"><i></i><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${t}</span><span class="vs">${s}</span></span>${ic('chevR',18)}</button>`;
+/* mesmo cartão, sem seta, para quem só consulta */
+const rsAttV=(tone,t,s)=>`<div class="ova ${tone}" style="cursor:default"><i></i><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${t}</span><span class="vs">${s}</span></span></div>`;
 const rsOk=(t,s)=>`<div class="ova ok"><i></i><span class="grow stack" style="gap:2px"><span class="vn">${t}</span><span class="vs">${s}</span></span>${ic('check',18)}</div>`;
 const rsPct=(a,b)=>b?Math.round(a/b*100):0;
 const RS_PAL=['menta','ceu','lima','ambar','rosado','salvia'];

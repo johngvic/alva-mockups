@@ -47,7 +47,7 @@ function vsResults(k){const st=VS[k],sales=vsSalesIn(k),m=vsSum(sales),v=vsOk(sa
 function vsOverview(k){const st=VS[k],sales=vsSalesIn(k),m=vsSum(sales),low=st.items.filter(i=>i.active&&i.stock<=i.min).sort((a,b)=>a.stock-b.stock).slice(0,4);
  return `${vsPeriod()}
  <div class="vk"><div><b>${vsMoney(m.sold)}</b><span>Vendido</span></div><div><b>${m.count}</b><span>Vendas</span></div><div><b>${vsMoney(m.ticket)}</b><span>Ticket médio</span></div></div>
- <section class="stack g3"><p class="eb2">Precisam de atenção</p>${low.length?`<div class="vl">${low.map(i=>`<button class="vr tap" data-a="vsItem" data-v="${i.id}"><span class="grow vn">${esc(i.name)}</span>${vsTag(vsStock(i)[1],vsStock(i)[0])}</button>`).join('')}</div>`:vsEmpty('Tudo em dia','Sem estoque baixo.')}</section>`;}
+ <section class="stack g3"><p class="eb2">Precisam de atenção</p>${low.map(i=>rsAtt(vsStock(i)[1]==='danger'?'bad':'warn',esc(i.name),vsStock(i)[0]+' · mínimo '+i.min,'vsItem',i.id)).join('')||rsOk('Tudo em dia','Sem estoque baixo.')}</section>`;}
 
 /* ---- Itens ---- */
 function vsItemRows(k){const st=VS[k],q=norm2(S.vs.q),l=st.items.filter(i=>(S.vs.cat==='all'||i.cat===S.vs.cat)&&(!q||norm2(i.name).includes(q)));
