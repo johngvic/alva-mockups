@@ -1639,3 +1639,21 @@ article.lim-ov{background:linear-gradient(165deg,color-mix(in srgb,var(--danger-
 .vf-hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#dfe8e8;font:500 13px/1 var(--font-text)}
 .ckbar{display:block;height:8px;border-radius:99px;background:var(--line);overflow:hidden}.ckbar i{display:block;height:100%;border-radius:99px;background:var(--brand);transition:width .3s}
 .ckqr{display:grid;place-items:center;padding:8px}.ckqr svg{width:220px;height:220px}
+
+/* ===== Resultados: cartão por gráfico, colunas e rosca (Tiago, 09/11/2026, FND-M-32) ===== */
+.rcard{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:var(--r-lg);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+.rcard .vl{border-top:0}.rcard .vl .vr:last-child{box-shadow:none}
+.rcols{display:flex;gap:6px;align-items:flex-end}
+.rcol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.rcb{height:112px;width:100%;box-sizing:border-box;padding-top:16px;display:flex;align-items:flex-end;justify-content:center;gap:3px;box-shadow:inset 0 -1px 0 var(--line)}
+.rcb i{position:relative;flex:1;max-width:18px;border-radius:4px 4px 2px 2px;opacity:.9}
+.rcb i.now{opacity:1;box-shadow:0 0 0 2px color-mix(in srgb,var(--brand) 35%,transparent)}
+.rcb i em{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding-bottom:2px;font:600 11px/14px var(--font-text);font-style:normal;color:var(--ink)}
+.rcl{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 11px/14px var(--font-text);color:var(--ink-muted)}.rcl.now{color:var(--ink);font-weight:700}
+.rlg{display:flex;flex-direction:column;gap:6px;font:400 13px/18px var(--font-text);color:var(--ink-muted)}.rlg span{display:flex;align-items:center;gap:8px}
+.rdot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
+.rdn{position:relative;width:148px;height:148px;margin:2px auto;border-radius:50%;display:grid;place-items:center}
+.rdn::after{content:"";position:absolute;inset:30px;border-radius:50%;background:var(--surface)}
+.rdn span{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:1px;max-width:84px;text-align:center}
+.rdn b{font:700 15px/18px var(--font-display);letter-spacing:-.02em;color:var(--ink);white-space:nowrap}.rdn small{font:500 11px/14px var(--font-text);color:var(--ink-muted)}
+.rdl .vr{min-height:36px;padding:7px 0}.rdl .vr b{font:600 14px/18px var(--font-text);white-space:nowrap}.rdl .vn{font-size:15px}
