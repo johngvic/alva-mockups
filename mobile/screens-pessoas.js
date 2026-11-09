@@ -312,7 +312,7 @@ function lsRows(c){const q=norm2(S.ls.q),l=c.rows.filter(r=>(S.ls.f==='all'||r.s
  return l.length?`<div class="vl">${l.map(r=>{const head=r.g&&r.g!==g?(g=r.g,`<p class="eb2" style="padding:16px 0 8px;box-shadow:inset 0 -1px 0 var(--line)">${r.g}</p>`):'';return head+`<button class="vr tap" data-a="lsOpen" data-v="${r.id}">${c.av?pavM(r.n,lsAv[r.id.length%6]):''}<span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(r.n)}</span><span class="vs">${esc(r.s)}</span></span>${lsTag(c,r.st)}</button>`;}).join('')}</div>`:vsEmpty('Nada encontrado','Tente outra busca ou filtro.');}
 function lsBody(m,sec){const c=lsC(m[0],sec);if(c.restrict&&S.role!=='admin')return `<div class="stack g5 vs-root">${vsEmpty('Área restrita','Só o Administrador e quem a igreja autorizar acessam este registro. Cada consulta vai para a auditoria.')}</div>`;if(c.custom)return `<div class="stack g5 vs-root">${c.custom()}</div>`;const key=m[0]+'|'+sec;if(S.ls.key!==key)Object.assign(S.ls,{key,q:'',f:'all'});
  const n=st=>c.rows.filter(r=>st==='all'||r.st===st).length,sts=Object.keys(c.ST);
- return `<div class="stack g5 vs-root">${vsHead(c.rows.length+' '+c.noun,c.noAdd?'':vsAdd(m[0],'lsNew',c.add))}${c.rows.length?vsSearch('lsQ','Buscar',''):''}${sts.length>1?vsChips('lsF',S.ls.f,[['all','Todos',n('all')],...sts.map(s=>[s,c.ST[s][1],n(s)])]):''}<div id="lsList">${lsRows(c)}</div></div>`;}
+ return `<div class="stack g5 vs-root">${pgHead(c.rows.length+' '+c.noun,c.noAdd?'':vsAdd(m[0],'lsNew',c.add))}${c.rows.length?vsSearch('lsQ','Buscar',''):''}${sts.length>1?vsChips('lsF',S.ls.f,[['all','Todos',n('all')],...sts.map(s=>[s,c.ST[s][1],n(s)])]):''}<div id="lsList">${lsRows(c)}</div></div>`;}
 function lsSheet(id){const m=S.gmod,c=lsCfg(),r=lsRow(id);if(c.sheet==='usr')return admUserSheet(id);const acts=(c.hideActs&&c.hideActs(r)?[]:c.acts).filter(a=>a[2].includes(r.st)&&can(m,a[3]||'editar'));
  sheet(`<div class="stack g5">${r.cover?`<img class="rfcover" src="${r.cover}" alt="">`:''}<div class="row g3" style="align-items:center">${c.av?pavM(r.n,lsAv[r.id.length%6],'lg'):''}<div class="grow stack" style="gap:4px;min-width:0;align-items:flex-start"><h3 class="t2">${esc(r.n)}</h3>${lsTag(c,r.st)}</div></div>
  <div class="vl">${r.d.map(([l,v])=>`<div class="vr"><span class="vs" style="min-width:104px">${l}</span><span class="grow" style="text-align:right;overflow-wrap:anywhere">${esc(v)}</span></div>`).join('')}</div>
@@ -330,3 +330,54 @@ Object.assign(A,{
  lsDel:id=>{const r=lsRow(id),c=lsCfg();vsConfirm('Excluir “'+esc(r.n)+'”?',c.delBody||'Isso remove o registro da lista e não pode ser desfeito.','Excluir',()=>{c.rows.splice(c.rows.indexOf(r),1);closeSheet();softRender();toast('success','Excluído',r.n);});}
 });
 phone.addEventListener('input',e=>{if(e.target.id!=='lsQ')return;S.ls.q=e.target.value;const l=$('#lsList');if(l)l.innerHTML=lsRows(lsCfg());});
+
+/* ===== Visão geral das páginas de Pessoas e Cuidado (cartões do web; alertas dos dados do módulo) ===== */
+const ITG_FAM=[{id:'fr1',k:'vinculo',q:'Rafael Pereira',n:'Helena Pereira',rel:'Filha',age:3,d:'28/09/2026'},{id:'fr2',k:'remocao',q:'Rafael Pereira',n:'Marcos Lima',rel:'Cunhado',age:41,d:'27/09/2026'}];
+function pvgItg(only){const g=itgCur(),free=itgFree(),ed=can('pessoas','editar'),np=itgPend(),nf=ITG_FILA.length;
+ const sFila=!g?'Não há integração aberta':free===Infinity?'A integração atual não tem limite de vagas':free?'A integração atual tem '+free+(free===1?' vaga':' vagas'):'A integração atual está lotada';
+ const tp=np+(np===1?' pedido de integração aguarda':' pedidos de integração aguardam');
+ const items=[np?(ed?rsAtt('warn',tp,'Aceitar ou recusar','pgGo','pessoas|Integração'):rsAttV('warn',tp,'Só quem edita decide')):'',
+  ...ITG_FAM.map(p=>pgWeb('warn',esc(p.n)+' · '+(p.k==='vinculo'?'pedido de vínculo':'pedido de remoção'),esc(p.rel)+' · pedido de '+esc(p.q),[['Pedido',p.k==='vinculo'?'Vínculo':'Remoção'],['Familiar',p.n+' · '+p.rel+' · '+p.age+' anos'],['Pedido por',p.q],['Data',p.d],['Situação','Em análise']],'Pessoas › Integração › Pedidos de família')),
+  nf?rsAtt('info',nf+(nf===1?' pessoa na fila de espera':' pessoas na fila de espera'),sFila,'pvgFila','pessoas|Integração'):''];
+ if(only)return items;
+ return pgK([[!g?'—':free===Infinity?'Sem limite':free,'Vagas na integração atual'],[nf,'Na fila de espera'],[ITG_FAM.length,'Pedidos de família']])+pgAtt(items);}
+function pvgMem(){return pgK([[144,'Total de membros','cadastrados'],[138,'Integrados'],[121,'Batizados','84% do total'],[98,'Titulares','46 dependentes']])+pgAtt([]);}
+function pvgDev(only){const rs=LSD.pessoas['Devocional'].rows,and=rs.filter(r=>r.st==='and'),agd=rs.filter(r=>r.st==='agd'),enc=rs.filter(r=>r.st==='enc');
+ const leram=and.reduce((a,r)=>a+r.ppl.filter(p=>p.hoje).length,0),tot=and.reduce((a,r)=>a+r.ppl.length,0);
+ const items=and.map(r=>{const c={em:0,at:0,nc:0};r.ppl.forEach(p=>c[dvgCls(p)]++);if(!c.at&&!c.nc)return '';
+  return rsAtt('warn',esc(r.n),[c.at?c.at+(c.at===1?' atrasado':' atrasados'):'',c.nc?c.nc+(c.nc===1?' não começou':' não começaram'):''].filter(Boolean).join(' · '),'pgOpen','pessoas|Devocional|'+r.id);});
+ if(only)return items;
+ return pgK([[and.length,'Em andamento',tot+' participações'],[agd.length,'Agendados',agd[0]?'próximo: '+esc(agd[0].n):'nenhum agendado'],[enc.length,'Encerrados'],[leram,'Leram hoje','de '+tot]])+pgAtt(items);}
+Object.assign(LSD.pessoas,{
+ 'Visão geral · Integração':{noun:'',ST:{},rows:[],custom:()=>pvgItg()},
+ 'Visão geral · Membros':{noun:'',ST:{},rows:[],custom:()=>pvgMem()},
+ 'Visão geral · Devocional':{noun:'',ST:{},rows:[],custom:()=>pvgDev()}});
+gMod('pessoas')[5]=['Visão geral · Integração','Integração','Visão geral · Membros','Membros','Visão geral · Devocional','Devocional'];
+Object.assign(A,{pvgFila:()=>{S.itg.top='fila';pgGoSec('pessoas','Integração');}});
+
+function cvgDisc(only){const l=CU_DISC,em=l.filter(r=>r.st==='em').length,at=l.filter(r=>r.st==='at'),pa=l.filter(r=>r.st==='pa').length;
+ const items=at.slice().sort((a,b)=>cuDays(b.lastISO)-cuDays(a.lastISO)).slice(0,4).map(r=>rsAtt('bad',esc(r.n),'Discipulado por '+esc(r.disc)+' · último contato '+cuAgo(cuDays(r.lastISO)),'pgOpen','cuidado|Discipulado|'+r.id));
+ if(only)return items;
+ return pgK([[l.length,'Pessoas na rede'],[em,'Em dia'],[at.length,'Atrasados'],[pa,'Pausados']])+pgAtt(items);}
+function cvgRes(){const l=CU_DISC,td=cuToday(),mon=td.slice(0,7),yr=td.slice(0,4),all=l.flatMap(r=>mtgList(r).map(m=>({r,m})));
+ const month=all.filter(x=>x.m.st==='re'&&x.m.date.startsWith(mon)).length,year=all.filter(x=>x.m.st==='re'&&x.m.date.startsWith(yr)).length,lim=cuISO(7);
+ const next=all.filter(x=>x.m.st==='ag'&&x.m.date>=td).sort((a,b)=>a.m.date.localeCompare(b.m.date)||a.m.time.localeCompare(b.m.time)),n7=next.filter(x=>x.m.date<=lim).length,and=l.filter(r=>r.st!=='pa').length;
+ const od=l.filter(r=>r.st==='at').sort((a,b)=>cuDays(b.lastISO)-cuDays(a.lastISO)).slice(0,4);
+ return pgK([[and,'Em andamento',(l.length-and)+' pausado'],[month,'Encontros no mês',year+' no ano'],[n7,'Próximos 7 dias',next.length+' agendados no total']])
+  +rsCard('Próximos encontros',next.length?`<div class="vl">${next.slice(0,10).map(x=>`<div class="vr"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(x.r.n)}</span><span class="vs">${cuFmt(x.m.date)} · ${x.m.time} · ${esc(x.m.mode)}</span></span></div>`).join('')}</div>`:vsEmpty('Nada agendado','Nenhum encontro marcado.'))
+  +rsCard('Contato mais atrasado',od.length?`<div class="vl">${od.map(r=>`<div class="vr"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(r.n)}</span><span class="vs">último contato ${cuAgo(cuDays(r.lastISO))} · ritmo ${esc(r.rit)}</span></span></div>`).join('')}</div>`:vsEmpty('Ninguém atrasado','Todos dentro do ritmo.'));}
+function cvgCase(only){const l=CU_CASES,at=l.filter(r=>r.st==='nv'||r.st==='ur'||r.st==='ac').length,ac=l.filter(r=>r.st==='ac').length,re=l.filter(r=>r.st==='re').length;
+ const items=l.filter(r=>r.st==='ur'||r.st==='nv').map(r=>{const red=r.restr&&!cuSeeRestr(r);return rsAtt(r.st==='ur'?'bad':'warn',esc(r.n),(r.st==='ur'?'Urgente':'Aguardando triagem')+(red?'':' · '+esc(r.kind)),'pgOpen','cuidado|Acompanhamento|'+r.id);});
+ if(only)return items;
+ return pgK([[at,'Casos ativos'],[ac,'Acompanhando','em andamento'],[re,'Resolvidos','nos últimos 30 dias']])+pgAtt(items);}
+function cvgPr(only){const act=CU_PR.filter(p=>p.st==='at'),rs=CU_PR.filter(p=>p.st==='rs').length,orando=act.reduce((a,p)=>a+p.count,0),mine=act.filter(p=>p.mine).length,sem=cuPrN('sem');
+ const items=[sem?rsAtt('info',sem+(sem===1?' pedido sem a sua oração':' pedidos sem a sua oração'),'Orar e marcar “Estou orando”','cvgSem','cuidado|Pedidos de oração'):''];if(only)return items;
+ return pgK([[act.length,'Pedidos ativos',rs+(rs===1?' respondido':' respondidos')],[orando,'Pessoas orando','confirmações “estou orando”'],[mine+' de '+act.length,'Você está orando']])
+  +pgAtt(items);}
+Object.assign(LSD.cuidado,{
+ 'Visão geral · Discipulado':{noun:'',ST:{},rows:[],custom:()=>cvgDisc()},
+ 'Resumo':{noun:'',ST:{},rows:[],custom:()=>cvgRes()},
+ 'Visão geral · Acompanhamento':{noun:'',ST:{},rows:[],custom:()=>cvgCase()},
+ 'Visão geral · Pedidos de oração':{noun:'',ST:{},rows:[],custom:()=>cvgPr()}});
+gMod('cuidado')[5]=['Visão geral · Discipulado','Discipulado','Resumo','Visão geral · Acompanhamento','Acompanhamento','Visão geral · Pedidos de oração','Pedidos de oração'];
+Object.assign(A,{cvgSem:()=>{S.cu.pf='sem';pgGoSec('cuidado','Pedidos de oração');}});

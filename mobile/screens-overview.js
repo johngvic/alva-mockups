@@ -4,7 +4,7 @@
    Só lê os dados dos motores existentes; não cria estado novo.
    ============================================================ */
 {
-const goSec=(m,s)=>{const sc=gMod(m)[5];S.gmod=m;if(!gFewSecs(m,sc)){S.gsec=s;if(S.screen==='gSecao')softRender();else go('gSecao');}else{S.gtab=sc.indexOf(s);softRender();}};
+const goSec=(m,s)=>{const sc=gMod(m)[5];S.gmod=m;gPgFix(m,s);if(!gFewSecs(m,sc)){S.gsec=s;if(S.screen==='gSecao')softRender();else go('gSecao');}else{S.gtab=sc.indexOf(s);softRender();}};
 A.ovGo=v=>goSec(S.gmod,v);
 const R$=n=>'R$ '+Math.round(n).toLocaleString('pt-BR');
 const mil=n=>'R$ '+(n/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' mil';

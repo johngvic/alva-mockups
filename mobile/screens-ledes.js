@@ -13,4 +13,5 @@ const LEDE_DYN={
  'comunidade|Ministérios':()=>LSD.comunidade['Ministérios'].rows.length+' ministérios ativos',
  'admin|Automações':()=>{const r=LSD.admin['Automações'].rows;return r.length+' jobs da plataforma · '+r.filter(x=>x.st!=='ds').length+' ativos · '+r.filter(x=>x.st==='fa').length+' com falha na última execução';}
 };
-const gLede=(id,sec)=>{const k=id+'|'+sec;try{if(LEDE_DYN[k])return LEDE_DYN[k]();}catch(e){}return LEDE[k]||'';};
+/* nas páginas com Visão geral, o resumo em texto (n membros, 1 em andamento...) já está nos cartões: não repete */
+const gLede=(id,sec)=>{const k=id+'|'+sec;try{if(LEDE_DYN[k])return pgPaged()?'':LEDE_DYN[k]();}catch(e){}return LEDE[k]||'';};

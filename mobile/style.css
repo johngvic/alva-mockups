@@ -1657,3 +1657,52 @@ article.lim-ov{background:linear-gradient(165deg,color-mix(in srgb,var(--danger-
 .rdn span{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:1px;max-width:84px;text-align:center}
 .rdn b{font:700 15px/18px var(--font-display);letter-spacing:-.02em;color:var(--ink);white-space:nowrap}.rdn small{font:500 11px/14px var(--font-text);color:var(--ink-muted)}
 .rdl .vr{min-height:36px;padding:7px 0}.rdl .vr b{font:600 14px/18px var(--font-text);white-space:nowrap}.rdl .vn{font-size:15px}
+
+/* abas das seções da Gestão (aba no centro, traço que desliza, setas) */
+.gnav{display:flex;align-items:center;gap:2px;margin:0 -6px}
+.gtw{position:relative;flex:1;min-width:0}
+.gtw::before,.gtw::after{content:"";position:absolute;top:0;bottom:1px;width:26px;z-index:2;pointer-events:none;opacity:0;transition:opacity .2s}
+.gtw::before{left:0;background:linear-gradient(90deg,var(--fade-bg,var(--bg)),transparent)}
+.gtw::after{right:0;background:linear-gradient(270deg,var(--fade-bg,var(--bg)),transparent)}
+.gtw.fl::before,.gtw.fr::after{opacity:1}
+.gnav .gtw>.utabs{position:relative}
+.gnav .gtw>.utabs.ul button:first-child{padding-left:12px}
+.gnav .gtw>.utabs button[aria-selected="true"]::after{display:none}
+.gind{position:absolute;bottom:0;left:0;width:0;height:3px;border-radius:3px 3px 0 0;background:var(--brand);transition:left .3s cubic-bezier(.3,.8,.3,1),width .3s cubic-bezier(.3,.8,.3,1);pointer-events:none}
+.gar{display:flex;flex:none;width:28px;height:38px;border:0;background:none;color:var(--ink-muted);align-items:center;justify-content:center;border-radius:8px;cursor:pointer;margin-bottom:2px}
+.gar.off{opacity:.25;pointer-events:none}
+.gar:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.gnav.ov .gtw>.utabs{padding-inline:calc(50% - 56px)}
+.gnav.esub{margin-bottom:16px}.gnav.esub .utabs.esub{margin-bottom:0}
+.gnav.one .gar,.gnav.one+.gdots{display:none}
+#gBody.gsl{animation:gslin .26s ease-out}
+@keyframes gslin{from{transform:translateX(var(--gd,26px));opacity:.25}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){#gBody.gsl{animation:none}.gind{transition:none}}
+
+/* bolinhas de posição (quantas seções há e em qual você está), só quando as abas não cabem */
+.gdots{display:flex;justify-content:center;align-items:center;gap:2px;margin-top:2px}
+.gdot{appearance:none;border:0;background:none;padding:8px 3px;cursor:pointer;display:grid;place-items:center}
+.gdot::before{content:"";display:block;width:6px;height:6px;border-radius:99px;background:var(--line-strong,var(--ink-faint,#c9c9c9));opacity:.7;transition:width .28s cubic-bezier(.3,.8,.3,1),background .2s,opacity .2s}
+.gdot.on::before{width:18px;background:var(--brand);opacity:1}
+.gdot:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;border-radius:99px}
+@media (prefers-reduced-motion:reduce){.gdot::before{transition:none}}
+
+.gnav.agnav{margin:0}
+.agnav .utw{flex:1;min-width:0}
+
+/* aba Módulos: grupos que abrem para baixo */
+.gg .gchev svg{transition:transform .22s cubic-bezier(.3,.8,.3,1)}
+.gg.open .gchev svg{transform:rotate(90deg)}
+.gsubs{padding-left:42px;animation:gsubin .22s ease-out}
+.gsubs .chrow{padding:14px 0}
+@keyframes gsubin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.gsubs{animation:none}.gg .gchev svg{transition:none}}
+
+/* cartões da Visão geral: 2 colunas quando são 2 ou 4, e linha de apoio */
+.vk.k2{grid-template-columns:repeat(2,1fr)}
+.vk>div>span+span{font-size:11.5px;opacity:.85}
+
+/* ícones dos módulos: noite usa o tom claro (o -ink é escuro e some no fundo escuro); dia usa o -ink */
+.mico,.gtile>span:first-child{color:var(--mt,var(--brand-text))}
+/* dia: o tom do módulo escurecido (o -ink de oceano, petróleo e vinho é claro e some no fundo branco) */
+.phone.dia .mico,.phone.dia .gtile>span:first-child{color:color-mix(in srgb,var(--mt,var(--brand-text)) 66%,#010f12)}

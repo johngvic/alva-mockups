@@ -14,7 +14,7 @@ V.home=()=>{const up=upcoming();const r=ROLES[S.role];return{sb:'var(--ink)',tab
    <div class="dots" id="dots"><span class="on"></span><span></span><span></span></div>
   </div>
   <section class="pad stack g3"><p class="eb2">Para assistir e ouvir</p><div class="gtiles">
-   ${(S.role==='visitante'?[['Pregações','book','ceu','nxPregs'],['Vídeos','play','rosado','nxVideos'],['Séries','layers','menta','nxSeries'],['Músicas','music','ambar','nxSongs'],['Quem somos','church','brasa','quemSomos']]:[['Pregações','book','ceu','nxPregs'],['Vídeos','play','rosado','nxVideos'],['Séries','layers','menta','nxSeries'],['Músicas','music','ambar','nxSongs']]).map(j=>`<button class="gtile" data-a="sub" data-v="${j[3]}"><span style="color:var(--tone-${j[2]}-ink,var(--brand-text))">${ic(j[1],24,1.6)}</span><span>${j[0]}</span></button>`).join('')}
+   ${(S.role==='visitante'?[['Pregações','book','ceu','nxPregs'],['Vídeos','play','rosado','nxVideos'],['Séries','layers','menta','nxSeries'],['Músicas','music','ambar','nxSongs'],['Quem somos','church','brasa','quemSomos']]:[['Pregações','book','ceu','nxPregs'],['Vídeos','play','rosado','nxVideos'],['Séries','layers','menta','nxSeries'],['Músicas','music','ambar','nxSongs']]).map(j=>`<button class="gtile" data-a="sub" data-v="${j[3]}"><span style="--mt:var(--tone-${j[2]},var(--brand-text));--mi:var(--tone-${j[2]}-ink,var(--brand-text))">${ic(j[1],24,1.6)}</span><span>${j[0]}</span></button>`).join('')}
   </div></section>
 <section class="pad stack g3">
    <div class="row g3" style="align-items:stretch">

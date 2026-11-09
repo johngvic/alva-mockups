@@ -61,7 +61,7 @@ S.subs='ativa';
 const can=(id,act)=>lvlOf(id)>=CAN[act]&&(act==='ver'||S.subs!=='suspensa');
 /* módulo em abas (até 5 seções) ou em lista de seções (mais de 5); Cafeteria, Restaurante e Loja são sempre em abas, iguais entre si (Tiago, 09/11/2026) */
 const TABBED=['cafe','rest','shop','financeiro'];
-const gFewSecs=(id,sc)=>sc.length<=5||TABBED.includes(id);
+const gFewSecs=(id,sc)=>true; // todas as seções abrem em abas (centradas, com setas); a lista de seções deixou de existir
 const visibleMods=()=>GMODS.filter(m=>lvlOf(m[0])>0);
 const canGestao=()=>visibleMods().length>0;
 const gPendOf=id=>lvlOf(id)>=2?(GPEND[id]||[]).filter(p=>lvlOf(id)>=(p[2]||2)):[];

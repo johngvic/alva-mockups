@@ -191,3 +191,23 @@ LSD.comunidade={
 LSD.comunidade['Casas de Apascentamento'].rows=CM_CASAS;LSD.comunidade['Redes de casa'].rows=CM_REDES;LSD.comunidade['Ministérios'].rows=CM_MINS;
 /* pendências do módulo saem dos dados */
 Object.defineProperty(GPEND,'comunidade',{configurable:true,enumerable:true,get:()=>[['Pedidos para entrar nas casas',CM_CASAS.reduce((a,c)=>a+c.reqs.length,0)],['Chamadas pendentes',[...CM_CASAS,...CM_REDES].reduce((a,r)=>a+mtgPend(r),0)]].filter(x=>x[1]>0)});
+
+/* ===== Visão geral das páginas de Comunidade (cartões do web; alertas dos dados do módulo) ===== */
+function mvgCasas(only){const cs=CM_CASAS.filter(c=>c.st==='at'),mon=cuToday().slice(0,7),ppl=cs.reduce((a,c)=>a+c.ppl.length,0),n=cs.reduce((a,c)=>a+mtgDone(c).filter(m=>m.date.startsWith(mon)).length,0);
+ const pc=cs.map(mtgPct).filter(x=>x!==null),avg=pc.length?Math.round(pc.reduce((a,b)=>a+b,0)/pc.length):null;
+ const items=[...cs.filter(c=>c.reqs.length).map(c=>rsAtt('warn',esc(c.n)+': '+c.reqs.length+(c.reqs.length===1?' pedido para entrar':' pedidos para entrar'),'Aceitar ou recusar','pgOpen','comunidade|Casas de Apascentamento|'+c.id)),
+  ...cs.filter(c=>mtgPend(c)).map(c=>rsAtt('warn',esc(c.n)+': '+mtgPend(c)+(mtgPend(c)===1?' chamada pendente':' chamadas pendentes'),'O dia passou e ninguém fez a chamada','pgOpen','comunidade|Casas de Apascentamento|'+c.id))];
+ if(only)return items;
+ return pgK([[cs.length,'Casas',cs.filter(c=>c.ministerio).length+' ligadas a ministérios'],[ppl,'Participantes'],[n,'Encontros no mês','em '+cs.length+' casas'],[avg===null?'—':avg+'%','Presença média']])+pgAtt(items);}
+function mvgRedes(only){const rs=CM_REDES.filter(r=>r.st==='at'),cs=CM_CASAS.filter(c=>c.st==='at'),loose=cs.filter(c=>!c.rede),pp=rs.reduce((a,r)=>a+cmRedePpl(r).length,0);
+ const items=[loose.length?pgWeb('info',loose.length+(loose.length===1?' casa sem rede':' casas sem rede'),esc(loose.map(c=>c.n).join(', ')),loose.map(c=>[c.n,'Sem rede']),'Comunidade › Redes de casa › Vincular casas'):'',
+  ...rs.filter(r=>mtgPend(r)).map(r=>rsAtt('warn',esc(r.n)+': '+mtgPend(r)+(mtgPend(r)===1?' chamada pendente':' chamadas pendentes'),'O dia passou e ninguém fez a chamada','pgOpen','comunidade|Redes de casa|'+r.id))];
+ if(only)return items;
+ return pgK([[rs.length,'Redes',rs.length+' supervisores'],[(cs.length-loose.length)+' de '+cs.length,'Casas vinculadas'],[pp,'Pessoas nas redes','participantes das casas']])+pgAtt(items);}
+function mvgMins(){const a=CM_MINS.filter(m=>m.st==='at'),mem=a.reduce((x,m)=>x+m.total,0),tm=a.reduce((x,m)=>x+m.times.length,0);
+ return pgK([[a.length,'Ministérios',(CM_MINS.length-a.length)+(CM_MINS.length-a.length===1?' inativo':' inativos')],[mem,'Membros vinculados','média de '+Math.round(mem/Math.max(1,a.length))+' por ministério'],[tm,'Times ativos','em '+a.length+' ministérios']])+pgAtt([]);}
+Object.assign(LSD.comunidade,{
+ 'Visão geral · Casas de Apascentamento':{noun:'',ST:{},rows:[],custom:()=>mvgCasas()},
+ 'Visão geral · Redes de casa':{noun:'',ST:{},rows:[],custom:()=>mvgRedes()},
+ 'Visão geral · Ministérios':{noun:'',ST:{},rows:[],custom:()=>mvgMins()}});
+gMod('comunidade')[5]=['Visão geral · Casas de Apascentamento','Casas de Apascentamento','Visão geral · Redes de casa','Redes de casa','Visão geral · Ministérios','Ministérios'];
