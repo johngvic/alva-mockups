@@ -33,7 +33,7 @@ Object.assign(LSD,{financeiro:{
     ['Conferência Missões — inscrições','A receber · Vence 9 out · R$ 4.800,00','pe','Não repete'],
     ['Aluguel do salão — Associação Esportiva Vida','A receber · Vence 25 set · R$ 1.200,00','at','Não repete · já recebido R$ 400,00'],
     ['Inscrições — Retiro de Jovens 2026','A receber · Vence 27 set · R$ 10.440,00','pg','Não repete']],'fp',([n,s,st,x])=>({n,s,st,d:[['Tipo',s.split(' · ')[0]],['Vencimento',s.split(' · ')[1].replace('Vence ','')],['Valor',s.split(' · ')[2]],['Repetição ou parcela',x]]}))},
- 'Aprovações':{noun:'aprovações',noAdd:1,ro:1,ST:{pe:['warning','Pendente'],ap:['ok','Aprovada'],re:['danger','Recusada']},acts:[['Aprovar','ap',['pe'],'aprovar'],['Recusar','re',['pe'],'aprovar']],
+ 'Aprovações':{noun:'aprovações',noAdd:1,ro:1,ST:{pe:['warning','Pendente'],ap:['ok','Aprovada'],re:['danger','Rejeitada']},acts:[['Aprovar','ap',['pe'],'aprovar']],extra:r=>r.st==='pe'&&can('financeiro','aprovar')?`<button class="btn outline md block" data-a="finRej" data-v="${r.id}">Rejeitar</button>`:'',
   rows:FIN([['Oferta missionária — Culto de quarta','Lançamento · + R$ 1.860,00 · Larissa Pires','pe'],['Extrato Bradesco (OFX)','Importação · 18 movimentos · Rafael Pereira','pe'],['Dízimos e Ofertas — Culto Dom','Lançamento · + R$ 12.480,00 · Larissa Pires','ap']],'fa',([n,s,st])=>({n,s,st,d:[['Tipo',s.split(' · ')[0]],['Detalhe',s.split(' · ').slice(1).join(' · ')],['Quem aprova','Só o Admin do Financeiro']]}))},
  'Importar e conciliar':{noun:'movimentos do extrato',add:'Importar extrato',fields:[['n','Descrição',''],['s','Valor','']],ST:{sp:['warning','Sem par'],co:['ok','Conciliado']},acts:[['Conciliar com a sugestão','co',['sp']]],
   rows:pg([['PIX recebido · Dízimos','+ R$ 1.200,00 · sugestão: Dízimos 29 set','sp'],['Débito · Enel','− R$ 890,00 · sugestão: Conta de energia','sp'],['TED · Aluguel','− R$ 2.400,00 · sugestão: Aluguel da sala','sp'],['PIX recebido · Cafeteria','+ R$ 77,00 · conciliado com vendas de hoje','co']],'fi')},
@@ -55,40 +55,33 @@ Object.assign(LSD,{financeiro:{
  'Mensagens':{noun:'mensagens',add:'Nova mensagem',fields:[['n','Assunto',''],['s','Para','']],ST:{nv:['warning','Nova'],rs:['ok','Respondida']},acts:[['Marcar como respondida','rs',['nv']]],rows:pg([['Dúvida sobre o informe','Camila Pereira','nv'],['Comprovante de doação','Paulo Alves','rs']],'fm')}
 
 },admin:{
- 'Usuários e permissões':{noun:'usuários',add:'Convidar usuário',av:1,fields:[['n','Nome',''],['s','E-mail','']],ST:{at:['ok','Ativo'],cv:['warning','Convite enviado']},acts:[],sheet:'usr',rows:[]},
- 'Papéis e matriz':{custom:()=>admMatrix()},
- 'Visitantes':{noun:'visitantes',add:'Novo visitante',av:1,fields:[['n','Nome',''],['s','Como chegou','']],ST:{nv:['info','Novo'],ct:['warning','Em contato'],mb:['ok','Virou membro']},acts:[['Iniciar contato','ct',['nv']],['Marcar como membro','mb',['nv','ct']]],rows:FIN([['Lucas Almeida','Primeiro acesso pelo app','nv'],['Beatriz Nogueira','Visitou o culto de 27 set','ct'],['Rui Fonseca','Veio por convite','mb']],'av',([n,s,st])=>({n,s,st,d:[['Chegada',s]]}))},
- 'Multi-igreja':{noun:'igrejas',add:'Nova igreja',fields:[['n','Nome',''],['s','Cidade','']],ST:{at:['ok','Ativa']},acts:[],rows:FIN([['Alva Sede','São Paulo · 1.240 membros'],['Alva Alphaville','Barueri · 420 membros'],['Alva Campinas','Campinas · 310 membros']],'ai',([n,s])=>({n,s,st:'at',d:[['Cidade e membros',s]]}))}
+ 'Usuários e permissões':{noun:'usuários',add:'Convidar usuário',av:1,fields:[['n','Nome',''],['s','E-mail','']],ST:{at:['ok','Ativo'],cv:['warning','Convidado'],su:['danger','Suspenso']},acts:[],sheet:'usr',rows:[]}
 }});
 
-/* ---- Administração: usuários, papel único (ADR-0012), acessos por área e matriz de papéis ---- */
-const AROLES=['Administrador','Pastor','Líder','Secretaria','Voluntário'],ALV=['Nenhum','Ver','Editar','Admin da área'],AMODS=GMODS.filter(m=>m[0]!=='admin');
-const ADMU=[['Carlos Andrade','Administrador',{}],['Rafael Pereira','Pastor',{}],['Marcos Lima','Pastor',{cuidado:3}],['Giovanna Martins','Líder',{cafe:3}],['Ana Costa','Líder',{kids:2}],['Patrícia Oliveira','Secretaria',{secretaria:3,financeiro:1}],['Davi Melo','Voluntário',{conteudo:1}]].map(([n,role,acc],i)=>({id:'au'+i,n,role,acc,st:'at',d:[]}));
-const admSync=()=>ADMU.forEach(u=>{const k=Object.keys(u.acc).filter(m=>u.acc[m]>0).length;u.s=u.role+(u.role==='Administrador'?' · todas as áreas':k?' · '+k+(k>1?' áreas':' área'):'');u.d=[['Papel',u.role]];});
+/* ---- Administração (Tiago, 08/11/2026): usuário Ativo, Convidado ou Suspenso; papel único (ADR-0012) e acessos por área em CONSULTA.
+ * Dar ou mudar acesso, papéis e matriz ficam na web (segurança). No app: suspender e reativar o acesso (Administrar) e revogar ou restabelecer um visitante. ---- */
+const ALV=['Nenhum','Ver','Editar','Admin da área'],AMODS=GMODS.filter(m=>m[0]!=='admin');
+const ADMU=[['Carlos Andrade','Administrador',{},'at','hoje'],['Rafael Pereira','Pastor',{},'at','hoje'],['Marcos Lima','Pastor',{cuidado:3},'at','ontem'],['Giovanna Martins','Líder',{cafe:3},'at','há 3 dias'],['Ana Costa','Líder',{kids:2},'at','ontem'],['Patrícia Oliveira','Secretaria',{secretaria:3,financeiro:1},'at','hoje'],['Davi Melo','Voluntário',{conteudo:1},'at','há 5 dias'],['Elisa Moura','Líder',{espacos:2},'cv','nunca'],['Josias Ferreira','Voluntário',{zeladoria:2},'su','há 40 dias']].map(([n,role,acc,st,last],i)=>({id:'au'+i,n,role,acc,st,last,d:[]}));
+const admSync=()=>ADMU.forEach(u=>{const k=Object.keys(u.acc).filter(m=>u.acc[m]>0).length;u.s=u.role+(u.role==='Administrador'?' · todas as áreas':k?' · '+k+(k>1?' áreas':' área'):'')+' · último acesso '+u.last;u.d=[['Papel',u.role],['Último acesso',u.last]];});
 admSync();LSD.admin['Usuários e permissões'].rows=ADMU;
-const MX={};AROLES.forEach(r=>{MX[r]={};AMODS.forEach(m=>{MX[r][m[0]]=r==='Administrador'?[1,1,1,1]:r==='Pastor'?[1,1,1,0]:r==='Líder'?[1,1,0,0]:r==='Secretaria'?(['pessoas','secretaria'].includes(m[0])?[1,1,1,0]:[1,0,0,0]):[1,0,0,0];});});
-S.am={role:'Pastor'};
-function admMatrix(){const ed=can('admin','editar'),r=S.am.role,lock=r==='Administrador';
- return `${vsChips('admRoleSel',r,AROLES.map(x=>[x,x]))}<p class="vs" style="white-space:normal">${lock?'Administrador é papel do sistema: tem tudo, em todas as áreas.':'Marque o que este papel pode fazer em cada módulo.'}</p>
- <div class="vl">${AMODS.map(m=>`<div class="vr"><span class="grow vn">${m[1]}</span><span class="vtogs">${['Ver','Criar','Editar','Excluir'].map((l,i)=>`<button class="vtog" aria-pressed="${!!MX[r][m[0]][i]}" ${ed&&!lock?`data-a="admTog" data-v="${m[0]}|${i}"`:'disabled'} aria-label="${l}">${l[0]}</button>`).join('')}</span></div>`).join('')}</div><p class="vs">V ver · C criar · E editar · X excluir</p>`;}
-const admLvlRows=u=>AMODS.map(m=>{const l=u.role==='Administrador'?3:(u.acc[m[0]]||0);return `<div class="vr"><span class="grow vn">${m[1]}</span><button class="vlv l${l}" ${u.role==='Administrador'||!can('admin','editar')?'disabled':`data-a="admLvl" data-v="${u.id}|${m[0]}"`}>${ALV[l]}</button></div>`;}).join('');
-function admUserSheet(id){const u=ADMU.find(x=>x.id===id)||lsRow(id);u.role=u.role||'Voluntário';u.acc=u.acc||{};const ed=can('admin','editar');
- sheet(`<div class="stack g5"><div class="row g3" style="align-items:center">${pavM(u.n,'ceu','lg')}<div class="grow stack" style="gap:2px"><h3 class="t2">${esc(u.n)}</h3><span class="vs">Um papel por pessoa. O acesso vale o maior entre o papel e as áreas.</span></div></div>
- <div class="field"><label>Papel</label>${vsChips('admRole',u.role,AROLES.map(x=>[x,x]))}</div>
- <div class="stack g2"><p class="eb2">Acessos por área</p><div class="vl vsel" id="admAcc">${admLvlRows(u)}</div></div>
- <button class="btn primary md block" data-a="closeSheet">Concluir</button></div>`);S.am.uid=u.id;$$('.sheet [data-a=admRole]').forEach(b=>{if(!ed)b.disabled=true;});}
+Object.defineProperty(GPEND,'admin',{configurable:true,enumerable:true,get:()=>[['Convites de acesso pendentes',ADMU.filter(u=>u.st==='cv').length]].filter(x=>x[1]>0)});
+const AROLES=['Administrador','Pastor','Líder','Secretaria','Voluntário'];S.am={uid:''};
+const admLvlRows=u=>AMODS.map(m=>{const l=u.role==='Administrador'?3:(u.acc[m[0]]||0),ed=can('admin','editar')&&u.role!=='Administrador'&&u.st!=='su';return `<div class="vr"><span class="grow vn">${m[1]}</span>${ed?`<button class="vlv l${l}" data-a="admLvl" data-v="${u.id}|${m[0]}">${ALV[l]}</button>`:vsTag(l?'info':'off',ALV[l])}</div>`;}).join('');
+function admUserSheet(id){const u=ADMU.find(x=>x.id===id),adm=can('admin','aprovar'),b=[];
+ if(adm&&u.role!=='Administrador'&&u.st==='at')b.push(`<button class="btn danger md block" data-a="admSusp" data-v="${id}">Suspender o acesso</button>`);
+ if(adm&&u.st==='su')b.push(`<button class="btn primary md block" data-a="admReat" data-v="${id}">Reativar o acesso</button>`);
+ sheet(`<div class="stack g5"><div class="row g3" style="align-items:center">${pavM(u.n,'ceu','lg')}<div class="grow stack" style="gap:4px;align-items:flex-start"><h3 class="t2">${esc(u.n)}</h3>${vsTag({at:'ok',cv:'warning',su:'danger'}[u.st],{at:'Ativo',cv:'Convidado',su:'Suspenso'}[u.st])}</div></div>
+ <div class="field"><label>Papel</label>${vsChips('admRole',u.role,AROLES.map(x=>[x,x]))}</div><p class="vs">Último acesso: ${u.last}</p>
+ <div class="stack g2"><p class="eb2">Acessos por área</p><div class="vl vsel" id="admAcc">${admLvlRows(u)}</div><p class="vs">Um papel por pessoa. O acesso vale o maior entre o papel e as áreas. Papéis e a matriz ficam na web.</p></div>
+ <div class="stack g3">${b.join('')}<button class="tlink" data-a="closeSheet">Concluir</button></div></div>`);S.am.uid=u.id;$$('.sheet [data-a=admRole]').forEach(b=>{if(!can('admin','editar'))b.disabled=true;});}
 const admU=()=>ADMU.find(x=>x.id===S.am.uid);
 function admAccSheet(){const m=gMod(S.gmod);
- sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Quem tem acesso a ${m[1]}</h3><p class="callout">Toque no nível para mudar. Administrador sempre tem tudo.</p></div><div class="vl vsel" id="admAccM">${ADMU.map(u=>{const l=u.role==='Administrador'?3:(u.acc[m[0]]||0);return `<div class="vr">${pavM(u.n,'ceu')}<span class="grow stack" style="gap:2px"><span class="vn">${esc(u.n)}</span><span class="vs">${u.role}</span></span><button class="vlv l${l}" ${u.role==='Administrador'?'disabled':`data-a="admLvlM" data-v="${u.id}"`}>${ALV[l]}</button></div>`;}).join('')}</div><button class="btn primary md block" data-a="closeSheet">Concluir</button></div>`);}
-const REL=['Resumo do período','Lista completa (CSV)','Comparativo mensal'];
-const gRelLink=id=>`<button class="tlink" data-a="gRel">Relatórios de ${gMod(id)[1]}</button>`;
+ sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Quem tem acesso a ${m[1]}</h3><p class="callout">Toque no nível para mudar. Administrador sempre tem tudo.</p></div><div class="vl vsel" id="admAccM">${ADMU.filter(u=>u.st!=='su').map(u=>{const l=u.role==='Administrador'?3:(u.acc[m[0]]||0);return `<div class="vr">${pavM(u.n,'ceu')}<span class="grow stack" style="gap:2px"><span class="vn">${esc(u.n)}</span><span class="vs">${u.role}</span></span>${can('admin','editar')&&u.role!=='Administrador'?`<button class="vlv l${l}" data-a="admLvlM" data-v="${u.id}">${ALV[l]}</button>`:vsTag(l?'info':'off',ALV[l])}</div>`;}).join('')}</div><button class="btn outline md block" data-a="closeSheet">Fechar</button></div>`);}
 Object.assign(A,{
+ admSusp:id=>{const u=ADMU.find(x=>x.id===id);vsConfirm('Suspender o acesso de '+esc(u.n.split(' ')[0])+'?',esc(u.n)+' deixa de entrar no sistema agora. Dá para reativar depois.','Suspender',()=>{u.st='su';admSync();closeSheet().then(()=>{softRender();toast('info','Acesso suspenso',u.n);});});},
+ admReat:id=>{const u=ADMU.find(x=>x.id===id);u.st='at';admSync();closeSheet().then(()=>{softRender();toast('success','Acesso reativado',u.n);});},
  admRole:r=>{const u=admU();u.role=r;admSync();$$('.sheet .vchips button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===r));$('#admAcc').innerHTML=admLvlRows(u);},
  admLvl:v=>{const [id,m]=v.split('|'),u=ADMU.find(x=>x.id===id);u.acc[m]=((u.acc[m]||0)+1)%4;admSync();$('#admAcc').innerHTML=admLvlRows(u);},
  admLvlM:id=>{const m=S.gmod,u=ADMU.find(x=>x.id===id);u.acc[m]=((u.acc[m]||0)+1)%4;admSync();admAccSheet();},
- admRoleSel:r=>{S.am.role=r;softRender();},
- admTog:v=>{const [m,i]=v.split('|'),a=MX[S.am.role][m];a[i]=a[i]?0:1;if(+i>0&&a[i])a[0]=1;if(+i===0&&!a[0])a.fill(0);softRender();},
- gAcc:()=>admAccSheet(),finExp:()=>toast('success','Arquivo gerado','Os lançamentos aprovados do mês foram enviados para o seu e-mail.'),finPdf:y=>toast('success','Informe '+y+' gerado','O PDF foi enviado para o seu e-mail.'),
- gRel:()=>{const m=gMod(S.gmod);sheet(`<div class="stack g5"><h3 class="t2">Relatórios de ${m[1]}</h3><div class="vl">${REL.map((r,i)=>`<div class="vr"><span class="grow vn">${r}</span><button class="btn outline sm" data-a="gRelGo" data-v="${r}">Gerar</button></div>`).join('')}</div></div>`);},
- gRelGo:r=>{closeSheet();toast('success','Relatório gerado',r+' · enviado para o seu e-mail.');}
+ gAcc:()=>admAccSheet(),finExp:()=>toast('success','Arquivo gerado','Os lançamentos aprovados do mês foram enviados para o seu e-mail.'),finPdf:y=>toast('success','Informe '+y+' gerado','O PDF foi enviado para o seu e-mail.')
 });

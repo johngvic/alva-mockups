@@ -471,9 +471,9 @@ function sxMdRows(){const q=norm(S.sxMdQ),sig=[S.sxMdQ,S.sxMdF].join('|');if(S.s
 {const _sv=secVis;secVis=function(){let h=_sv.apply(this,arguments);
  h=h.replace('O que a secretaria precisa acompanhar: situação dos membros, atos, documentos e mandatos.','Situação dos membros, atos, documentos e mandatos da igreja.');
  h=h.replace(/\(([^()<>]*\(a\))\) vence/g,'· $1 · vence');
+ /* o card "Documentos recentes" mora sob o gráfico (screens-secretaria.js); o antigo "Atalhos" sai e os Aniversariantes ocupam a linha inteira */
  const i=h.indexOf('<section class="card rise" style="--d:4;padding:18px 20px"><div class="sh"><h2>Atalhos</h2>');
- if(i>-1){const j=h.indexOf('</section>',i)+10;const docs=SX_DOCS.slice().sort((a,b)=>a.d<b.d?1:-1).slice(0,4);
-  h=h.slice(0,i)+`<section class="card rise" style="--d:4;padding:18px 20px"><div class="sh"><h2>Documentos recentes</h2><button class="lnk" data-a="sxGo" data-v="sec-docs">Ver todos</button></div>${docs.map(d=>`<button class="sx-bd sxv-doc" data-a="sxDocOpen" data-v="${d.id}"><span class="sxt-ic">${ic(SX_DOC_T[d.t].ic,15,2)}</span><span class="sx-m"><b>${esc(d.t)}</b><small>${esc(d.pessoa)} · ${dBR(d.d)}</small></span>${d.st==='valido'?'':sxPill('Revogado','var(--st-rec)','var(--st-rec-bg)')}</button>`).join('')}</section>`+h.slice(j);}
+ if(i>-1){const j=h.indexOf('</section>',i)+10;h=h.slice(0,i)+h.slice(j);h=h.replace('<div class="sx-two"><section class="card rise" style="--d:3;padding:18px 20px"><div class="sh"><h2>Aniversariantes','<div><section class="card rise" style="--d:3;padding:18px 20px"><div class="sh"><h2>Aniversariantes');}
  return h;};}
 Object.assign(A,{sxDDm:v=>{const p=$('#sxDD-'+v);closePops(p);p.classList.toggle('open');},
  sxAtoSt:v=>{S.sxAtoSt=v;closePops();render();},sxAtoPg:v=>{S.sxAtoPg=+v;$('#sxAtL').innerHTML=sxAtoRows();},
@@ -567,12 +567,12 @@ lede=function(){return '';};
  Kids:['Visão geral','Turmas','Salas','Times','Planejamento','Escalas'],
  Conteúdo:['Pregações','Séries','Vídeos','Músicas','Cursos','Jornadas','Material de apoio'],
  Agenda:['Calendário','Cultos','Eventos','Inscrições','Escalas','Apresentações','Batismos','Consagrações','Casamentos'],
- Espaços:['Salas','Reservas'],
+ Espaços:['Visão geral','Salas','Reservas'],
  Almoxarifado:['Visão geral','Itens','Categorias','Empréstimos','Devoluções','Distribuições','Transferências','Movimentações'],
  Cafeteria:['Visão geral','Itens','Categorias','Vendas','Caixa diário','Movimentações'],
  Restaurante:['Visão geral','Itens','Categorias','Vendas','Caixa diário','Movimentações'],
  Loja:['Visão geral','Itens','Categorias','Vendas','Pedidos do app','Caixa diário','Movimentações'],
- Secretaria:['Visão geral','Atos','Documentos','Cargos e mandatos','Análises'],
+ Secretaria:['Visão geral','Atos','Documentos','Cargos e mandatos'],
  Financeiro:['Visão geral','Caixa de entrada','Lançamentos','Contas a pagar e a receber','Aprovações','Importar e conciliar','Exportação contábil','Doações','Caixas e vendas','Informe anual','DRE','Fechamentos','Contas financeiras','Plano e centros de custo','Contatos','Mensagens'],
  Comunicação:['Notícias','Banners','Notificações','Transmissões'],
  Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Zeladoria','Almoxarifado','Cafeteria','Restaurante','Loja','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],

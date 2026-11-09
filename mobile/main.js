@@ -17,7 +17,10 @@
 //#include ./screens-vendas.js
 //#include ./screens-lideranca.js
 //#include ./screens-pessoas.js
+//#include ./screens-encontros.js
 //#include ./screens-operacao.js
+//#include ./screens-escalas.js
+//#include ./screens-agenda.js
 //#include ./screens-conteudo-gestao.js
 //#include ./screens-forms.js
 //#include ./screens-financeiro.js
@@ -27,6 +30,15 @@
 //#include ./screens-web-parity.js
 //#include ./screens-overview.js
 //#include ./screens-ledes.js
+//#include ./screens-kids.js
+//#include ./screens-espacos.js
+//#include ./screens-quadros.js
+//#include ./screens-zeladoria.js
+//#include ./screens-almoxarifado.js
+//#include ./screens-secretaria.js
+//#include ./screens-caixas.js
+//#include ./screens-comunicacao.js
+//#include ./screens-resultados.js
 //#include ./screens-bebes-batismo.js
 //#include ./core-splash.js
 //#include ./screens-identidade.js

@@ -10,45 +10,47 @@ Object.assign(I,{
  bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>'
 });
-const VENDAS=['Visão geral','Itens','Vendas','Caixa diário','Movimentações'];
+const VENDAS=['Visão geral','Itens','Vendas','Caixa diário','Movimentações','Resultados'];
 /* [id, nome, ícone, tom, fase do protótipo, seções] */
 const GMODS=[
- ['pessoas','Pessoas','users','ceu',3,['Membros','Integração']],
- ['comunidade','Comunidade','home','menta',3,['Casas de Apascentamento','Ministérios']],
+ ['pessoas','Pessoas','users','ceu',3,['Integração','Membros','Devocional']],
+ ['comunidade','Comunidade','home','menta',3,['Casas de Apascentamento','Redes de casa','Ministérios']],
  ['cuidado','Cuidado','heart','rosado',3,['Discipulado','Acompanhamento','Pedidos de oração']],
- ['kids','Kids','baby','ambar',3,['Visão geral','Salas','Escalas']],
+ ['kids','Kids','baby','ambar',3,['Visão geral','Salas','Planejamento','Escalas']],
  ['conteudo','Conteúdo','layers','oceano',5,['Pregações','Vídeos','Músicas','Séries','Jornadas','Cursos','Material de apoio']],
- ['agenda','Agenda','calendar','laranja',4,['Eventos','Cultos','Apresentações','Batismos','Calendário','Escalas','Inscrições']],
+ ['agenda','Agenda','calendar','laranja',4,['Eventos','Cultos','Apresentações','Batismos','Consagrações','Casamentos','Calendário','Escalas','Inscrições']],
  ['espacos','Espaços','building','salvia',4,['Salas','Reservas']],
  ['zeladoria','Zeladoria','bucket','salvia',4,['Chamados','Rotinas']],
- ['almox','Almoxarifado','box','damasco',4,['Visão geral','Itens','Categorias','Empréstimos','Devoluções','Movimentações']],
+ ['almox','Almoxarifado','box','damasco',4,['Visão geral','Itens','Empréstimos','Movimentações']],
  ['cafe','Cafeteria','coffee','brasa',2,VENDAS],
  ['rest','Restaurante','chef','vinho',2,VENDAS],
  ['shop','Loja','bag','lima',2,VENDAS],
- ['secretaria','Secretaria','file','ceu',5,['Atendimentos','Documentos']],
+ ['secretaria','Secretaria','file','ceu',5,['Visão geral','Atos','Documentos','Cargos e mandatos']],
  ['financeiro','Financeiro','wallet','petroleo',6,['Visão geral','Caixa de entrada','Lançamentos','Contas a pagar e a receber','Aprovações','Caixas e vendas']],
- ['comunicacao','Comunicação','megaphone','laranja',5,['Notícias','Notificações','Mensagens','Banners','Transmissões']],
- ['admin','Administração','shield','brasa',6,['Usuários e permissões','Papéis e matriz','Visitantes','Multi-igreja']]
+ ['comunicacao','Comunicação','megaphone','laranja',5,['Notícias','Mensagens','Banners','Transmissões']],
+ ['admin','Administração','shield','brasa',6,['Usuários e permissões']]
 ];
 const gMod=id=>GMODS.find(m=>m[0]===id);
-const GPEND={pessoas:[['Pedidos de integração',3],['Cadastros a revisar',2]],cuidado:[['Pedidos de oração aguardando',4]],kids:[['Check-ins sem responsável',1]],agenda:[['Escalas sem resposta',6],['Inscrições a aprovar',2]],espacos:[['Reservas a aprovar',2]],almox:[['Devoluções atrasadas',3]],zeladoria:[['Chamados abertos',2]],shop:[['Pedidos a separar',5]],cafe:[['Pedidos a separar',4],['Caixa a fechar',1]],rest:[['Caixa a fechar',1]],conteudo:[['Rascunhos para revisar',3]],comunicacao:[['Notícias para aprovar',1]],secretaria:[['Declarações a emitir',3]],financeiro:[['Contas a pagar esta semana',5],['Aprovações',2,3]],admin:[['Convites de acesso',2]]};
+const GPEND={pessoas:[],cuidado:[],kids:[],agenda:[],espacos:[],almox:[],zeladoria:[],shop:[],cafe:[],rest:[],conteudo:[],comunicacao:[],secretaria:[],financeiro:[],admin:[]};
 /* ESCOPO DO APP (Tiago, 08/11/2026): o app leva o que dá praticidade a quem está no celular (decidir, registrar, ajustar, consultar);
    cadastro, configuração, importação, relatório e análise ficam no web. Por seção: noAdd = sem botão de novo; ro = sem Editar nem Excluir
    (as ações de estado, como aprovar, continuam); acts:[] = sem ações. Quem não está aqui segue o desenho da própria seção. */
 const APPSEC={
  'pessoas|Membros':{noAdd:1,ro:1,acts:[]},
- 'cuidado|Discipulado':{noAdd:1},
- 'cuidado|Pedidos de oração':{noAdd:1,canEdit:()=>false,delBody:'O pedido sai das listas e de quem está orando. O autor não é avisado e o texto é apagado depois, pela retenção.'},
- 'comunidade|Casas de Apascentamento':{noAdd:1,ro:1},'comunidade|Ministérios':{noAdd:1,ro:1},
- 'kids|Salas':{noAdd:1,ro:1},'kids|Escalas':{noAdd:1},
+ 'pessoas|Devocional':{noAdd:1,ro:1,acts:[]},
+ 'cuidado|Discipulado':{noAdd:1,ro:1},
+ 'cuidado|Acompanhamento':{ro:1},
+ 'comunidade|Casas de Apascentamento':{noAdd:1,ro:1},'comunidade|Redes de casa':{noAdd:1,ro:1},'comunidade|Ministérios':{noAdd:1,ro:1},
+ 'kids|Salas':{noAdd:1,ro:1},
  'conteudo|Pregações':{noAdd:1,ro:1},'conteudo|Vídeos':{noAdd:1,ro:1},'conteudo|Músicas':{noAdd:1,ro:1},'conteudo|Séries':{noAdd:1,ro:1},'conteudo|Jornadas':{noAdd:1,ro:1},'conteudo|Cursos':{noAdd:1,ro:1},'conteudo|Material de apoio':{noAdd:1,ro:1},
- 'agenda|Eventos':{noAdd:1},'agenda|Cultos':{noAdd:1},'agenda|Apresentações':{noAdd:1,ro:1},'agenda|Batismos':{noAdd:1,ro:1},'agenda|Escalas':{noAdd:1},'agenda|Inscrições':{noAdd:1,ro:1},
+ 'agenda|Eventos':{noAdd:1,ro:1},'agenda|Cultos':{noAdd:1,ro:1},'agenda|Apresentações':{noAdd:1,ro:1},'agenda|Batismos':{noAdd:1,ro:1},'agenda|Consagrações':{noAdd:1,ro:1},'agenda|Casamentos':{noAdd:1,ro:1},'agenda|Escalas':{noAdd:1},'agenda|Inscrições':{noAdd:1,ro:1},
  'espacos|Salas':{noAdd:1,ro:1},
+ 'almox|Itens':{noAdd:1,ro:1},
  'zeladoria|Fornecedores':{noAdd:1,ro:1,acts:[]},
  'secretaria|Atos':{noAdd:1,ro:1},'secretaria|Documentos':{noAdd:1,ro:1},'secretaria|Cargos e mandatos':{noAdd:1,ro:1,acts:[]},
  'financeiro|Lançamentos':{canEdit:r=>!r.lock&&r.st==='pe',editLabel:()=>'Editar'}, /* corrigir lançamento aprovado fica no web */
  'financeiro|Contas a pagar e a receber':{noAdd:1,ro:1},'financeiro|Caixas e vendas':{noAdd:1,ro:1},
- 'comunicacao|Notícias':{noAdd:1,ro:1},'comunicacao|Mensagens':{noAdd:1,ro:1},'comunicacao|Banners':{noAdd:1,ro:1},'comunicacao|Transmissões':{noAdd:1,ro:1}
+ 'comunicacao|Notícias':{noAdd:1,ro:1},'comunicacao|Banners':{noAdd:1,ro:1},'comunicacao|Transmissões':{noAdd:1,ro:1}
 };
 /* Casos de teste do protótipo: Administrador = tudo em Admin; Líder = um módulo (nível escolhido na lateral). */
 Object.assign(S,{view:'membro',gl:{mod:'cafe',lvl:3},gmod:null,gsec:null,gtab:0});
@@ -57,6 +59,9 @@ const CAN={ver:1,criar:2,editar:2,excluir:3,acessos:3,aprovar:3};
 /* Assinatura da igreja (FND-M-31): suspensa = somente leitura, sem criar, editar, aprovar nem excluir */
 S.subs='ativa';
 const can=(id,act)=>lvlOf(id)>=CAN[act]&&(act==='ver'||S.subs!=='suspensa');
+/* módulo em abas (até 5 seções) ou em lista de seções (mais de 5); Cafeteria, Restaurante e Loja são sempre em abas, iguais entre si (Tiago, 09/11/2026) */
+const TABBED=['cafe','rest','shop'];
+const gFewSecs=(id,sc)=>sc.length<=5||TABBED.includes(id);
 const visibleMods=()=>GMODS.filter(m=>lvlOf(m[0])>0);
 const canGestao=()=>visibleMods().length>0;
 const gPendOf=id=>lvlOf(id)>=2?(GPEND[id]||[]).filter(p=>lvlOf(id)>=(p[2]||2)):[];

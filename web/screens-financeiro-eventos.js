@@ -5,8 +5,15 @@ Object.assign(A,{evFinRep:v=>{rpState('agenda','financeiro').f.ev=v;A.rptGo('age
 /* ---------- Integração › fila de espera (ações) ---------- */
 Object.assign(A,{
  igTop:v=>{S.igTop=v;render();},
- igCall:v=>{const p=IGFILA.find(x=>x.id===v),cur=INTEGS.find(g=>g.current);if(!cur){toast('Não há integração aberta. Crie uma nova integração.');return;}if(!igCallIds([v])){toast('Integração lotada: aumente o limite ou espere a próxima.');return;}render();toast(`${p.n.split(' ')[0]} chamado(a) para ${cur.n}. A pessoa recebe o aviso no app.`);},
- igCallN:()=>{const cur=INTEGS.find(g=>g.current);if(!cur){toast('Não há integração aberta.');return;}const k=igCallIds(IGFILA.map(x=>x.id));render();toast(k?`${k} ${k===1?'pessoa chamada':'pessoas chamadas'} para ${cur.n}.`:'Sem vaga na integração atual.');},
+ igCall:v=>{const p=IGFILA.find(x=>x.id===v),cur=INTEGS.find(g=>g.current);if(!cur){toast('Não há integração atual. Crie uma nova integração.');return;}
+  const go=()=>{igCallIds([v]);render();toast(`${p.n.split(' ')[0]} chamado(a) para ${cur.n}. A pessoa recebe o aviso no app.`);};
+  if(igFree()>0)go();else igOverDlg({title:`Chamar ${p.n.split(' ')[0]} acima do limite?`,body:igOverMsg(cur,1),label:'Chamar',onConfirm:go});},
+ igCallN:()=>{const cur=INTEGS.find(g=>g.current);if(!cur){toast('Não há integração atual.');return;}if(!IGFILA.length){toast('Ninguém na fila.');return;}
+  const free=igFree(),d=Math.min(IGFILA.length,Math.max(1,free===Infinity?IGFILA.length:free));
+  openDlg(`${dlgHead('Chamar os próximos',`Por ordem de chegada, para ${esc(cur.n)}.`)}<label class="fld"><span class="fl">Quantas pessoas</span><input id="cnN" type="number" min="1" max="${IGFILA.length}" value="${d}" inputmode="numeric"><span class="hint" id="cnH"></span></label><div class="dfoot"><button class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" id="cnOk">Chamar</button></div>`,'sm');
+  igCnHint();$('#cnN').addEventListener('input',igCnHint);
+  $('#cnOk').addEventListener('click',()=>{const k=Math.max(1,Math.min(IGFILA.length,+$('#cnN').value||1)),go=()=>{const q=igCallIds(IGFILA.slice(0,k).map(x=>x.id));render();toast(`${q} ${q===1?'pessoa chamada':'pessoas chamadas'} para ${cur.n}.`);};
+   if(free===Infinity||k<=free){closeDlg();go();}else{closeDlg(true);igOverDlg({title:'Chamar acima do limite?',body:igOverMsg(cur,k),label:'Chamar',onConfirm:go});}});},
  igRm:v=>{const p=IGFILA.find(x=>x.id===v);confirmDel({title:`Remover ${p.n.split(' ')[0]} da fila?`,body:'A pessoa é avisada no app e pode entrar na fila de novo.',label:'Remover',onConfirm:()=>{IGFILA.splice(IGFILA.indexOf(p),1);render();toast('Removido(a) da fila');}});}
 });
 /* ---------- Integração › Regras ---------- */

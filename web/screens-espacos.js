@@ -220,6 +220,35 @@ function rvForm(o={}){
   S.rvDay=o2.d;if(o2.d<S.rvWk||o2.d>addD(S.rvWk,6))S.rvWk=o2.d;closeDlg();render();const ni=Object.values(pick).reduce((a,b)=>a+b,0);toast(edit?(rv._pw&&rv._pw!==o2.who?`Reserva atualizada · ${rv._pw.split(' ')[0]} e ${o2.who.split(' ')[0]} foram avisados`:`Reserva atualizada · ${o2.who.split(' ')[0]} foi avisado(a)`):`Reserva confirmada · ${slById(o2.s).n}, ${hm(o2.f)}–${hm(o2.t)}${ni?` · ${ni} ${ni>1?'itens enviados':'item enviado'} para aprovação`:''}`);},650);});
 }
 
+/* barras de resultado no desenho da Zeladoria (lista: nome em destaque, valor e legenda à direita, barra abaixo); usado nas Visões gerais de Espaços e Almoxarifado */
+function chBars(l){return `<ul class="zl-an">${l.map(x=>`<li><div class="zl-ah"><b>${x.c?`<span class="zl-dot" style="background:${x.c}"></span>`:''}${esc(x.l)}</b><span>${x.v}${x.s?`<small>${x.s}</small>`:''}</span></div><span class="bd-bar"><i style="width:${Math.max(2,Math.round(x.w))}%;${x.c?'background:'+x.c:''}"></i></span></li>`).join('')}</ul>`;}
+/* ---------- Visão geral (resultados à esquerda, "Precisam de atenção" à direita; mesma anatomia das demais) ---------- */
+function espVis(){
+ const act=ESPS.filter(s=>s.act),off=ESPS.filter(s=>!s.act),wk=[...Array(7)].map((_,i)=>addD(NOWD,i)),ok=RESERVAS.filter(r=>r.st==='confirmada');
+ const hoje=ok.filter(r=>rvTouch(r,NOWD)).sort((a,b)=>a.f<b.f?-1:1),prox=ok.filter(r=>wk.some(d=>rvTouch(r,d)));
+ const occS=act.map(s=>[s,Math.round(wk.reduce((a,d)=>a+occ(s.id,d),0)/7*100)]).sort((a,b)=>b[1]-a[1]),mxO=Math.max(1,...occS.map(x=>x[1]));
+ const occH=Math.round(act.reduce((a,s)=>a+occ(s.id,NOWD),0)/Math.max(1,act.length)*100);
+ const per=[['Manhã',0,720],['Tarde',720,1080],['Noite',1080,1440]].map(([n,a,b])=>[n,ok.filter(r=>mm(r.f)>=a&&mm(r.f)<b).length]),mxP=Math.max(1,...per.map(x=>x[1]));
+ const who={};ok.forEach(r=>{who[r.who]=(who[r.who]||0)+1;});const topW=Object.entries(who).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ const att=[...LOANS.filter(l=>l.rv&&l.st==='rec').map(l=>{const r=RESERVAS.find(x=>x.id===l.rv),it=itm(l.item);return r?['alert','Item recusado: '+(it?it.n:'item')+' × '+l.qty,(slById(r.s)?slById(r.s).n:'')+' · '+fmtD(r.d)+' · '+(l.why||'sem motivo'),'Abrir reserva','rvView',r.id]:null;}).filter(Boolean),
+  ...off.flatMap(s=>ok.filter(r=>r.s===s.id&&!rvPast(r)).map(r=>['door','Sala desativada com reserva futura: '+s.n,fmtD(r.d)+' · '+r.who,'Abrir reserva','rvView',r.id]))];
+ return `<header class="ph rise"><div><p class="eb">Espaços</p><h1>Visão geral</h1><p class="lede">Como as salas estão sendo usadas e o que precisa de atenção</p></div><div class="pact"><button class="btn sec" data-a="nav" data-v="salas">${ic('building',15)}Ver salas</button><button class="btn pri" data-a="rvNew">${ic('plus',15,2.2)}Nova reserva</button></div></header>
+ <section class="card kpis4 rise" style="--d:1">
+  <div class="k4"><span class="kl">Salas ativas</span><span class="kv">${act.length}</span><span class="kd">${off.length?off.length+' desativada'+(off.length===1?'':'s'):'todas disponíveis'}</span></div>
+  <div class="k4"><span class="kl">Capacidade total</span><span class="kv">${act.reduce((a,s)=>a+s.cap,0)}</span><span class="kd">lugares nas salas ativas</span></div>
+  <div class="k4"><span class="kl">Reservas hoje</span><span class="kv">${hoje.length}</span><span class="kd">ocupação de ${occH}% do dia</span></div>
+  <div class="k4"><span class="kl">Próximos 7 dias</span><span class="kv">${prox.length}</span><span class="kd">reservas, sem contar os cultos</span></div></section>
+ <div class="pgrid rise" style="--d:2"><div class="col">
+  <section class="card pc"><div class="sh"><h2>Ocupação por sala</h2><span class="who">próximos 7 dias, cultos incluídos</span></div>${chBars(occS.map(([s,p])=>({l:s.n,v:p+'%',s:s.cap+' lugares',w:p/mxO*100})))}</section>
+  <section class="card pc"><div class="sh"><h2>Horários de pico</h2><span class="who">reservas por período do dia</span></div>${chBars(per.map(([n,c])=>({l:n,v:c+(c===1?' reserva':' reservas'),w:c/mxP*100})))}</section>
+  <section class="card pc"><div class="sh"><h2>Quem mais reserva</h2><span class="who">reservas confirmadas</span></div>${topW.length?chBars(topW.map(x=>({l:x[0],v:x[1]+(x[1]===1?' reserva':' reservas'),w:x[1]/topW[0][1]*100}))):'<div class="mempty"><p>Nenhuma reserva ainda.</p></div>'}</section>
+ </div><div class="col">
+  <section class="card pc"><div class="sh"><h2>Precisam de atenção</h2><span class="who">${att.length} ${att.length===1?'item':'itens'}</span></div>
+   ${att.length?`<ul class="zl-att">${att.map(a=>`<li><span class="zl-ai">${ic(a[0],16,2)}</span><span class="zl-at"><b>${esc(a[1])}</b><small>${esc(a[2])}</small></span><button class="btn sec sm" data-a="${a[4]}" data-v="${a[5]}">${a[3]}</button></li>`).join('')}</ul>`:'<div class="mempty"><p>Tudo em dia.</p><span>Item recusado pelo almoxarifado ou sala desativada com reserva aparecem aqui.</span></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Reservas de hoje</h2><span class="who">${hoje.length}</span></div>${hoje.length?`<ul class="zl-att">${hoje.map(r=>`<li><span class="zl-at"><b>${esc(r.why)}</b><small>${esc(slById(r.s).n)} · ${r.f}–${r.t} · ${esc(r.who)}</small></span><button class="btn ghost sm" data-a="rvView" data-v="${r.id}">Ver</button></li>`).join('')}</ul>`:'<div class="mempty"><p>Nenhuma reserva hoje.</p></div>'}</section>
+ </div></div>`;
+}
+
 /* ---------- Salas ---------- */
 function slPage(){
  const act=ESPS.filter(s=>s.act),off=ESPS.filter(s=>!s.act),wk=[...Array(7)].map((_,i)=>addD(NOWD,i));

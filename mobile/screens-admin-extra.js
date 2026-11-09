@@ -36,13 +36,6 @@ const LG={pe:['warning','Pendente'],co:['ok','Concluído']};
 LSD.admin['LGPD']={noun:'pedidos',noAdd:1,ro:1,ST:LG,acts:[['Processar pedido','co',['pe']]],
  rows:mk('lg',[['Ricardo Santos','Exportação de dados','10 set','co','Concluído em 11 set'],['Fernanda Lima','Exclusão de conta','15 set','pe','Prazo legal: 15 dias']],([n,t,d,st,x])=>({n,s:t+' · pedido em '+d,st,d:[['Pessoa',n],['Tipo',t],['Pedido em',d+' 2026'],['Situação',x]]}))};
 
-/* ---------- Automações e modelos de aviso ---------- */
-const AT={ac:['ok','Ativa'],ds:['off','Desligada']};
-LSD.comunicacao['Automações']={noun:'automações',noAdd:1,ro:1,ST:AT,acts:[['Desligar','ds',['ac']],['Ligar','ac',['ds']]],
- rows:mk('at',[['Lembrete de reserva de espaço','1 dia e 15 minutos antes, para quem reservou','ac'],['Lembrete de evento','7 dias, 1 dia e 1 hora antes, para inscritos e confirmados','ac'],['Lembrete de encontro','1 dia e 1 hora antes, para quem não recusou','ac'],['Lembrete de tarefa','24 horas antes e ao vencer','ac'],['Live ou culto','1 hora antes, só push, para quem tem o app','ac'],['Aniversário','No dia, às 8h, para o aniversariante','ac'],['Escala','1 dia antes, para quem está escalado','ac'],['Boas-vindas','Quando um membro é integrado','ds']],([n,s,st])=>({n,s,st,d:[['Quando envia',s]]}))};
-LSD.comunicacao['Modelos']={noun:'modelos de aviso',noAdd:1,ro:1,ST:{at:['ok','Ativo']},acts:[],
- rows:mk('md',[['Código de login','Identidade','E-mail'],['Convite para entrar','Identidade','E-mail'],['Encontro da casa marcado','Casas','Push, E-mail'],['Pedido de entrada decidido','Casas','Push, E-mail'],['Tarefa atribuída','Ministérios','Push, E-mail'],['Lembrete de evento','Eventos','Push, E-mail'],['Live ou culto','Lembretes','Push'],['Feliz aniversário','Datas','Push, E-mail'],['Boas-vindas','Datas','E-mail, Push'],['Pedido pendente na Secretaria','Equipe','Push, E-mail']],([n,dom,c])=>({n,s:dom+' · '+c,st:'at',d:[['Área',dom],['Canais',c],['Versão','Cada edição cria uma nova versão']]}))};
-
 /* ---------- Parâmetros do sistema ---------- */
 const SPT=[['geral','Geral'],['seguranca','Segurança'],['comunicacao','Comunicação'],['comunidade','Comunidade'],['quadros','Quadros'],['arquivos','Arquivos'],['eventos','Eventos']];
 const SPAR=

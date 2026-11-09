@@ -33,7 +33,7 @@ Object.assign(S,{sxSit:'todas',sxAto:'todos',sxDocT:'emitidos',sxArq:'todas',sxA
 /* ---------- permissões e menu ---------- */
 (()=>{
  const g=NAV.find(x=>x[0]==='Gestão')[1];
- g.unshift(['secretaria','file','Secretaria',[['sec-vis','Visão geral'],['sec-atos','Atos'],['sec-docs','Documentos'],['sec-cargos','Cargos e mandatos'],['sec-ana','Análises'],['sec-msg','Mensagens']]]);
+ g.unshift(['secretaria','file','Secretaria',[['sec-vis','Visão geral'],['sec-atos','Atos'],['sec-docs','Documentos'],['sec-cargos','Cargos e mandatos'],['sec-msg','Mensagens']]]);
  NAV.find(x=>x[0]==='Geral')[1].find(n=>n[0]==='cuidado')[3].push(['disciplina','Disciplina']);
  SAREAS.push(['Secretaria','file']);
  ['Secretaria','Disciplina'].forEach(k=>MODS.push(k));
@@ -502,23 +502,21 @@ Object.assign(A,{
   const f=$('#sxF');f.onsubmit=e=>{e.preventDefault();sxRevoke(x);x.fim=x.ini>SX_TODAY?x.ini:SX_TODAY;x.enc=1;sxLog('Encerrou','Mandato',sxCargo(x.cg).n+' · '+x.pessoa);closeDlg();render();toast('Mandato encerrado');};}
 });
 
-/* ---------- análises da secretaria (os relatórios de lista ficam em Relatórios) ---------- */
-function secAna(){
- const t=S.sxRel==='perfil'?'perfil':'mov',integ=sxInteg(),on=integ.filter(m=>!SX_BLOCK.includes(sxSitOf(m)));
+/* ---------- resultados da secretaria: ficam na Visão geral (entradas e saídas mês a mês e o perfil de quem está na igreja); as listas ficam em Relatórios ---------- */
+function secAnaBody(t){
+ const integ=sxInteg(),on=integ.filter(m=>!SX_BLOCK.includes(sxSitOf(m)));
  let body='';
  if(t==='mov'){
   const ms=['01','02','03','04','05','06','07','08','09'],ent=ms.map(k=>integ.filter(m=>m.int==='2026-'+k).length),sai=ms.map(k=>integ.filter(m=>{const r=SX_SIT[m.id];return r&&SX_BLOCK.includes(r.s)&&r.h[0].d.slice(0,7)==='2026-'+k;}).length),mx=Math.max(1,...ent,...sai);
-  {const tE=ent.reduce((a,b)=>a+b,0),tS=sai.reduce((a,b)=>a+b,0);body=`<div class="sx-note rise" style="--d:3;--c:var(--brand-text);margin:0">${ic('info',13,2)}<span><small>A lista de quem saiu, com o motivo, está em <button class="lnk inl" data-a="rptGo" data-v="membros|membros">Relatórios › Membros</button>.</small></span></div>`+sxKpis([['Entradas em 2026',tE,'integrações concluídas','var(--st-int)'],['Saídas',tS,'transferências, desligamentos e falecimentos',tS?'var(--st-rec)':''],['Saldo do ano',(tE-tS>0?'+':'')+(tE-tS),'membros a mais que em janeiro']]).replace('--d:1','--d:3');}
-  body+=`<section class="card rise sxa-mov" style="--d:4;padding:20px 22px"><div class="sh"><h2>Mês a mês</h2><span class="who"><i class="sx-lg in"></i>Integrações <i class="sx-lg out"></i>Transferências, desligamentos e falecimentos</span></div>
+  body=`<section class="card rise sxa-mov" style="--d:4;padding:20px 22px"><div class="sh"><h2>Entradas e saídas, mês a mês</h2><span class="who"><i class="sx-lg in"></i>Integrações <i class="sx-lg out"></i>Transferências, desligamentos e falecimentos</span></div>
    <div class="sxa-ch"><div class="sxa-grid">${[0,1,2,3].map(()=>'<i></i>').join('')}</div><div class="sx-bars">${ms.map((k,i)=>`<div class="sx-bc"><div class="sx-bb"><span class="sxa-b in" style="height:${ent[i]/mx*100}%" title="${ent[i]} entradas">${ent[i]?`<em>${ent[i]}</em>`:''}</span>${sai[i]?`<span class="sxa-b out" style="height:${sai[i]/mx*100}%" title="${sai[i]} saídas"><em>${sai[i]}</em></span>`:''}</div><small>${MONTHS[i].slice(0,3)}</small></div>`).join('')}</div></div></section>`;
  }else{
   const dist=(f,keys)=>keys.map(k=>[k,on.filter(m=>f(m)===k).length]),fx=m=>{const a=age(m.nasc);return a<13?'0 a 12':a<18?'13 a 17':a<30?'18 a 29':a<45?'30 a 44':a<60?'45 a 59':'60 ou mais';};
   const blocks=[['Faixa etária',dist(fx,['0 a 12','13 a 17','18 a 29','30 a 44','45 a 59','60 ou mais'])],['Estado civil',dist(m=>m.civil,[...new Set(on.map(m=>m.civil))])],['Gênero',dist(m=>m.gen,[...new Set(on.map(m=>m.gen))])],['Batismo',[['Batizados',on.filter(m=>m.bap).length],['Ainda não batizados',on.filter(m=>!m.bap).length]]]];
   body=`<div class="sx-dist rise" style="--d:3">${blocks.map(b=>{const mx=Math.max(1,...b[1].map(x=>x[1]));const tot=Math.max(1,b[1].reduce((q,x)=>q+x[1],0));return `<section class="card sxa-p" style="padding:18px 20px"><div class="sh"><h2>${b[0]}</h2><span class="who">${on.length} membros</span></div>${b[1].map(x=>`<div class="sx-hb"><span>${esc(x[0])}</span><span class="sx-hbb"><i style="width:${x[1]/mx*100}%"></i></span><b>${x[1]}<small>${Math.round(x[1]/tot*100)}%</small></b></div>`).join('')}</section>`;}).join('')}</div>`;
  }
- return sxHead('Secretaria','Análises','Números da vida da igreja: entradas e saídas de membros e o perfil de quem está na igreja.','')+sxSeg('sxRelTab',[['mov','Entradas e saídas'],['perfil','Perfil']],t)+body;
+ return body;
 }
-Object.assign(A,{sxRelTab:v=>{S.sxRel=v;render();}});
 
 /* ---------- visão geral da secretaria ---------- */
 function secVis(){
@@ -544,9 +542,9 @@ function secVis(){
  const bd=ativos.filter(m=>m.nasc).map(m=>{const [,mo,da]=m.nasc.split('-'),d=`2026-${mo}-${da}`,n=sxDays(SX_TODAY,d);return {m,d,n};}).filter(x=>x.n>=0&&x.n<=7).sort((a,b)=>a.n-b.n);
  return sxHead('Secretaria','Visão geral','O que a secretaria precisa acompanhar: situação dos membros, atos, documentos e mandatos.',`<button class="btn sec" data-a="sxAtoNew">${ic('plus',15,2.2)}Registrar ato</button><button class="btn pri" data-a="sxDocNew">${ic('file',15)}Emitir documento</button>`)
  +sxKpis([['Membros ativos',ativos.length,integ.length+' integrados no total'],['Afastados',afast.length,afast.length?'acompanhe de perto':'nenhum afastado',afast.length?'var(--st-sol)':''],['Documentos nos últimos 30 dias',docs30,'emitidos e válidos'],['Mandatos vencendo',vig.length,'em até 90 dias',vig.length?'var(--st-sol)':'']])
- +`<div class="sx-two"><section class="card rise" style="--d:2;padding:18px 20px"><div class="sh"><h2>Precisa da sua atenção <span class="pill">${items.length}</span></h2></div>${items.length?items.map(i=>`<div class="sx-ai"><span class="sx-ti">${ic(i.ic,18)}</span><span class="sx-m"><b>${i.t}</b><small>${i.s}</small></span><button class="btn sec sm" data-a="${i.a}" data-v="${i.v}">${i.l}</button></div>`).join(''):'<div class="mempty"><p>Tudo em dia.</p><span>Nada pedindo a sua atenção agora.</span></div>'}</section>
-  <div class="sx-col"><section class="card rise" style="--d:3;padding:18px 20px"><div class="sh"><h2>Aniversariantes da semana</h2><button class="lnk" data-a="rptGo" data-v="membros|aniv">Ver mês</button></div>${bd.length?bd.map(x=>`<button class="sx-bd" data-a="sxOpenM" data-v="${x.m.id}">${mav(x.m)}<span class="sx-m"><b>${esc(x.m.n)}</b><small>faz ${2026-+x.m.nasc.slice(0,4)} anos</small></span><span class="who">${x.n===0?'hoje':sxShort(x.d)}</span></button>`).join(''):'<p class="who" style="margin:8px 0 0">Ninguém nesta semana.</p>'}</section>
-  <section class="card rise" style="--d:4;padding:18px 20px"><div class="sh"><h2>Atalhos</h2></div><div class="sx-sc">${[['sec-atos','bucket','Atos'],['sec-docs','file','Documentos'],['sec-cargos','key','Cargos e mandatos'],['rp-secretaria','clipboard','Relatórios']].map(x=>`<button data-a="sxGo" data-v="${x[0]}">${ic(x[1],18)}<span>${x[2]}</span></button>`).join('')}</div></section></div></div>`;
+ +`<div class="sx-two"><div class="sx-col">`+secAnaBody('mov')+`<section class="card rise" style="--d:3;padding:18px 20px"><div class="sh"><h2>Documentos recentes</h2><button class="lnk" data-a="sxGo" data-v="sec-docs">Ver todos</button></div>${SX_DOCS.slice().sort((a,b)=>a.d<b.d?1:-1).slice(0,5).map(d=>`<button class="sx-bd" data-a="sxDocOpen" data-v="${d.id}">${sxAv(d.pessoa)}<span class="sx-m"><b>${esc(d.t)}</b><small>${esc(d.pessoa)} · ${dBR(d.d)} · nº ${d.num}${d.st==='revogado'?' · revogado':''}</small></span></button>`).join('')||'<div class="mempty"><p>Nenhum documento emitido ainda.</p></div>'}</section></div><section class="card rise" style="--d:2;padding:18px 20px"><div class="sh"><h2>Precisam de atenção <span class="pill">${items.length}</span></h2></div>${items.length?items.map(i=>`<div class="sx-ai"><span class="sx-ti">${ic(i.ic,18)}</span><span class="sx-m"><b>${i.t}</b><small>${i.s}</small></span><button class="btn sec sm" data-a="${i.a}" data-v="${i.v}">${i.l}</button></div>`).join(''):'<div class="mempty"><p>Tudo em dia.</p><span>Nada pedindo a sua atenção agora.</span></div>'}</section></div>`
+ +secAnaBody('perfil')
+ +`<div class="sx-two"><section class="card rise" style="--d:3;padding:18px 20px"><div class="sh"><h2>Aniversariantes da semana</h2><button class="lnk" data-a="rptGo" data-v="membros|aniv">Ver mês</button></div>${bd.length?bd.map(x=>`<button class="sx-bd" data-a="sxOpenM" data-v="${x.m.id}">${mav(x.m)}<span class="sx-m"><b>${esc(x.m.n)}</b><small>faz ${2026-+x.m.nasc.slice(0,4)} anos</small></span><span class="who">${x.n===0?'hoje':sxShort(x.d)}</span></button>`).join(''):'<p class="who" style="margin:8px 0 0">Ninguém nesta semana.</p>'}</section>  <section class="card rise" style="--d:4;padding:18px 20px"><div class="sh"><h2>Atalhos</h2></div><div class="sx-sc">${[['sec-atos','bucket','Atos'],['sec-docs','file','Documentos'],['sec-cargos','key','Cargos e mandatos'],['rp-secretaria','clipboard','Relatórios']].map(x=>`<button data-a="sxGo" data-v="${x[0]}">${ic(x[1],18)}<span>${x[2]}</span></button>`).join('')}</div></section></div>`;
 }
 Object.assign(A,{sxGo:v=>A.nav(v)});
 
@@ -633,7 +631,7 @@ Object.assign(A,{
 
 /* ---------- ligações e eventos ---------- */
 function secMsg(){return sxHead('Secretaria','Mensagens','O que a Secretaria já mandou aos membros e o que está na fila',msgBtn('free|Secretaria|','btn pri'))+msgTabHtml('sec');}
-{const _ph=placeholder;placeholder=id=>{const f={'sec-msg':secMsg,'sec-vis':secVis,'sec-atos':secAtos,'sec-docs':secDocs,'sec-cargos':secCargos,'sec-ana':secAna,disciplina:discPage}[id];return f?f():_ph(id);};}
+{const _ph=placeholder;placeholder=id=>{const f={'sec-msg':secMsg,'sec-vis':secVis,'sec-atos':secAtos,'sec-docs':secDocs,'sec-cargos':secCargos,disciplina:discPage}[id];return f?f():_ph(id);};}
 document.addEventListener('input',e=>{const t=e.target,k=t&&t.dataset&&t.dataset.scq;if(!k)return;
  if(k==='doc'){S.sxDocQ=t.value;$('#sxDl').innerHTML=sxDocList();}
  else if(k==='arq'){S.sxArqQ=t.value;$('#sxAl').innerHTML=sxArqList();}

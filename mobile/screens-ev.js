@@ -7,7 +7,6 @@
 const TK={};
 const tkOf=n=>TK[n]||(TK[n]=n==='Conferência Anual 2026'?[{n:'Inscrição geral',p:'80,00',q:120,s:84},{n:'Estudante',p:'40,00',q:30,s:12}]:[]);
 const insOf=r=>LSD.agenda['Inscrições'].rows.filter(x=>x.v&&x.v.evento===r.n&&x.st!=='ca');
-LSD.agenda['Eventos'].extra=r=>`<div class="row g3"><button class="btn outline md grow" data-a="evCk" data-v="${r.id}">Check-in</button><button class="btn outline md grow" data-a="evTk" data-v="${r.id}">Ingressos</button></div>`;
 const ckLine=(x,i)=>`<div class="vr">${pavM(x.n,lsAv[i%6])}<span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(x.n)}</span><span class="vs">${x.ck?'Presente':'Aguardando'}</span></span><button class="btn ${x.ck?'primary':'outline'} sm" data-a="evCkT" data-v="${x.id}" id="ck-${x.id}">${x.ck?'Presente':'Check-in'}</button></div>`;
 const CK={tab:'cam',res:null,code:false},CKP='Recepção';
 Object.assign(I,{
@@ -40,7 +39,7 @@ Object.assign(A,{
  evCkCode:id=>{CK.code=true;ckSheet(id);},
  /* leitura simulada do QR do ingresso: ok | used | pend; a equipe vê o resultado e confirma */
  evCkSim:v=>{const [id,k]=v.split('|'),l=insOf(lsRow(id));let p=null;
-  if(k==='ok'){p=l.find(x=>!x.ck&&x.st==='ap');if(!p){toast('info','Sem códigos para ler','Todos já entraram ou estão pendentes.');return;}}
+  if(k==='ok'){p=l.find(x=>!x.ck&&x.st==='cf');if(!p){toast('info','Sem códigos para ler','Todos já entraram ou estão pendentes.');return;}}
   else if(k==='used'){p=l.find(x=>x.ck);if(!p){toast('info','Ninguém entrou ainda','Leia um código válido primeiro.');return;}}
   else if(k==='pend'){p=l.find(x=>x.st==='pe');if(!p){toast('info','Sem pendências','Todos os pagamentos estão confirmados.');return;}}
   CK.res={k,p};CK.code=false;ckSheet(id);},
@@ -52,16 +51,12 @@ Object.assign(A,{
  evCkQr:id=>{sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">QR da impressora</h3><p class="callout">Impressora ${CKP} · ${esc(lsRow(id).n)}</p></div>
   <div class="qr ckqr">${qrSVG('ALVA-PRN-'+CKP+'-'+id)}</div><p class="vs" style="text-align:center;white-space:normal">Quem se inscreveu lê este QR com o app do Alva e a etiqueta sai sozinha. O QR muda a cada 2 minutos, por isso fica numa tela e não impresso na parede.</p>
   <button class="btn outline md block" data-a="evCk" data-v="${id}">Voltar ao check-in</button></div>`);},
- evCkT:iid=>{const x=LSD.agenda['Inscrições'].rows.find(y=>y.id===iid);x.ck=!x.ck;const b=$('#ck-'+iid);if(b){b.className='btn '+(x.ck?'primary':'outline')+' sm';b.textContent=x.ck?'Presente':'Check-in';b.previousElementSibling.lastElementChild.textContent=x.ck?'Presente':'Aguardando';}
+ evCkT:iid=>{const x=LSD.agenda['Inscrições'].rows.find(y=>y.id===iid);x.ck=x.ck?'':new Date().toTimeString().slice(0,5);const b=$('#ck-'+iid);if(b){b.className='btn '+(x.ck?'primary':'outline')+' sm';b.textContent=x.ck?'Presente':'Check-in';b.previousElementSibling.lastElementChild.textContent=x.ck?'Presente':'Aguardando';}
   const l=insOf({n:x.v.evento}),n=$('#ckN'),bar=$('#ckBar'),c=l.filter(y=>y.ck).length;if(n)n.textContent=c+' de '+l.length+' entradas';if(bar)bar.style.width=(l.length?Math.round(c/l.length*100):0)+'%';},
  evTk:id=>{const r=lsRow(id),l=tkOf(r.n);
   sheet(`<div class="stack g5"><h3 class="t2">Ingressos</h3><p class="callout">${esc(r.n)}</p>
-  ${l.length?`<div class="vl">${l.map(t=>`<div class="vr"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(t.n)}</span><span class="vs">R$ ${t.p} · ${t.s} de ${t.q} vendidos</span></span>${vsTag(t.s>=t.q?'off':'ok',t.s>=t.q?'Esgotado':'À venda')}</div>`).join('')}</div>`:vsEmpty('Sem ingressos','Crie o primeiro tipo de ingresso deste evento.')}
-  <div class="row g3"><button class="btn outline md grow" data-a="lsOpen" data-v="${id}">Voltar</button><button class="btn primary md grow" data-a="evTkNew" data-v="${id}">Novo ingresso</button></div></div>`);},
- evTkNew:id=>{const r=lsRow(id);
-  sheet(`<div class="stack g5"><h3 class="t2">Novo ingresso</h3>${field({id:'tk_n',label:'Nome',ph:'Ex.: Inscrição geral'})}<div class="row g3">${field({id:'tk_p',label:'Preço',ph:'0,00',im:'decimal'})}${field({id:'tk_q',label:'Quantidade',ph:'100',im:'numeric'})}</div>
-  <div class="row g3"><button class="btn outline md grow" data-a="evTk" data-v="${id}">Cancelar</button><button class="btn primary md grow" id="tkOk">Salvar</button></div></div>`,sh=>$('#tkOk',sh).addEventListener('click',()=>{
-   const n=val('tk_n'),q=parseInt(val('tk_q'),10);let bad=0;if(!n){setErr('tk_n','Preencha este campo.');bad=1;}if(!(q>0)){setErr('tk_q','Informe a quantidade.');bad=1;}if(bad)return;
-   tkOf(r.n).push({n,p:val('tk_p')||'0,00',q,s:0});A.evTk(id);toast('success','Ingresso criado',n);}));}
+  ${l.length?`<div class="vl">${l.map(t=>`<div class="vr"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(t.n)}</span><span class="vs">R$ ${t.p} · ${t.s} de ${t.q} vendidos</span></span>${vsTag(t.s>=t.q?'off':'ok',t.s>=t.q?'Esgotado':'À venda')}</div>`).join('')}</div>`:vsEmpty('Sem ingressos','Os ingressos são criados na web.')}
+  <button class="btn outline md block" data-a="lsOpen" data-v="${id}">Voltar</button><p class="vs">Criar, pausar e excluir ingresso fica na web.</p></div>`);}
+
 });
 }

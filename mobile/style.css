@@ -499,6 +499,7 @@ article.lim-ov{background:linear-gradient(165deg,color-mix(in srgb,var(--danger-
 .scrim{position:absolute;inset:0;z-index:50;background:rgba(1,15,18,.55);animation:fade .2s;display:flex;align-items:flex-end}
 .sheet{width:100%;max-height:88%;overflow-y:auto;background:var(--surface-raised);border-radius:var(--r-xl) var(--r-xl) 0 0;box-shadow:var(--shadow-sheet);padding:10px 20px 34px;animation:sup .32s cubic-bezier(.2,.8,.2,1);scrollbar-width:none}
 .sheet.closing{animation:sdown .22s ease forwards}
+.scrim.swap,.sheet.swap{animation:none}
 .scrim.closing{animation:fade .22s reverse forwards}
 .grab{width:40px;height:5px;border-radius:999px;background:var(--line-strong);margin:0 auto 14px}
 @keyframes sup{from{transform:translateY(100%)}to{transform:none}}

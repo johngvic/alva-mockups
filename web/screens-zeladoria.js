@@ -125,7 +125,7 @@ Object.assign(S,{zj:null,ztab:'resumo',zview:'quadro',zq:'',zst:'todos',zcat:'to
 /* ---------- menu e permissões ---------- */
 (()=>{
  const g=NAV.find(x=>x[0]==='Operação')[1],i=g.findIndex(x=>x[0]==='espacos');
- g.splice(i<0?g.length:i+1,0,['zeladoria','bucket','Zeladoria',[['zel-vis','Visão geral'],['zel-trab','Trabalhos'],['zel-forn','Fornecedores'],['zel-cat','Categorias'],['zel-ana','Análises']]]);
+ g.splice(i<0?g.length:i+1,0,['zeladoria','bucket','Zeladoria',[['zel-vis','Visão geral'],['zel-trab','Trabalhos'],['zel-forn','Fornecedores'],['zel-cat','Categorias']]]);
  SAREAS.push(['Zeladoria','bucket']);MODS.push('Zeladoria');
  Object.keys(RPERM).forEach(r=>{RPERM[r].Zeladoria=r==='Administrador'?ACTS.slice():r==='Pastor'?['Ver','Criar','Editar']:[];});
  if(typeof MODMIN!=='undefined')MODMIN.Zeladoria='Zeladoria';
@@ -146,8 +146,9 @@ function zelVis(){
   else if(zLate(j))att.push([j,'clock','Execução atrasada',`Era para terminar em ${fmtD(j.fim)} · ${-inDays(j.fim)} dia${-inDays(j.fim)===1?'':'s'} de atraso`,'Abrir']);
   else if(j.st==='execucao'&&zLib(j)&&zSaldo(j)<=zLib(j)*.1)att.push([j,'alert','Limite do caixa quase esgotado',`Sobram ${zR(zSaldo(j))} de ${zR(zLib(j))} liberados · previsto ${zR(zPrev(j))}`,'Abrir']);
  });
+ ZJ.forEach(j=>zOutsOf(j).filter(e=>!e.file&&e.d.slice(0,4)==='2026').slice(0,1).forEach(e=>att.push([j,'alert','Despesa sem comprovante',`${e.desc} · ${zR2(e.v/100)}`,'Abrir'])));
  const attShow=S.zatt?att:att.slice(0,6),execS=exec.slice().sort((a,b)=>(+!!zLate(b))-(+!!zLate(a))||String(a.fim||'9').localeCompare(String(b.fim||'9'))).slice(0,5),doneL=ZJ.filter(j=>j.st==='concluido'&&zVis(j)),doneS=doneL.slice().sort((a,b)=>String(b.hist[b.hist.length-1][0]).localeCompare(String(a.hist[a.hist.length-1][0]))).slice(0,5);
- return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Visão geral</h1><p class="lede">O que precisa de atenção e como andam as obras</p></div>
+ return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Visão geral</h1><p class="lede">Como andam as obras, quanto se gasta e o que precisa de atenção</p></div>
   <div class="pact"><button class="btn sec" data-a="nav" data-v="zel-trab">${ic('layers',15)}Ver trabalhos</button><button class="btn pri" data-a="zNew">${ic('plus',15,2.2)}Pedir um trabalho</button></div></header>
  <section class="card kpis4 rise" style="--d:1">
   <div class="k4"><span class="kl">Pedidos a avaliar</span><span class="kv">${cnt('pedido')}</span><span class="kd ${urg?'dn':''}">${urg?urg+' urgente'+(urg>1?'s':''):'nenhum urgente'}</span></div>
@@ -155,12 +156,12 @@ function zelVis(){
   <div class="k4"><span class="kl">Em execução</span><span class="kv">${exec.length}</span><span class="kd ${late.length?'dn':''}">${late.length?late.length+(late.length>1?' atrasadas':' atrasada'):'nenhuma atrasada'}</span></div>
   <div class="k4"><span class="kl">Saldo nos caixas das obras</span><span class="kv">${zR(sal)}</span><span class="kd">gasto em 2026: ${zR(g26)}</span></div>
  </section>
-  <section class="card pc rise" style="--d:2"><div class="sh"><h2>Precisa de você</h2><span class="who">${att.length} ${att.length===1?'item':'itens'}</span></div>
-   ${att.length?`<ul class="zl-att">${attShow.map(a=>`<li><span class="zl-ai">${ic(a[1],16,2)}</span><span class="zl-at"><b>${esc(a[0].n)}</b><small>${esc(a[2])} · ${esc(a[3])}</small></span><button class="btn sec sm" data-a="zOpen" data-v="${a[0].id}">${a[4]}</button></li>`).join('')}</ul>${att.length>6?`<div class="zl-more"><button class="btn ghost sm" data-a="zAttToggle">${S.zatt?'Mostrar menos':'Ver todos ('+att.length+')'}</button></div>`:''}`:'<div class="mempty"><p>Nada esperando por você.</p><span>Quando chegar um pedido ou faltar algo, aparece aqui.</span></div>'}</section>
-  <div class="pgrid rise" style="--d:3"><div class="col">
+ ${fMes()}
+  <div class="pgrid rise" style="--d:2"><div class="col">${zelRes()}</div><div class="col">
+   <section class="card pc"><div class="sh"><h2>Precisam de atenção</h2><span class="who">${att.length} ${att.length===1?'item':'itens'}</span></div>
+   ${att.length?`<ul class="zl-att">${attShow.map(a=>`<li><span class="zl-ai">${ic(a[1],16,2)}</span><span class="zl-at"><b>${esc(a[0].n)}</b><small>${esc(a[2])} · ${esc(a[3])}</small></span><button class="btn sec sm" data-a="zOpen" data-v="${a[0].id}">${a[4]}</button></li>`).join('')}</ul>${att.length>6?`<div class="zl-more"><button class="btn ghost sm" data-a="zAttToggle">${S.zatt?'Mostrar menos':'Ver todos ('+att.length+')'}</button></div>`:''}`:'<div class="mempty"><p>Nada esperando por você: tudo em dia.</p><span>Quando chegar um pedido ou faltar algo, aparece aqui.</span></div>'}</section>
    <section class="card pc"><div class="sh"><h2>Em execução</h2><span class="who">${exec.length}</span></div>
     ${exec.length?`<ul class="zl-xl">${execS.map(j=>`<li><button class="zl-xr" data-a="zOpen" data-v="${j.id}"><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.local)} · ${esc(j.resp||'A definir')}${j.fim?` · previsão ${fmtD(j.fim)}`:''}</small></span><span class="zl-xm">${zLate(j)?'<em class="tag warn">Atrasada</em>':'<em class="tag">No prazo</em>'}</span><span class="zl-xb">${zBar(zGasto(j),zLib(j))}<small><b>${zR(zGasto(j))}</b> de ${zR(zLib(j))} · previsto ${zR(zPrev(j))}</small></span><span class="tc">${ic('chevR',16)}</span></button></li>`).join('')}</ul>`:'<div class="mempty"><p>Nenhuma obra em execução.</p></div>'}${exec.length>5?`<div class="zl-more"><button class="btn ghost sm" data-a="zGoList" data-v="execucao">Ver todas (${exec.length})</button></div>`:''}</section>
-  </div><div class="col">
    <section class="card pc"><div class="sh"><h2>Concluídos recentemente</h2><span class="who">${doneL.length}</span></div>
     <ul class="zl-att">${doneS.map(j=>`<li><span class="zl-ai ok">${ic('check',16,2.4)}</span><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.tipo)} · gasto ${zR(zGasto(j))}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${j.id}">Ver</button></li>`).join('')||'<li class="who">Nenhum ainda.</li>'}</ul>${doneL.length>5?`<div class="zl-more"><button class="btn ghost sm" data-a="zGoList" data-v="concluido">Ver todos (${doneL.length})</button></div>`:''}</section>
   </div></div>`;
@@ -288,7 +289,8 @@ function zFornRows(){
 }
 
 /* ---------- Análises ---------- */
-function zelAna(){
+/* resultados da Zeladoria: moram na Visão geral, ao lado de "Precisam de atenção" (o mês escolhido vale como no Financeiro; "Ano inteiro" só aqui) */
+function zelRes(){
  const per=S.relM||RELN,isY=per[0]==='Y',lab=isY?'Ano de '+per.slice(1):monthName(per),pp=isY?'Y'+(+per.slice(1)-1):ymAdd(per,-1),plab=isY?pp.slice(1):monthName(pp);
  const inP=(d,p)=>p[0]==='Y'?d.slice(0,4)===p.slice(1):d.slice(0,7)===p;
  const outs=p=>{const a=[];ZJ.forEach(j=>zOutsOf(j).forEach(e=>{if(inP(e.d,p))a.push({j,e,v:e.v/100,cat:e.cat||j.cat,nat:e.nat||'Material'});}));return a;};
@@ -301,26 +303,12 @@ function zelAna(){
  const byJob={};cur.forEach(x=>{byJob[x.j.id]=(byJob[x.j.id]||0)+x.v;});const jobs=Object.entries(byJob).sort((a,b)=>b[1]-a[1]).slice(0,6);
  const semComp=cur.filter(x=>!x.e.file),delta=ptot?Math.round((tot-ptot)/ptot*100):null,nJ=Object.keys(byJob).length;
  const rowC=(label,v,pv,mx,col)=>`<li><div class="zl-ah"><b>${col?`<span class="zl-dot" style="background:${col}"></span>`:''}${esc(label)}</b><span>${zR(v)}<small>${pv?zR(pv)+' em '+plab:'sem gasto em '+plab}</small></span></div><span class="bd-bar"><i style="width:${Math.round(v/mx*100)}%;${col?'background:'+col:''}"></i></span><span class="bd-bar zl-prev"><i style="width:${Math.round(pv/mx*100)}%"></i></span></li>`;
- return `<header class="ph rise"><div><p class="eb">Zeladoria</p><h1>Análises</h1><p class="lede">Quanto a igreja gasta com as obras, e em quê</p></div></header>
- ${fMes()}
- <section class="card kpis4 rise" style="--d:1">
-  <div class="k4"><span class="kl">Gasto em ${lab.toLowerCase()}</span><span class="kv">${zR(tot)}</span><span class="kd ${delta>0?'dn':'up'}">${delta==null?'sem '+plab+' para comparar':(delta>=0?'+':'−')+Math.abs(delta)+'% sobre '+plab}</span></div>
-  <div class="k4"><span class="kl">Trabalhos com gasto</span><span class="kv">${nJ}</span><span class="kd">${cur.length} lançamento${cur.length===1?'':'s'}</span></div>
-  <div class="k4"><span class="kl">Maior categoria</span><span class="kv zl-kvt">${cats.length&&byCat[cats[0]]?esc(cats[0]):'—'}</span><span class="kd">${cats.length&&byCat[cats[0]]?zR(byCat[cats[0]]):''}</span></div>
-  <div class="k4"><span class="kl">Sem comprovante</span><span class="kv ${semComp.length?'dn':''}">${semComp.length}</span><span class="kd">${semComp.length?zR(sum(semComp))+' sem nota ou recibo':'tudo com comprovante'}</span></div>
- </section>
- <div class="pgrid rise" style="--d:2"><div class="col">
-  <section class="card pc"><div class="sh"><h2>Por categoria</h2><span class="who">${lab} × ${plab}</span></div>${cats.length&&tot?`<ul class="zl-an">${cats.map(c=>rowC(c,byCat[c]||0,pCat[c]||0,mxC,zCatCol(c))).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
+ return `<section class="card pc"><div class="sh"><h2>Por categoria</h2><span class="who">${lab} × ${plab}</span></div>${cats.length&&tot?`<ul class="zl-an">${cats.map(c=>rowC(c,byCat[c]||0,pCat[c]||0,mxC,zCatCol(c))).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
   <section class="card pc"><div class="sh"><h2>Por tipo de trabalho</h2><span class="who">${lab} × ${plab}</span></div>${tot?`<ul class="zl-an">${ZTIPOS.map(t=>rowC(t,byTipo[t]||0,pTipo[t]||0,mxT)).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
   <section class="card pc"><div class="sh"><h2>Por fornecedor</h2></div>${forns.length||direto?`<ul class="zl-lines">${forns.map(f=>`<li><span>${esc(f[0])}</span><b>${zR(f[1])}</b></li>`).join('')}${direto?`<li><span>Compras diretas, sem fornecedor cadastrado</span><b>${zR(direto)}</b></li>`:''}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
- </div><div class="col">
   <section class="card pc"><div class="sh"><h2>Material × mão de obra</h2></div>
    <div class="zl-ln"><span>Material</span><b>${zR(mat)}</b></div><div class="zl-ln"><span>Mão de obra</span><b>${zR(mao)}</b></div>${zBar(mat,mat+mao)}</section>
-  <section class="card pc"><div class="sh"><h2>Para conferir com o Financeiro</h2><span class="who">${lab}</span></div>
-   <div class="zl-ln"><span>Saídas lançadas</span><b>${zR(tot)}</b></div><div class="zl-ln"><span>Lançamentos</span><b>${cur.length}</b></div><div class="zl-ln"><span>Com comprovante</span><b>${cur.length-semComp.length}</b></div><div class="zl-ln tot"><span>Sem comprovante</span><b class="${semComp.length?'neg':''}">${semComp.length}</b></div>
-   ${semComp.length?`<ul class="zl-att" style="margin-top:12px">${semComp.slice(0,5).map(x=>`<li><span class="zl-ai">${ic('alert',16,2)}</span><span class="zl-at"><b>${esc(x.e.desc)}</b><small>${esc(x.j.n)} · ${fmtD(x.e.d)} · ${zR2(x.v)}</small></span><button class="btn ghost sm" data-a="zOpen" data-v="${x.j.id}">Abrir</button></li>`).join('')}</ul>`:''}</section>
-  <section class="card pc"><div class="sh"><h2>Maiores trabalhos</h2><span class="who">${lab}</span></div>${jobs.length?`<ul class="zl-att">${jobs.map(([id,v])=>{const j=zJob(id);return `<li><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.tipo)} · previsto ${zPrev(j)?zR(zPrev(j)):'—'}</small></span><b class="zl-n">${zR(v)}</b></li>`;}).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>
- </div></div>`;
+  <section class="card pc"><div class="sh"><h2>Maiores trabalhos</h2><span class="who">${lab}</span></div>${jobs.length?`<ul class="zl-att">${jobs.map(([id,v])=>{const j=zJob(id);return `<li><span class="zl-at"><b>${esc(j.n)}</b><small>${esc(j.tipo)} · previsto ${zPrev(j)?zR(zPrev(j)):'—'}</small></span><b class="zl-n">${zR(v)}</b></li>`;}).join('')}</ul>`:'<div class="mempty"><p>Sem gastos neste período.</p></div>'}</section>`;
 }
 
 /* ---------- Categorias (cadastro igual ao do Almoxarifado: nome, cor e ícone) ---------- */
@@ -436,8 +424,8 @@ function zFornForm(f){
 Object.assign(A,ZA);
 
 /* ---------- páginas, comentários e buscas ---------- */
-{const _ph=placeholder;placeholder=id=>({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-cat':zelCats,'zel-ana':zelAna})[id]?({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-cat':zelCats,'zel-ana':zelAna})[id]():_ph(id);}
-{const _nav=A.nav;A.nav=v=>{S.zj=null;if(v!=='zel-ana'&&String(S.relM)[0]==='Y')S.relM=RELN;_nav(v);};}
+{const _ph=placeholder;placeholder=id=>({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-cat':zelCats})[id]?({'zel-vis':zelVis,'zel-trab':zelTrab,'zel-forn':zelForn,'zel-cat':zelCats})[id]():_ph(id);}
+{const _nav=A.nav;A.nav=v=>{S.zj=null;if(v!=='zel-vis'&&String(S.relM)[0]==='Y')S.relM=RELN;_nav(v);};}
 {const _r=render;render=function(){_r.apply(this,arguments);
  if(S.active==='zel-trab'&&S.zj)requestAnimationFrame(tabInd);
  const q=$('#zq');if(q&&!q._z){q._z=1;q.addEventListener('input',e=>{S.zq=e.target.value;$('#zrows').innerHTML=zRows();});}

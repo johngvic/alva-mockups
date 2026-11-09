@@ -11,11 +11,13 @@ function toast(type,title,msg){
 /* ---------- sheet ---------- */
 function sheet(html,onMount){
  const o=$('#overlay');
- o.innerHTML=`<div class="scrim" data-a="closeSheet" data-self="1"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
+ /* trocar de folha (ou reabrir logo depois de fechar) não repete a animação de entrada: parece a mesma tela mudando */
+ const swap=!!$('.sheet:not(.closing)',o)||(Date.now()-(window.__shClosed||0)<700);
+ o.innerHTML=`<div class="scrim${swap?' swap':''}" data-a="closeSheet" data-self="1"><div class="sheet${swap?' swap':''}" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
  onMount&&onMount($('.sheet',o));
  const f=$('.sheet input,.sheet textarea',o);if(f&&!f.readOnly)setTimeout(()=>f.focus({preventScroll:true}),340);
 }
-function closeSheet(){const o=$('#overlay');const sc=$('.scrim',o);if(!sc)return Promise.resolve();sc.classList.add('closing');$('.sheet',o).classList.add('closing');return wait(210).then(()=>{o.innerHTML=''});}
+function closeSheet(){const o=$('#overlay');const sc=$('.scrim',o);if(!sc)return Promise.resolve();sc.classList.add('closing');$('.sheet',o).classList.add('closing');return wait(210).then(()=>{window.__shClosed=Date.now();o.innerHTML=''});}
 function overlayLoading(text){const o=$('#overlay');o.innerHTML=`<div class="loading-over" role="status" aria-live="polite"><div class="ld"><span class="ld-glow"></span>${splashSVG()}</div><p class="ld-t">${esc(String(text).replace(/…$/,''))}<span class="ld-d"><i></i><i></i><i></i></span></p><span class="ld-bar"><i></i></span></div>`;}
 
 /* ---------- forms ---------- */

@@ -234,9 +234,23 @@ function axMoves(){const all=moves(),l=all.filter(m=>S.mvf==='todos'||m.t===S.mv
 /* ---------- Relatórios ---------- */
 function axRep(){const tot=ITEMS.reduce((a,i)=>a+i.total,0),rows=ICATS.map(c=>{const its=ITEMS.filter(i=>i.cat===c.id);return {c,n:its.length,t:its.reduce((a,i)=>a+i.total,0),a:its.reduce((a,i)=>a+avOf(i),0),o:its.reduce((a,i)=>a+outOf(i),0),its};}).filter(r=>r.n);
  const low=ITEMS.filter(i=>i.total&&avOf(i)/i.total<.35);
- return axHead('Visão geral','O almoxarifado por categoria',`${rpBtn('almoxarifado','resumo')}`)
+ const att=[...LOANS.filter(lnLate).map(l=>{const it=itm(l.item),dd=-dDays(l.due);return ['clock','Empréstimo atrasado: '+it.n+' × '+lnOpen(l),l.who+' · '+dd+' dia'+(dd===1?'':'s')+' de atraso','Abrir','axGoNav','aemp'];}),
+  ...lnGroups().map(g=>['bell','Solicitação de itens da reserva',g[0].who+' · '+g.length+' item'+(g.length===1?'':'ns'),'Decidir','axGoReq','']),
+  ...low.map(i=>['alert','Estoque baixo: '+i.n,avOf(i)+' de '+i.total+' disponíveis','Abrir','axGoNav','aitens'])];
+ const lent={};LOANS.forEach(l=>{const it=itm(l.item);if(it)lent[it.n]=(lent[it.n]||0)+l.qty;});const topL=Object.entries(lent).sort((x,y)=>y[1]-x[1]).slice(0,5);
+ const allMv=moves(),mxMv=Math.max(1,...Object.keys(MVT).map(k=>allMv.filter(m=>m.t===k).length));
+ return axHead('Visão geral','Como está o almoxarifado e o que precisa de atenção',`${rpBtn('almoxarifado','resumo')}`)
  +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Unidades no total</span><span class="kv">${tot.toLocaleString('pt-BR')}</span><span class="kd">em ${ITEMS.length} itens</span></div><div class="k4"><span class="kl">Disponíveis</span><span class="kv" style="color:var(--st-int)">${Math.round(ITEMS.reduce((a,i)=>a+avOf(i),0)/tot*100)}%</span><span class="kd">do total</span></div><div class="k4"><span class="kl">Empréstimos atrasados</span><span class="kv" style="color:var(--st-rec)">${LOANS.filter(lnLate).length}</span><span class="kd">${LOANS.filter(lnLate).reduce((a,l)=>a+lnOpen(l),0)} unidades</span></div><div class="k4"><span class="kl">Estoque baixo</span><span class="kv" style="color:var(--st-sol)">${low.length}</span><span class="kd">menos de 35% disponível</span></div></section>
- <div class="ax-rg rise" style="--d:2">${rows.map(r=>`<article class="card ax-rc" style="--k:${r.c.c}"><div class="ax-rch">${kTile(r.c,30)}<div class="dkt"><b>${esc(r.c.n)}</b><span>${r.n} ite${r.n===1?'m':'ns'} · ${r.t.toLocaleString('pt-BR')} unidades</span></div><b class="ax-rp">${Math.round(r.a/Math.max(1,r.t)*100)}%<small>disponível</small></b></div>
+ <div class="pgrid rise" style="--d:2"><div class="col">
+  <section class="card pc"><div class="sh"><h2>Disponibilidade por categoria</h2><span class="who">${tot.toLocaleString('pt-BR')} unidades</span></div>${chBars(rows.map(r=>({l:r.c.n,v:Math.round(r.a/Math.max(1,r.t)*100)+'%',s:r.a+' de '+r.t+' disponíveis',w:r.a/Math.max(1,r.t)*100,c:r.c.c})))}</section>
+  <section class="card pc"><div class="sh"><h2>Mais emprestados</h2><span class="who">unidades, em todos os empréstimos</span></div>${topL.length?chBars(topL.map(x=>({l:x[0],v:x[1]+(x[1]===1?' unidade':' unidades'),w:x[1]/topL[0][1]*100}))):'<div class="mempty"><p>Nenhum empréstimo ainda.</p></div>'}</section>
+  <section class="card pc"><div class="sh"><h2>Movimentações</h2><span class="who">por tipo</span></div>${chBars(Object.entries(MVT).map(([k,v])=>{const n=allMv.filter(m=>m.t===k).length;return {l:v[0],v:n+(n===1?' registro':' registros'),w:n/mxMv*100,c:v[2]};}))}</section>
+ </div><div class="col">
+  <section class="card pc"><div class="sh"><h2>Precisam de atenção</h2><span class="who">${att.length} ${att.length===1?'item':'itens'}</span></div>
+   ${att.length?`<ul class="zl-att">${att.map(a=>`<li><span class="zl-ai">${ic(a[0],16,2)}</span><span class="zl-at"><b>${esc(a[1])}</b><small>${esc(a[2])}</small></span><button class="btn sec sm" data-a="${a[4]}" data-v="${a[5]||''}">${a[3]}</button></li>`).join('')}</ul>`:'<div class="mempty"><p>Tudo em dia.</p><span>Atrasos, solicitações das reservas e estoque baixo aparecem aqui.</span></div>'}</section>
+ </div></div>
+ <p class="eb rise" style="--d:3;margin:20px 0 8px">Itens por categoria</p>`
+ +`<div class="ax-rg rise" style="--d:2">${rows.map(r=>`<article class="card ax-rc" style="--k:${r.c.c}"><div class="ax-rch">${kTile(r.c,30)}<div class="dkt"><b>${esc(r.c.n)}</b><span>${r.n} ite${r.n===1?'m':'ns'} · ${r.t.toLocaleString('pt-BR')} unidades</span></div><b class="ax-rp">${Math.round(r.a/Math.max(1,r.t)*100)}%<small>disponível</small></b></div>
   ${r.its.map(i=>`<div class="ax-ri"><span>${esc(i.n)}</span><span class="ax-mb"><i style="width:${avOf(i)/Math.max(1,i.total)*100}%"></i><em style="width:${outOf(i)/Math.max(1,i.total)*100}%"></em></span><small>${avOf(i)}/${i.total}</small></div>`).join('')}</article>`).join('')}</div>`;}
 
 function axAfter(){const q=$('#axq');if(q)q.addEventListener('input',e=>{S.axq=e.target.value;const c=e.target.selectionStart;axRe();const n=$('#axq');n.focus();n.setSelectionRange(c,c);});}
@@ -256,5 +270,6 @@ const AXA={
  dsNew:v=>dsForm(v),trNew:v=>trForm(v),
  ajOpen:v=>{closeDlg(true);ajForm(v);},
  mvF:v=>{S.mvf=S.mvf===v?'todos':v;axRe();},
+ axGoNav:v=>A.nav(v),axGoReq:()=>{S.lnTab='req';A.nav('aemp');},
 };
 
