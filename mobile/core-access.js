@@ -60,7 +60,7 @@ const CAN={ver:1,criar:2,editar:2,excluir:3,acessos:3,aprovar:3};
 S.subs='ativa';
 const can=(id,act)=>lvlOf(id)>=CAN[act]&&(act==='ver'||S.subs!=='suspensa');
 /* módulo em abas (até 5 seções) ou em lista de seções (mais de 5); Cafeteria, Restaurante e Loja são sempre em abas, iguais entre si (Tiago, 09/11/2026) */
-const TABBED=['cafe','rest','shop'];
+const TABBED=['cafe','rest','shop','financeiro'];
 const gFewSecs=(id,sc)=>sc.length<=5||TABBED.includes(id);
 const visibleMods=()=>GMODS.filter(m=>lvlOf(m[0])>0);
 const canGestao=()=>visibleMods().length>0;
