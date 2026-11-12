@@ -575,7 +575,7 @@ lede=function(){return '';};
  Secretaria:['Visão geral','Atos','Documentos','Cargos e mandatos'],
  Financeiro:['Visão geral','Caixa de entrada','Lançamentos','Contas a pagar e a receber','Aprovações','Importar e conciliar','Exportação contábil','Doações','Caixas e vendas','Informe anual','DRE','Fechamentos','Contas financeiras','Plano e centros de custo','Contatos','Mensagens'],
  Comunicação:['Notícias','Banners','Notificações','Transmissões'],
- Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Zeladoria','Almoxarifado','Cafeteria','Restaurante','Loja','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],
+ Relatórios:['Integração','Membros','Casas de Apascentamento','Ministérios','Discipulado','Acompanhamento','Pedidos de oração','Kids','Conteúdo','Agenda e eventos','Escalas','Espaços','Zeladoria','Almoxarifado','Cafeteria','Restaurante','Loja','Mercado Social','Secretaria','Financeiro','Doações','Comunicação','Multi-igreja'],
  Administração:['Usuários e permissões','Superusuários','Visitantes','Recursos habilitados','Parâmetros do sistema','Multi-igreja','Auditoria e LGPD']};
  const by=(list,key,order)=>{const ix=x=>{const i=order.indexOf(key(x));return i<0?999:i;};list.sort((a,b)=>ix(a)-ix(b));};
  const apply=()=>NAV.forEach(g=>{if(ORD[g[0]])by(g[1],x=>x[2],ORD[g[0]]);g[1].forEach(n=>{if(n[3]&&SUB[n[2]])by(n[3],c=>c[1],SUB[n[2]]);});});

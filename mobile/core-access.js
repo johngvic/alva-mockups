@@ -10,7 +10,7 @@ Object.assign(I,{
  bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>'
 });
-const VENDAS=['Visão geral','Itens','Vendas','Caixa diário','Movimentações','Resultados'];
+const VENDAS=['Visão geral','Itens','Vouchers','Vendas','Caixa diário','Movimentações','Resultados'];
 /* [id, nome, ícone, tom, fase do protótipo, seções] */
 const GMODS=[
  ['pessoas','Pessoas','users','ceu',3,['Integração','Membros','Devocional']],
@@ -25,13 +25,14 @@ const GMODS=[
  ['cafe','Cafeteria','coffee','brasa',2,VENDAS],
  ['rest','Restaurante','chef','vinho',2,VENDAS],
  ['shop','Loja','bag','lima',2,VENDAS],
+ ['social','Mercado Social','cart','salvia',2,VENDAS],
  ['secretaria','Secretaria','file','ceu',5,['Visão geral','Atos','Documentos','Cargos e mandatos']],
  ['financeiro','Financeiro','wallet','petroleo',6,['Visão geral','Caixa de entrada','Lançamentos','Contas a pagar e a receber','Aprovações','Caixas e vendas']],
  ['comunicacao','Comunicação','megaphone','laranja',5,['Notícias','Mensagens','Banners','Transmissões']],
  ['admin','Administração','shield','brasa',6,['Usuários e permissões']]
 ];
 const gMod=id=>GMODS.find(m=>m[0]===id);
-const GPEND={pessoas:[],cuidado:[],kids:[],agenda:[],espacos:[],almox:[],zeladoria:[],shop:[],cafe:[],rest:[],conteudo:[],comunicacao:[],secretaria:[],financeiro:[],admin:[]};
+const GPEND={pessoas:[],cuidado:[],kids:[],agenda:[],espacos:[],almox:[],zeladoria:[],shop:[],social:[],cafe:[],rest:[],conteudo:[],comunicacao:[],secretaria:[],financeiro:[],admin:[]};
 /* ESCOPO DO APP (Tiago, 08/11/2026): o app leva o que dá praticidade a quem está no celular (decidir, registrar, ajustar, consultar);
    cadastro, configuração, importação, relatório e análise ficam no web. Por seção: noAdd = sem botão de novo; ro = sem Editar nem Excluir
    (as ações de estado, como aprovar, continuam); acts:[] = sem ações. Quem não está aqui segue o desenho da própria seção. */
@@ -60,7 +61,7 @@ const CAN={ver:1,criar:2,editar:2,excluir:3,acessos:3,aprovar:3};
 S.subs='ativa';
 const can=(id,act)=>lvlOf(id)>=CAN[act]&&(act==='ver'||S.subs!=='suspensa');
 /* módulo em abas (até 5 seções) ou em lista de seções (mais de 5); Cafeteria, Restaurante e Loja são sempre em abas, iguais entre si (Tiago, 09/11/2026) */
-const TABBED=['cafe','rest','shop','financeiro'];
+const TABBED=['cafe','rest','shop','social','financeiro'];
 const gFewSecs=(id,sc)=>true; // todas as seções abrem em abas (centradas, com setas); a lista de seções deixou de existir
 const visibleMods=()=>GMODS.filter(m=>lvlOf(m[0])>0);
 const canGestao=()=>visibleMods().length>0;

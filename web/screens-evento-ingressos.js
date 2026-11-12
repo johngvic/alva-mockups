@@ -98,8 +98,8 @@ evVch=function(e){
  return `<section class="card mtab"><div class="tbar"><span class="who" style="margin-right:auto">Códigos de desconto válidos só para este evento.${one?'':' O desconto vale para qualquer ingresso, sem passar do valor dele.'}</span><button class="btn pri sm" data-a="vAdd">${ic('plus',14,2.2)}Novo voucher</button></div>
   ${e.vouchers.length?`<div class="vgrid">${e.vouchers.map((v,i)=>{const exp=v.exp&&inDays(v.exp)<0,pct=v.type==='pct',full=pct?v.disc>=100:one&&v.disc>=ref;return `<article class="vc ${exp?'exp':''}"><div class="vc1"><span class="mono vcode">${esc(v.code)}</span><button class="ibtn sm" data-a="vDel" data-v="${i}" aria-label="Excluir voucher">${ic('x',14)}</button></div>
    <div class="vc2"><b>${full?'100%':pct?v.disc+'%':'− '+brl(v.disc)}</b><span>${full?'bolsa integral':pct?'de desconto no ingresso':one?`paga ${brl(Math.max(0,ref-v.disc))}`:'de desconto no ingresso'}</span></div>
-   <div class="vc3"><span>${v.mode==='liberado'?`${ic('users',13)}Qualquer pessoa`:`${ic('lock',13)}${esc(v.email)}`}</span><span>${v.uses} ${v.uses===1?'uso':'usos'}</span></div>
-   <div class="vc4 ${exp?'bad':''}">${v.exp?(exp?`Expirou em ${dBR(v.exp)}`:`Vale até ${dBR(v.exp)}`):'Nunca expira'}</div></article>`;}).join('')}</div>`:`<div class="mempty"><p>Nenhum voucher.</p><span>Crie códigos de desconto ou bolsas para este evento.</span></div>`}</section>`;
+   <div class="vc3"><span>${v.mode==='liberado'?`${ic('users',13)}Qualquer pessoa`:`${ic('lock',13)}${esc(v.email)}`}</span><span>${v.uses}${v.limit?' de '+v.limit:''} ${(v.limit||v.uses)===1?'uso':'usos'}</span></div>
+   <div class="vc4 ${exp?'bad':''}">${v.from&&inDays(v.from)>0?`Começa em ${dBR(v.from)}${v.exp?' · vale até '+dBR(v.exp):''}`:v.exp?(exp?`Expirou em ${dBR(v.exp)}`:`Vale até ${dBR(v.exp)}`):'Nunca expira'}</div></article>`;}).join('')}</div>`:`<div class="mempty"><p>Nenhum voucher.</p><span>Crie códigos de desconto ou bolsas para este evento.</span></div>`}</section>`;
 };
 
 /* ---------- diálogo de ingresso ---------- */
@@ -149,7 +149,7 @@ function regCalc(e,st,m){
  const t=e.tickets.find(x=>x.id===st.tk),base=t?tkPrice(e,t):0,code=(st.vc||'').trim().toUpperCase(),vc=code?e.vouchers.find(x=>x.code===code):null;
  let err='',disc=0;
  if(code&&!vc)err='Voucher não encontrado neste evento';
- else if(vc&&vc.exp&&inDays(vc.exp)<0)err=`Expirou em ${dBR(vc.exp)}`;
+ else if(vc&&evVchBlock(vc))err=evVchBlock(vc);else if(vc&&vc.exp&&inDays(vc.exp)<0)err=`Expirou em ${dBR(vc.exp)}`;
  else if(vc&&vc.mode==='especifico'&&m&&vc.email!==m.e)err=`Este voucher é só para ${vc.email}`;
  else if(vc)disc=vDisc(vc,base);
  const adds=[...st.buy].map(id=>itById(e,id)).filter(i=>i&&!(t&&t.incl.includes(i.id))),add=adds.reduce((a,i)=>a+(+i.price||0),0);

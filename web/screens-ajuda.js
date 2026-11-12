@@ -56,12 +56,15 @@ const AJ=[
  {id:'rest',n:'Restaurante',ic:'chef',go:'rest-vis',lede:'Itens, vendas e caixa do restaurante.',f:[
   ['O Restaurante e a Cafeteria se misturam?','Não. Cada um tem menu, permissão, dados e relatórios próprios, porque quem opera cada um é diferente.','restaurante cafeteria separado permissão'],
   ['Como vejo o que foi vendido no dia?','No Caixa diário, que mostra as vendas válidas do dia. As vendas podem ser Concluídas, Canceladas ou Estornadas, com meio de pagamento (Pix, Cartão ou Dinheiro).','vendas dia caixa estorno pagamento'],
-  ['O valor das vendas entra no Financeiro?','Sim. As vendas entram como receita, e o painel do Financeiro mostra Cafeteria, Restaurante e Loja.','financeiro receita vendas']]},
+  ['O valor das vendas entra no Financeiro?','Sim. As vendas entram como receita, e o painel do Financeiro mostra Cafeteria, Restaurante, Loja e Mercado Social.','financeiro receita vendas']]},
  {id:'loja',n:'Loja',ic:'bag',go:'shop-vis',lede:'Venda de livros, camisetas e acessórios, no balcão e pelo app.',f:[
   ['Como faço uma venda rápida?','Digite o código do item, a quantidade e o valor e aperte Enter; a lista vai se montando. O valor vem do preço do item, mas pode ser alterado, e há um botão de desconto. Confirme a venda no fim.','venda rápida balcão desconto'],
   ['Como funcionam os pedidos feitos pelo app?','Em Loja › Pedidos do app, a equipe vê o quadro Separando, Pronto para retirar e Retirados. Ao marcar como pronto, o comprador é avisado no app. A retirada é na igreja.','pedidos app retirada separando'],
   ['Como cancelo uma venda?','A qualquer hora, a partir da venda. O cancelamento devolve o estoque e gera o estorno no Financeiro.','cancelar venda estorno'],
   ['A Loja pode vender curso ou e-book?','Não. A Loja vende só bens físicos, por regra das lojas de aplicativos. Item digital exigiria rever essa regra.','digital e-book curso política loja aplicativos']]},
+ {id:'social',n:'Mercado Social',ic:'cart',go:'social-vis',lede:'Venda de alimentos e itens de higiene e limpeza, no caixa (PDV) e no web.',f:[
+  ['O Mercado Social é parte da Loja?','Não. É um módulo próprio, com a mesma estrutura da Loja (itens, categorias, vendas, caixa diário, divergências e movimentações), centro de custo e permissão próprios. Não aparece no app.','mercado social loja diferença centro de custo'],
+  ['Como vendo no Mercado Social?','Pelo PDV, no caixa, com leitor de código de barras e impressora de comprovante, ou pela venda rápida no web.','pdv caixa leitor impressora venda rápida']]},
  {id:'conteudo',n:'Conteúdo',ic:'layers',go:'pregacoes',lede:'Pregações, vídeos, músicas, séries, jornadas, cursos e materiais.',f:[
   ['Quem vê cada conteúdo?','Cada conteúdo é Público (qualquer pessoa, inclusive visitante), Interno (todos os membros, o padrão) ou Restrito a um ministério. Escolher um ministério torna o conteúdo restrito.','visibilidade público interno restrito ministério'],
   ['O que é uma série?','Uma coleção ordenada de pregações, vídeos ou músicas, de um único tipo, escolhido ao criar. Os itens continuam existindo sozinhos; a série só os reúne.','série pregações vídeos músicas'],
@@ -691,7 +694,7 @@ FLW.push(
      [['s','alva','Cuidado','Revisão de disciplina vencida.'],['s','alva','Almoxarifado','Empréstimo em atraso.']],
      [['s','alva','Zeladoria','Obra atrasada.'],['s','alva','Loja','Pedido do app parado.']]]],
    ['s','alva','Entrega a pendência','Aparece para quem cuida e fecha sozinha quando a causa some.']]),
- flwJob(6,'6 · Alertas de estoque','','Avisa quando o estoque de Cafeteria, Restaurante e Loja fica abaixo do mínimo.',['Roda a cada hora.','No máximo um aviso por item a cada período configurado.','O Almoxarifado não usa este job: avisa por evento, a cada baixa ou ajuste.'],[
+ flwJob(6,'6 · Alertas de estoque','','Avisa quando o estoque de Cafeteria, Restaurante, Loja e Mercado Social fica abaixo do mínimo.',['Roda a cada hora.','No máximo um aviso por item a cada período configurado.','O Almoxarifado não usa este job: avisa por evento, a cada baixa ou ajuste.'],[
    ['s','alva','Compara estoque com o mínimo','Item por item, em cada módulo.'],
    ['f','Resultado',[[['s','alva','Abaixo do mínimo','Abre o aviso, respeitando o intervalo entre repetições.']],[['s','alva','Voltou ao normal','Fecha o aviso sozinho.']]]]]),
  flwJob(7,'7 · Pagamentos','','Garante que todo pagamento chegue a um estado final: confere o que ficou sem aviso, dá baixa, expira o que venceu e acompanha reembolsos.',['Roda a cada 10 minutos.','É o caminho de exceção: o normal é o aviso do provedor.','Atende conectores, doações, inscrições de evento e pedidos do app.'],[

@@ -28,17 +28,17 @@ Object.entries(FOOD_STORES).forEach(([key,store],si)=>{
 });
 Object.assign(S,{foodMode:'month',foodMonth:'2026-09',foodDay:FOOD_DATE,foodCat:'all',foodQuery:'',foodStatus:'all',foodMethod:'all',foodItemF:'all',foodMv:'all',foodRows:20});
 const foodMoney=n=>R$(n/100);
-const foodStore=()=>S.active.startsWith('shop-')?'shop':S.active.startsWith('rest-')?'rest':'cafe';
+const foodStore=()=>S.active.startsWith('social-')?'social':S.active.startsWith('shop-')?'shop':S.active.startsWith('rest-')?'rest':'cafe';
 const foodCat=(k,id)=>FOOD_STORES[k].cats.find(c=>c.id===id)||{name:'Sem categoria',tone:'salvia'};
 const foodItem=(k,id)=>FOOD_STORES[k].items.find(i=>i.id===id);
 const foodAmount=a=>a.reduce((n,s)=>n+s.total,0);
 const foodPeriod=s=>S.foodMode==='day'?s.date===S.foodDay:s.date.startsWith(S.foodMonth);
 /* itens vendidos no totem, saldo negativo, origem das vendas e divergências de exemplo */
-const foodOrigin=s=>s.app?'App':s.totemNo?'Totem':'Balcão';
+const foodOrigin=s=>s.app?'App':s.totemNo?'Totem':s.pdv?'PDV':'Balcão';
 function foodSeedItems(k,si){const st=FOOD_STORES[k];st.items.forEach((it,i)=>{if(i<4){it.totem=true;it.totemCode='TT-'+(si+1)+String(i+1).padStart(2,'0');}});if(st.items[2])st.items[2].stock=-2;}
 FOOD_SALES.forEach((s,i)=>{if(s.method!=='Dinheiro'&&i%2===0)s.totemNo='T-'+String(2000+i);});
 Object.keys(FOOD_STORES).forEach((k,si)=>foodSeedItems(k,si));
-const FOOD_DIV_T={neg:['Estoque negativo','bad','alert'],line:['Linha sem item','warn','box'],price:['Preço diferente','info','tag']};
+const FOOD_DIV_T={neg:['Estoque negativo','bad','alert'],line:['Linha sem item','warn','box'],price:['Preço diferente','info','tag'],voucher:['Voucher acima do limite','warn','ticket']};
 const FOOD_DIV={};
 function foodDivSeed(k){const st=FOOD_STORES[k],a=st.items[2],b=st.items[4]||st.items[0],m=x=>(x/100).toLocaleString('pt-BR',{minimumFractionDigits:2});
  return [
@@ -70,7 +70,7 @@ const FOOD_LOOK={salg:['#c25a12','croissant'],bolo:['#db2777','cake'],lan:['#84a
 const FOOD_ICONS=['croissant','cake','sandwich','cookie','iceCream','utensils','soup','cupSoda','droplet','coffee','chef','box'];
 Object.assign(FOOD_STORES.cafe,{c:'#c25a12'});Object.assign(FOOD_STORES.rest,{c:'#1f9a52'});
 Object.values(FOOD_STORES).forEach(st=>st.cats.forEach(c=>{const l=FOOD_LOOK[c.id]||['#475569','box'];c.c=l[0];c.ic=l[1];}));
-const FOOD_PAY={Pix:['pix','#0ea5a4'],'Cartão':['card','#2f7de1'],Dinheiro:['cash','#1f9a52']};
+const FOOD_PAY={Pix:['pix','#0ea5a4'],'Cartão':['card','#2f7de1'],Dinheiro:['cash','#1f9a52'],Misto:['ticket','#7c3aed']};
 const FOOD_ST={ok:['var(--st-int)','var(--st-int-bg)'],warn:['var(--st-sol)','var(--st-sol-bg)'],bad:['var(--st-rec)','var(--st-rec-bg)'],off:['var(--ink-muted)','var(--surface-2)'],info:['var(--brand-text)','var(--brand-soft)']};
 const foodPill=(label,kind='ok')=>`<span class="stp" style="--c:${FOOD_ST[kind][0]};--b:${FOOD_ST[kind][1]}"><i></i>${esc(label)}</span>`;
 const foodStatus=s=>foodPill({completed:'Concluída',cancelled:'Cancelada'}[s.status],s.status==='completed'?'ok':'off');
@@ -98,7 +98,7 @@ function foodPkPaint(){const p=$('#fdPk');if(!p)return;const day=S.foodMode==='d
   <div class="fd-pk-d">${'<span></span>'.repeat(off)}${Array.from({length:n},(_,i)=>{const d=`${v}-${String(i+1).padStart(2,'0')}`;return `<button type="button" class="${d===S.foodDay?'on':''} ${d===FOOD_DATE?'cur':''} ${has.has(d)?'has':''}" data-a="foodPkPick" data-v="${d}" ${d>FOOD_DATE?'disabled':''}>${i+1}</button>`;}).join('')}</div>
   <div class="fd-pk-f"><span class="fd-pk-lg"><i></i>dia com vendas</span><button type="button" class="lnk" data-a="foodPkPick" data-v="${FOOD_DATE}">Último dia</button></div>`;}
 
-function foodPage(){const k=foodStore(),page=S.active.split('-')[1],M={cafe:CAFE_PAGES,rest:REST_PAGES,shop:SHOP_PAGES}[k];return (M[page]||M.vis)(k);}
+function foodPage(){const k=foodStore(),page=S.active.split('-')[1],M={cafe:CAFE_PAGES,rest:REST_PAGES,shop:SHOP_PAGES,social:SOCIAL_PAGES}[k];return (M[page]||M.vis)(k);}
 function foodHead(k,title,subtitle,actions='',bar=''){const st=FOOD_STORES[k];return `<header class="ph rise"><div><p class="eb">${esc(st.name)}</p><h1>${title}</h1><p class="lede">${subtitle}</p></div>${actions?`<div class="pact">${actions}</div>`:''}</header>${bar}`;}
 
 const foodSel=(id,label,opts,val)=>`<label class="fd-sel">${ic('sliders',14)}<select id="${id}" aria-label="${label}">${opts.map(([a,b])=>`<option value="${a}" ${val===a?'selected':''}>${b}</option>`).join('')}</select>${ic('chevD',13,2)}</label>`;

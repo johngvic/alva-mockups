@@ -2,7 +2,7 @@
  * Situação do evento: Confirmado ou Previsão. Cerimônia (Apresentação, Batismo, Consagração, Casamento): pessoa Pendente, Confirmado, Realizado, Recusado ou Cancelado.
  * Inscrição: Confirmada, Pendente ou Cancelada, com o pagamento (Pago, Pendente, Gratuita, Reembolso solicitado, Reembolsado) e o check-in.
  * O app decide e opera na porta: confirmar ou recusar pedido, marcar realizado, check-in, marcar como pago, reenviar link, ver as escalas da data.
- * Criar evento, série, local, ingressos, vouchers, publicação, cancelar compra com reembolso e venda de balcão ficam na web. */
+ * Criar evento, série, local, ingressos, publicação, cancelar compra com reembolso e venda de balcão ficam na web. */
 const AG_EV_ST={cf:['ok','Confirmado'],tt:['info','Previsão']};
 const AG_PS={pe:['warning','Pendente'],cf:['ok','Confirmado'],co:['info','Realizado'],re:['danger','Recusado'],ca:['off','Cancelado']};
 const AG_TYPE={ret:'Retiro',conf:'Conferência',esp:'Evento especial',cul:'Culto',apr:'Apresentação',bat:'Batismo',con:'Consagração',cas:'Casamento'};
@@ -58,7 +58,8 @@ function agScales(e){if(e.t!=='cul'&&e.t!=='conf'&&e.t!=='ret'&&e.t!=='esp')retu
 function agEvExtra(r){const ed=can('agenda','editar');let h='';
  if(r.vagas&&r.st==='cf'){const l=agRegs(r),ins=l.filter(x=>x.st!=='ca'),pg=ins.filter(x=>x.pay==='pg'),pen=ins.filter(x=>x.pay==='pe'),prev=ins.reduce((a,x)=>a+x.val,0),rec=pg.reduce((a,x)=>a+x.val,0);
   h+=`<div class="vk"><div><b>${ins.length}/${r.vagas}</b><span>Inscritos</span></div><div><b>${prev?AG_BRL(rec).replace(',00',''):'Gratuito'}</b><span>${prev?'Arrecadado de '+AG_BRL(prev).replace(',00',''):'Sem valor'}</span></div><div><b>${pen.length}</b><span>Pagamentos pendentes</span></div></div>`;
-  if(ed)h+=`<div class="row g3"><button class="btn outline md grow" data-a="evCk" data-v="${r.id}">Check-in</button><button class="btn outline md grow" data-a="evTk" data-v="${r.id}">Ingressos</button></div>`;}
+  if(ed)h+=`<div class="row g3"><button class="btn outline md grow" data-a="evCk" data-v="${r.id}">Check-in</button><button class="btn outline md grow" data-a="evTk" data-v="${r.id}">Ingressos</button></div>`;
+  h+=`<div class="row g3"><button class="btn outline md block" data-a="evVch" data-v="${r.id}">${ic('ticket',18,2)}Vouchers · ${(typeof EVV!=='undefined'&&EVV[r.id]||[]).length}</button></div>`;}
  if(r.st==='tt')h+='<p class="callout">Evento em previsão. Confirmar a data e o local é feito na web.</p>';
  return h+agScales(r)+(r.t==='cul'||r.vagas?qdBlock(r.id,'')+cxBlock(r.id,''):'');}
 /* cerimônias: pessoas do dia, com as decisões */

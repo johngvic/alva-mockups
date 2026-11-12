@@ -10,7 +10,7 @@ regTot=function(e,r){const t=tkOf(e,r);return (+r.val||0)+buyOf(e,r).reduce((a,i
 regCalc=function(e,st,m){
  const t=e.tickets.find(x=>x.id===st.tk),base=t?tkPrice(e,t):0,code=(st.vc||'').trim().toUpperCase(),vc=code?e.vouchers.find(x=>x.code===code):null;
  let err='',disc=0;
- if(code&&!vc)err='Voucher não encontrado neste evento';
+ if(code&&!vc)err='Voucher não encontrado neste evento';else if(vc&&evVchBlock(vc))err=evVchBlock(vc);
  else if(vc&&vc.exp&&inDays(vc.exp)<0)err=`Expirou em ${dBR(vc.exp)}`;
  else if(vc&&vc.mode==='especifico'&&m&&vc.email!==m.e)err=`Este voucher é só para ${vc.email}`;
  else if(vc)disc=vDisc(vc,base);

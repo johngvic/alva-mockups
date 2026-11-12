@@ -200,6 +200,6 @@ function nxHouseAgenda(){const month=S.calM||'2026-10',meetings=CASAS.filter(c=>
 const nxCalPage=calPage;calPage=()=>nxCalPage()+nxHouseAgenda();
 
 Object.assign(A,NXA);
-{const base=A.nxSaleConfirm;A.nxSaleNew=()=>{nxCart=[];nxDiscount={type:'value',value:0};nxMethod='Pix';nxPosQ='';nxPosCat='all';nxBuyer='';nxSaleForm();};A.nxSaleConfirm=(v,b)=>{const n=FOOD_SALES.length;base(v,b);if(FOOD_SALES.length>n){const x=FOOD_SALES[FOOD_SALES.length-1];x.method=nxMethod;if(nxBuyer.trim())x.buyer=nxBuyer.trim();nxBuyer='';}};}
+{const base=A.nxSaleConfirm;A.nxSaleNew=()=>{nxPosStore=foodStore();nxVoucher=null;nxCart=[];nxDiscount={type:'value',value:0};nxMethod='Pix';nxPosQ='';nxPosCat='all';nxBuyer='';nxSaleForm();};A.nxSaleConfirm=(v,b)=>{const n=FOOD_SALES.length;base(v,b);if(FOOD_SALES.length>n){const x=FOOD_SALES[FOOD_SALES.length-1];x.method=nxMethod;if(nxBuyer.trim())x.buyer=nxBuyer.trim();nxBuyer='';}};}
 Object.assign(A,CPA,PA,IA,DA,CA,HA,RA,KA,AA,AU,GA,EA,LMA,CKA,BBA,PFA,SPA,CMA,CTA,FIA,AXA,BKA,FOODA,CAREA,ID_ACTIONS);
-const foodBaseNav=A.nav;A.nav=v=>{if(/^(cafe|rest|shop)-/.test(v)&&v!==S.active){S.foodQuery="";S.foodCat="all";S.foodStatus="all";S.foodMethod="all";S.foodItemF="all";S.foodMv="all";S.foodRows=20;}foodBaseNav(v);};
+const foodBaseNav=A.nav;A.nav=v=>{if(/^(cafe|rest|shop|social)-/.test(v)&&v!==S.active){S.foodQuery="";S.foodCat="all";S.foodStatus="all";S.foodMethod="all";S.foodItemF="all";S.foodMv="all";S.foodRows=20;}foodBaseNav(v);};

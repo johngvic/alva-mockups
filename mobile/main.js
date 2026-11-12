@@ -28,11 +28,13 @@
 //#include ./screens-admin-extra.js
 //#include ./screens-ev.js
 //#include ./screens-web-parity.js
+//#include ./screens-vouchers.js
 //#include ./screens-overview.js
 //#include ./screens-ledes.js
 //#include ./screens-kids.js
 //#include ./screens-espacos.js
 //#include ./screens-quadros.js
+//#include ./screens-foto.js
 //#include ./screens-zeladoria.js
 //#include ./screens-almoxarifado.js
 //#include ./screens-secretaria.js

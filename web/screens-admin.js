@@ -53,7 +53,7 @@ const dBRs=d=>{const [y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;};
 const admHead=(t,sub,act)=>`<header class="ph rise"><div><p class="eb">Administração</p><h1>${t}</h1><p class="lede">${sub}</p></div><div class="pact">${act||''}</div></header>`;
 
 /* ---------- Usuários ---------- */
-const MODS=['Membros','Integração',...CUI,'Comunidade','Kids','Agenda e eventos','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Conteúdo','Comunicação','Financeiro','Multi-igreja'];
+const MODS=['Membros','Integração',...CUI,'Comunidade','Kids','Agenda e eventos','Espaços','Almoxarifado','Cafeteria','Restaurante','Loja','Mercado Social','Conteúdo','Comunicação','Financeiro','Multi-igreja'];
 const RPERM={};const rp=o=>Object.fromEntries(MODS.map(m=>[m,o[m]||[]]));
 RPERM.Administrador=rp(Object.fromEntries(MODS.map(m=>[m,ACTS])));
 RPERM.Pastor=rp({Membros:ACTS,Integração:ACTS,...Object.fromEntries(CUI.map(m=>[m,ACTS])),Comunidade:ACTS,Kids:['Ver'],'Agenda e eventos':['Ver','Criar','Editar'],Conteúdo:['Ver','Criar','Editar'],Comunicação:['Ver','Criar'],Financeiro:['Ver']});
@@ -61,9 +61,9 @@ RPERM['Líder']=rp({Membros:['Ver'],Comunidade:['Ver','Editar'],'Agenda e evento
 RPERM.Secretaria=rp({Membros:ACTS,Integração:ACTS,'Agenda e eventos':ACTS,Espaços:ACTS,Comunicação:['Ver','Criar','Editar'],Financeiro:['Ver']});
 RPERM['Voluntário']=rp({'Agenda e eventos':['Ver'],Kids:['Ver'],Espaços:['Ver']});
 /* Módulos e ministérios: cada módulo pertence a um ministério. Módulo sem ministério não é usado (some do menu) e não recebe acesso por área. Escolher o ministério não dá acesso a ninguém. */
-const MODMAP=[['Integração','userplus','integracao'],['Cuidado','heart','cuidado'],['Kids','baby','kids'],['Agenda','calendar','agenda'],['Espaços','building','espacos'],['Loja','bag','shop'],['Almoxarifado','box','almox'],['Cafeteria','coffee','cafe'],['Restaurante','chef','rest'],['Conteúdo','layers','conteudo'],['Comunicação','megaphone','comunicacao'],['Financeiro','wallet','financeiro'],['Secretaria','file','secretaria']];
+const MODMAP=[['Integração','userplus','integracao'],['Cuidado','heart','cuidado'],['Kids','baby','kids'],['Agenda','calendar','agenda'],['Espaços','building','espacos'],['Loja','bag','shop'],['Mercado Social','cart','social'],['Almoxarifado','box','almox'],['Cafeteria','coffee','cafe'],['Restaurante','chef','rest'],['Conteúdo','layers','conteudo'],['Comunicação','megaphone','comunicacao'],['Financeiro','wallet','financeiro'],['Secretaria','file','secretaria']];
 const MODAREAS=MODMAP.map(m=>m[0]);
-const MODMIN={'Integração':'Integração','Cuidado':'Pastoral','Kids':'Kids','Agenda':'Eventos','Espaços':'Zeladoria','Loja':'Eventos','Almoxarifado':'Almoxarifado','Cafeteria':'Cafeteria','Restaurante':'Cozinha','Conteúdo':'Mídia','Comunicação':'Comunicação','Secretaria':'Secretaria','Financeiro':'Financeiro'};
+const MODMIN={'Integração':'Integração','Cuidado':'Pastoral','Kids':'Kids','Agenda':'Eventos','Espaços':'Zeladoria','Loja':'Eventos','Mercado Social':'Eventos','Almoxarifado':'Almoxarifado','Cafeteria':'Cafeteria','Restaurante':'Cozinha','Conteúdo':'Mídia','Comunicação':'Comunicação','Secretaria':'Secretaria','Financeiro':'Financeiro'};
 const modOn=nav=>{const m=MODMAP.find(x=>x[2]===nav);return !m||!!MODMIN[m[0]];};
 const SAREAS=[['Almoxarifado','box'],['Ministério de Louvor','music'],['Ministério Infantil','baby'],['Casa Norte — Lapa','home'],['Integração','userplus'],['Financeiro','wallet']];
 const SPERM={Visualizar:['Só consulta','eye','var(--ink-muted)','var(--surface-2)'],Editar:['Cria e altera','pen','var(--st-ace)','var(--st-ace-bg)'],Admin:['Líder da área — pode conceder acesso','shield','var(--st-rec)','var(--st-rec-bg)']};

@@ -20,7 +20,7 @@ h1{margin:48px 0 0;font:400 44px/48px var(--serif);letter-spacing:-.01em}
 h1 em{color:var(--brand)}
 .lede{margin:14px 0 0;font:400 16px/24px var(--sans);color:var(--muted);max-width:520px}
 .grid{margin-top:40px;display:grid;grid-template-columns:1fr;gap:16px}
-@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}.grid a.card:first-child{grid-column:1/-1}h1{font-size:54px;line-height:58px}}
+@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}h1{font-size:54px;line-height:58px}}
 a.card{display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:24px;background:var(--surface);color:inherit;text-decoration:none;box-shadow:0 1px 2px rgba(1,15,18,.04),0 10px 30px rgba(1,15,18,.06);transition:transform .2s,box-shadow .2s}
 a.card:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(1,15,18,.04),0 16px 40px rgba(1,15,18,.1),inset 0 0 0 1.5px var(--brand)}
 .tag{align-self:flex-start;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
@@ -34,11 +34,12 @@ footer{padding:20px;text-align:center;font:400 12.5px/18px var(--sans);color:var
 <main>
  <span class="logo"><svg viewBox="0 0 48 32" height="22" width="33" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c7ebea"/><stop offset=".5" stop-color="#6da8a7"/><stop offset="1" stop-color="#07486e"/></linearGradient><clipPath id="c"><rect width="48" height="25"/></clipPath></defs><g stroke="#07486e" stroke-width="2.6" stroke-linecap="round"><line x1="11.16" y1="20.83" x2="5.93" y2="19.13"/><line x1="16.07" y1="14.08" x2="12.83" y2="9.63"/><line x1="24" y1="11.5" x2="24" y2="6"/><line x1="31.93" y1="14.08" x2="35.17" y2="9.63"/><line x1="36.84" y1="20.83" x2="42.07" y2="19.13"/></g><g clip-path="url(#c)"><circle cx="24" cy="25" r="10" fill="url(#g)"/></g><line x1="5" y1="28.5" x2="43" y2="28.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>alva</span>
  <h1>Protótipos para <em>revisão</em>.</h1>
- <p class="lede">Versões navegáveis do app da comunidade e do painel de gestão. Os dados são fictícios e nada é salvo.</p>
+ <p class="lede">Versões navegáveis do Alva: site, painel web, app da comunidade e ponto de venda. Os dados são fictícios e nada é salvo.</p>
  <div class="grid">
   <a class="card" href="./site/"><span class="tag">Site comercial</span><b>Conheça o Alva</b><p>Apresentação do produto, experiência do app e proposta de planos, do gratuito ao atendimento personalizado.</p><span class="go">Explorar o site →</span></a>
   <a class="card" href="/web/"><span class="tag">Painel de gestão</span><b>Alva Web</b><p>Acesso multi-igreja, dashboard, pessoas, cuidado, comunidade, kids e administração. Funciona no desktop e no celular.</p><span class="go">Abrir protótipo →</span></a>
   <a class="card" href="/mobile/"><span class="tag">App da comunidade</span><b>Alva App</b><p>Login, início, agenda, grupos, cursos, ingressos e perfis de acesso. Use o menu ao lado para trocar de tela, tema e cenário.</p><span class="go">Abrir protótipo →</span></a>
+  <a class="card" href="./pdv/index.html"><span class="tag">Ponto de venda · Windows</span><b>Alva PDV</b><p>O caixa da loja da igreja: leitor de código de barras, venda rápida, desconto, comprovante e maquininha. Vende mesmo sem internet e sincroniza depois.</p><span class="go">Abrir o protótipo →</span></a>
  </div>
 </main>
 <footer>Alva · protótipos de design · não é o produto final</footer>

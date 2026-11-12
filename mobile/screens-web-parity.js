@@ -91,7 +91,7 @@ LSD.admin['Automações']={noun:'jobs',noAdd:1,ro:1,ST:{at:['ok','Ativo'],ds:['o
 
 /* ======================= LOJA, CAFETERIA, RESTAURANTE › Divergências e Pedidos do app ======================= */
 
-gMod('shop')[5]=['Visão geral','Itens','Vendas','Pedidos do app','Caixa diário','Movimentações','Resultados'];
+gMod('shop')[5]=['Visão geral','Itens','Vouchers','Vendas','Pedidos do app','Caixa diário','Movimentações','Resultados'];
 const DV={cafe:[['n','Bolo de cenoura · fatia ficou com saldo −2','Vendas do totem e do balcão passaram do estoque. Ajuste o saldo.'],['l','Suco de uva 300 ml (pedido do totem T-2033)','O totem vendeu uma linha que não existe no cadastro. Código do produto no totem: T3301.'],['p','Pipoca · porção: R$ 7,00 no totem, R$ 5,00 no cadastro','O preço da venda difere do preço do item. Confira qual vale.']],rest:[['n','Marmita executiva ficou com saldo −3','As vendas passaram do estoque. Ajuste o saldo.'],['p','Suco natural: R$ 9,00 no totem, R$ 8,00 no cadastro','O preço da venda difere do preço do item. Confira qual vale.']],shop:[['n','Camiseta Alva (G) ficou com saldo −1','Um pedido do app passou do estoque. Ajuste o saldo.']]};
 const DVK={n:['danger','Estoque negativo'],l:['warning','Linha sem item'],p:['info','Preço diferente']};
 const VSX={};Object.keys(DV).forEach(k=>{VSX[k]={div:DV[k].map(([t,a,b],i)=>({id:k+'d'+i,t,a,b}))};});

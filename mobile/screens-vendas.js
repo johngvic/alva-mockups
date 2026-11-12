@@ -2,17 +2,18 @@
    VENDAS · Cafeteria, Restaurante e Loja: visão geral, itens, categorias, vendas, caixa e estoque
    Mesmo molde para os três pontos de venda; o acesso do Gestão decide quais botões aparecem.
    ========================================================= */
-const VS_READY=['cafe','rest','shop'],VS_DAY=29,VPAY=['Pix','Cartão','Dinheiro'];
+const VS_READY=['cafe','rest','shop','social'],VS_DAY=29,VPAY=['Pix','Cartão','Dinheiro'];
 const VSDEF={cafe:{pre:'CF',h:16,cats:[['salg','Salgados','damasco'],['bolo','Bolos','rosado'],['lan','Lanches','lima'],['agua','Água','ceu'],['beb','Bebidas','menta'],['doc','Doces','salvia']],items:[['Coxinha','salg',700,32],['Pão de queijo','salg',500,8],['Bolo de cenoura · fatia','bolo',800,12],['Sanduíche natural','lan',1200,14],['Pipoca · porção','lan',500,0],['Água mineral 500 ml','agua',400,80],['Refrigerante · lata','beb',600,36],['Café expresso','beb',500,45],['Bombom','doc',300,24]]},
  rest:{pre:'RE',h:12,cats:[['alm','Almoço','damasco'],['mar','Marmitas','lima'],['sob','Sobremesas','rosado'],['agua','Água','ceu'],['beb','Bebidas','menta']],items:[['Almoço · prato completo','alm',3900,46],['Marmita completa','mar',2900,18],['Pudim · porção','sob',900,7],['Mousse de maracujá','sob',800,10],['Água mineral 500 ml','agua',400,65],['Refrigerante · lata','beb',600,28],['Suco natural · copo','beb',800,20]]},
- shop:{pre:'LJ',h:10,cats:[['books','Livros','ceu'],['shirts','Camisetas','salvia'],['acc','Acessórios','damasco']],items:[['Livro · Uma vida com propósito','books',4900,25,5],['Camiseta Alva','shirts',5900,18,5],['Caneca Alva','acc',3500,8,3],['Bíblia de estudo','books',8900,6,4],['Ecobag Alva','acc',2500,30,5]]}};
+ shop:{pre:'LJ',h:10,cats:[['books','Livros','ceu'],['shirts','Camisetas','salvia'],['acc','Acessórios','damasco']],items:[['Livro · Uma vida com propósito','books',4900,25,5],['Camiseta Alva','shirts',5900,18,5],['Caneca Alva','acc',3500,8,3],['Bíblia de estudo','books',8900,6,4],['Ecobag Alva','acc',2500,30,5]]},
+ social:{pre:'MS',h:9,cats:[['merc','Mercearia','damasco'],['hig','Higiene e limpeza','ceu'],['beb','Bebidas','menta']],items:[['Arroz 5 kg','merc',2890,30,8],['Feijão 1 kg','merc',850,42,8],['Macarrão 500 g','merc',420,60,8],['Açúcar 1 kg','merc',540,35,8],['Óleo de soja 900 ml','merc',790,28,8],['Café 500 g','merc',1690,18,8],['Sabão em pó 1 kg','hig',1450,12,8],['Sabonete','hig',230,70,8],['Creme dental','hig',590,24,8],['Leite 1 L','beb',560,40,8],['Suco de caixa 1 L','beb',720,16,8]]}};
 const VS={};
 Object.entries(VSDEF).forEach(([k,d])=>{const st=VS[k]={cats:d.cats.map(([id,name,tone])=>({id,name,tone})),sales:[],moves:[],seq:0,mv:0,cash:{open:true,since:'07:30',float:5000}};
  st.items=d.items.map(([name,cat,price,stock,min],i)=>({id:k+i,name,cat,price,stock,min:min||10,active:true}));const n=st.items.length;
  for(let day=1;day<=VS_DAY;day++)for(let t=0;t<3;t++){const a=(day+t)%n,b=(a+(n>5?3:1))%n;
   const lines=[a,b].map((ix,j)=>({item:st.items[ix].id,qty:1+(day+t+j)%3,price:st.items[ix].price}));
   const status=(day===12&&t===0)||(day===21&&t===1)?'cancelled':'completed',total=lines.reduce((x,l)=>x+l.qty*l.price,0);
-  st.sales.push({id:d.pre+'-'+String(++st.seq).padStart(4,'0'),day,time:(d.h+t)+':'+String(10+(day%4)*10).padStart(2,'0'),lines,status,method:VPAY[[0,1,0,2][(day+t)%4]],total,or:k==='shop'&&t===2?'App':t===1?'Totem':'Balcão'});}
+  st.sales.push({id:d.pre+'-'+String(++st.seq).padStart(4,'0'),day,time:(d.h+t)+':'+String(10+(day%4)*10).padStart(2,'0'),lines,status,method:VPAY[[0,1,0,2][(day+t)%4]],total,or:k==='shop'&&t===2?'App':k==='social'?'Balcão':t===1?'Totem':'Balcão'});}
  st.items.forEach(it=>st.moves.push({id:'m'+(++st.mv),item:it.id,day:25,kind:'entry',qty:20,reason:'Compra / reposição'}));
  st.sales.filter(s=>s.status==='cancelled').forEach(s=>st.moves.push({id:'m'+(++st.mv),item:s.lines[0].item,day:s.day,kind:'refund',qty:s.lines[0].qty,reason:'Venda '+s.id+' cancelada'}));
  st.moves.push({id:'m'+(++st.mv),item:st.items[1].id,day:27,kind:'adjust',qty:-2,reason:'Perda · validade'});});
@@ -36,7 +37,7 @@ function vsResults(k){const st=VS[k],sales=vsSalesIn(k),m=vsSum(sales),v=vsOk(sa
  const days=Array.from({length:14},(_,i)=>{const d=VS_DAY-13+i;return{d,val:vsOk(st.sales.filter(s=>s.day===d)).reduce((n,s)=>n+s.total,0)};}),mx=Math.max(1,...days.map(x=>x.val));
  const top=st.items.map(it=>{const ls=lines.filter(l=>l.item===it.id),q=ls.reduce((n,l)=>n+l.qty,0);return{it,q,val:ls.reduce((n,l)=>n+l.qty*l.price,0)};}).filter(x=>x.q).sort((a,b)=>b.val-a.val).slice(0,5),tm=Math.max(1,...top.map(x=>x.val));
  const low=st.items.filter(i=>i.active&&i.stock<=i.min).sort((a,b)=>a.stock-b.stock).slice(0,4);
- const pay=VPAY.map(p=>({p,val:v.filter(s=>s.method===p).reduce((n,s)=>n+s.total,0)}));
+ const pay=VPAY.map(p=>({p,val:vsBy(v,p)}));
  return `${vsPeriod()}
  <section class="ovh"><p class="ovh-eb">Vendido no período</p><b class="ovh-n">${vsMoney(m.sold)}</b><p class="ovh-s"><span class="ovh-chip">${m.count} venda${m.count===1?'':'s'}</span><span>Ticket médio ${vsMoney(m.ticket)}</span></p></section>
  <section class="rcard"><p class="eb2">Últimos 14 dias</p><div class="vbars" role="img" aria-label="Vendas por dia">${days.map(x=>`<i class="${x.d===VS_DAY?'now':''}" style="height:${Math.max(3,x.val/mx*100)}%" title="${x.d} set · ${vsMoney(x.val)}"></i>`).join('')}</div><div class="vbars-l"><span>${days[0].d} set</span><span>hoje</span></div></section>
@@ -63,11 +64,11 @@ function vsSalesView(k){const all=vsSalesIn(k),n=s=>all.filter(x=>s==='all'||x.s
  return `${vsPeriod()}${vsHead(m.count+' vendas · '+vsMoney(m.sold),vsAdd(k,'vsSaleNew','Venda rápida'))}${vsSearch('vsSq','Buscar código ou produto',S.vs.q)}${vsChips('vsSt',S.vs.st,[['all','Todas',n('all')],['completed','Concluídas',n('completed')],['cancelled','Canceladas',n('cancelled')]])}<div id="vsList">${vsSalesRows(k)}</div>`;}
 
 /* ---- Caixa diário ---- */
-function vsCash(k){const st=VS[k],c=st.cash,today=st.sales.filter(s=>s.day===VS_DAY),canc=today.filter(s=>s.status==='cancelled').length,v=vsOk(today),by=p=>v.filter(s=>s.method===p).reduce((n,s)=>n+s.total,0),sold=v.reduce((n,s)=>n+s.total,0);
+function vsCash(k){const st=VS[k],c=st.cash,today=st.sales.filter(s=>s.day===VS_DAY),canc=today.filter(s=>s.status==='cancelled').length,v=vsOk(today),by=p=>vsBy(v,p),sold=v.reduce((n,s)=>n+s.total,0);
  return `<div class="row between" style="align-items:center"><div class="stack" style="gap:2px"><p class="eb2">Hoje · ${VS_DAY} set</p><span class="vs">O dia fecha sozinho na virada; não há fechar o caixa.</span></div></div>
  <div class="vk"><div><b>${vsMoney(sold)}</b><span>Vendido</span></div><div><b>${v.length}</b><span>Vendas</span></div><div><b>${vsMoney(c.float+by('Dinheiro'))}</b><span>Em dinheiro</span></div></div>
  <section class="stack g3"><p class="eb2">Por meio de pagamento</p><div class="vl"><div class="vr"><span class="grow">Fundo de caixa</span><b>${vsMoney(c.float)}</b></div>${VPAY.map(p=>`<div class="vr"><span class="vdot p${VPAY.indexOf(p)}"></span><span class="grow">${p}</span><b>${vsMoney(by(p))}</b></div>`).join('')}</div></section>
- <section class="stack g3"><p class="eb2">Por origem</p><div class="vl">${['Balcão','App','Totem'].map(o=>`<div class="vr"><span class="grow">${o}</span><b>${vsMoney(v.filter(s=>s.or===o).reduce((n,s)=>n+s.total,0))}</b></div>`).join('')}</div></section>
+ <section class="stack g3"><p class="eb2">Por origem</p><div class="vl">${['Balcão','PDV','App','Totem'].map(o=>`<div class="vr"><span class="grow">${o}</span><b>${vsMoney(v.filter(s=>s.or===o).reduce((n,s)=>n+s.total,0))}</b></div>`).join('')}</div></section>
  ${canc?`<p class="callout">${canc} ${canc===1?'cancelamento':'cancelamentos'} hoje.</p>`:''}`;}
 
 /* ---- Movimentações ---- */
@@ -77,25 +78,25 @@ function vsMoves(k){const st=VS[k],l=st.moves.filter(m=>S.vs.mv==='all'||m.kind=
  ${l.length?`<div class="vl">${l.map(m=>{const t=VMV[m.kind],it=vsItem(k,m.item),q=m.kind==='sale'?-Math.abs(m.qty):m.qty;return `<div class="vr"><span class="grow stack" style="gap:2px;min-width:0"><span class="vn">${esc(it?it.name:'Item removido')}</span><span class="vs">${t[0]} · ${m.day===VS_DAY?'hoje':m.day+' set'} · ${esc(m.reason)}</span></span><b class="vamt" style="color:${q<0?'var(--danger-ink,var(--ink))':'var(--ink)'}">${q>0?'+':''}${q}</b></div>`;}).join('')}</div>`:vsEmpty('Nenhuma movimentação')}`;}
 
 /* ---- ponto de entrada (usado pela Gestão) ---- */
-function vsBody(k,sec){const M={'Visão geral':vsOverview,'Itens':vsItems,'Vendas':vsSalesView,'Caixa diário':vsCash,'Movimentações':vsMoves,'Resultados':vsResults,'Divergências':vsDiv,'Pedidos do app':vsOrders};return `<div class="stack g5 vs-root">${(M[sec]||vsOverview)(k)}</div>`;}
+function vsBody(k,sec){const M={'Visão geral':vsOverview,'Itens':vsItems,'Vouchers':vsVouchers,'Vendas':vsSalesView,'Caixa diário':vsCash,'Movimentações':vsMoves,'Resultados':vsResults,'Divergências':vsDiv,'Pedidos do app':vsOrders};return `<div class="stack g5 vs-root">${(M[sec]||vsOverview)(k)}</div>`;}
 
 /* ---- sheets ---- */
 const vsDone=(t,m)=>{closeSheet();softRender();toast('success',t,m);};
 const vsConfirm=(title,msg,yes,fn)=>sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${title}</h3><p class="callout">${msg}</p></div><div class="row g3"><button class="btn outline md grow" data-a="closeSheet">Voltar</button><button class="btn danger md grow" id="vcY">${yes}</button></div></div>`,sh=>$('#vcY',sh).addEventListener('click',()=>{fn();}));
 function vsItemSheet(id){const k=vsK(),it=vsItem(k,id),s=vsStock(it);
- sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${esc(it.name)}</h3><p class="callout">${esc(vsCat(k,it.cat).name)} · ${vsMoney(it.price)}</p></div>
+ sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">${esc(it.name)}</h3><p class="callout">${esc(vsCat(k,it.cat).name)} · ${vsMoney(it.price)}${it.barcode?' · cód. '+it.barcode:''}</p></div>
  <div class="vk"><div><b>${it.stock}</b><span>Em estoque</span></div><div><b>${it.min}</b><span>Mínimo</span></div><div>${vsTag(s[1],it.active?(it.stock<=0?'Sem estoque':it.stock<=it.min?'Baixo':'Em dia'):'Inativo')}<span style="margin-top:8px">Situação</span></div></div>
  ${can(k,'editar')&&it.active?`<button class="btn primary md block" data-a="vsAdj" data-v="${id}">Ajustar estoque</button>`:can(k,'editar')?'<p class="callout">Item inativo: reativar é na web.</p>':'<p class="callout">Você só pode ver este item.</p>'}<p class="vs">Editar o item, mudar o preço e inativar ficam na web.</p></div>`);}
 /* cadastro rápido de item (nome, preço, categoria, estoque e mínimo); o resto do cadastro fica na web */
 function vsItemForm(){const k=vsK(),st=VS[k];S.vs.fcat=st.cats[0].id;
- sheet(`<div class="stack g5"><h3 class="t2">Novo item</h3>${field({id:'viN',label:'Nome',val:'',ph:'Ex.: Pão de queijo'})}${field({id:'viP',label:'Preço (R$)',val:'',ph:'0,00',im:'decimal'})}
+ sheet(`<div class="stack g5"><h3 class="t2">Novo item</h3>${field({id:'viN',label:'Nome',val:'',ph:'Ex.: Pão de queijo'})}${field({id:'viP',label:'Preço (R$)',val:'',ph:'0,00',im:'decimal'})}${field({id:'viB',label:'Código de barras (opcional)',val:'',ph:'6 a 14 números',im:'numeric'})}
  <div class="field"><label>Categoria</label>${vsChips('vsFcat',S.vs.fcat,st.cats.map(c=>[c.id,c.name]))}</div>
  <div class="row g3">${field({id:'viS',label:'Estoque inicial',val:'0',im:'numeric'})}${field({id:'viM',label:'Mínimo',val:'10',im:'numeric'})}</div>
- <p class="vs">Código, foto, descrição e Vender no totem ficam na web.</p>
+ <p class="vs">Foto, descrição e Vender no totem ficam na web.</p>
  <div class="row g3"><button class="btn outline md grow" data-a="closeSheet">Cancelar</button><button class="btn primary md grow" id="viOk">Salvar</button></div></div>`,sh=>$('#viOk',sh).addEventListener('click',()=>{
   const n=val('viN'),p=Math.round(parseFloat(val('viP').replace(',','.'))*100),s=parseInt(val('viS'),10),m=parseInt(val('viM'),10);let bad=false;
-  if(!n){setErr('viN','Dê um nome ao item.');bad=true;}if(!(p>0)){setErr('viP','Informe um preço maior que zero.');bad=true;}if(isNaN(s)){setErr('viS','Número inválido.');bad=true;}if(bad)return;
-  st.items.push({id:k+Date.now(),name:n,cat:S.vs.fcat,price:p,stock:s,min:isNaN(m)?10:m,active:true});vsDone('Item criado',n);}));}
+  if(!n){setErr('viN','Dê um nome ao item.');bad=true;}if(!(p>0)){setErr('viP','Informe um preço maior que zero.');bad=true;}if(isNaN(s)){setErr('viS','Número inválido.');bad=true;}const b=val('viB');if(b&&!/^\d{6,14}$/.test(b)){setErr('viB','De 6 a 14 números.');bad=true;}else if(b&&st.items.some(x=>x.barcode===b)){setErr('viB','Já existe um item com esse código.');bad=true;}if(bad)return;
+  st.items.push({id:k+Date.now(),name:n,cat:S.vs.fcat,price:p,stock:s,min:isNaN(m)?10:m,active:true,barcode:b});vsDone('Item criado',n);}));}
 /* ajustar estoque: motivo obrigatório (Compra / reposição, Correção de contagem, Perda / validade) */
 function vsAdjSheet(id){const k=vsK(),it=vsItem(k,id);S.vs.mot='Compra / reposição';
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Ajustar estoque</h3><p class="callout">${esc(it.name)}. Saldo atual: ${it.stock} un.</p></div>${field({id:'vaQ',label:'Quantidade nova',val:String(it.stock),im:'numeric'})}<div class="field"><label>Motivo</label>${vsChips('vsMot',S.vs.mot,[['Compra / reposição','Compra / reposição'],['Correção de contagem','Correção de contagem'],['Perda / validade','Perda / validade']])}</div><div class="row g3"><button class="btn outline md grow" data-a="vsItem" data-v="${id}">Voltar</button><button class="btn primary md grow" id="vaOk">Ajustar</button></div></div>`,sh=>$('#vaOk',sh).addEventListener('click',()=>{
@@ -104,7 +105,7 @@ function vsAdjSheet(id){const k=vsK(),it=vsItem(k,id);S.vs.mot='Compra / reposi�
 function vsSaleSheet(id){const k=vsK(),s=VS[k].sales.find(x=>x.id===id),can2=can(k,'editar')&&s.status==='completed';
  sheet(`<div class="stack g5"><div class="stack g2"><h3 class="t2">Venda ${s.id}</h3><p class="callout">${s.day===VS_DAY?'Hoje':s.day+' set'}, ${s.time} · ${s.method}</p></div>
  <div class="vl">${s.lines.map(l=>`<div class="vr"><span class="grow vn">${l.qty}× ${esc(vsItem(k,l.item).name)}</span><b>${vsMoney(l.qty*l.price)}</b></div>`).join('')}<div class="vr"><span class="grow"><b>Total</b></span><b class="vamt">${vsMoney(s.total)}</b></div></div>
- <div class="vl"><div class="vr"><span class="vs" style="min-width:104px">Origem</span><span class="grow" style="text-align:right">${s.or}</span></div></div>
+ <div class="vl"><div class="vr"><span class="vs" style="min-width:104px">Origem</span><span class="grow" style="text-align:right">${s.or}${s.pdv?' · '+s.pdv:''}</span></div>${s.voucher?`<div class="vr"><span class="vs" style="min-width:104px">Voucher</span><span class="grow" style="text-align:right">${esc(s.voucher.code)} · − ${vsMoney(s.vd)}</span></div>`:''}</div>${s.pays&&s.pays.length>1?`<p class="eb2">Pagamentos · ${s.pays.length} formas</p><div class="vl">${s.pays.map(x=>`<div class="vr"><span class="grow">${x.method}</span><b>${vsMoney(x.amount)}</b></div>`).join('')}</div>`:''}${s.divs?`<p class="callout">Divergência registrada: ${esc(s.divs.join(' · '))} A equipe confere na web.</p>`:''}
  ${s.status==='cancelled'?`<p class="callout">Venda cancelada. O estoque foi devolvido.</p>`:''}
  ${can2?`<button class="btn danger md block" data-a="vsSaleCancel" data-v="${id}">Cancelar venda</button>`:s.status==='completed'?'<p class="callout">Você só pode consultar esta venda.</p>':''}</div>`);}
 function vsSaleNew(){const k=vsK(),st=VS[k];S.vs.cart={};S.vs.pay='Pix';

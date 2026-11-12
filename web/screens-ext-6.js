@@ -1,5 +1,5 @@
 /* ---------- Lojas: paginação de Itens e Vendas ---------- */
-const fdPagedPage=()=>/^(cafe|rest|shop)-(items|sales)$/.test(S.active);
+const fdPagedPage=()=>/^(cafe|rest|shop|social)-(items|sales)$/.test(S.active);
 {const base=foodPage;foodPage=function(){if(!fdPagedPage())return base.apply(this,arguments);const keep=S.foodRows;S.foodRows=1e9;const h=base.apply(this,arguments);S.foodRows=keep;return h;};}
 function fdPaginate(){if(!fdPagedPage())return;const sec=$('#main .mtab');if(!sec)return;const rows=[...sec.querySelectorAll('.trow:not(.thead)')];if(!rows.length)return;
  const sig=[S.active,S.foodQuery,S.foodStatus,S.foodMethod,S.foodCat,S.foodItemF,S.foodMode,S.foodMonth,S.foodDay,rows.length].join('|');if(S.fdSig!==sig){S.fdSig=sig;S.fdPg=1;}

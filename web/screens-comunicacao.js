@@ -116,8 +116,8 @@ const NTT=[
  ['Identidade','Código de login',['E-mail']],['Identidade','Convite para entrar',['E-mail']],
  ['Casas','Encontro da casa marcado',['Push','E-mail']],['Casas','Pedido de entrada decidido',['Push','E-mail']],
  ['Ministérios','Tarefa atribuída',['Push','E-mail']],['Eventos','Lembrete de evento',['Push','E-mail']],
- ['Lembretes','Live ou culto',['Push']],['Datas','Feliz aniversário',['Push','E-mail']],['Datas','Boas-vindas',['E-mail','Push']],['Equipe','Pedido pendente na Secretaria',['Push','E-mail']]
-].map((r,i)=>({id:'tp'+i,dom:r[0],n:r[1],sup:r[2],when:'2026-10-0'+(1+i%8),
+ ['Lembretes','Live ou culto',['Push']],['Datas','Feliz aniversário',['Push','E-mail']],['Datas','Boas-vindas',['E-mail','Push']],['Equipe','Pedido pendente na Secretaria',['Push','E-mail']],['Vendas','Venda aprovada · comprovante',['E-mail'],'Comprovante da venda (PDF)'],['Vendas','Venda cancelada · comprovante',['E-mail'],'Comprovante da venda cancelada (PDF)']
+].map((r,i)=>({id:'tp'+i,dom:r[0],n:r[1],sup:r[2],att:r[3]||'',when:'2026-10-0'+(1+i%8),
  ch:Object.fromEntries(r[2].map((c,j)=>[c,{on:true,v:1+((i+j)%3),t:r[1]+' · {{igreja}}',m:'Olá, {{nome}}! '+(c==='E-mail'?'<p>Mensagem completa do aviso “'+r[1]+'”, com <b>formatação</b> e imagem.</p>':'Detalhes no app.')}]))}));
 const ntTp=id=>NTT.find(x=>x.id===id);
 const ntLim=ch=>ch==='Push'?180:5000;
@@ -128,7 +128,7 @@ function puModelos(){
   <div class="cm-pl">${NTT.map(m=>`<div class="cm-pr enviado">
    <span class="cm-pd"><b>${m.sup.length}</b><small>${m.sup.length>1?'canais':'canal'}</small><em></em></span>
    <div class="cm-pt"><b>${esc(m.n)}</b><span>${esc(m.dom)} · atualizado em ${fmtD(m.when)}</span></div>
-   <div class="cm-pm">${m.sup.map(c=>`<span class="cm-seg" style="${m.ch[c].on?'':'opacity:.5'}">${ic(c==='Push'?'bell':'mail',12)}${c} v${m.ch[c].v}${m.ch[c].on?'':' · desligado'}</span>`).join(' ')}</div>
+   <div class="cm-pm">${m.sup.map(c=>`<span class="cm-seg" style="${m.ch[c].on?'':'opacity:.5'}">${ic(c==='Push'?'bell':'mail',12)}${c} v${m.ch[c].v}${m.ch[c].on?'':' · desligado'}</span>`).join(' ')}${m.att?`<span class="cm-seg">${ic('file',12)}${esc(m.att)}</span>`:''}</div>
    <div class="cm-ps"><span class="stp" style="--c:var(--st-int);--b:var(--st-int-bg)"><i></i>Ativo</span></div>
    <div class="cm-pa"><button class="btn sec sm" data-a="mdEdit" data-v="${m.id}">Editar</button></div></div>`).join('')}</div>
   <div class="tfoot"><span>${NTT.length} tipos de aviso</span><span>${ic('info',13)} A lista de tipos é fixa; a igreja não cria tipo novo.</span></div></section>`;
@@ -452,6 +452,7 @@ const CMA={
    <label class="fld"><span class="fl">${c==='E-mail'?'Assunto':'Título'}</span><input name="t-${c}" value="${esc(m.ch[c].t)}" autocomplete="off"></label>
    <label class="fld"><span class="fl">Mensagem <small>${c==='E-mail'?'aceita HTML e imagem':'texto simples e curto'}</small></span><textarea name="m-${c}" rows="4">${esc(m.ch[c].m)}</textarea><small class="soft" id="mdC-${c}"></small></label>
    <div class="fld"><span class="fl">Pré-visualização</span><div id="mdPv-${c}" style="background:var(--bg-soft,rgba(0,0,0,.04));border-radius:12px;padding:12px;font-size:.92em"></div></div></fieldset>`).join('')}
+  ${m.att?`<div class="sx-note" style="--c:var(--brand-text);margin:0">${ic('file',13,2)}<span><b>Vai com um PDF em anexo:</b> ${esc(m.att)}. <small>O módulo de venda gera o PDF a partir do modelo do comprovante (Parâmetros › PDV e vendas) e o entrega à Comunicação.</small></span></div>`:''}
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button type="submit" class="btn pri" id="mdOk">Salvar nova versão</button></div></form>`,'lg');
  const f=$('#mdF'),ok=$('#mdOk');
  const val=()=>{let bad=false,any=false;m.sup.forEach(c=>{const on=f.querySelector('[name=ch][value="'+c+'"]').checked,box=f.querySelector('.mdch[data-ch="'+c+'"]');box.style.display=on?'':'none';if(!on)return;any=true;

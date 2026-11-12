@@ -267,6 +267,7 @@ function rpFood(key,label,lede){
 rpFood('cafe','Cafeteria','Vendas, itens e movimentações de estoque da cafeteria.');
 rpFood('rest','Restaurante','Vendas, itens e movimentações de estoque do restaurante.');
 rpFood('shop','Loja','Vendas, itens e movimentações de estoque da loja.');
+rpFood('social','Mercado Social','Vendas, itens e movimentações de estoque do mercado social.');
 
 rpDef('conteudo','Conteúdo','Catálogo de pregações, músicas, vídeos, séries, jornadas, cursos e materiais.',[
  {k:'pregacoes',l:'Pregações',rows:()=>PREGS.slice(),fl:[{k:'who',l:'Pregador',opts:()=>rpUniq(PREGS.map(p=>p.who)),ok:(r,v)=>r.who===v}],
@@ -443,10 +444,10 @@ rpDef('usuarios','Usuários e visitantes','Contas do painel e contas de visitant
 
  /* ----- Cafeteria, Restaurante e Loja: origem da venda e conciliação financeira ----- */
  const concL=s=>{if(s.status!=='completed')return '—';const x=fqStat(s).st;return x==='conferir'?'A conferir':x==='maq'?'Conciliada com a maquininha':s.method==='Dinheiro'?'Depositada no banco':'Recebida no banco';};
- ['cafe','rest','shop'].forEach(k=>{const v=tab(k,'vendas');
+ ['cafe','rest','shop','social'].forEach(k=>{const v=tab(k,'vendas');
   v.cols.splice(4,0,rpCol('or','Origem',r=>foodOrigin(r)));
   v.cols.splice(7,0,rpCol('cf','Conciliação',r=>concL(r)));
-  v.fl.push({k:'or',l:'Origem',opts:()=>[['Balcão','Balcão'],['Totem','Totem'],['App','App']],ok:(r,x)=>foodOrigin(r)===x});});
+  v.fl.push({k:'or',l:'Origem',opts:()=>[['Balcão','Balcão'],['PDV','PDV'],['Totem','Totem'],['App','App']],ok:(r,x)=>foodOrigin(r)===x});});
 }
 
 /* ---------- Zeladoria ---------- */

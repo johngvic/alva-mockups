@@ -30,6 +30,8 @@
 //#include ./screens-restaurante.js
 //#include ./screens-loja.js
 //#include ./screens-ext-1.js
+//#include ./screens-mercado-social.js
+//#include ./screens-vouchers.js
 //#include ./screens-ext-2.js
 //#include ./screens-ext-3.js
 //#include ./screens-ext-4.js

@@ -14,13 +14,24 @@ const LJ_ITEMS=[
  {id:'sh2',n:'Camiseta Alva',cat:'shirts',price:5900,stock:18,desc:'Algodão, modelagem unissex.',sizes:['P','M','G','GG'],g:'brasa'},
  {id:'sh5',n:'Boné Alva',cat:'accessories',price:4500,stock:4,desc:'Ajustável, com bordado.',g:'lima'},
  {id:'sh8',n:'Ecobag Alva',cat:'accessories',price:2900,stock:15,desc:'Lona crua, alça longa.',g:'aurora'}];
-S.lj={cat:'Todos',q:'',pay:'pix'};S.cart=[];S.orders=[{id:'A1027',d:'20 set',items:[{id:'sh1',q:1}],total:4900,pay:'Pix',st:'retirado'}];
+S.lj={cat:'Todos',q:'',pay:'pix',vch:'',vfinal:false};S.cart=[];S.orders=[{id:'A1027',d:'20 set',items:[{id:'sh1',q:1}],total:4900,pay:'Pix',st:'retirado'}];
 const ljR=c=>brl(c/100);
 const ljNorm=t=>String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const ljIt=id=>LJ_ITEMS.find(x=>x.id===id);
 const ljCat=id=>LJ_CATS.find(c=>c[0]===id);
 const ljCount=()=>S.cart.reduce((a,x)=>a+x.q,0);
-const ljTotal=()=>S.cart.reduce((a,x)=>a+ljIt(x.id).price*x.q,0);
+const ljSub=()=>S.cart.reduce((a,x)=>a+ljIt(x.id).price*x.q,0);
+/* voucher no pedido: aplica sozinho quando o código existe e está valendo; o app está sempre online */
+const ljVchOf=()=>{const c=(S.lj.vch||'').trim().toUpperCase();return c?VCHM.shop.find(v=>v.code===c)||null:null;};
+const ljVchMsg=()=>{const c=(S.lj.vch||'').trim().toUpperCase();if(!c)return '';const v=ljVchOf();if(!v)return S.lj.vfinal?'Voucher não encontrado.':'';const s=vmStat(v)[0];return s==='Ativo'?v.name+' aplicado.':({Pausado:'Este voucher está pausado.',Vencido:'Este voucher venceu.',Esgotado:'Este voucher já foi usado o máximo de vezes.',Agendado:'Este voucher ainda não começou a valer.'})[s];};
+const ljDisc=()=>{const v=ljVchOf();if(!v||vmStat(v)[0]!=='Ativo')return 0;const s=ljSub();return v.type==='p'?Math.round(s*v.value/100):Math.min(s,v.value);};
+const ljTotal=()=>ljSub()-ljDisc();
+const ljVchUse=()=>{const v=ljVchOf();if(v&&ljDisc())v.uses++;S.lj.vch='';S.lj.vfinal=false;};
+const ljTotHtml=()=>{const sub=ljSub(),d=ljDisc(),tt=sub-d;return `<div class="kv"><div class="kr"><span>Subtotal · ${ljCount()} ${ljCount()>1?'itens':'item'}</span><span>${ljR(sub)}</span></div>${d?`<div class="kr"><span>Voucher ${esc(ljVchOf().code)}</span><span>− ${ljR(d)}</span></div>`:''}<div class="kr"><span>Retirada</span><span>Grátis</span></div><div class="kr"><span style="color:var(--ink);font-weight:600">Total</span><span>${ljR(tt)}</span></div></div>
+  <button class="btn primary block" data-a="ljCheckout">${S.lj.pay==='pix'?'Pagar com Pix':'Pagar com cartão'} · ${ljR(tt)}</button>`;};
+const ljVPaint=()=>{const m=$('#ljV-m'),tot=$('#ljTot');if(m){m.textContent=ljVchMsg();m.style.color=ljDisc()?'var(--ok, #1f9a52)':'var(--danger, #c0392b)';}if(tot)tot.innerHTML=ljTotHtml();};
+phone.addEventListener('input',e=>{if(e.target.id!=='ljV')return;S.lj.vch=e.target.value;S.lj.vfinal=false;ljVPaint();});
+phone.addEventListener('change',e=>{if(e.target.id!=='ljV')return;S.lj.vch=e.target.value;S.lj.vfinal=true;ljVPaint();});
 const ljInCart=id=>S.cart.filter(x=>x.id===id).reduce((a,x)=>a+x.q,0);
 const ljCover=(it,cls='')=>`<span class="lj-cv gr-${it.g} ${cls}">${ic(ljCat(it.cat)[2],cls==='lg'?56:34,1.5)}${it.stock===0?'<span class="lj-bd off">Esgotado</span>':it.stock<=5?`<span class="lj-bd">Últimas ${it.stock}</span>`:''}</span>`;
 const ljCartBtn=()=>`<button class="iconbtn lj-cb" data-a="go" data-v="lojaCart" aria-label="Sacola${ljCount()?', '+ljCount()+' itens':''}">${ic('bag',19,1.9)}${ljCount()?`<small>${ljCount()}</small>`:''}</button>`;
@@ -49,12 +60,12 @@ V.lojaCart=()=>{const t=ljTotal();
   <div class="list">${S.cart.map((x,i)=>{const it=ljIt(x.id);return `<div class="item lj-ci">${ljCover(it,'sm')}<span class="grow stack" style="gap:3px;min-width:0"><span class="it-title" style="font-size:16px">${esc(it.n)}</span><span class="it-sub">${x.size?'Tamanho '+x.size+' · ':''}${ljR(it.price)}</span></span><div class="lj-step sm"><button type="button" data-a="ljQty" data-v="${i}|-1" aria-label="${x.q===1?'Tirar da sacola':'Menos'}">${ic(x.q===1?'trash':'minus',14,2.25)}</button><b>${x.q}</b><button type="button" data-a="ljQty" data-v="${i}|1" aria-label="Mais" ${x.q>=Math.min(it.stock,9)?'disabled':''}>${ic('plus',14,2.25)}</button></div></div>`;}).join('')}</div>
   <section class="stack g3"><p class="eb2">Retirada</p><div class="card row g3" style="padding:16px;border-radius:var(--r-md);align-items:flex-start"><span class="iconbox" style="${tone('menta')}">${ic('pin',20)}</span><span class="grow stack" style="gap:2px"><span class="it-title" style="font-size:16px">Loja · ${esc((S.church&&S.church.name)||'Alva Sede')}</span><span class="it-sub">Domingos, das 9h às 13h. Mostre o código do pedido no balcão.</span></span></div></section>
   <section class="stack g3"><p class="eb2">Pagamento</p><div class="lj-pay" role="radiogroup">${[['pix','Pix','qr','Aprovação na hora'],['card','Cartão de crédito','card','Visa final 4242']].map(([k,l,i,sub])=>`<button type="button" role="radio" aria-checked="${S.lj.pay===k}" data-a="ljPay" data-v="${k}">${ic(i,20,1.9)}<span class="grow stack" style="gap:1px;align-items:flex-start"><b>${l}</b><small>${sub}</small></span><i class="lj-rd"></i></button>`).join('')}</div></section>
-  <div class="kv"><div class="kr"><span>Subtotal · ${ljCount()} ${ljCount()>1?'itens':'item'}</span><span>${ljR(t)}</span></div><div class="kr"><span>Retirada</span><span>Grátis</span></div><div class="kr"><span style="color:var(--ink);font-weight:600">Total</span><span>${ljR(t)}</span></div></div>
-  <button class="btn primary block" data-a="ljCheckout">${S.lj.pay==='pix'?'Pagar com Pix':'Pagar com cartão'} · ${ljR(t)}</button>`
+   <section class="stack g3"><p class="eb2">Voucher</p><label class="lj-search"><input id="ljV" placeholder="Código do voucher (aplica sozinho)" value="${esc(S.lj.vch||'')}" autocomplete="off" style="text-transform:uppercase"></label><p class="foot" id="ljV-m" style="min-height:18px;color:${ljDisc()?'var(--ok, #1f9a52)':'var(--danger, #c0392b)'}">${esc(ljVchMsg())}</p></section>
+   <div id="ljTot">${ljTotHtml()}</div>`
   :`<div class="card" style="padding:32px 18px;border-radius:var(--r-lg);text-align:center"><span class="iconbox" style="${tone('ceu')};margin:0 auto 10px">${ic('bag',22)}</span><p class="it-title" style="justify-content:center">Sua sacola está vazia</p><p class="foot" style="margin:4px 0 16px">Escolha algo na loja para continuar.</p><button class="btn secondary md" data-a="back">Voltar para a loja</button></div>`);};
 function ljPlace(){const code=Math.random().toString(36).slice(2,6).toUpperCase(),id='A'+(1030+S.orders.length);
- S.orders.unshift({id,code,d:'Hoje',items:S.cart.map(x=>({...x})),total:ljTotal(),pay:S.lj.pay==='pix'?'Pix':'Cartão final 4242',st:'separando'});
- S.cart.forEach(x=>{const it=ljIt(x.id);it.stock=Math.max(0,it.stock-x.q);});S.cart=[];S.ljLast=id;go('lojaOk',{replace:false});}
+ S.orders.unshift({id,code,d:'Hoje',items:S.cart.map(x=>({...x})),total:ljTotal(),vch:ljDisc()?{code:ljVchOf().code,disc:ljDisc()}:null,pay:S.lj.pay==='pix'?'Pix':'Cartão final 4242',st:'separando'});
+ S.cart.forEach(x=>{const it=ljIt(x.id);it.stock=Math.max(0,it.stock-x.q);});ljVchUse();S.cart=[];S.ljLast=id;go('lojaOk',{replace:false});}
 V.lojaOk=()=>{const o=S.orders.find(x=>x.id===S.ljLast);
  return {sb:'var(--ink)',tabs:null,amb:'home',html:`<div class="pad stack g6 lj-ok"><span class="lj-okc">${ic('check',34,2.5)}</span><div class="stack g2" style="text-align:center"><h1 class="t1">Pedido confirmado</h1><p class="callout" style="margin:0">Pagamento aprovado via ${o.pay}. Avisamos quando estiver separado.</p></div>
   <div class="lj-code"><span class="eb2">Código de retirada</span><b>${o.code}</b><span class="foot">Pedido #${o.id} · mostre no balcão da loja</span></div>
@@ -62,7 +73,7 @@ V.lojaOk=()=>{const o=S.orders.find(x=>x.id===S.ljLast);
   <div class="stack g3"><button class="btn primary block" data-a="ljDone">Voltar para a loja</button><button class="tlink" data-a="ljGoOrders">Ver meus pedidos</button></div></div>`};};
 V.lojaOrders=()=>ljScreen('Meus pedidos','Compras feitas pelo app.',`<div class="list">${S.orders.map(o=>`<button class="item" data-a="ljOrder" data-v="${o.id}"><span class="grow stack" style="gap:3px"><span class="it-title" style="font-size:16px">Pedido #${o.id}</span><span class="it-sub">${o.d} · ${o.items.reduce((a,x)=>a+x.q,0)} ${o.items.reduce((a,x)=>a+x.q,0)>1?'itens':'item'} · ${ljR(o.total)}</span></span>${ljSt(o)}</button>`).join('')||'<p class="foot" style="padding:16px">Nenhum pedido ainda.</p>'}</div>`);
 function ljPixOrder(){const code=Math.random().toString(36).slice(2,6).toUpperCase(),id='A'+(1030+S.orders.length);
- S.orders.unshift({id,code,d:'Hoje',items:S.cart.map(x=>({...x})),total:ljTotal(),pay:'Pix',st:'aguardando'});S.cart=[];S.ljLast=id;softRender();ljPixSheet(id);}
+ S.orders.unshift({id,code,d:'Hoje',items:S.cart.map(x=>({...x})),total:ljTotal(),vch:ljDisc()?{code:ljVchOf().code,disc:ljDisc()}:null,pay:'Pix',st:'aguardando'});ljVchUse();S.cart=[];S.ljLast=id;softRender();ljPixSheet(id);}
 function ljConfirmPix(id){const o=S.orders.find(x=>x.id===id);if(!o||o.st!=='aguardando')return;o.st='separando';o.items.forEach(x=>{const it=ljIt(x.id);it.stock=Math.max(0,it.stock-x.q);});S.ljLast=id;go('lojaOk',{replace:false});}
 function ljCancelOrder(id){const o=S.orders.find(x=>x.id===id);if(!o||o.st!=='aguardando')return;o.st='cancelado';softRender();toast('info','Pedido cancelado','Nada foi cobrado. Você pode fazer um novo pedido quando quiser.');}
 function ljPixSheet(id){const o=S.orders.find(x=>x.id===id),cells=Array.from({length:441},(_,i)=>{const x=i%21,y=Math.floor(i/21),f=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);const edge=f&&(x%14===0||x%14===6||y%14===0||y%14===6||(x%14>=2&&x%14<=4&&y%14>=2&&y%14<=4));return f?(edge?1:0):((x*7+y*13+x*y)%5<2?1:0);});

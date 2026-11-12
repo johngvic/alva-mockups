@@ -17,7 +17,7 @@ const PLANO=[
 const FCATS={};PLANO.forEach(a=>FCATS[a.n]=[a.tn,a.t]);
 const catTag=c=>{const t=(FCATS[c]||['salvia'])[0];return `<span class="fi-cat" style="--t:var(--tone-${t});--ti:var(--tone-${t}-ink)">${esc(c)}</span>`;};
 const CC0=(id,n,cod='')=>({id,n,cod,on:true});
-const CCUSTOS=[CC0('cc1','Geral'),CC0('cc2','Cultos'),CC0('cc3','Cafeteria'),CC0('cc4','Restaurante'),CC0('cc5','Loja'),CC0('cc6','Eventos'),CC0('cc7','Ministério Kids'),CC0('cc8','Missões'),CC0('cc9','Reforma do Templo')];
+const CCUSTOS=[CC0('cc1','Geral'),CC0('cc2','Cultos'),CC0('cc3','Cafeteria'),CC0('cc4','Restaurante'),CC0('cc5','Loja'),CC0('cc10','Mercado Social'),CC0('cc6','Eventos'),CC0('cc7','Ministério Kids'),CC0('cc8','Missões'),CC0('cc9','Reforma do Templo')];
 const CTO=(id,n,doc,tp,email='',tel='',x={})=>({id,n,doc,tp,email,tel,mb:'',role:'',...x});
 const memId=n=>(MEMBERS.find(m=>m.n===n)||{}).id||'';
 const CONTATOS=[CTO('ct1','Companhia de Energia','00.111.222/0001-01','f','atendimento@energia.example','(11) 3000-1001'),CTO('ct2','Gráfica Rápida Ltda','00.111.222/0001-02','f','vendas@graficarapida.example','(11) 98800-2002'),CTO('ct3','Imobiliária Central','00.111.222/0001-03','f','contratos@imobcentral.example','(11) 3000-3003'),CTO('ct4','NetFácil Telecom','00.111.222/0001-04','f','empresas@netfacil.example','0800 000 4004'),CTO('ct5','Seguradora Segura','00.111.222/0001-05','f','corretor@segura.example','(11) 3000-5005'),CTO('ct6','Som & Luz Equipamentos','00.111.222/0001-06','f','','(11) 97700-6006'),CTO('ct7','Distribuidora Limpa Bem','00.111.222/0001-07','f','pedidos@limpabem.example','(11) 3000-7007'),CTO('ct8','Associação Esportiva Vida','00.111.222/0001-08','c','diretoria@esportivavida.example','(11) 96600-8008'),CTO('ct9','Daniel Rocha','','u','daniel.rocha@igreja.example','(11) 96655-0009',{role:'Pastor'}),CTO('ct10','Patrícia Oliveira Nunes','','u','patricia.on@email.com','(11) 97800-8823',{role:'Secretária',mb:memId('Patrícia Oliveira Nunes')}),CTO('ct11','João Batista','','u','','(11) 95544-0011',{role:'Zelador'})];
@@ -45,7 +45,7 @@ const LANCS=[
   const P=(dia,desc,cat,tipo,v,cc,ct)=>{if(v>0)LANCS.push(LC(`${ym}-${dia}`,ym,desc,cat,tipo,v,'ok','Rafael Pereira',{cc:cc||'cc1',ct:ct||''}));};
   const ins=r()<.35?rd(4000,9000):0;
   P('07','Dízimos e Ofertas — Culto Dom','Dízimos','e',rd(10800,12600),'cc2');P('21','Dízimos e Ofertas — Culto Dom','Dízimos','e',rd(10600,12400),'cc2');P('14','Ofertas — Culto Dom','Ofertas','e',rd(1800,2500),'cc2');
-  P('18','Campanha','Doações','e',r()<.7?rd(2000,5800):0,'cc9');P('12','Vendas — Cafeteria','Vendas','e',rd(3100,3900),'cc3');P('12','Vendas — Loja','Vendas','e',rd(800,1400),'cc5');
+  P('18','Campanha','Doações','e',r()<.7?rd(2000,5800):0,'cc9');P('12','Vendas — Cafeteria','Vendas','e',rd(3100,3900),'cc3');P('12','Vendas — Loja','Vendas','e',rd(800,1400),'cc5');P('12','Vendas — Mercado Social','Vendas','e',rd(300,700),'cc10');
   P('15','Inscrições — retiro','Inscrições','e',ins,'cc6');P('16','Custo do retiro','Custo de eventos','s',ins?Math.round(ins*.3/10)*10:0,'cc6');P('13','Taxas de maquininha','Taxas de maquininha','s',rd(110,160),'cc3');
   P('05','Salário — Patrícia Oliveira Nunes','Salários','s',4600,'cc1','ct10');P('05','Salário — João Batista','Salários','s',2200,'cc1','ct11');P('05','Ajuda de custo — Daniel Rocha','Ajuda de custo pastoral','s',4500,'cc1','ct9');P('20','Encargos e benefícios','Encargos e benefícios','s',2060);
   P('10','Aluguel do salão','Estrutura','s',3200,'cc1','ct3');P('28','Energia elétrica','Estrutura','s',rd(580,720),'cc1','ct1');P('08','Internet e telefonia','Estrutura','s',289,'cc1','ct4');P('11','Aluguel do salão — Associação Esportiva Vida','Aluguel de espaços','e',1200,'cc1','ct8');
@@ -139,10 +139,11 @@ function fVis(){
     <div class="fv-dots">${pts.map((p,i)=>`<i class="${i===S.fbar?'on':''}" style="left:${p[0]/W*100}%;top:${p[1]/H*100}%"></i>`).join('')}</div></div></div></section>
  ${fvProj()}
  <p class="eb rise" style="--d:2;margin:6px 0 -4px">Precisam de atenção</p>
- <div class="fv-act four rise" style="--d:2">
+ <div class="fv-act five rise" style="--d:2">
   <button class="card fv-a ${late.length?'bad':'ok'}" data-a="ftkGo" data-v="p"><span class="fv-ai">${ic('clock',18)}</span><b class="fv-an">${late.length}</b><span class="fv-at"><b>conta${late.length===1?'':'s'} atrasada${late.length===1?'':'s'}</b><span>${late.length?R$(late.reduce((a,p)=>a+p.v,0)):'Tudo em dia'}</span></span>${ic('arrowR',15,2)}</button>
   <button class="card fv-a wait" data-a="ftkGo" data-v="p"><span class="fv-ai">${ic('calendar',18)}</span><b class="fv-an">${soon.length}</b><span class="fv-at"><b>vence${soon.length===1?'':'m'} em 7 dias</b><span>${R$(soon.reduce((a,p)=>a+p.v,0))}</span></span>${ic('arrowR',15,2)}</button>
   <button class="card fv-a brand" data-a="nav" data-v="fapr"><span class="fv-ai">${ic('check',18,2.2)}</span><b class="fv-an">${APROVS.length}</b><span class="fv-at"><b>aguardando aprovação</b><span>${APROVS.length?APROVS.map(a=>a.tipo==='imp'?'extrato':'lançamento').join(' + '):'Nada pendente'}</span></span>${ic('arrowR',15,2)}</button>
+  ${(()=>{const un=[...FQMAQ.filter(m=>!m.cc).map(m=>m.n),...FQPDV.filter(p=>!p.cc).map(p=>p.cod),...FQTOT.filter(t=>!t.cc).map(t=>t.n)];return `<button class="card fv-a ${un.length?'wait':'ok'}" data-a="fqAttGo"><span class="fv-ai">${ic('link',18)}</span><b class="fv-an">${un.length}</b><span class="fv-at"><b>equipamento${un.length===1?'':'s'} sem vínculo</b><span>${un.length?'sem centro de custo: a venda não concilia':'Tudo vinculado'}</span></span>${ic('arrowR',15,2)}</button>`;})()}
   ${(()=>{const pe=FEDOCS.filter(d=>d.st==='pend'),old=pe.length?Math.max(...pe.map(d=>-dDays(d.q.slice(0,10)))):0;return `<button class="card fv-a ${pe.length?'wait':'ok'}" data-a="nav" data-v="fent"><span class="fv-ai">${ic('file',18)}</span><b class="fv-an">${pe.length}</b><span class="fv-at"><b>na caixa de entrada</b><span>${pe.length?'esperando lançamento · mais antigo '+(old===0?'de hoje':'há '+old+(old===1?' dia':' dias')):'Nada para tratar'}</span></span>${ic('arrowR',15,2)}</button>`;})()}</div>
  <div class="fv-act rise" style="--d:3">
   <button class="card fv-a ok" data-a="nav" data-v="fcon"><span class="fv-ai">${ic('wallet',18)}</span><b class="fv-an">${R0(fSaldo())}</b><span class="fv-at"><b>saldo das contas</b><span>${FCONTAS.length} contas ativas</span></span>${ic('arrowR',15,2)}</button>
@@ -652,7 +653,7 @@ const pcCom=()=>pcVivos().reduce((a,c)=>a+c.in-c.out,0);
    → depósito no extrato do banco (Importar e conciliar › Extrato do banco, linhas "Recebíveis da maquininha").
    Exemplos: dados de teste; nada é lido de verdade. */
 const FQADQ=['Mercado Pago'];
-const FQMODN={cafe:'Cafeteria',rest:'Restaurante',shop:'Loja'},FQCC={cafe:'cc3',rest:'cc4',shop:'cc5',fin:'cc2'},FQCCN={cc3:'Cafeteria',cc4:'Restaurante',cc5:'Loja',cc2:'Cultos'};
+const FQMODN={cafe:'Cafeteria',rest:'Restaurante',shop:'Loja',social:'Mercado Social'},FQCC={cafe:'cc3',rest:'cc4',shop:'cc5',social:'cc10',fin:'cc2'},FQCCN={cc3:'Cafeteria',cc4:'Restaurante',cc5:'Loja',cc10:'Mercado Social',cc2:'Cultos'};
 /* maquininha da igreja (dízimos e ofertas) é do módulo Financeiro; totem e venda só existem nos módulos de venda */
 const FQMODM={...FQMODN,fin:'Financeiro'};
 const FQMAQ=[
@@ -663,6 +664,7 @@ const FQMAQ=[
  {id:'mq5',n:'Restaurante · máquina 2',adq:'Mercado Pago',est:'MP-770132',mod:'rest',cc:'cc4',conta:'Conta principal'},
  {id:'mq6',n:'Loja · máquina 1',adq:'Mercado Pago',est:'MP-330181',mod:'shop',cc:'cc5',conta:'Conta principal'},
  {id:'mq7',n:'Loja · máquina 2',adq:'Mercado Pago',est:'MP-330182',mod:'shop',cc:'cc5',conta:'Conta principal'},
+ {id:'mq9',n:'Mercado Social · máquina 1',adq:'Mercado Pago',est:'MP-440191',mod:'social',cc:'cc10',conta:'Conta principal'},
  {id:'mq8',n:'Igreja · Dízimos e ofertas',adq:'Mercado Pago',est:'MP-880201',mod:'fin',cc:'cc2',conta:'Conta principal'}];
 const FQTOT=[
  {id:'tt1',n:'Totem 1 · Cafeteria',term:'T-CAF-01',prov:'Totify',card:'CARD-CAF',mod:'cafe',cc:'cc3',maq:'mq1'},
@@ -670,6 +672,15 @@ const FQTOT=[
  {id:'tt3',n:'Totem 3 · Cafeteria',term:'T-CAF-03',prov:'Totify',card:'CARD-CAF',mod:'cafe',cc:'cc3',maq:'mq3'},
  {id:'tt4',n:'Totem 1 · Restaurante',term:'T-RES-01',prov:'Totify',card:'CARD-RES',mod:'rest',cc:'cc4',maq:'mq4'},
  {id:'tt5',n:'Totem 2 · Restaurante',term:'T-RES-02',prov:'Totify',card:'CARD-RES',mod:'rest',cc:'cc4',maq:'mq5'}];
+const FQTIPO={solta:'Solta',nuvem:'Nuvem',tef:'TEF conectado'};
+{const tp={mq1:'nuvem',mq2:'nuvem',mq3:'solta',mq4:'solta',mq5:'solta',mq6:'nuvem',mq7:'solta',mq8:'solta',mq9:'nuvem'};FQMAQ.forEach(m=>{m.tipo=tp[m.id]||'solta';});
+ FQMAQ.push({id:'mq10',n:'Moderninha nova (recém-cadastrada)',adq:'Mercado Pago',est:'MP-000111',mod:'shop',cc:'',conta:'Conta principal',tipo:'nuvem'});}
+const FQPDV=[
+ {id:'pd1',n:'PDV 1 · Loja',cod:'PDV-SEDE-01',mod:'shop',cc:'cc5',maq:'mq7',inst:{maq:'CAIXA-LIVRARIA-01',ip:'192.168.0.23',ver:'1.0.3',visto:'2026-09-30 17:42'}},
+ {id:'pd2',n:'PDV 2 · Loja',cod:'PDV-SEDE-02',mod:'shop',cc:'cc5',maq:'mq6',inst:{maq:'CAIXA-LIVRARIA-02',ip:'192.168.0.41',ver:'1.0.3',visto:'2026-09-30 17:40'}},
+ {id:'pd3',n:'PDV 3 · Loja (reserva)',cod:'PDV-SEDE-03',mod:'shop',cc:'cc5',maq:'',inst:null},
+ {id:'pd4',n:'PDV 4 · Loja (novo)',cod:'PDV-SEDE-04',mod:'shop',cc:'',maq:'',inst:null},
+ {id:'pd5',n:'PDV 1 · Mercado Social',cod:'PDV-SOCIAL-01',mod:'social',cc:'cc10',maq:'mq9',inst:{maq:'CAIXA-SOCIAL-01',ip:'192.168.0.55',ver:'1.0.3',visto:'2026-09-30 16:58'}}];
 const FQST={},FQREC=[];let _fqs=0,_fqm=100,_fqSales=null;
 CPISENTA.add('Taxas de maquininha');
 const fqR=v=>Math.round(v*100)/100;
@@ -1031,22 +1042,48 @@ const fqAprTabs=k=>`<div class="utabs rise" style="--d:2" role="tablist">${[['l'
 
 const fqPg=I=>I.type==='maq'||I.type==='pag';
 /* ---- Cadastro: Contas financeiras › Maquininhas e Totens ---- */
-const fqAct=k=>k==='m'?`<button class="btn pri" data-a="fqMaqNew">${ic('plus',15,2.2)}Nova maquininha</button>`:k==='t'?`<button class="btn pri" data-a="fqTotNew">${ic('plus',15,2.2)}Novo totem</button>`:`<button class="btn sec" data-a="fTransf">${ic('swap',15)}Transferir</button><button class="btn pri" data-a="fcNew">${ic('plus',15,2.2)}Nova conta</button>`;
+const fqAct=k=>k==='p'?`<button class="btn pri" data-a="fqPdvNew">${ic('plus',15,2.2)}Novo PDV</button>`:k==='m'?`<button class="btn pri" data-a="fqMaqNew">${ic('plus',15,2.2)}Nova maquininha</button>`:k==='t'?`<button class="btn pri" data-a="fqTotNew">${ic('plus',15,2.2)}Novo totem</button>`:`<button class="btn sec" data-a="fTransf">${ic('swap',15)}Transferir</button><button class="btn pri" data-a="fcNew">${ic('plus',15,2.2)}Nova conta</button>`;
 function fqMaqTab(){
  const note=`<p class="fi-note rise" style="--d:2">${ic('info',15)}<span><b>Opcional.</b> As maquininhas servem para saber de onde veio cada venda no cartão e conferir o que a adquirente repassa. Quem não concilia cartões continua só subindo o extrato do banco, como sempre.</span></p>`;
  if(!FQMAQ.length)return note+`<section class="card cm-done rise" style="--d:3"><span class="cm-ok">${ic('wallet',30,2)}</span><h2>Nenhuma maquininha cadastrada</h2><p>Cadastre as máquinas de cada módulo para conciliar as vendas no cartão.</p><button class="btn pri" data-a="fqMaqNew">${ic('plus',15,2.2)}Nova maquininha</button></section>`;
- return note+`<section class="card mtab rise" style="--d:3"><div class="fq-r thead"><span>Maquininha</span><span>Adquirente</span><span>Módulo e centro</span><span>Conta</span><span></span></div>${FQMAQ.map(m=>{const nt=FQTOT.filter(t=>t.maq===m.id).length;return `<div class="fq-r"><span><b>${esc(m.n)}</b><small>Estabelecimento ${esc(m.est)}${nt?` · ${nt} ${nt===1?'totem':'totens'}`:''}</small></span><span>${esc(m.adq)}</span><span>${FQMODM[m.mod]}<small>${esc(fqCcN(m.cc))}</small></span><span>${esc(m.conta)}</span><span class="fq-a"><button class="btn sec sm" data-a="fqMaqEdit" data-v="${m.id}">${ic('pen',14)}Editar</button><button class="btn sec sm" data-a="fqMaqDel" data-v="${m.id}" aria-label="Excluir ${esc(m.n)}">${ic('x',14)}</button></span></div>`;}).join('')}</section>`;}
+ return note+`<section class="card mtab rise" style="--d:3"><div class="fq-r thead"><span>Maquininha</span><span>Adquirente e tipo</span><span>Módulo e centro</span><span>Conta</span><span></span></div>${FQMAQ.map(m=>{const nt=FQTOT.filter(t=>t.maq===m.id).length,up=FQPDV.filter(p=>p.maq===m.id);return `<div class="fq-r"><span><b>${esc(m.n)}</b><small>Estabelecimento ${esc(m.est)}${nt?` · ${nt} ${nt===1?'totem':'totens'}`:''}${up.length?` · usada por ${up.map(p=>esc(p.cod)).join(', ')}`:''}</small></span><span>${esc(m.adq)}<small>${FQTIPO[m.tipo]||'Solta'}</small></span><span>${FQMODM[m.mod]}<small>${m.cc?esc(fqCcN(m.cc)):'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Sem vínculo financeiro</span>'}</small></span><span>${esc(m.conta)}</span><span class="fq-a"><button class="btn sec sm" data-a="fqMaqEdit" data-v="${m.id}">${ic('pen',14)}Editar</button><button class="btn sec sm" data-a="fqMaqDel" data-v="${m.id}" aria-label="Excluir ${esc(m.n)}">${ic('x',14)}</button></span></div>`;}).join('')}</section>`;}
 function fqTotTab(){
- const note=`<p class="fi-note rise" style="--d:2">${ic('info',15)}<span><b>Opcional.</b> O código do terminal e o do cardápio (o centro de custo no sistema do totem) vêm em cada venda. Aqui você liga os dois ao módulo e ao centro de custo do Alva. Loja não precisa de totem: só de maquininha.</span></p>`;
+ const note=`<p class="fi-note rise" style="--d:2">${ic('info',15)}<span><b>Opcional.</b> O código do terminal e o do cardápio (o centro de custo no sistema do totem) vêm em cada venda. Aqui você liga os dois ao módulo e ao centro de custo do Alva. Loja e Mercado Social não precisam de totem: só de maquininha.</span></p>`;
  if(!FQTOT.length)return note+`<section class="card cm-done rise" style="--d:3"><span class="cm-ok">${ic('building',30,2)}</span><h2>Nenhum totem cadastrado</h2><p>Cadastre os totens da cafeteria e do restaurante para saber de onde veio cada venda.</p><button class="btn pri" data-a="fqTotNew">${ic('plus',15,2.2)}Novo totem</button></section>`;
  return note+`<section class="card mtab rise" style="--d:3"><div class="fq-r thead"><span>Totem</span><span>Cardápio e provedor</span><span>Módulo e centro</span><span>Maquininha</span><span></span></div>${FQTOT.map(t=>{const m=fqMq(t.maq);return `<div class="fq-r"><span><b>${esc(t.n)}</b><small>Terminal ${esc(t.term)}</small></span><span>${esc(t.card)}<small>${esc(t.prov||'')}</small></span><span>${FQMODN[t.mod]}<small>${esc(fqCcN(t.cc))}</small></span><span>${m?esc(m.n):'<span class="soft">Nenhuma</span>'}</span><span class="fq-a"><button class="btn sec sm" data-a="fqTotEdit" data-v="${t.id}">${ic('pen',14)}Editar</button><button class="btn sec sm" data-a="fqTotDel" data-v="${t.id}" aria-label="Excluir ${esc(t.n)}">${ic('x',14)}</button></span></div>`;}).join('')}</section>`;}
+function fqPdvTab(){
+ const note=`<p class="fi-note rise" style="--d:2">${ic('info',15)}<span><b>O PDV é o canal de venda do caixa.</b> O operador cadastra e registra o PDV no computador do caixa; aqui o Financeiro só liga ao centro de custo. Um PDV tem uma instalação só: registrar em outro computador desregistra o anterior. Sem vínculo, o PDV fica "Aguardando vínculo financeiro" e não vende.</span></p>`;
+ return note+`<section class="card mtab rise" style="--d:3"><div class="fq-r thead"><span>PDV</span><span>Módulo e centro</span><span>Instalação</span><span>Maquininha</span><span></span></div>${FQPDV.map(p=>{const mq=fqMq(p.maq);return `<div class="fq-r"><span><b>${esc(p.n)}</b><small>${esc(p.cod)}</small></span><span>${FQMODM[p.mod]}<small>${p.cc?esc(fqCcN(p.cc)):'<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>Aguardando vínculo financeiro</span>'}</small></span><span>${p.inst?`<b>${esc(p.inst.maq)}</b><small>IP ${esc(p.inst.ip)} · versão ${esc(p.inst.ver)} · último contato ${dBR(p.inst.visto.slice(0,10)).slice(0,5)} ${p.inst.visto.slice(11)}</small>`:'<span class="soft">Sem instalação</span>'}</span><span>${mq?esc(mq.n)+'<small>'+(FQTIPO[mq.tipo]||'')+'</small>':'<span class="soft">Nenhuma</span>'}</span><span class="fq-a"><button class="btn sec sm" data-a="fqPdvEdit" data-v="${p.id}">${ic('pen',14)}Editar</button>${p.inst?`<button class="btn sec sm" data-a="fqPdvUnreg" data-v="${p.id}">Desregistrar</button>`:''}<button class="btn sec sm" data-a="fqPdvDel" data-v="${p.id}" aria-label="Excluir ${esc(p.n)}">${ic('x',14)}</button></span></div>`;}).join('')}</section>`;}
+function fqPdvForm(id){const ed=id?FQPDV.find(p=>p.id===id):null,m0=ed?ed.mod:'shop';
+ const mo=(mod,sel)=>'<option value="">Nenhuma</option>'+FQMAQ.filter(m=>m.mod===mod).map(m=>`<option value="${m.id}" ${m.id===sel?'selected':''}>${esc(m.n)}</option>`).join('');
+ openDlg(`${dlgHead(ed?'Editar PDV':'Novo PDV','O PDV vende pelo módulo escolhido. A instalação no computador do caixa é feita pelo operador, na máquina.')}<form id="fqF" class="fgrid fq-f" novalidate>
+  <label class="fld wide"><span class="fl">Apelido</span><input name="n" value="${esc(ed?ed.n:'')}" placeholder="Ex.: PDV 5 · Loja" maxlength="40" autocomplete="off"></label>
+  <label class="fld"><span class="fl">Código do PDV</span><input name="cod" value="${esc(ed?ed.cod:'')}" placeholder="Ex.: PDV-SEDE-05" maxlength="20" autocomplete="off" style="text-transform:uppercase"></label>
+  <label class="fld"><span class="fl">Módulo</span>${selw('mod',Object.entries(FQMODN).map(([k,n])=>`<option value="${k}" ${k===m0?'selected':''}>${n}</option>`).join(''))}</label>
+  <label class="fld"><span class="fl">Centro de custo</span>${selw('cc','<option value="">Sem vínculo (vincular depois)</option>'+optCC(ed?ed.cc:FQCC[m0]))}</label>
+  <label class="fld"><span class="fl">Maquininha <small>opcional</small></span>${selw('maq',mo(m0,ed?ed.maq:''))}</label>
+  <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit" disabled>${ed?'Salvar':'Cadastrar PDV'}</button></div></form>`,'sm');
+ const f=$('#fqF'),ok=f.querySelector('[type=submit]'),chk=()=>{ok.disabled=!(f.n.value.trim()&&f.cod.value.trim());};
+ f.addEventListener('input',chk);f.addEventListener('change',chk);chk();
+ f.mod.addEventListener('change',()=>{f.cc.value=FQCC[f.mod.value];f.maq.innerHTML=mo(f.mod.value,'');});
+ f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;const cod=f.cod.value.trim().toUpperCase();
+  if(FQPDV.some(p=>p.id!==id&&p.cod===cod))return toast('Já existe um PDV com esse código');
+  const o={n:f.n.value.trim(),cod,mod:f.mod.value,cc:f.cc.value,maq:f.maq.value};
+  if(ed)Object.assign(ed,o);else FQPDV.push({id:'pd'+(++_fqm),...o,inst:null});
+  closeDlg();fRe();toast(ed?'PDV atualizado':'PDV cadastrado');});}
+function fqPdvUnreg(id){const p=FQPDV.find(x=>x.id===id);if(!p||!p.inst)return;
+ confirmDel({title:`Desregistrar ${p.cod}?`,body:`O computador ${p.inst.maq} deixa de vender. As vendas que ele ainda guarda continuam sendo aceitas quando a internet voltar.`,label:'Desregistrar',onConfirm:()=>{p.inst=null;fRe();toast('PDV desregistrado');}});}
+function fqPdvDel(id){const p=FQPDV.find(x=>x.id===id);if(!p)return;
+ if(p.inst)return toast('Desregistre o PDV antes de excluir');
+ confirmDel({title:`Excluir ${p.n}?`,body:'As vendas já feitas continuam no histórico do módulo.',label:'Excluir',onConfirm:()=>{FQPDV.splice(FQPDV.indexOf(p),1);fRe();toast('PDV excluído');}});}
 function fqMaqForm(id){const ed=id?fqMq(id):null,bank=FCONTAS.filter(c=>c.tipo==='Conta bancária'),m0=ed?ed.mod:'cafe';
  openDlg(`${dlgHead(ed?'Editar maquininha':'Nova maquininha','Cada maquininha é de um só módulo e usa o centro de custo dele. A da igreja, de dízimos e ofertas, é do módulo Financeiro. O código do estabelecimento é o que vem no extrato do adquirente.')}<form id="fqF" class="fgrid fq-f" novalidate>
   <label class="fld wide"><span class="fl">Apelido</span><input name="n" value="${esc(ed?ed.n:'')}" placeholder="Ex.: Cafeteria · máquina 4" maxlength="40" autocomplete="off"></label>
   <label class="fld wide"><span class="fl">Adquirente</span>${selw('adq',FQADQ.map(a=>`<option ${ed&&ed.adq===a?'selected':''}>${a}</option>`).join(''))}</label>
+  <label class="fld wide"><span class="fl">Tipo</span>${selw('tipo',Object.entries(FQTIPO).map(([k,n])=>`<option value="${k}" ${(ed?ed.tipo:'nuvem')===k?'selected':''}>${n}</option>`).join(''))}<span class="hint">Solta: o operador registra no PDV. Nuvem: o Alva manda o valor para a maquininha. TEF conectado: pinpad ligado ao PDV.</span></label>
   <label class="fld wide"><span class="fl">Código do estabelecimento</span><input name="est" value="${esc(ed?ed.est:'')}" placeholder="Ex.: MP-770124" maxlength="20" autocomplete="off"></label>
   <label class="fld"><span class="fl">Módulo</span>${selw('mod',Object.entries(FQMODM).map(([k,n])=>`<option value="${k}" ${k===m0?'selected':''}>${n}</option>`).join(''))}</label>
-  <label class="fld"><span class="fl">Centro de custo</span>${selw('cc',optCC(ed?ed.cc:FQCC[m0]))}</label>
+  <label class="fld"><span class="fl">Centro de custo</span>${selw('cc','<option value="">Sem vínculo (vincular depois)</option>'+optCC(ed?ed.cc:FQCC[m0]))}<span class="hint">Sem vínculo, a maquininha não pode ser usada e as vendas dela não conciliam.</span></label>
   <label class="fld wide"><span class="fl">Conta do banco que recebe o repasse</span>${selw('conta',bank.map(c=>`<option ${ed&&ed.conta===c.n?'selected':''}>${esc(c.n)}</option>`).join(''))}</label>
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit" disabled>${ed?'Salvar':'Cadastrar maquininha'}</button></div></form>`,'sm');
  const f=$('#fqF'),ok=f.querySelector('[type=submit]'),chk=()=>{ok.disabled=!(f.n.value.trim()&&f.est.value.trim());};
@@ -1054,7 +1091,7 @@ function fqMaqForm(id){const ed=id?fqMq(id):null,bank=FCONTAS.filter(c=>c.tipo==
  f.mod.addEventListener('change',()=>{f.cc.value=FQCC[f.mod.value];});
  f.addEventListener('submit',e=>{e.preventDefault();if(ok.disabled)return;const est=f.est.value.trim();
   if(FQMAQ.some(m=>m.id!==id&&norm(m.est)===norm(est)))return toast('Já existe uma maquininha com esse código de estabelecimento');
-  const o={n:f.n.value.trim(),adq:f.adq.value,est,mod:f.mod.value,cc:f.cc.value,conta:f.conta.value};
+  const o={n:f.n.value.trim(),adq:f.adq.value,tipo:f.tipo.value,est,mod:f.mod.value,cc:f.cc.value,conta:f.conta.value};
   if(ed){Object.assign(ed,o);FQTOT.forEach(t=>{if(t.maq===ed.id&&t.mod!==ed.mod)t.maq='';});}else FQMAQ.push({id:'mq'+(++_fqm),...o});
   closeDlg();fRe();toast(ed?'Maquininha atualizada':'Maquininha cadastrada');});}
 function fqTotForm(id){const ed=id?FQTOT.find(t=>t.id===id):null,m0=ed?ed.mod:'cafe';
@@ -1064,7 +1101,7 @@ function fqTotForm(id){const ed=id?FQTOT.find(t=>t.id===id):null,m0=ed?ed.mod:'c
   <label class="fld wide"><span class="fl">Provedor do totem</span>${selw('prov',(CN_PROV.Comércio||[]).map(p=>`<option ${ed&&ed.prov===p?'selected':''}>${esc(p)}</option>`).join(''))}</label>
   <label class="fld"><span class="fl">Código do terminal</span><input name="term" value="${esc(ed?ed.term:'')}" placeholder="Ex.: T-CAF-04" maxlength="20" autocomplete="off"></label>
   <label class="fld"><span class="fl">Código do cardápio</span><input name="card" value="${esc(ed?ed.card:'')}" placeholder="Ex.: CARD-CAF" maxlength="20" autocomplete="off"></label>
-  <label class="fld"><span class="fl">Módulo</span>${selw('mod',Object.entries(FQMODN).filter(([k])=>k!=='shop').map(([k,n])=>`<option value="${k}" ${k===m0?'selected':''}>${n}</option>`).join(''))}</label>
+  <label class="fld"><span class="fl">Módulo</span>${selw('mod',Object.entries(FQMODN).filter(([k])=>k!=='shop'&&k!=='social').map(([k,n])=>`<option value="${k}" ${k===m0?'selected':''}>${n}</option>`).join(''))}</label>
   <label class="fld"><span class="fl">Centro de custo</span>${selw('cc',optCC(ed?ed.cc:FQCC[m0]))}</label>
   <label class="fld wide"><span class="fl">Maquininha do totem <small>opcional</small></span>${selw('maq',mo(m0,ed?ed.maq:''))}</label>
   <div class="dfoot"><button type="button" class="btn sec" data-a="closeDlg">Cancelar</button><button class="btn pri" type="submit" disabled>${ed?'Salvar':'Cadastrar totem'}</button></div></form>`,'sm');
@@ -1090,8 +1127,8 @@ function fCon(){
  const fk=S.fck||'c';
  return fHead('Contas financeiras','Onde está o dinheiro da igreja',fqAct(fk))
  +`<section class="card kpis4 k3 rise" style="--d:1"><div class="k4"><span class="kl">Saldo total</span><span class="kv">${R$(fSaldo())}</span><span class="kd">somando todas as contas</span></div><div class="k4"><span class="kl">Contas ativas</span><span class="kv">${FCONTAS.length}</span><span class="kd">bancárias, caixas e carteiras</span></div><div class="k4"><span class="kl">Aguardando aprovação</span><span class="kv">${APROVS.length}</span><span class="kd">ainda não contam no saldo</span></div></section>
- ${sxSeg('fckT',[['c','Contas',FCONTAS.length],['m','Maquininhas',FQMAQ.length],['t','Totens',FQTOT.length]],fk)}
- ${fk==='m'?fqMaqTab():fk==='t'?fqTotTab():`<div class="fc-grid rise" style="--d:2">${FCONTAS.map((c,i)=>{const pn=fPendConta(c,i),tot=fSaldo(),pc=tot>0?Math.round(Math.max(0,c.atual)/tot*100):0;return `<article class="card fc-acc"><header><span class="fc-ai ${c.banco?'b':'c'}">${ic(c.banco?'building':'wallet',18,2)}</span><span class="fc-an"><b>${esc(c.n)}</b><small>${esc(c.tipo)}${c.banco?' · '+esc(c.banco):''}${c.prov?' · '+esc(c.prov):''}</small></span>${pn?`<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>${pn} pendente${pn===1?'':'s'}</span>`:''}</header>
+ ${sxSeg('fckT',[['c','Contas',FCONTAS.length],['m','Maquininhas',FQMAQ.length],['t','Totens',FQTOT.length],['p','PDVs',FQPDV.length]],fk)}
+ ${fk==='m'?fqMaqTab():fk==='t'?fqTotTab():fk==='p'?fqPdvTab():`<div class="fc-grid rise" style="--d:2">${FCONTAS.map((c,i)=>{const pn=fPendConta(c,i),tot=fSaldo(),pc=tot>0?Math.round(Math.max(0,c.atual)/tot*100):0;return `<article class="card fc-acc"><header><span class="fc-ai ${c.banco?'b':'c'}">${ic(c.banco?'building':'wallet',18,2)}</span><span class="fc-an"><b>${esc(c.n)}</b><small>${esc(c.tipo)}${c.banco?' · '+esc(c.banco):''}${c.prov?' · '+esc(c.prov):''}</small></span>${pn?`<span class="stp" style="--c:var(--st-sol);--b:var(--st-sol-bg)"><i></i>${pn} pendente${pn===1?'':'s'}</span>`:''}</header>
   <div class="fc-av"><b>${R$(c.atual)}</b><small>${c.cart?'disponível · ':''}${pc}% do saldo total</small></div><span class="fc-bar"><i style="width:${pc}%"></i></span>
   ${(()=>{if(!c.cart)return '';const l=fqLib(c);return `<p class="fc-lib"><span>A liberar <b>${R$(l.v)}</b>${l.n?` · ${l.n} ${l.n===1?'parcela':'parcelas'}`:''}</span>${l.d?`<span>Próxima liberação <b>${dBR(l.d).slice(0,5)}</b></span>`:'<span class="soft">Nada a liberar</span>'}</p><p class="fc-aut">${ic('link',12,2)}Criada sozinha com a conexão do ${esc(c.prov)}, em Parâmetros › Conectores. Não se cria nem se exclui à mão.</p>`;})()}
   <footer><span>Saldo inicial <b>${R$(c.ini)}</b> em ${dBR(c.desde)}</span><span class="fq-a">${c.cart?`<button class="btn sec sm" data-a="fTransf" data-v="${i}">${ic('swap',14)}Transferir para o banco</button>`:''}<button class="btn sec sm" data-a="fcxOpen" data-v="${i}">Ver extrato</button></span></footer></article>`;}).join('')}</div>`}`;
@@ -1114,7 +1151,7 @@ function fExtrato(i){const c=FCONTAS[i],all=LANCS.filter(l=>l.st==='ok'&&(l.acc?
 
 /* ---------- Previsibilidade (só leitura) ---------- */
 /* exemplo: quanto do vendido de cada mês já foi reconhecido; o mês mais antigo está mais reconhecido (a regra real é a FIN-P-64) */
-const RECB={cafe:.72,rest:.55,shop:.9};
+const RECB={cafe:.72,rest:.55,shop:.9,social:.8};
 const mDiff=(a,b)=>(+a.slice(0,4)-+b.slice(0,4))*12+(+a.slice(5,7)-+b.slice(5,7));
 const recFrac=(k,ym)=>Math.min(1,(RECB[k]||0)+.2*Math.max(0,mDiff(FOOD_DATE.slice(0,7),ym)));
 function fPrev(){
@@ -1123,7 +1160,7 @@ function fPrev(){
  if(S.fpv==='cd')S.fpv='vd';
  const tab=S.fpv||'cx',vw=S.fpvC||'ab',cur=FOOD_DATE.slice(0,7),mm=S.relM,mn=MONTHS[+mm.slice(5)-1],isCur=mm===cur;
  const PU=pcUnits(),list=PU.filter(c=>vw==='ab'?!c.closed:(c.closed&&c.in-c.out>0)),com=pcCom(),ret=pcVivos().reduce((a,c)=>a+c.ret,0);
- const stores=Object.entries(FOOD_STORES).filter(([k])=>['cafe','rest','shop'].includes(k)),sm=(k,f)=>foodSummary(FOOD_SALES.filter(s=>s.store===k&&f(s.date)));
+ const stores=Object.entries(FOOD_STORES).filter(([k])=>['cafe','rest','shop','social'].includes(k)),sm=(k,f)=>foodSummary(FOOD_SALES.filter(s=>s.store===k&&f(s.date)));
  const rows=stores.map(([k,st])=>{const m=sm(k,d=>d.startsWith(mm));return {k,n:st.name,cf:fqPend(k,mm),h:isCur?sm(k,d=>d===FOOD_DATE):null,m,r:Math.round(m.sold*recFrac(k,mm))};});
  const vm=rows.reduce((a,r)=>a+r.m.sold,0)/100,cv=m=>`${brl2(m.sold/100)}<small>${m.count} ${m.count===1?'venda':'vendas'}</small>`;
  const pendTot=stores.reduce((a,[k])=>a+[...new Set(FOOD_SALES.filter(s=>s.store===k).map(s=>s.date.slice(0,7)))].reduce((q,ym)=>{const m=sm(k,d=>d.startsWith(ym));return q+m.sold-Math.round(m.sold*recFrac(k,ym));},0),0)/100;
@@ -1137,7 +1174,7 @@ function fPrev(){
   +rows.map(r=>`<div class="trow pv vd fq-go" data-a="fqVend" data-v="${r.k}" role="button" tabindex="0"><span class="pv-n"><b>${esc(r.n)}</b><small>${r.m.count} ${r.m.count===1?'venda':'vendas'} em ${mn}</small></span><span class="pv-c pv-c1">${r.h?cv(r.h):'—'}</span><span class="pv-c pv-c2">${cv(r.m)}</span><span class="pv-c pv-c3" style="color:${r.cf?'var(--st-sol)':'var(--ink-muted)'}">${r.cf?r.cf+' '+(r.cf===1?'venda':'vendas'):'—'}</span><span class="pv-t">${brl2(r.m.sold/100)}</span><span class="pv-s">${r.h?`Hoje ${brl2(r.h.sold/100)} · `:''}${r.cf?`${r.cf} a conferir`:'Tudo conferido'}</span></div>`).join('')
   +`<div class="trow pv vd tot"><span class="pv-n"><b>Total</b></span><span class="pv-c pv-c1">${isCur?brl2(rows.reduce((a,r)=>a+r.h.sold,0)/100):'—'}</span><span class="pv-c pv-c2">${brl2(vm)}</span><span class="pv-c pv-c3">${rows.reduce((a,r)=>a+r.cf,0)||'—'}</span><span class="pv-t">${brl2(vm)}</span></div>`;
  return fHead('Caixas e vendas','O dinheiro que ainda não chegou à conta da igreja',tab==='vd'&&FQMAQ.length?`<button class="btn sec" data-a="fqImp">${ic('upload',15)}Importar extrato da maquininha</button>`:'')
- +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Com as pessoas</span><span class="kv">${R$(com)}</span><span class="kd">caixas abertos e encerrados com saldo${(()=>{const vb=PU.reduce((a,c)=>a+(c.verba||0),0);return vb?' · verbas aprovadas '+R$(vb):'';})()}</span></div><div class="k4"><span class="kl">Já devolvido à igreja</span><span class="kv">${R$(ret)}</span><span class="kd">devoluções dos caixas</span></div><div class="k4"><span class="kl">Vendido em ${mn}</span><span class="kv">${R$(vm)}</span><span class="kd">Cafeteria, Restaurante e Loja · bruto</span></div><div class="k4"><span class="kl">A conferir</span><span class="kv" style="color:var(--st-sol)">${rows.reduce((a,r)=>a+r.cf,0)}</span><span class="kd">vendas de ${mn} ainda sem conciliação</span></div></section>`
+ +`<section class="card kpis4 rise" style="--d:1"><div class="k4"><span class="kl">Com as pessoas</span><span class="kv">${R$(com)}</span><span class="kd">caixas abertos e encerrados com saldo${(()=>{const vb=PU.reduce((a,c)=>a+(c.verba||0),0);return vb?' · verbas aprovadas '+R$(vb):'';})()}</span></div><div class="k4"><span class="kl">Já devolvido à igreja</span><span class="kv">${R$(ret)}</span><span class="kd">devoluções dos caixas</span></div><div class="k4"><span class="kl">Vendido em ${mn}</span><span class="kv">${R$(vm)}</span><span class="kd">Cafeteria, Restaurante, Loja e Mercado Social · bruto</span></div><div class="k4"><span class="kl">A conferir</span><span class="kv" style="color:var(--st-sol)">${rows.reduce((a,r)=>a+r.cf,0)}</span><span class="kd">vendas de ${mn} ainda sem conciliação</span></div></section>`
  +(tab==='cx'?`<div class="sx-note rise" style="--d:2;--c:var(--brand-text);margin:0">${ic('info',13,2)}<span><b>Só leitura.</b> <small>Dinheiro que ainda não chegou à conta da igreja; a baixa é feita em cada caixa.</small></span></div>`
   :`<div class="sx-note rise" style="--d:2;--c:var(--brand-text);margin:0">${ic('info',13,2)}<span><b>Só leitura: nada aqui vira lançamento.</b> <small>Clique num estabelecimento para ver as vendas do mês e o status financeiro de cada uma.</small></span></div>`)
  +`<div class="utabs rise" style="--d:2" role="tablist">${[['cx','Caixas'],['vd','Vendas']].map(t=>`<button role="tab" class="${tab===t[0]?'on':''}" aria-selected="${tab===t[0]}" data-a="fpvTab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>`
@@ -1439,7 +1476,7 @@ const FIA={
  fqVend:v=>{S.fqSt=v;S.fqFm='todas';S.fqSf='todas';S.fqN=20;fGo();},fqVendBack:()=>{S.fqSt=null;fGo();},
  fqFm:v=>{S.fqFm=v;S.fqN=20;fRe();},fqSf:v=>{S.fqSf=v;S.fqN=20;fRe();},fqMais:()=>{S.fqN=(S.fqN||20)+20;fRe();},
  fqSale:v=>fqSaleDlg(v),fqCx:v=>{S.fqCxI=v;S.fqCt=null;S.fqFm='todas';S.fqSf='todas';S.fqN=30;S.fqCq='';fGo();},fqCxTab:v=>{S.fqCt=v;S.fqFm='todas';S.fqSf='todas';S.fqN=30;S.fqCq='';fRe();},fqLc:v=>fqLcDlg(v),fqZEnc:v=>{const u=pcuGet(v),j=u&&u.cx&&typeof zJob==='function'?zJob(u.cx.ownerId):null;if(!j||pcPend(u))return;j.enc={by:'Financeiro',d:NOWD};cxUnitAll(u.cx).forEach(y=>{y.status='encerrado';y.closedAt=NOWD;});zLog(j,'Obra encerrada pelo Financeiro','Financeiro');S.fqCxI=null;fGo();toast('Obra encerrada. Ela sai do quadro e fica em Encerradas');},fqIniOk:v=>{const u=pcuGet(v);if(u&&u.cx&&u.cx.ini){u.cx.ini.st='confirmado';fRe();toast('Saldo inicial confirmado');}},fqVerba:v=>fqVerbaForm(v),fqAdv:v=>fqAdvForm(v),fqAdvOk:v=>{const [k,id]=v.split('|'),u=pcuGet(k),a=u&&u.cx&&cxAdvs(u.cx).find(y=>y.id===id);if(!a)return;const ret=cxAdvSettle(u.cx,a);fRe();toast(ret>0?'Baixa dada. '+R$(ret/100)+' sem justificativa voltam para a igreja':'Baixa dada: tudo justificado');},lcVerba:()=>{closeDlg();setTimeout(()=>fqVerbaForm(),60);},fqCxBack:()=>{S.fqCxI=null;fGo();},fqPay:v=>fqPayDlg(v),
- fqMaqNew:()=>fqMaqForm(),fqMaqEdit:v=>fqMaqForm(v),fqMaqDel:v=>fqMaqDel(v),
+ fqPdvNew:()=>fqPdvForm(),fqPdvEdit:v=>fqPdvForm(v),fqPdvUnreg:v=>fqPdvUnreg(v),fqPdvDel:v=>fqPdvDel(v),fqAttGo:()=>{S.fck=FQPDV.some(p=>!p.cc)?'p':'m';S.active='fcon';render();},fqMaqNew:()=>fqMaqForm(),fqMaqEdit:v=>fqMaqForm(v),fqMaqDel:v=>fqMaqDel(v),
  fqTotNew:()=>fqTotForm(),fqTotEdit:v=>fqTotForm(v),fqTotDel:v=>fqTotDel(v),
  fqImp:()=>{S.im={step:1,type:'maq',conta:0,file:null,filter:'todas',adq:(FQMAQ[0]||{}).adq};A.nav('fimp');},
  fqImpPag:()=>{S.im={step:1,type:'pag',conta:0,file:null,filter:'todas',adq:'Asaas'};A.nav('fimp');},
